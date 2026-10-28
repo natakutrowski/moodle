@@ -30,6 +30,37 @@ use mod_minilesson\local\exception\textgenerationfailed;
  */
 class aigen {
 
+    /**
+     * Free-to-use variables that an aigen config item can have the AI generate. They hold data for
+     * use later in the generation run (as an image prompt, or as context for a following item),
+     * rather than being fields of the item itself.
+     *
+     * @var array
+     */
+    public const DATAVARS = ['data1', 'data2', 'data3', 'data4', 'data5'];
+
+    /**
+     * The context field that holds the lesson's native language, for a prompt to map a placeholder to.
+     * It is set from the lesson by make_import_data(), never by the user, like target_language.
+     *
+     * @var string
+     */
+    public const NATIVE_LANGUAGE_CONTEXT = 'native_language';
+
+    /**
+     * How much of a template's content the caller decides, rather than the AI inventing it.
+     * Ordered weakest to strongest control; see {@see self::control_rank()}.
+     *
+     * @var string The AI invents the content from a topic, keywords or a level.
+     */
+    public const CONTROL_GENERATED = 'generated';
+
+    /** @var string The AI rewrites or marks up text the caller supplied. */
+    public const CONTROL_DERIVED = 'derived';
+
+    /** @var string The caller's text is used verbatim. */
+    public const CONTROL_SUPPLIED = 'supplied';
+
     /** @var array */
     public const DEFAULTTEMPLATES = [
         '6880824450555' => 'audiostory',
@@ -51,6 +82,7 @@ class aigen {
         '6960baa71fa35' => 'fiction_withpics',
         '696105abf2b2a' => 'fiction_nopics',
         '6979e4ab51d53' => 'narrativefiction_withpics',
+        '69b032eb8af03' => 'fiction_addpics',
         '6a30d8d44b6fa' => 'vocabcards',
         '6a2504c6d2e93' => 'youtubefinale_freewrite',
         '6a2518a50b676' => 'youtubefinale_freespeak',
@@ -105,6 +137,8 @@ class aigen {
         '6a36351da64e3' => 'grammar_choosewords_v1',
         '6a363a03964a0' => 'grammar_shufflewords',
         '6a38ad44e9b60' => 'grammar_choosewords_v2',
+        '6a4909ba67c08' => 'cefr_a2',
+        '6a5dc6971e891' => 'wordpractice_v4',
     ];
     /** @var \stdClass|null */
     private $moduleinstance = null;
@@ -166,6 +200,9 @@ class aigen {
         $langvoices = utils::get_tts_voices($this->moduleinstance->ttslanguage, false, $this->moduleinstance->region);
         $nicevoices = utils::get_nice_voices($this->moduleinstance->ttslanguage, $this->moduleinstance->region);
 
+        // The language for definitions and translations comes from the lesson, not from the user.
+        $contextdata[self::NATIVE_LANGUAGE_CONTEXT] = self::prompt_native_language($this->moduleinstance);
+
         foreach ($aigenconfig->items as $configitem) {
             $currentitemcount++;
             $importitem = $aigentemplate->items[$configitem->itemnumber];
@@ -202,11 +239,47 @@ class aigen {
                         }
                     }
 
+                    // Work out which generate fields hold a list of values rather than a single value.
+                    // The format hint below must show these as JSON arrays, or the AI is as likely to
+                    // return one joined string as it is an array, and the joined string can not be
+                    // reliably split again (a wordshuffle sentence, say, contains commas of its own).
+                    $arrayfields = [];
+                    // Real item fields declare their type in the item type's key columns.
+                    $itemtypeclass = local\itemtype\item::get_itemtype_class($importitem->type);
+                    if ($itemtypeclass) {
+                        foreach ($itemtypeclass::get_keycolumns() as $coldef) {
+                            if (isset($coldef['type']) && $coldef['type'] === 'stringarray') {
+                                $arrayfields[$coldef['jsonname']] = true;
+                            }
+                        }
+                    }
+                    // Data vars hold generated data rather than a field of the item, so nothing declares
+                    // their shape. But if one is the mapping of an image file area then it is consumed
+                    // one element per image, so it is a list too. This only holds for data vars: a real
+                    // item field mapped to a file area (eg freespeaking's "text") is still a single value,
+                    // and its key column above is the authority on that.
+                    if (!empty($configitem->generatefileareas)) {
+                        foreach ($configitem->generatefileareas as $generatefilearea) {
+                            if (
+                                !empty($generatefilearea->generate) &&
+                                !empty($generatefilearea->mapping) &&
+                                in_array($generatefilearea->mapping, self::DATAVARS)
+                            ) {
+                                $arrayfields[$generatefilearea->mapping] = true;
+                            }
+                        }
+                    }
+
                     // Prepare the response format (JSON).
                     $generateformat = new \stdClass();
                     foreach ($configitem->generatefields as $generatefield) {
                         if (isset($generatefield->generate) && $generatefield->generate == 1) {
-                            $generateformat->{$generatefield->name} = $generatefield->name . '_data';
+                            if (isset($arrayfields[$generatefield->name])) {
+                                $generateformat->{$generatefield->name} =
+                                    [$generatefield->name . '_data_1', $generatefield->name . '_data_2'];
+                            } else {
+                                $generateformat->{$generatefield->name} = $generatefield->name . '_data';
+                            }
                         }
                     }
                     $generateformatjson = json_encode($generateformat);
@@ -241,10 +314,16 @@ class aigen {
                             }
                         }
                     } else {
+                        // The payload is whatever came back, which is not always a string: a web
+                        // service exception arrives as an object, and concatenating that raises a
+                        // fatal that buries the very message being reported.
+                        $failure = is_scalar($genresult->payload)
+                            ? (string) $genresult->payload
+                            : json_encode($genresult->payload);
                         throw new textgenerationfailed(
                             $currentitemcount,
                             $importitem->type,
-                            $useprompt . ' | Error: ' . $genresult->payload
+                            $useprompt . ' | Error: ' . $failure
                         );
                     }
 
@@ -324,7 +403,7 @@ class aigen {
                                 if ($trimmed !== '' && $trimmed[0] === '[') {
                                     $decoded = json_decode($imagepromptdata, true);
                                     if (is_array($decoded)) {
-                                        $imagepromptdata = $decoded;
+                                        $imagepromptdata = self::image_prompt_list($decoded);
                                     }
                                 }
                             }
@@ -790,9 +869,231 @@ class aigen {
         foreach ($templates as $i => $template) {
             $template->config = json_decode($template->config);
             $template->template = json_decode($template->template);
+            // A default template's name and description are lang strings. The DB copy is only written
+            // when the template is first installed, so it goes stale and is never translated.
+            // Old upgrade steps run this before the uniqueid column exists.
+            if (isset($template->uniqueid) && isset(self::DEFAULTTEMPLATES[$template->uniqueid])) {
+                $templateshortname = self::DEFAULTTEMPLATES[$template->uniqueid];
+                $template->name = get_string('aigentemplatename:' . $templateshortname, constants::M_COMPONENT);
+                $template->description = get_string('aigentemplatedescription:' . $templateshortname, constants::M_COMPONENT);
+            }
             $templates[$i] = (array) $template;
         }
         return $templates;
+    }
+
+    /**
+     * Rank a control level so levels can be compared and sorted. Higher means the caller
+     * decides more of the content.
+     *
+     * @param string $control One of the self::CONTROL_* values.
+     * @return int
+     */
+    public static function control_rank($control) {
+        switch ($control) {
+            case self::CONTROL_SUPPLIED:
+                return 2;
+            case self::CONTROL_DERIVED:
+                return 1;
+            default:
+                return 0;
+        }
+    }
+
+    /**
+     * Work out how much control the caller has over one config item's content.
+     *
+     * A "reuse" item writes the caller's input straight into the item, so the caller decides
+     * the content exactly. A "generate"/"extract" item has the AI produce the content: if the
+     * caller's own text feeds the prompt the AI is only reworking supplied material, otherwise
+     * it is inventing it from a topic/keywords/level.
+     *
+     * @param \stdClass $configitem An item from a template config's "items" array.
+     * @return string One of the self::CONTROL_* values.
+     */
+    public static function item_control_level($configitem) {
+        if (($configitem->generatemethod ?? '') === 'reuse') {
+            return self::CONTROL_SUPPLIED;
+        }
+        foreach (($configitem->promptfields ?? []) as $promptfield) {
+            if (($promptfield->mapping ?? '') === 'user_text') {
+                return self::CONTROL_DERIVED;
+            }
+        }
+        return self::CONTROL_GENERATED;
+    }
+
+    /**
+     * Turn a decoded list of image prompts into the plain list generate_images() takes. A caller
+     * may send the prompts as [{"filename": "01.png", "prompt": "..."}] so each one names the
+     * picture placeholder it is for. generate_images() fills a file area's files in order, so these
+     * are sorted by filename and reduced to their prompts. A plain list of strings is returned as is.
+     *
+     * @param array $prompts The decoded image prompt data.
+     * @return array The image prompts, in file order.
+     */
+    public static function image_prompt_list(array $prompts) {
+        $objects = array_filter($prompts, function ($prompt) {
+            return is_array($prompt) && isset($prompt['prompt']);
+        });
+        if (empty($objects) || count($objects) !== count($prompts)) {
+            return $prompts;
+        }
+        usort($objects, function ($a, $b) {
+            return strnatcmp($a['filename'] ?? '', $b['filename'] ?? '');
+        });
+        return array_column($objects, 'prompt');
+    }
+
+    /**
+     * Work out how much control the caller has over a whole template's content. This is the
+     * weakest of its items: the item the caller cannot steer is where the lesson's teaching
+     * point gets lost, whatever the other items do.
+     *
+     * @param \stdClass $config A decoded template config.
+     * @return string One of the self::CONTROL_* values.
+     */
+    public static function template_control_level($config) {
+        $lowest = null;
+        foreach (($config->items ?? []) as $configitem) {
+            $control = self::item_control_level($configitem);
+            if ($lowest === null || self::control_rank($control) < self::control_rank($lowest)) {
+                $lowest = $control;
+            }
+        }
+        return $lowest ?? self::CONTROL_GENERATED;
+    }
+
+    /**
+     * The lesson setting a template input falls back to, for an input whose field mapping declares
+     * one with "defaultfrom". Only "nativelang" is understood so far: a dozen templates ask for a
+     * native language that the lesson already records, and a teacher who is not prompted for it
+     * rarely thinks to supply it.
+     *
+     * @param \stdClass $fieldmapping One entry of the config's fieldmappings.
+     * @param \stdClass|null $moduleinstance The lesson the items are being generated into.
+     * @return string The value to fall back to, or '' where the lesson does not set one.
+     */
+    public static function input_default($fieldmapping, $moduleinstance) {
+        if (empty($fieldmapping->defaultfrom) || empty($moduleinstance)) {
+            return '';
+        }
+        switch ($fieldmapping->defaultfrom) {
+            case 'nativelang':
+                // The '0' value is the "--" option: the lesson has no native language, so there is nothing to use.
+                $nativelang = $moduleinstance->nativelang ?? '';
+                if ($nativelang === '' || $nativelang === '0') {
+                    return '';
+                }
+                // The prompts read as prose ("translate into {nativelanguage}"), so send the name, not the code.
+                return utils::get_nativelang_options()[$nativelang] ?? '';
+        }
+        return '';
+    }
+
+    /**
+     * The lesson's native language as a prompt should name it, for definitions and translations.
+     *
+     * When the native language is the target language, or is not set, the definitions are in an
+     * easy version of the target language. The prompts read as prose, so this is a language name
+     * (always in English, as the generation may run in a task with another current language).
+     *
+     * @param \stdClass $moduleinstance The lesson the items are being generated into.
+     * @return string eg "Japanese" or "easy English (US)"
+     */
+    public static function prompt_native_language($moduleinstance) {
+        $target = (string) $moduleinstance->ttslanguage;
+        $native = (string) ($moduleinstance->nativelang ?? '');
+        // The '0' value is the "--" option: no native language, so we use the target language.
+        if ($native === '' || $native === '0') {
+            $native = $target;
+        }
+        $languagename = function ($code) {
+            $key = strtolower($code);
+            if (get_string_manager()->string_exists($key, constants::M_COMPONENT)) {
+                return get_string_manager()->get_string($key, constants::M_COMPONENT, null, 'en');
+            }
+            return $code;
+        };
+        if (utils::fetch_feedback_language($native, $target) !== $native) {
+            return 'easy ' . $languagename($target);
+        }
+        return $languagename($native);
+    }
+
+    /**
+     * Fill in the template inputs the caller left empty that have a lesson setting to fall back to.
+     * Run before the required-input check, so an unsupplied input that the lesson can answer is
+     * answered rather than rejected.
+     *
+     * @param array $contextdata The generation context, as submitted.
+     * @param \stdClass $config A decoded template config.
+     * @param \stdClass|null $moduleinstance The lesson the items are being generated into.
+     * @return array The same context, with the defaults filled in.
+     */
+    public static function apply_input_defaults(array $contextdata, $config, $moduleinstance) {
+        foreach (($config->fieldmappings ?? new \stdClass()) as $fieldname => $fieldmapping) {
+            if (empty($fieldmapping->enabled) || !empty($contextdata[$fieldname])) {
+                continue;
+            }
+            $default = self::input_default($fieldmapping, $moduleinstance);
+            if ($default !== '') {
+                $contextdata[$fieldname] = $default;
+            }
+        }
+        return $contextdata;
+    }
+
+    /**
+     * The context fields a template actually consumes. An enabled field mapping that appears
+     * here is required: the template author wired it into a prompt, a reused field, an image
+     * prompt or the overall image context, so submitting it empty does not fall back to a
+     * default, it generates content with a hole in it.
+     *
+     * @param \stdClass $config A decoded template config.
+     * @return array A list of context field names (eg 'user_keywords', 'user_customdata1').
+     */
+    public static function template_referenced_fields($config) {
+        $referenced = [];
+        foreach (($config->items ?? []) as $configitem) {
+            foreach (($configitem->promptfields ?? []) as $promptfield) {
+                if (!empty($promptfield->mapping)) {
+                    $referenced[$promptfield->mapping] = true;
+                }
+            }
+            foreach (($configitem->generatefields ?? []) as $generatefield) {
+                if (!empty($generatefield->mapping)) {
+                    $referenced[$generatefield->mapping] = true;
+                }
+            }
+            foreach (($configitem->generatefileareas ?? []) as $generatefilearea) {
+                if (!empty($generatefilearea->mapping)) {
+                    $referenced[$generatefilearea->mapping] = true;
+                }
+            }
+            // The "--" value is the unset marker for the overall image context, not a field name.
+            if (!empty($configitem->overallimagecontext) && $configitem->overallimagecontext !== '--') {
+                $referenced[$configitem->overallimagecontext] = true;
+            }
+        }
+        return array_keys($referenced);
+    }
+
+    /**
+     * The enabled inputs of a template that must be supplied a non-empty value.
+     *
+     * @param \stdClass $config A decoded template config.
+     * @return array A list of context field names.
+     */
+    public static function template_required_inputs($config) {
+        $referenced = self::template_referenced_fields($config);
+        $required = [];
+        foreach (($config->fieldmappings ?? new \stdClass()) as $fieldname => $fieldmapping) {
+            if (!empty($fieldmapping->enabled) && in_array($fieldname, $referenced)) {
+                $required[] = $fieldname;
+            }
+        }
+        return $required;
     }
 
     /**
@@ -807,8 +1108,7 @@ class aigen {
 
         foreach (self::DEFAULTTEMPLATES as $uniqueid => $templateshortname) {
             $t = new \stdClass();
-            $t->name = get_string("aigentemplatename:" . $templateshortname, constants::M_COMPONENT);
-            $t->description = get_string("aigentemplatedescription:" . $templateshortname, constants::M_COMPONENT);
+            [$t->name, $t->description] = self::default_template_texts($templateshortname);
             // Load the configuration and template files for the aigen template.
             // These files should be located in the specified directory.
             // Ensure that the paths are correct and the files exist.
@@ -827,5 +1127,79 @@ class aigen {
                 debugging('Error reading $template config file: ' . $e->getMessage(), DEBUG_DEVELOPER);
             }
         }
+        // An updated template keeps the name and description it was installed with, so refresh them.
+        self::sync_default_template_texts();
+    }
+
+    /**
+     * The English name and description of a default template, from its lang strings.
+     *
+     * The lang strings are the source of truth. English is used because the DB copy is what the
+     * template editor shows and saves, and the lesson template sync writes it back to the English
+     * lang file.
+     *
+     * @param string $templateshortname The template's DEFAULTTEMPLATES short name.
+     * @return array [name, description]
+     */
+    public static function default_template_texts($templateshortname) {
+        $sm = get_string_manager();
+        return [
+            $sm->get_string('aigentemplatename:' . $templateshortname, constants::M_COMPONENT, null, 'en'),
+            $sm->get_string('aigentemplatedescription:' . $templateshortname, constants::M_COMPONENT, null, 'en'),
+        ];
+    }
+
+    /**
+     * Copy the lang string name and description of each default template into its DB record:
+     * the name and description columns, and the lessonTitle and lessonDescription in its config.
+     * These are what the template editor shows, and they are otherwise only set at install.
+     *
+     * @return void
+     */
+    public static function sync_default_template_texts() {
+        global $DB;
+
+        foreach (self::DEFAULTTEMPLATES as $uniqueid => $templateshortname) {
+            [$name, $description] = self::default_template_texts($templateshortname);
+            $records = $DB->get_records('minilesson_templates', ['uniqueid' => $uniqueid], '', 'id, name, description, config');
+            foreach ($records as $record) {
+                $config = self::set_config_text($record->config, 'lessonTitle', $name);
+                $config = self::set_config_text($config, 'lessonDescription', $description);
+                if ($record->name !== $name || $record->description !== $description || $config !== $record->config) {
+                    $record->name = $name;
+                    $record->description = $description;
+                    $record->config = $config;
+                    $record->timemodified = time();
+                    $DB->update_record('minilesson_templates', $record);
+                }
+            }
+        }
+    }
+
+    /**
+     * Set one top level string value in a template config's JSON text, leaving the rest of the text
+     * as it is. The config is stored as written, and re-encoding it would reformat all of it.
+     *
+     * @param string $json The config JSON.
+     * @param string $key The key, eg lessonTitle.
+     * @param string $value The new value.
+     * @return string The config JSON, unchanged if the key is not found.
+     */
+    public static function set_config_text($json, $key, $value) {
+        $decoded = json_decode((string) $json);
+        if (!is_object($decoded) || !isset($decoded->$key) || $decoded->$key === $value) {
+            return $json;
+        }
+        $pattern = '/("' . preg_quote($key, '/') . '"\s*:\s*)"(?:[^"\\\\]|\\\\.)*"/';
+        $count = 0;
+        $newjson = preg_replace_callback($pattern, function ($m) use ($value) {
+            return $m[1] . json_encode($value);
+        }, $json, 1, $count);
+        // Only accept the edit if it gave valid JSON with the new value.
+        $check = json_decode((string) $newjson);
+        if (!$count || !is_object($check) || $check->$key !== $value) {
+            return $json;
+        }
+        return $newjson;
     }
 }

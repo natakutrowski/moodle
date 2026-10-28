@@ -31,6 +31,12 @@ use core_ai\provider;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class aimanager {
+    /** @var int Times to ask for structured content before giving up: one go, then one more. */
+    const GENERATION_ATTEMPTS = 2;
+
+    /** @var int Seconds to wait before asking again. */
+    const GENERATION_RETRY_DELAY = 1;
+
 
     /** @var int|null */
     protected $contextid;
@@ -402,20 +408,102 @@ class aimanager {
         $params['region'] = $this->region;
         $params['subject'] = 'none';
 
+        // This call asks for JSON, and the answer sometimes comes back as prose or as JSON that
+        // does not parse - the model writing something other than what was asked for. That is a
+        // different kind of failure from a bad token or an exhausted quota: asking again usually
+        // works, which is what a person does by hand when a generation run dies. So it is asked
+        // again once, and only for that kind of failure.
+        for ($attempt = 1; $attempt <= self::GENERATION_ATTEMPTS; $attempt++) {
+            $ret = $this->attempt_structured_content($params);
+            if ($ret->success || empty($ret->retryable) || $attempt === self::GENERATION_ATTEMPTS) {
+                break;
+            }
+            self::log_cp_api('unusable reply, asking again', [
+                'action' => $actionconst,
+                'attempt' => $attempt . ' of ' . self::GENERATION_ATTEMPTS,
+            ]);
+            sleep(self::GENERATION_RETRY_DELAY);
+        }
+
+        unset($ret->retryable);
+        if ($cache && $ret->success && $ret->payload !== null) {
+            self::set_cache($actionconst, $prompt, $provider, json_encode($ret));
+        }
+        return $ret;
+    }
+
+    /**
+     * One attempt at generating structured content.
+     *
+     * @param array $params the call parameters
+     * @return \stdClass success, payload, and whether the failure is worth repeating
+     */
+    protected function attempt_structured_content(array $params): \stdClass {
         $response = self::call_cp_api($params);
 
         $ret = new \stdClass();
+        $ret->retryable = false;
+
         if ($response && isset($response->returnCode)) {
-            $ret->success = $response->returnCode == '0' ? true : false;
+            $ret->success = $response->returnCode == '0';
             $ret->payload = json_decode($response->returnMessage);
-            if ($cache && $ret->success && $ret->payload !== null) {
-                self::set_cache($actionconst, $prompt, $provider, json_encode($ret));
+
+            // A reply can be accepted by the cloud and still be unusable here: returnCode 0 with a
+            // returnMessage that is not the JSON this call asked for. Left as a success it sets
+            // nothing and the item is created with its generated fields empty - a blank slide
+            // rather than an error, which is the harder kind of failure to notice.
+            if ($ret->success && $ret->payload === null && trim((string) $response->returnMessage) !== '') {
+                self::log_cp_api('reply was not the JSON this call asked for', [
+                    'action' => $params['action'] ?? '(none)',
+                    'returnMessage' => substr((string) $response->returnMessage, 0, 1000),
+                ]);
+                $ret->success = false;
+                $ret->payload = 'The AI service returned content that was not in the expected format.';
+                $ret->retryable = true;
             }
         } else {
             $ret->success = false;
-            $ret->payload = $response ? $response : "unknown problem occurred";
+            $ret->payload = $response ? $response : 'unknown problem occurred';
+            // False means the reply could not be parsed at all, which is the same flavour of
+            // problem. Null means there was no token, and asking again will not conjure one.
+            $ret->retryable = ($response === false);
         }
+
         return $ret;
+    }
+
+    /**
+     * Translate a short piece of text from one language to another.
+     *
+     * Results are cached in minilesson_ai_cache, so repeated translations of the same
+     * text (e.g. by different students on the same lesson item) only hit the AI provider once.
+     *
+     * @param string $text The text to translate.
+     * @param string $fromlang The language code of the text, e.g. en-US.
+     * @param string $tolang The language code to translate into, e.g. ja-JP.
+     * @param bool $placeholders The text holds [[n]] placeholders that must come back unchanged.
+     * @return string|false The translated text, or false on failure.
+     */
+    public function translate_text($text, $fromlang, $tolang, $placeholders = false) {
+        // The text goes in as JSON: with a plain text payload the model tends to reply with
+        // bare text instead of the requested JSON, which the Poodll API rejects.
+        $payload = json_encode(['text' => $text], JSON_UNESCAPED_UNICODE);
+        $prompt = "Translate the value of the text key in the JSON string that follows, ";
+        $prompt .= "from language: $fromlang, into language: $tolang." . PHP_EOL;
+        if ($placeholders) {
+            $prompt .= "The text contains placeholders like [[1]]. Copy every placeholder into the translation ";
+            $prompt .= "unchanged, where it belongs in the translated sentence." . PHP_EOL;
+        }
+        $prompt .= 'Return results in the format: {"translation": "thetranslatedtext"}' . PHP_EOL;
+        $prompt .= 'Return only the translation, with no explanations or alternatives.' . PHP_EOL;
+        $prompt .= $payload;
+
+        $ret = $this->generate_structured_content($prompt, true);
+        if ($ret->success && is_object($ret->payload)
+                && isset($ret->payload->translation) && is_string($ret->payload->translation)) {
+            return $ret->payload->translation;
+        }
+        return false;
     }
 
     /**
@@ -535,6 +623,9 @@ class aimanager {
         $overallimagecontext,
         $cache = false
     ) {
+        global $CFG;
+        require_once($CFG->libdir . '/filelib.php');
+
         $imageurls = [];
         $imagecnt = 0;
 
@@ -555,7 +646,8 @@ class aimanager {
                 continue;
             }
             $imagecnt++;
-
+            // We make a local copy of this because we may modify it.
+            $theoverallimagecontext = $overallimagecontext;
             $stylekeywords = [
                 'flat vector illustration',
                 'cartoon',
@@ -567,23 +659,48 @@ class aimanager {
                 'line drawing',
                 'realistic',
                 'infographic',
+                'black and white photo',
                 'black and white movie',
                 'hand drawn',
                 '3d render',
             ];
             $stylefound = false;
+            // Check if the prompt has specified a style.
             foreach ($stylekeywords as $stylekeyword) {
                 if (stripos(mb_strtolower($prompt), $stylekeyword) !== false) {
                     $stylefound = true;
                     break;
                 }
             }
+
+            // If no prompt is specified, check if the overallimagecontext is specifying a style.
+            // If so, add it to the prompt and set overallimagecontext to "--".
+            if (!$stylefound && !empty($theoverallimagecontext) && $theoverallimagecontext !== "--") {
+                $matchedstyle = '';
+                $stylepos = false;
+                foreach ($stylekeywords as $stylekeyword) {
+                    $pos = stripos($theoverallimagecontext, $stylekeyword);
+                    if ($pos !== false) {
+                        $stylefound = true;
+                        $matchedstyle = $stylekeyword;
+                        $stylepos = $pos;
+                        break;
+                    }
+                }
+                if ($stylefound && $stylepos === 0) {
+                    $prompt = "Give me a {$matchedstyle} image, with no text on it, depicting: " . $prompt;
+                    $theoverallimagecontext = "--";
+                }
+            }
+
+            // If no style is found, use "cute cartoon image".
             if (!$stylefound) {
                 $prompt = "Give me a simple cute cartoon image, with no text on it, depicting: " . $prompt;
             }
 
-            if ($overallimagecontext && !empty($overallimagecontext) && $overallimagecontext !== "--") {
-                $prompt .= PHP_EOL . " in the context of the following topic: " . $overallimagecontext;
+            // If we have an overall image context, set that.
+            if ($theoverallimagecontext && !empty($theoverallimagecontext) && $theoverallimagecontext !== "--") {
+                $prompt .= PHP_EOL . " in the context of the following topic: " . $theoverallimagecontext;
             }
 
             // Serve from cache if we already generated this exact image prompt.
@@ -666,6 +783,8 @@ class aimanager {
      * @return string|null The base64-encoded resized image, or null on failure.
      */
     protected static function process_image_response($responsestring) {
+        global $CFG;
+
         if (!utils::is_json($responsestring)) {
             return null;
         }
@@ -675,7 +794,10 @@ class aimanager {
         }
         $payload = json_decode($response->returnMessage);
         if (isset($payload[0]->url)) {
-            $rawdata = file_get_contents($payload[0]->url);
+            // Fallback branch - CloudPoodll normally returns the image inline as b64_json.
+            // But some model may yet return URLs.
+            require_once($CFG->libdir . '/filelib.php');
+            $rawdata = download_file_content($payload[0]->url, null, null, false, 60, 10);
         } else if (isset($payload[0]->b64_json)) {
             $rawdata = base64_decode($payload[0]->b64_json);
         } else {
@@ -814,6 +936,15 @@ class aimanager {
         global $USER;
         $token = $params['wstoken'] ?? static::get_cp_token();
         if (!$token) {
+            // Callers see only a null and report a generic failure, so say which half is missing.
+            $conf = get_config(constants::M_COMPONENT);
+            self::log_cp_api('no token', [
+                'wsfunction' => $params['wsfunction'] ?? 'local_cpapi_call_ai',
+                'apiuser' => empty($conf->apiuser) ? 'NOT SET' : 'set',
+                'apisecret' => empty($conf->apisecret) ? 'NOT SET' : 'set',
+                'hint' => 'Credentials are set but no token came back: the subscription may have '
+                    . 'lapsed, or cloud.poodll.com may be unreachable from this server.',
+            ]);
             return null;
         }
         $params['wstoken'] = $params['wstoken'] ?? $token;
@@ -823,10 +954,63 @@ class aimanager {
         $params['owner'] = $params['owner'] ?? hash('md5', $USER->username);
         $serverurl = utils::get_cloud_poodll_server() . '/webservice/rest/server.php';
         $response = utils::curl_fetch($serverurl, $params, "post");
+
         if (!utils::is_json($response)) {
+            // The reply is thrown away here and the caller is left with a bare false, which is how
+            // an AI generation run ends up reporting "text generation failed" and nothing more.
+            // Whatever came back instead of JSON is usually the whole answer: an HTML error page,
+            // an empty body, a plain text message from the cloud.
+            self::log_cp_api('response was not JSON', [
+                'wsfunction' => $params['wsfunction'],
+                'action' => $params['action'] ?? '(none)',
+                'url' => $serverurl,
+                'responsetype' => gettype($response),
+                'responselength' => is_string($response) ? strlen($response) : 0,
+                'response' => is_string($response) ? substr($response, 0, 1000) : var_export($response, true),
+            ]);
             return false;
         }
-        return json_decode($response);
+
+        $decoded = json_decode($response);
+
+        // Valid JSON is not the same as a usable answer. A web service exception comes back as
+        // well-formed JSON with no returnCode at all, which is what a changed or renamed cloud
+        // function looks like from here.
+        if (!isset($decoded->returnCode)) {
+            self::log_cp_api('reply carried no returnCode', [
+                'wsfunction' => $params['wsfunction'],
+                'action' => $params['action'] ?? '(none)',
+                'keys' => is_object($decoded) ? implode(', ', array_keys(get_object_vars($decoded))) : gettype($decoded),
+                'response' => substr($response, 0, 1000),
+            ]);
+        } else if ($decoded->returnCode != '0') {
+            self::log_cp_api('returnCode ' . $decoded->returnCode, [
+                'wsfunction' => $params['wsfunction'],
+                'action' => $params['action'] ?? '(none)',
+                'returnMessage' => substr((string) ($decoded->returnMessage ?? ''), 0, 1000),
+            ]);
+        }
+
+        return $decoded;
+    }
+
+    /**
+     * Record a Cloud Poodll call that did not go as expected.
+     *
+     * Developer level, so it costs nothing on a live site, and deliberately never prints the
+     * token or the credentials themselves - only whether they are there.
+     *
+     * @param string $what a short description of the problem
+     * @param array $detail context to print alongside it
+     * @return void
+     */
+    protected static function log_cp_api(string $what, array $detail): void {
+        $lines = [];
+        foreach ($detail as $key => $value) {
+            $lines[] = $key . ': ' . str_replace(["\r", "\n"], ' ', (string) $value);
+        }
+        debugging('mod_minilesson cloud poodll call failed - ' . $what . ' [' . implode(' | ', $lines) . ']',
+            DEBUG_DEVELOPER);
     }
 
     public static function get_cp_token() {
@@ -894,7 +1078,7 @@ class aimanager {
                 foreach ($providerinstances[$mapactionclass] as $provider) {
                     if ($provider->get_name() == $providerid) {
                         $providerinstance = $provider;
-                        $component = \core\component::get_component_from_classname(get_class($provider));
+                        $component = static::get_component_from_classname(get_class($provider));
                         $CFG->forced_plugin_settings[$component]['action_generate_text_systeminstruction'] = $actionclass::get_system_instruction();
                         $providerenabled = manager::is_action_enabled(
                             $providerid,
@@ -969,7 +1153,20 @@ class aimanager {
         ];
     }
 
+    /**
+     * Resolve the frankenstyle component name from a PSR-4 class name.
+     *
+     * This intentionally does not delegate to \core\component /
+     * \core_component::get_component_from_classname(). The namespaced \core\component
+     * class only exists on Moodle 5.0+, and core_component::get_component_from_classname()
+     * does not exist before Moodle 4.4, so a direct reference fatals on Moodle 4.3.
+     * Every caller passes a PSR-4 / frankenstyle class name, so the first namespace
+     * segment is the component.
+     *
+     * @param string $classname
+     * @return string The component name, or '' if it could not be determined.
+     */
     public static function get_component_from_classname($classname): string {
-        return \core\component::get_component_from_classname($classname) ?? strstr(ltrim($classname, '\\'), '\\', true);
+        return strstr(ltrim($classname, '\\'), '\\', true) ?: '';
     }
 }

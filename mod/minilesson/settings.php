@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -31,16 +30,16 @@ use mod_minilesson\aimanager;
 use mod_minilesson\constants;
 use mod_minilesson\utils;
 
-//if ($ADMIN->fulltree) {
+// if ($ADMIN->fulltree) {
 if ($hassiteconfig) {
-    //Add category to navigation
+    // Add category to navigation
     $minilessoncat = new admin_category(
         'modsettingsminilessoncat',
         get_string('modulename', constants::M_COMPONENT)
-    );//, $module->is_enabled() === false);
+    );// , $module->is_enabled() === false);
     $ADMIN->add('modsettings', $minilessoncat);
 
-    //create main settings page
+    // create main settings page
     // The page name must be 'modsettingminilesson' (the section name core expects for this module)
     // so that the settings link shows on admin/plugins.php. This is how mod_quiz does it too.
     $pagetitle = get_string('generalsettings', 'admin');
@@ -64,46 +63,11 @@ if ($hassiteconfig) {
         $showbelowapisecret = $tokeninfo;
         // if we have no API user and secret we show a "fetch from elsewhere on site" or "take a free trial" link
     } else {
-        $amddata = ['apppath' => $CFG->wwwroot . '/' . constants::M_URL];
-        $cpcomponents = ['filter_poodll',
-        'qtype_cloudpoodll',
-        'mod_readaloud',
-        'mod_wordcards',
-        'mod_solo',
-        'mod_englishcentral',
-        'mod_pchat',
-        'atto_cloudpoodll',
-        'tinymce_cloudpoodll',
-        'tiny_poodll',
-        'assignsubmission_cloudpoodll',
-        'assignfeedback_cloudpoodll',
-        ];
-
-        foreach ($cpcomponents as $cpcomponent) {
-            switch ($cpcomponent) {
-                case 'filter_poodll':
-                    $apiusersetting = 'cpapiuser';
-                    $apisecretsetting = 'cpapisecret';
-                    break;
-                case 'mod_englishcentral':
-                    $apiusersetting = 'poodllapiuser';
-                    $apisecretsetting = 'poodllapisecret';
-                    break;
-                default:
-                    $apiusersetting = 'apiuser';
-                    $apisecretsetting = 'apisecret';
-            }
-            $cloudpoodllapiuser = get_config($cpcomponent, $apiusersetting);
-            if (!empty($cloudpoodllapiuser)) {
-                $cloudpoodllapisecret = get_config($cpcomponent, $apisecretsetting);
-                if (!empty($cloudpoodllapisecret)) {
-                    $amddata['apiuser'] = $cloudpoodllapiuser;
-                    $amddata['apisecret'] = $cloudpoodllapisecret;
-                    break;
-                }
-            }
-        }
-        $showbelowapisecret = $OUTPUT->render_from_template(constants::M_COMPONENT . '/managecreds', $amddata);
+        $amddata = \mod_minilesson\cbcredentials::export_buttons_data(
+            '#id_s_mod_minilesson_apiuser',
+            '#id_s_mod_minilesson_apisecret'
+        );
+        $showbelowapisecret = $OUTPUT->render_from_template(constants::M_COMPONENT . '/cbmanagecreds', $amddata);
     }
 
 
@@ -137,14 +101,14 @@ if ($hassiteconfig) {
     ));
 
     // Default learners native language.
-    $nativelangoptions = [0 => '--'] + utils::get_lang_options();
+    $nativelangoptions = [0 => '--'] + utils::get_nativelang_options();
     $shortlangcodes = utils::get_shortlang_options();
     // Use the site default language as default native language or if that is not available use '--'.
     $nativelangdefault = $CFG->lang && array_key_exists($CFG->lang, $shortlangcodes) ? $shortlangcodes[$CFG->lang] : 0;
     $mainsettings->add(new admin_setting_configselect(
         constants::M_COMPONENT .  '/nativelang',
         get_string('nativelang', constants::M_COMPONENT),
-        '',
+        get_string('nativelang_help', constants::M_COMPONENT),
         $nativelangdefault,
         $nativelangoptions
     ));
@@ -188,6 +152,19 @@ if ($hassiteconfig) {
     $details = get_string($name . '_details', constants::M_COMPONENT);
     $default = constants::M_CONTWIDTH_COMPACT;
     $options = utils::get_containerwidth_options();
+    $mainsettings->add(new admin_setting_configselect(
+        constants::M_COMPONENT . "/$name",
+        $label,
+        $details,
+        $default,
+        $options
+    ));
+
+    $name = 'nextbuttonalign';
+    $label = get_string($name, constants::M_COMPONENT);
+    $details = get_string($name . '_details', constants::M_COMPONENT);
+    $default = constants::M_NEXTBUTTON_DEFAULT;
+    $options = utils::get_nextbuttonalign_options();
     $mainsettings->add(new admin_setting_configselect(
         constants::M_COMPONENT . "/$name",
         $label,
@@ -258,7 +235,7 @@ if ($hassiteconfig) {
         constants::LAYOUT_AUTO => get_string('layoutauto', constants::M_COMPONENT),
         constants::LAYOUT_HORIZONTAL => get_string('layouthorizontal', constants::M_COMPONENT),
         constants::LAYOUT_VERTICAL => get_string('layoutvertical', constants::M_COMPONENT),
-        constants::LAYOUT_MAGAZINE => get_string('layoutmagazine', constants::M_COMPONENT)
+        constants::LAYOUT_MAGAZINE => get_string('layoutmagazine', constants::M_COMPONENT),
     ];
     $mainsettings->add(new admin_setting_configselect(
         constants::M_COMPONENT .  '/layout',
@@ -290,11 +267,27 @@ if ($hassiteconfig) {
         0
     ));
 
+    // Community page (shared student submissions on supporting item types).
+    $mainsettings->add(new admin_setting_configcheckbox(
+        constants::M_COMPONENT .  '/enablecommunitypage',
+        get_string('enablecommunitypage', constants::M_COMPONENT),
+        get_string('enablecommunitypage_details', constants::M_COMPONENT),
+        0
+    ));
+
     // Native Language Setting
     $mainsettings->add(new admin_setting_configcheckbox(
         constants::M_COMPONENT .  '/setnativelanguage',
         get_string('enablenativelanguage', constants::M_COMPONENT),
         get_string('enablenativelanguage_details', constants::M_COMPONENT),
+        1
+    ));
+
+    // Native language translation (the default for new activities).
+    $mainsettings->add(new admin_setting_configcheckbox(
+        constants::M_COMPONENT .  '/nativetranslation',
+        get_string('nativetranslation', constants::M_COMPONENT),
+        get_string('nativetranslation_details', constants::M_COMPONENT),
         1
     ));
 
@@ -422,8 +415,89 @@ if ($hassiteconfig) {
         PARAM_TEXT
     ));
 
-    //add other API keys settings page to minilesson category
+    // add other API keys settings page to minilesson category
     $ADMIN->add('modsettingsminilessoncat', $otherapikeysettings);
+
+    // Chat agent. The in-Moodle assistant that builds lessons by chatting with a teacher.
+    $pagetitle = get_string('chatagent_settings', constants::M_COMPONENT);
+    $chatagentsettings = new admin_settingpage('modsettingminilessonchatagent', $pagetitle, 'moodle/site:config');
+
+    $chatagentsettings->add(new admin_setting_heading(
+        constants::M_COMPONENT . '/chatagent_heading',
+        '',
+        get_string('chatagent_settings_details', constants::M_COMPONENT)
+    ));
+
+    $chatagentsettings->add(new admin_setting_configcheckbox(
+        constants::M_COMPONENT . '/chatagentenabled',
+        get_string('chatagentenabled', constants::M_COMPONENT),
+        get_string('chatagentenabled_details', constants::M_COMPONENT),
+        1
+    ));
+
+    // Cloud Poodll by default: most sites have Poodll credentials and no Gemini key of their own.
+    $chatagentsettings->add(new admin_setting_configselect(
+        constants::M_COMPONENT . '/chatagentprovider',
+        get_string('chatagentprovider', constants::M_COMPONENT),
+        get_string('chatagentprovider_details', constants::M_COMPONENT),
+        'cloudpoodll',
+        [
+            'cloudpoodll' => get_string('chatagentprovider_cloudpoodll', constants::M_COMPONENT),
+            'ownkey' => get_string('chatagentprovider_ownkey', constants::M_COMPONENT),
+        ]
+    ));
+
+    // Free text rather than a menu.
+    // Models are released faster than a dropdown list here is likely to be updated.
+    $chatagentsettings->add(new admin_setting_configtext(
+        constants::M_COMPONENT . '/chatagentmodel',
+        get_string('chatagentmodel', constants::M_COMPONENT),
+        get_string('chatagentmodel_details', constants::M_COMPONENT),
+        \mod_minilesson\local\chatagent\gemini_driver::DEFAULT_MODEL,
+        PARAM_TEXT
+    ));
+
+    // Under Cloud Poodll the model is set somewhere in Poodll's murky cloud world.
+    $chatagentsettings->hide_if(
+        constants::M_COMPONENT . '/chatagentmodel',
+        constants::M_COMPONENT . '/chatagentprovider',
+        'eq',
+        'cloudpoodll'
+    );
+
+    $chatagentsettings->add(new admin_setting_configtext(
+        constants::M_COMPONENT . '/chatagentmaxtoolcalls',
+        get_string('chatagentmaxtoolcalls', constants::M_COMPONENT),
+        get_string('chatagentmaxtoolcalls_details', constants::M_COMPONENT),
+        \mod_minilesson\local\chatagent\controller::DEFAULT_MAX_TOOL_CALLS,
+        PARAM_INT
+    ));
+
+    $chatagentsettings->add(new admin_setting_configtext(
+        constants::M_COMPONENT . '/chatagentmaxturns',
+        get_string('chatagentmaxturns', constants::M_COMPONENT),
+        get_string('chatagentmaxturns_details', constants::M_COMPONENT),
+        40,
+        PARAM_INT
+    ));
+
+    $chatagentsettings->add(new admin_setting_configtext(
+        constants::M_COMPONENT . '/chatagentmaxattachmentmb',
+        get_string('chatagentmaxattachmentmb', constants::M_COMPONENT),
+        get_string('chatagentmaxattachmentmb_details', constants::M_COMPONENT),
+        \mod_minilesson\local\chatagent\attachments::DEFAULT_MAX_MB,
+        PARAM_INT
+    ));
+
+    $chatagentsettings->add(new admin_setting_configtext(
+        constants::M_COMPONENT . '/chatagentretaindays',
+        get_string('chatagentretaindays', constants::M_COMPONENT),
+        get_string('chatagentretaindays_details', constants::M_COMPONENT),
+        \mod_minilesson\task\chatagent_cleanup::DEFAULT_RETAIN_DAYS,
+        PARAM_INT
+    ));
+
+    $ADMIN->add('modsettingsminilessoncat', $chatagentsettings);
 
     // Lesson bank settings.
     $mainsettings->add(new admin_setting_configcheckbox(
@@ -479,6 +553,17 @@ if ($hassiteconfig) {
         $CFG->wwwroot . constants::M_URL . '/accountdashboard.php'
     );
     $ADMIN->add('modsettingsminilessoncat', $accountdashboard);
+
+    // Manage MCP.
+    $managemcp = new admin_externalpage(
+        'mod_minilesson_managemcp',
+        get_string('managemcp', constants::M_COMPONENT),
+        $CFG->wwwroot . constants::M_URL . '/managemcp.php'
+    );
+    $ADMIN->add('modsettingsminilessoncat', $managemcp);
+
+    // Manage OAuth clients now lives in the shared local_oauthmcp plugin (Site administration
+    // > Plugins > Local plugins), if it is installed - see managemcp.php for the link.
 
     $plugins = core_plugin_manager::instance()->get_plugins_of_type(constants::SUBPLUGINTYPES['item']);
     foreach ($plugins as $plugin) {

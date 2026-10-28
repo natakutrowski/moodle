@@ -86,6 +86,7 @@ class mod_minilesson_external extends external_api {
         $data->transcriber = $config->transcriber;
         $data->richtextprompt = $config->prompttype;
         $data->containerwidth = $config->containerwidth;
+        $data->nextbuttonalign = $config->nextbuttonalign ?? constants::M_NEXTBUTTON_DEFAULT;
         $data->activitylink = 0;
         $data->foriframe = 0;
         $data->grade = 0;
@@ -895,16 +896,21 @@ class mod_minilesson_external extends external_api {
         $result = json_decode($response, true);
 
         $ret = new \stdClass();
+        $ret->error = false;
+        $ret->errormessage = '';
+        $ret->data = '';
         if ($result === null || json_last_error()) {
             $ret->error = true;
+            $ret->errormessage = get_string('lessonbank:badresponse', constants::M_COMPONENT);
         } else {
             $ret1 = $result[0];
             if (empty($ret1['error'])) {
                 $ret->data = json_encode($ret1['data']);
-            } else if (!empty($ret1['exception'])) {
-                $ret->error = $ret1['exception']['message'];
             } else {
                 $ret->error = true;
+                $ret->errormessage = empty($ret1['exception']['message'])
+                    ? get_string('lessonbank:badresponse', constants::M_COMPONENT)
+                    : $ret1['exception']['message'];
             }
         }
         return $ret;
@@ -917,7 +923,8 @@ class mod_minilesson_external extends external_api {
     public static function lessonbank_returns() {
         return new external_single_structure([
             'error' => new external_value(PARAM_BOOL, 'has error', VALUE_DEFAULT, false),
-            'data' => new external_value(PARAM_RAW, 'json encoded data', VALUE_DEFAULT),
+            'errormessage' => new external_value(PARAM_TEXT, 'the error message, if there was an error', VALUE_DEFAULT, ''),
+            'data' => new external_value(PARAM_RAW, 'json encoded data', VALUE_DEFAULT, ''),
         ]);
     }
 

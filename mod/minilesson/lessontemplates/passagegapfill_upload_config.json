@@ -55,10 +55,10 @@
             ]
         }
     ],
-    "lessonTitle": "Passage Gapfill (upload passage) ",
+    "lessonTitle": "Passage Gapfill (upload passage)",
     "lessonDescription": "Enter a text passage, AI will create add number of \"gaps\" in the passage for students to complete.",
     "uniqueid": "6a3385bb328ce",
-    "version": "2",
+    "version": "3",
     "fieldmappings": {
         "target_language": {
             "enabled": false,

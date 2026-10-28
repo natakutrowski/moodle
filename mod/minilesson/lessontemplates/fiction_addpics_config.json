@@ -1,0 +1,225 @@
+{
+    "items": [
+        {
+            "itemnumber": 0,
+            "prompt": "",
+            "generatemethod": "reuse",
+            "generatefileareasmethod": "generate",
+            "generatefields": [
+                {
+                    "name": "nativelangchooser",
+                    "generate": 1,
+                    "mapping": ""
+                },
+                {
+                    "name": "data1",
+                    "generate": 0,
+                    "mapping": ""
+                },
+                {
+                    "name": "data2",
+                    "generate": 0,
+                    "mapping": ""
+                },
+                {
+                    "name": "data3",
+                    "generate": 0,
+                    "mapping": ""
+                },
+                {
+                    "name": "data4",
+                    "generate": 0,
+                    "mapping": ""
+                },
+                {
+                    "name": "data5",
+                    "generate": 0,
+                    "mapping": ""
+                }
+            ],
+            "generatefileareas": [
+                {
+                    "name": "itemmedia",
+                    "generate": 1,
+                    "mapping": "user_customdata3"
+                }
+            ],
+            "overallimagecontext": "user_customdata1",
+            "promptfields": []
+        },
+        {
+            "itemnumber": 1,
+            "prompt": "",
+            "generatemethod": "reuse",
+            "generatefileareasmethod": "generate",
+            "generatefields": [
+                {
+                    "name": "fictionyarn",
+                    "generate": 1,
+                    "mapping": "user_text"
+                },
+                {
+                    "name": "presentationmode",
+                    "generate": 0,
+                    "mapping": ""
+                },
+                {
+                    "name": "data1",
+                    "generate": 0,
+                    "mapping": ""
+                },
+                {
+                    "name": "data2",
+                    "generate": 0,
+                    "mapping": ""
+                },
+                {
+                    "name": "data3",
+                    "generate": 0,
+                    "mapping": ""
+                },
+                {
+                    "name": "data4",
+                    "generate": 0,
+                    "mapping": ""
+                },
+                {
+                    "name": "data5",
+                    "generate": 0,
+                    "mapping": ""
+                }
+            ],
+            "generatefileareas": [
+                {
+                    "name": "customfile1",
+                    "generate": 1,
+                    "mapping": "user_customdata2"
+                }
+            ],
+            "overallimagecontext": "user_customdata1",
+            "promptfields": []
+        }
+    ],
+    "lessonTitle": "Interactive Story (agent-written, with pics)",
+    "lessonDescription": "Use this when the teacher gives an idea or premise for a story: you write the story yourself in Yarn, following the fiction authoring guide, which gives a better story than the generated story templates. The teacher does not need to have a script. You choose the story type, and supply the complete story with picture placeholders, one image prompt per placeholder, an image prompt for the poster, and an image style. The story is used exactly as you wrote it. The template generates the pictures and the poster, and builds 2 items: a content page with the poster, and a fiction item with a picture for every placeholder.",
+    "uniqueid": "69b032eb8af03",
+    "version": "16",
+    "agentonly": 1,
+    "fieldmappings": {
+        "target_language": {
+            "enabled": false,
+            "title": "",
+            "description": "",
+            "type": "text"
+        },
+        "user_topic": {
+            "enabled": true,
+            "title": "Story Summary",
+            "description": "Optional. A one or two sentence summary of the story. It is saved as the lesson's topic.",
+            "type": "textarea"
+        },
+        "user_level": {
+            "enabled": false,
+            "title": "Language Level",
+            "description": "",
+            "type": "dropdown",
+            "options": [
+                "CEFR A1",
+                "CEFR A2",
+                "CEFR B1",
+                "CEFR B2",
+                "CEFR C1",
+                "CEFR C2"
+            ]
+        },
+        "user_text": {
+            "enabled": true,
+            "title": "Fiction Story",
+            "description": "An interactive fiction story written in Yarn format. Do not write it from memory: first call mod_minilesson_aigen_fetch_item_type_details with itemtype \"fiction\" and follow the authoringguide it returns, which covers the yarn syntax this player supports and how to structure a story worth reading.\r\n\r\nPlace the picture commands as the authoring guide directs: at the top of the node, as the first line after the '---' divider. The filenames are two digits counting up from 01.png with no gaps, to a maximum of 30 (01.png, 02.png ... 09.png, 10.png).",
+            "type": "textarea"
+        },
+        "user_keywords": {
+            "enabled": false,
+            "title": "",
+            "description": "",
+            "type": "text"
+        },
+        "user_customdata1": {
+            "enabled": true,
+            "title": "Image Style",
+            "description": "The image style for all the pictures: the poster and every story picture. It is used for each image prompt that does not name a style of its own.",
+            "type": "dropdown",
+            "options": [
+                "Flat vector illustration",
+                "Cartoon",
+                "Photorealistic",
+                "Infographic",
+                "Line drawing",
+                "Digital painting",
+                "3D Render",
+                "Black and white movie still"
+            ]
+        },
+        "user_customdata2": {
+            "enabled": true,
+            "title": "Image Prompts",
+            "description": "A JSON array of image filenames and prompts that match the placeholder filenames in the interactive fiction story. The json array should be structured like this:\r\n[{\"filename\": \"a-placeholder-filename\", \"prompt\": \"image-description\"}]\r\ne.g \r\n[\r\n  {\r\n    \"filename\": \"01.png\",\r\n    \"prompt\": \"Black and white movie still. A dark, snowy street in 1980s Moscow. A lone man in a heavy coat stands by a payphone under a dim streetlamp. Grainy texture, high contrast shadows.\"\r\n  },\r\n  {\r\n    \"filename\": \"02.png\",\r\n    \"prompt\": \"Black and white movie still. A grim discovery in Gorky Park. Three shapes lie in the deep snow near a frozen pond. The atmosphere is cold and silent. Low angle shot, dramatic lighting.\"\r\n  }\r\n]",
+            "type": "textarea"
+        },
+        "user_customdata3": {
+            "enabled": true,
+            "title": "Poster Image Prompt",
+            "description": "An image generation prompt for the square poster image on the story's intro page. Describe the main characters in one scene that represents the story. The poster is made from this prompt only, so describe the characters' looks and the setting here too. The Image Style is used unless the prompt names a style of its own. Do not ask for text in the image.",
+            "type": "textarea"
+        },
+        "user_customdata4": {
+            "enabled": true,
+            "title": "Story Type",
+            "description": "The shape of the story you write. \"Story with choices\" is narrative fiction (Part 3A of the fiction authoring guide): a plot moves on and the learner's choices change what happens. \"Explore a place\" is spatial fiction (Part 3B): the learner moves between places, finds things and uses them. The template does not read this value, it tells you which kind of story to write. If the user has not said which they want, ask them before you write the story, because changing it later means writing the story again.",
+            "type": "dropdown",
+            "options": [
+                "Story with choices",
+                "Explore a place"
+            ]
+        },
+        "user_customdata5": {
+            "enabled": false,
+            "title": "",
+            "description": "",
+            "type": "text"
+        },
+        "user_customdata6": {
+            "enabled": false,
+            "title": "",
+            "description": "",
+            "type": "text"
+        },
+        "user_customdata7": {
+            "enabled": false,
+            "title": "",
+            "description": "",
+            "type": "text"
+        },
+        "user_customdata8": {
+            "enabled": false,
+            "title": "",
+            "description": "",
+            "type": "text"
+        },
+        "user_customdata9": {
+            "enabled": false,
+            "title": "",
+            "description": "",
+            "type": "text"
+        },
+        "user_customdata10": {
+            "enabled": false,
+            "title": "",
+            "description": "",
+            "type": "text"
+        }
+    },
+    "tags": [
+        "Reading"
+    ]
+}

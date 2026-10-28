@@ -89,6 +89,9 @@ class itemform extends baseform {
             0 => get_string('presentationmode_plain', constants::M_COMPONENT),
             1 => get_string('presentationmode_mobile_chat', constants::M_COMPONENT),
             2 => get_string('presentationmode_storymode', constants::M_COMPONENT),
+            3 => get_string('presentationmode_immersivedark', constants::M_COMPONENT),
+            4 => get_string('presentationmode_immersivebright', constants::M_COMPONENT),
+            5 => get_string('presentationmode_immersivepaper', constants::M_COMPONENT),
         ], 0);
 
         $this->add_dropdown(itemtype::FLOWTHROUGH_MESSAGES, get_string('flowthroughmessages', constants::M_COMPONENT),
@@ -105,12 +108,25 @@ class itemform extends baseform {
         ], 0);
         $this->add_static_text('shownonoptions_desc', '', get_string('shownonoptions_desc', constants::M_COMPONENT));
 
-        $this->add_dropdown(itemtype::TAP_TO_TRANSLATE, get_string('fiction:taptotranslate', constants::M_COMPONENT),
-         [
-            0 => get_string('no'),
-            1 => get_string('yes'),
-        ], 0);
-        $this->add_static_text('taptotranslate_desc', '', get_string('fiction:taptotranslate_desc', constants::M_COMPONENT));
+        // Read aloud: a per-message TTS button, with the voice and speed it should use.
+        $this->add_checkbox(
+            itemtype::READALOUD,
+            get_string('fiction_readaloud', constants::M_COMPONENT),
+            get_string('fiction_readaloud_details', constants::M_COMPONENT),
+            0
+        );
+        $this->add_ttsaudioselect(
+            constants::POLLYVOICE,
+            get_string('choosevoice', constants::M_COMPONENT),
+            itemtype::READALOUD,
+            0
+        );
+        $this->add_voiceoptions(
+            constants::POLLYOPTION,
+            get_string('choosevoiceoption', constants::M_COMPONENT),
+            itemtype::READALOUD,
+            0
+        );
 
     }
 }

@@ -31,8 +31,8 @@ $string['continuepreviousattempt'] = 'Continue Previous Attempt?';
 $string['allowcontinueattempts'] = 'Can continue previous attempt';
 $string['allowcontinueattempts_details'] = 'If enabled, students can resume a previous incomplete attempt from where they left off.';
 $string['allowcontinueattempts_help'] = 'If enabled, students can resume a previous incomplete attempt from where they left off.';
-$string['attemptreusequestion'] = "Do you want to continue your previous attempt (yes) ?<br>
-If you say no, your previous attempt will be deleted.";
+$string['attemptreusequestion'] = 'If you start again, your previous attempt will be deleted.';
+$string['startagain'] = 'Start again';
 $string['modulename'] = 'Poodll MiniLesson';
 $string['modulenameplural'] = 'Poodll MiniLessons';
 $string['modulename_help'] = 'Poodll MiniLesson combines several language learning activities into a simple, self-guided online lesson.
@@ -85,6 +85,39 @@ $string['minilesson:evaluate'] = 'Can evaluate student MiniLesson attempts';
 $string['minilesson:submit'] = 'Can submit MiniLesson attempts';
 $string['minilesson:push'] = 'Push settings from one instance to others';
 $string['minilesson:canuseaigen'] = 'Can use AI Generation feature';
+$string['minilesson:usemcp'] = 'Can use the MCP / AI generation web service';
+$string['managemcp'] = 'Manage MCP';
+$string['mcpuserrolename'] = 'MiniLesson MCP User';
+$string['mcpuserroledesc'] = 'Automatically created by mod_minilesson: grants permission to use the MiniLesson AI-generation / MCP web service.';
+$string['managemcp_intro'] = 'MiniLesson MCP lets AI assistants and agents (such as Claude, or a custom GPT) create and manage MiniLesson activities on this site directly, using the Model Context Protocol. A user must be explicitly permitted to use it before an AI client can act on their behalf. It is also possible for agents to use the MiniLesson Ai Generate APIs directly. The requirements for access are the same as for MCP.';
+$string['managemcp_endpointurlheading'] = 'MCP Endpoint URL';
+$string['managemcp_endpointurlbody'] = 'Provide this URL when configuring your AI agent or MCP client (such as Claude Desktop, Claude.ai, ChatGPT connectors, or Gemini):';
+$string['managemcp_copied'] = 'Copied to clipboard';
+$string['managemcp_enableheading'] = 'Enabling MCP for a user';
+$string['managemcp_enablebody'] = 'To allow someone to use MCP, assign them a role that carries the mod/minilesson:usemcp capability at system context. By default that\'s the "{$a}" role created below. Once assigned, an AI client that supports OAuth (e.g. Claude.ai, Gemini) can connect by walking them through login and consent automatically; clients that only take a static token can use one generated on the user\'s behalf.';
+$string['managemcp_oauthrequirements'] = 'OAuth server requirements: OAuth delivers its access token to the AI agent after communicating with the Moodle server. The user will need to have been granted mod/minilesson:usemcp capability. And you will need the local_oauthmcp plugin installed.';
+$string['managemcp_helplink'] = 'Full setup instructions';
+$string['managemcp_oauthclientslink'] = 'If your AI client doesn\'t support automatic registration, create a manual OAuth client here';
+$string['managemcp_oauthpluginmissing'] = 'OAuth-based connections (needed for Claude.ai, ChatGPT, and Gemini\'s web connector UIs) require the local_oauthmcp plugin, which is not currently installed on this site. Clients that accept a static token (e.g. Claude Desktop, Claude Code) are unaffected.';
+$string['managemcp_createroleheading'] = 'Create the MiniLesson MCP User role';
+$string['managemcp_createrolebody'] = 'Clicking the button below creates a role called "{$a->rolename}", assignable at system context only, carrying just the "{$a->capability}" capability. The role can then be assigned to a user at: Site administration → Users → Permissions → Assign system roles.';
+$string['managemcp_createrolebtn'] = 'Create the {$a} role';
+$string['managemcp_createroleconfirm'] = 'Create the "{$a}" role?';
+$string['managemcp_rolealreadyexists'] = 'Disabled: the "{$a}" role already exists.';
+$string['managemcp_migrateheading'] = 'Migrate legacy allowed users';
+$string['managemcp_migratebody'] = 'Previously access to MCP/AI-Generate APIs was granted by adding individual users to the AI Generation Service\'s allowed-users list. That list is no longer used. This button assigns the MCP role to everyone still on that old list, at system context, so they keep their access. It does not remove anyone from the old list, and is safe to run more than once.';
+$string['managemcp_migratebtn'] = 'Migrate legacy allowed users ({$a})';
+$string['managemcp_migrateconfirm'] = 'Assign the MCP role to {$a} legacy allowed user(s)?';
+$string['managemcp_migratedisabled_norole'] = 'Disabled: create the MCP role above first.';
+$string['managemcp_migratedisabled_nousers'] = 'Disabled: there are no users on the old allowed-users list to migrate.';
+$string['managemcp_rolecreated'] = 'Created the "{$a}" role.';
+$string['managemcp_migratedone'] = 'Done: assigned the "{$a->rolename}" role to {$a->migrated} user(s) ({$a->skipped} already had it).';
+$string['managemcp_usersheading'] = 'Users with MCP access';
+$string['managemcp_nousers'] = 'No user currently holds the mod/minilesson:usemcp capability.';
+$string['managemcp_hastoken'] = 'Has a token';
+$string['managemcp_tokenexpiry'] = 'Token expires';
+$string['managemcp_neverexpires'] = 'Never';
+$string['managemcp_upgradenotice'] = 'This site has users on the old AI Generation Service allowed-users list. Access is now controlled by the "mod/minilesson:usemcp" capability instead - visit {$a} to migrate them, or they will lose access.';
 
 
 $string['id'] = 'ID';
@@ -271,6 +304,7 @@ $string['no-no'] = 'Norwegian'; // Norwegian
 $string['sr-rs'] = 'Serbian'; // Serbian
 $string['vi-vn'] = 'Vietnamese'; // Vietnamese
 $string['so-so'] = 'Somali'; // Somali
+$string['ti-er'] = 'Tigrinya';
 $string['ps-af'] = 'Pashto'; // Afghan Pashto
 
 $string['awsregion'] = 'AWS Region';
@@ -427,6 +461,7 @@ $string['wordshuffle_a11y_returned_to_bank'] = 'Returned "{$a}" to word bank';
 $string['wordshuffle_a11y_placed_in_slot'] = 'Placed "{$a}" in drop slot';
 
 $string['multichoice'] = 'Multi Choice';
+$string['multichoicequiz'] = 'Multichoice Quiz';
 $string['multiaudio'] = 'MC Audio';
 $string['dictation'] = 'Dictation';
 $string['dictationchat'] = 'Dictation Chat';
@@ -453,9 +488,14 @@ $string['slides'] = 'Slides';
 $string['fiction'] = 'Fiction';
 $string['shadow'] = 'Video Shadowing';
 $string['cards'] = 'Cards';
+$string['wordcards'] = 'Word Cards';
 $string['error:invalidyoutubeurl'] = 'The YouTube URL or video ID is not valid.';
 $string['error:noyoutubetranscript'] = 'No subtitles are available for this YouTube video.';
 $string['error:youtubefetchfailed'] = 'Could not fetch data from YouTube. Please try again later.';
+$string['error:youtubeblocked'] = 'YouTube would not serve subtitles to this server. This usually means it is refusing automated requests from the server\'s IP address rather than anything being wrong with the video. You can still add subtitles by copying them into the subtitle box by hand. (YouTube said: {$a})';
+$string['error:youtubeagerestricted'] = 'This YouTube video is age restricted, so its subtitles cannot be fetched.';
+$string['error:youtubeunplayable'] = 'YouTube will not play this video, so its subtitles cannot be fetched. ({$a})';
+$string['error:notranscripttimestamps'] = 'No timestamps were found in the pasted text. On YouTube, open the transcript panel, switch timestamps on from its menu, then copy the whole transcript.';
 
 $string['transcriber'] = 'Transcriber';
 $string['transcriber_details'] = 'The transcription engine to use';
@@ -491,6 +531,7 @@ $string['skip-fluency'] = 'Continue';
 $string['start'] = 'Start';
 // $string['next'] = 'Next';
 $string['nextlessonitem'] = 'Next Page';
+$string['finishlesson'] = 'Finish';
 $string['loading'] = 'Loading...';
 $string['dictation_instructions1'] = 'Listen and type each sentence that you hear.';
 $string['sc_instructions1'] = 'Read the phrase on each card aloud.';
@@ -511,7 +552,7 @@ $string['fluency_instructions1'] = 'Read the sentences aloud. Click the micropho
 $string['conversation_instructions1'] = 'replace these instructions.';
 $string['audiochat_instructions1'] = 'Practice speaking with your AI partner about the topic.';
 $string['wordshuffle_instructions1'] = 'Put the words in the correct order to form a sentence.';
-$string['scatter_instructions1'] = 'Choose the word pairs';
+$string['scatter_instructions1'] = 'Match the word pairs';
 $string['slides_instructions1'] = 'Click > or < to go forward or backward through the slides.';
 $string['fiction_instructions1'] = 'Follow the instructions and make good choices. Good luck.';
 
@@ -551,7 +592,7 @@ $string['title'] = 'Title';
 $string['type'] = 'Type';
 $string['sentences'] = 'Sentences';
 $string['correctresponses'] = 'Correct responses';
-$string['enterresponses'] = 'Enter a list of correct responses, and an optional list of partially correct responses, in the text areas below.';
+$string['enterresponses'] = 'Enter a list of correct responses, and an optional list of partially correct responses, in the text areas below. Each should be on a new line.';
 $string['sentenceprompts'] = 'Sentences (prompts)';
 // $string['entersentences'] ='Enter a list of sentences in the text area below. Place each sentence on a new line.';
 $string['phraseresponses'] = 'Enter a list of items in the text area below. Each item should be a on a new line. The format is:<br> audio prompt | correct response (optional)| text prompt (optional) <br>e.g How are you?|I am fine.';
@@ -601,6 +642,37 @@ $string['choosenativelanguage'] = 'Choose Native Language';
 $string['audiostorytimes'] = 'Image Entry Times';
 $string['audiostoryfiles'] = 'Audio Story Files';
 
+// Community page.
+$string['enablecommunitypage'] = 'Enable community page';
+$string['enablecommunitypage_details'] = 'Allow item types that support it (e.g. Free Speaking) to show a community page, where students can hear submissions that other students scored well on and consented to share.';
+$string['cpage_enable'] = 'Community page';
+$string['cpage_enable_details'] = 'Show a community page after the results page, where students can hear submissions that other students consented to share. Only submissions that scored at or above the selected grade are shown.';
+$string['cpage_disabled'] = 'Disabled';
+$string['cpage_threshold_option'] = 'Enabled: submissions scoring {$a}% or more are shown';
+$string['cpage_enablelikes'] = 'Allow likes on community page';
+$string['cpage_enablelikes_details'] = 'Show a like button under each shared submission, and allow sorting by like count.';
+$string['cpage_title'] = 'Community page';
+$string['cpage_intro'] = 'Listen to submissions shared by other students.';
+$string['cpage_nosubmissions'] = 'There are currently no shared submissions to view.';
+$string['cpage_sharethis'] = 'Share this';
+$string['cpage_sharethis_details'] = 'I consent to my submission, including my voice recording, being shared with other students on the community page.';
+$string['cpage_consentsaved'] = 'Your sharing preference was saved.';
+$string['cpage_yoursubmission'] = 'Your submission';
+$string['cpage_like'] = 'Like';
+$string['cpage_more'] = 'more...';
+$string['cpage_sortby'] = 'Sort by';
+$string['cpage_sortdate'] = 'Newest';
+$string['cpage_sortlikes'] = 'Most liked';
+$string['privacy:metadata:cpagesubmissionstable'] = 'Stores whether a user consented to sharing their submission on the community page, and its like count.';
+$string['privacy:metadata:cpagesubmissions:itemid'] = 'The lesson item the consent applies to';
+$string['privacy:metadata:cpagesubmissions:userid'] = 'The user who gave or withheld consent';
+$string['privacy:metadata:cpagesubmissions:consent'] = 'Whether the user consented to sharing their submission';
+$string['privacy:metadata:cpagesubmissions:likes'] = 'The number of likes the shared submission received';
+$string['privacy:metadata:cpagelikestable'] = 'Stores which community page submissions a user liked.';
+$string['privacy:metadata:cpagelikes:submissionid'] = 'The shared submission that was liked';
+$string['privacy:metadata:cpagelikes:userid'] = 'The user who liked the submission';
+$string['privacy:metadata:cpagelikes:timecreated'] = 'When the like was given';
+
 // showtextprompt
 $string['enablesetuptab'] = "Enable setup tab";
 $string['enablesetuptab_details'] = "Don't check this. It will show a tab containing the activity instance settings to admins. This is for a special use case and minilesson pages will show without headers,footers or blocks.";
@@ -627,11 +699,32 @@ $string['layoutvertical'] = 'Vertical';
 $string['layouthorizontal'] = 'Horizontal';
 $string['layoutmagazine'] = 'Magazine';
 
-$string['freetrial'] = "Get Cloud Poodll API Credentials and a Free Trial";
-$string['freetrial_desc'] = "A dialog should appear that allows you to register for a free trial with Poodll. After registering you should login to the members dashboard to get your API user and secret. And to register your site URL.";
+$string['freetrial'] = "Get a Poodll free trial";
+$string['freetrial_desc'] = "Poodll MiniLesson is a premium Moodle plugin. A free trial can be set up in a couple of minutes without leaving your Moodle site. For details on pricing visit <a href='https://poodll.com/pricing'>Poodll.com</a>. ";
 // $string['memberdashboard'] = "Member Dashboard";
 // $string['memberdashboard_desc'] = "";
 $string['fillcredentials'] = "Set API user and secret with existing credentials";
+
+// In app free trial and credentials setup (see cbcredentials.php / fetchcbpage.php).
+$string['cbsetupheading'] = "Set up your Poodll API credentials";
+$string['cbsetupintro'] = "Poodll MiniLesson cannot run until the Poodll API user and secret have been set for this site. They are site wide settings, so you only need to do this once.";
+$string['cbsetupfound'] = "Another Poodll plugin on this site already has credentials. You can copy them across with the button below, then save them.";
+$string['cbsetupnotfound'] = "No Poodll credentials were found anywhere on this site. If you do not have them yet you can take a free trial, and your API user and secret will be emailed to you.";
+$string['cbsavecredentials'] = "Save credentials";
+$string['cbgotosettings'] = "Go to the MiniLesson settings page";
+$string['cbcredentialssaved'] = "Your Poodll API credentials were saved and accepted.";
+$string['cbnocredentialsset'] = "MiniLesson cannot run yet because the Poodll API user and secret have not been set for this site.";
+$string['cbaskadmin'] = "Please ask your site administrator to set up the Poodll API credentials for this site.";
+$string['nocredentialsentered'] = "No API user and secret were entered.";
+$string['cbgetfreetrial'] = "Get free trial";
+$string['cbtrialstep1'] = "Click the \"Get free trial\" button below and fill in the Poodll checkout form. There is nothing to pay and no credit card is required.";
+$string['cbtrialstep2'] = "Check your email. Your Poodll API user and secret will arrive there a moment after you register.";
+$string['cbtrialstep3'] = "Return to the tab you came from, paste the API user and secret into the form there, and save.";
+$string['cbtrialsiteurl'] = "Your subscription will be registered for the site URL:";
+$string['cbtrialsiteurl_desc'] = "If that is not the address your users visit this Moodle site on, register the correct URL in the members dashboard at member.poodll.com after signing up.";
+$string['cbaftercheckout'] = "Almost done: check your email";
+$string['cbaftercheckout_desc'] = "Your Poodll API user and secret are on their way by email. When they arrive, return to the tab you came from, paste them into the credentials form and save.";
+$string['cbtrialfailed'] = "The Poodll signup form could not be loaded. Please check your internet connection and try again, or sign up at member.poodll.com instead.";
 
 
 $string['viewstart'] = "Activity open";
@@ -669,6 +762,12 @@ $string['totalscore'] = 'Total Score:';
 $string['score'] = 'Score';
 $string['questiontext'] = 'Question';
 $string['ttsdialoginstructions'] = "Choose the speaker voices for roles A,B and C and enter the dialog. Begin each dialog line with the speaker role + ')'. e.g A) Hello. Sound effect lines begin with >> e.g >>seagulls";
+$string['speakera'] = "Speaker A";
+$string['speakerb'] = "Speaker B";
+$string['speakerc'] = "Speaker C";
+$string['ttsdialoglabela'] = "Speaker A label";
+$string['ttsdialoglabelb'] = "Speaker B label";
+$string['ttsdialoglabelc'] = "Speaker C label";
 
 $string['courseattempts'] = 'Course Attempts';
 $string['courseattemptsreport'] = 'Course Attempts Report';
@@ -709,6 +808,11 @@ $string['containerwidth'] = "Container width";
 $string['contwidth-compact'] = "Compact";
 $string['contwidth-wide'] = "Wide";
 $string['contwidth-full'] = "Full";
+$string['nextbuttonalign'] = 'Next button position';
+$string['nextbuttonalign_details'] = 'Where the button that moves to the next page sits under each item. Default puts it on the right (on the left on right to left sites). Center puts it in the middle, so it is not mistaken for a next button that the theme shows in the page footer.';
+$string['nextbuttonalign_help'] = 'Where the button that moves to the next page sits under each item. Default puts it on the right (on the left on right to left sites). Center puts it in the middle, so it is not mistaken for a next button that the theme shows in the page footer.';
+$string['nextbuttonalign-default'] = 'Default';
+$string['nextbuttonalign-center'] = 'Center';
 $string['lessonfont'] = "Custom font";
 $string['lessonfont_details'] = "A font name that will override site default for this minilesson when displayed. Must be exact in spelling and case. eg Andika or Comic Sans MS";
 $string['lessonfont_help'] = "A font name that will override site default for this minilesson when displayed. Must be exact in spelling and case. eg Andika or Comic Sans MS";
@@ -748,16 +852,23 @@ $string['readsentences_desc'] = 'If checked each sentence will be read aloud. It
 $string['allowretry'] = 'Allow retry';
 $string['allowretry_desc'] = 'If checked allows students to submit new attempts, if their previous response was not correct.';
 $string['audiochatretry_desc'] = 'If checked students can re-start the chat session again immediately after they finish.';
+$string['audiochat_topic_instructions'] = 'Set the topic field that will be used in the AI prompt here. This field is for use by AI but it will also be displayed to the user as the discussion topic if the Item text/question field is empty.';
+$string['audiochat_role_instructions'] = 'Set the role that the AI chat bot will take in the conversation. e.g a kind teacher.';
 $string['eventminilessonstepsubmitted'] = 'Minilesson step submitted';
 $string['eventminilessonattemptsubmitted'] = 'Minilesson attempt submitted';
 $string['import'] = 'Import';
 $string['importing'] = 'Importing';
-$string['importresults'] = 'Import Results';
+$string['importcompleted'] = 'Import completed. The {$a} imported item(s) are shown below.';
+$string['importpartial'] = 'Imported {$a->imported} of {$a->total} items.';
+$string['importnoitems'] = 'No items were found in the import file.';
+$string['importfailures'] = 'Items that could not be imported';
+$string['importitemnumber'] = 'Item';
+$string['importproblem'] = 'Problem';
 $string['backtoimport'] = 'Return to Import Top';
+$string['backtoitems'] = 'Return to Lesson Items';
 $string['importinstructions'] = 'You can import Minilesson items using form below. The import file should be a CSV or JSON file. Refer to the <a href="https://support.poodll.com/en/support/solutions/articles/19000153051-importing-items-into-minilesson" target="_blank">import documentation</a> for the data and data format to include for each item type. There is an sample import file below. Or use the export button further down the page to export the items in this activity to a JSON file.';
 $string['cannotsavecsv'] = 'Cannot save csv file';
 $string['csvdelimiter'] = 'Delimiter';
-$string['importitemsresult'] = "Import Items Results";
 $string['examplecsv'] = 'Example csv/text file';
 $string['examplecsv_help'] = 'To use the example csv file, download it then open it with a text or spreadsheet editor. Leave the first line unchanged, then edit the following lines (records) and add your Minilesson item data, adding more lines as necessary. Save the file as CSV then upload it.';
 $string['examplejson'] = 'Example json file';
@@ -768,11 +879,25 @@ $string['importfromlang'] = 'Translate from language';
 $string['importtolang'] = 'Translate to language';
 
 $string['error:emptyfield'] = 'CANNOT BE EMPTY';
-$string['error:failed'] = 'FAILED';
+$string['error:unknowncolumn'] = 'Unknown column: {$a}';
 $string['error:correctanswer'] = 'INVALID ANSWER';
-$string['error:invaliditemtype'] = 'INVALID ITEM TYPE';
+$string['error:correctanswerrange'] = 'The correct answer must be a number between 1 and {$a} (the number of answer options)';
+$string['error:toomanyanswers'] = 'Too many answer options. The maximum is {$a}';
+$string['error:invalidoptionvalue'] = 'Value "{$a->value}" is not one of the allowed values: {$a->allowed}';
+$string['error:pagenocontent'] = 'A page item needs some content: text, tts, ttsdialog, ttspassage, ytid, iframe or an uploaded media file';
+$string['error:nogaps'] = 'No gaps found. Enclose the gap letters in square brackets, e.g. "This is my d[og]"';
+$string['error:needspipepair'] = 'Each line needs a pipe-separated pair, e.g. "Term|Definition"';
+$string['error:invalidyarn'] = 'The yarn script must start with a "title: Start" node, and every node needs "---" after its header and "===" after its body';
+$string['error:yarnproblems'] = 'The yarn script has problems that must be fixed: {$a}';
+$string['error:aigenitemsrejected'] = '{$a->failed} of {$a->total} items were rejected and not added to the lesson. {$a->messages}';
+$string['error:noh5ppackage'] = 'An H5P package file (.h5p) is required in the customfile1 file area';
+$string['error:invaliditemtype'] = 'Invalid item type';
 $string['error:invalidjson'] = 'INVALID JSON';
 $string['error:noitemsinjson'] = 'NO ITEMS IN JSON';
+$string['error:imagepromptarea'] = 'Images can only be generated for image file areas, not audio ones.';
+$string['error:imagepromptinvalid'] = 'An image prompt needs a plain file name and a non-empty text prompt.';
+$string['error:imagepromptlimit'] = 'Too many image prompts in one import: the limit is {$a}. Send the rest in another import.';
+$string['error:imagegenfailed'] = 'The image could not be generated. Supply it as base64 or resubmit the prompt.';
 $string['error:csvloaderror'] = 'CSV LOAD ERROR';
 
 
@@ -789,6 +914,7 @@ $string["sttstaudio"] = 'STT Audio';
 $string["speechtester"] = 'SpeechTester';
 $string["exportinstructions"] = 'Export items  in this MiniLesson activity to a JSON file. This can be used to backup or transfer items to another MiniLesson activity. Or you can edit the exported items and re-import them as new items.';
 $string["exportitems"] = 'Export Items';
+$string['exportitem'] = 'Export item';
 $string["importformat"] = "Import Format";
 $string["exportheading"] = 'Export Items as JSON';
 $string["exportandtranslateinstructions"] = 'Translate and export items in this MiniLesson activity to a JSON file. This can be used to translate the text of language A in the lesson to language B, in order that the items can be imported into a new MiniLesson activity with a different language profile. It was designed so that different versions of the same lesson could be created for learners with different native languages. First select the language to translate from (the page will reload). Then select the language to translate to (the page will reload). A translate button will appear, press that and the activity will be translated and exported.';
@@ -831,7 +957,6 @@ $string['passagetoread'] = 'Passage to read';
 $string['passagewithgaps'] = 'Passage with gaps';
 // Spacegame.
 $string['achievedhighscoreof'] = 'Achieved a high score of {$a}';
-$string['addtomywords'] = "Click to add to My Words";
 $string['emptyquiz'] = 'There are no multiple choice questions in the selected category.';
 $string['endofgame'] = 'Your score was: {$a}. Press space or click to restart.';
 $string['fullscreen'] = 'Fullscreen';
@@ -843,7 +968,6 @@ $string['notyetplayed'] = 'Not yet played';
 $string['playedxtimeswithhighscore'] = 'Played {$a->times} times. The last game ended with a high score of {$a->score}';
 $string['playerscores'] = 'Player scores';
 $string['points'] = 'Points';
-$string['removefrommywords'] = "Click to remove from My Words";
 $string['removescores'] = 'Remove all user scores';
 $string['score'] = 'Score';
 $string['scoreheader'] = 'Score';
@@ -874,8 +998,8 @@ $string['aigrade_instructions'] = 'Grading Instructions for AI';
 $string['aigrade_instructions_desc'] = 'The instructions tell AI how to generate a "score" between 0 and the total marks for this item. They are a template that will be merged with the AI topic, AI data 1, AI data 2 to create the instructions. You can use the following variables in the instructions: {topic}, {ai data1}, {ai data2}. The resulting AI grade will be multiplied by the total words spoken over the target word count, so that answers that are too brief are penalized. Set target word count to 0 if that is not desireable.';
 $string['aigrade_instructions_help'] = 'The instructions tell AI how to generate a "score" between 0 and the total marks for this item. They are a template that will be merged with the AI topic, AI data 1, AI data 2 to create the instructions. You can use the following variables in the instructions: {topic}, {ai data1}, {ai data2}. The resulting AI grade will be multiplied by the total words spoken over the target word count, so that answers that are too brief are penalized. Set target word count to 0 if that is not desireable.';
 $string['aigrade_feedback'] = 'Feedback Instructions for AI';
-$string['aigrade_feedback_desc'] = 'The feedback instructions tell AI how to give feedback to the student on their response. They are a template that will be merged with the AI topic, AI data 1, AI data 2 to create the instructions. You can use the following variables in the instructions: {topic}, {ai data1}, {ai data2}.';
-$string['aigrade_feedback_help'] = 'The feedback instructions tell AI how to give feedback to the student on their response. They are a template that will be merged with the AI topic, AI data 1, AI data 2 to create the instructions. You can use the following variables in the instructions: {topic}, {ai data1}, {ai data2}.';
+$string['aigrade_feedback_desc'] = 'The feedback instructions tell AI how to give feedback to the student on their response. They are a template that will be merged with the AI topic, AI data 1, AI data 2 and feedback language to create the instructions. You can use the following variables in the instructions: {topic}, {ai data1}, {ai data2}, {feedback language}. If the feedback language is the target language, AI is asked to use "easy [target-language]".';
+$string['aigrade_feedback_help'] = 'The feedback instructions tell AI how to give feedback to the student on their response. They are a template that will be merged with the AI topic, AI data 1, AI data 2 and feedback language to create the instructions. You can use the following variables in the instructions: {topic}, {ai data1}, {ai data2}, {feedback language}. If the feedback language is the target language, AI is asked to use "easy [target language]".';
 $string['aigrade_feedback_language'] = 'AI Feedback Language';
 $string['aigrade_feedback_language_help'] = 'Sets the language that feedback will be returned in. Default native and target languages refers to those set in this Minilesson\'s settings. The choice here may be overridden if the user has set their own native language preference.';
 $string['aigrade_instructions_preset'] = 'Select a preset from the list to load ready made instructions into the text area below. You can modify the instructions as you wish.';
@@ -981,12 +1105,16 @@ $string['contextmapping:type'] = 'Field type';
 $string['contextmapping:options'] = 'Field options';
 $string['contextmapping:options_desc'] = 'Input Field Options';
 $string['aigenmodaltitle'] = 'Enter data for AI Generate';
+$string['aigennativelangeasy'] = 'Definitions and translations will be in easy {$a}.';
+$string['aigennativelangnotset'] = 'Not set';
 $string['generatingitemdata'] = 'Generating item: {$a}';
 $string['generatingtextdata'] = 'Making text data for: {$a}';
 $string['generatingimagedata'] = 'Making image data for: {$a}';
 $string['aigenpageimporting'] = 'Importing AI generated items';
 $string['aigenpagecomplete'] = 'AI generation complete';
 $string['aigenviewresult'] = 'View AI Generated Items';
+$string['aigeninputdefaults:nativelang'] = 'Leave this empty unless the user has named a language: it then falls back to the native language set on the lesson. Generation fails only if the lesson does not set one either.';
+$string['aigenmissingrequiredinputs'] = 'Template "{$a->template}" requires a non-empty value for every input it declares, but these were empty: {$a->missing}. There is no default to fall back on, so an empty value here generates content with a hole in it. Do not guess these values or send them empty: ask the user what they should be, or pick a template that does not need them, then try again.';
 $string['col:templateid'] = 'ID';
 $string['col:name'] = 'Name';
 $string['col:timemodified'] = 'Updated at';
@@ -1018,6 +1146,7 @@ $string['aigentemplatename:ayoutubelesson'] = 'YouTube Lesson';
 $string['aigentemplatename:youtubefinalelesson'] = 'YouTube Finale (listen and speak)';
 $string['aigentemplatename:wordpractice'] = 'Word Practice v1';
 $string['aigentemplatename:wordpractice2'] = 'Word Practice v2';
+$string['aigentemplatename:wordpractice_v4'] = 'Word Practice v4';
 $string['aigentemplatename:audiostory'] = 'Listen to the Story (generate story)';
 $string['aigentemplatename:set_of_slides'] = 'Set of Slides';
 $string['aigentemplatename:set_of_slides_nopics'] = 'Set of Slides (no images)';
@@ -1032,27 +1161,36 @@ $string['aigentemplatename:choose_best_reply'] = 'Choose the correct reply.';
 $string['aigentemplatename:fiction_withpics'] = 'Interactive Story (with pics)';
 $string['aigentemplatename:fiction_nopics'] = 'Interactive Story (no pics)';
 $string['aigentemplatename:narrativefiction_withpics'] = 'Narrative Story (with pics)';
+$string['aigentemplatename:fiction_addpics'] = 'Interactive Story (agent-written, with pics)';
 $string['aigentemplatename:vocabcards'] = 'Vocab Cards';
 $string['aigentemplatedescription:passagereading'] = 'Enter a list of keywords and a topic, AI will prepare a passage of text and some reading and speaking activities based on it.';
 $string['aigentemplatedescription:ayoutubelesson'] = 'Enter a YouTube video id (or URL) and summaries. Poodll will generate a short lesson with multi-choice and speaking activities';
 $string['aigentemplatedescription:youtubefinalelesson'] = 'This is a lesson based on a YouTube video story. A related but simplified story is prepared and comprehension, and speaking actvities are built on the story. Finally the student sees the original video that they have been studying';
-$string['aigentemplatedescription:wordpractice'] = 'Enter a list of words (5) and a topic, Poodll will make a activity with vocab cards, listening and typing gapfills, a space game a free writing activity';
-$string['aigentemplatedescription:wordpractice2'] = 'Given a list of words, example sentences and the students native language, this template will generate a set of practice activities with images and native language hints. You can use up to 9 words.';
+$string['aigentemplatedescription:wordpractice'] = 'Enter a list of words (5) and a topic and in an image style, Poodll will make a activity with vocab cards, listening and typing gapfills, a space game a free writing activity';
+$string['aigentemplatedescription:wordpractice2'] = 'Given a list of words and example sentences, this template will generate a set of practice activities with images and native language hints. You can use up to 9 words. Translations use the native language set in the MiniLesson settings.';
+$string['aigentemplatedescription:wordpractice_v4'] = 'Enter 4 - 10 keywords or phrases, and an image style. Translations use the native language set in the MiniLesson settings. They will be used to generate:
+i)  a set of vocab cards with translations and example sentences
+ii) scatter activity (matching keyword/phrase with translation)
+iii)  a wordcards item - listen and choose mode
+iv)  a wordcards item - listen and type mode
+v)  a wordcards item - choose the word mode
+vi)  a wordcards item - type the word mode';
 $string['aigentemplatedescription:audiostory'] = 'Enter a topic, the learners language level and a type of story. AI will prepare an audio story with listening and speaking activities.';
 $string['aigentemplatedescription:set_of_slides'] = 'This template will create a tutorial slides that are based on a description of what you want to teach.';
 $string['aigentemplatedescription:set_of_slides_nopics'] = 'Enter a description of the tutorial that you would like AI to generate, and it will generate a set of slides for you to use.';
-$string['aigentemplatedescription:keywordstogapfillsfluency'] = 'Enter a list of words (maximum 30) and Poodll will make a short activity for students to practice those words';
+$string['aigentemplatedescription:keywordstogapfillsfluency'] = 'Enter a list of words (maximum 30), the learners language level, an image style, and Poodll will make a short activity for students to practice those words. The activity will have an intro page, a listening gapfill, a typing gapfll and speaking gapfill items.';
 $string['aigentemplatedescription:reading_aic_passagegen'] = 'This will take a topic and learner level and generate a reading passage that will be used in a passage reading and then an audio chat session that is based on the reading passage.';
 $string['aigentemplatedescription:reading_aic_passageupload'] = 'Paste in a reading passage, and 4 short answer questions. These will be used in a passage reading exercise and then an audio chat session that is based on the reading passage.';
 $string['aigentemplatedescription:keywords_to_ws_sc'] = 'Enter 4 - 10 keywords. The keywords will be used to generate a word shuffle and scatter activity. The keywords will also be used to generate a picture of each keyword on a blackboard.';
-$string['aigentemplatedescription:keywords_to_ws_sc_sg'] = 'Enter 4 - 10 keywords. The keywords will be used to generate a set of vocab cards, word shuffle, scatter activity, and space game items.';
+$string['aigentemplatedescription:keywords_to_ws_sc_sg'] = 'Enter 4 - 10 keywords, the language level and an image style. The keywords will be used to generate a set of vocab cards, word shuffle, scatter activity, and space game items. Translations use the native language set in the MiniLesson settings.';
 $string['aigentemplatedescription:dialog_multichoice'] = 'Enter 4 dialogs. They will form 4 multi choice questions where the choice of answer is an image representing the currently playing Dialog. The dialogs are in TTS Dialog format. e.g A) I like toast. [new line]  B) Me too.';
 $string['aigentemplatedescription:image_slides'] = 'Enter 5 image descriptions and an image style to get 5 image slides';
 $string['aigentemplatedescription:choose_best_reply'] = 'Student hears 10 short conversations and must choose the best next reply from the 3 options offered. Each question has a picture. It is based on the Eiken Level 3 English test listening section. You need to enter the  location and situation (usually a problem) for each conversation. eg "two friends at the beach and one has lost their wallet"';
 $string['aigentemplatedescription:fiction_withpics'] = 'An interactive story with pics';
 $string['aigentemplatedescription:fiction_nopics'] = 'An interactive story with no pics, apart from an introduction screen';
 $string['aigentemplatedescription:narrativefiction_withpics'] = 'An interactive fiction item with fewer choices, more story, and pictures.';
-$string['aigentemplatedescription:vocabcards'] = 'A set of vocabulary cards. Enter the list of comma separated words/phrases, and the students\' native language. Cards with the word/phrase, translation, example sentence and a picture will be created.';
+$string['aigentemplatedescription:fiction_addpics'] = 'Use this when the teacher gives an idea or premise for a story: you write the story yourself in Yarn, following the fiction authoring guide, which gives a better story than the generated story templates. The teacher does not need to have a script. You choose the story type, and supply the complete story with picture placeholders, one image prompt per placeholder, an image prompt for the poster, and an image style. The story is used exactly as you wrote it. The template generates the pictures and the poster, and builds 2 items: a content page with the poster, and a fiction item with a picture for every placeholder.';
+$string['aigentemplatedescription:vocabcards'] = 'A set of vocabulary cards. Enter the list of comma separated words/phrases, and the image style. Cards with the word/phrase, translation, example sentence and a picture will be created. Translations use the native language set in the MiniLesson settings.';
 $string['aigentemplatename:youtubefinale_freewrite'] = 'YouTube Finale (listen and free write)';
 $string['aigentemplatedescription:youtubefinale_freewrite'] = 'This is a lesson based on a YouTube video story. A related but simplified story is prepared and comprehension, and a writing activity are built on the story.';
 $string['aigentemplatename:youtubefinale_freespeak'] = 'YouTube Finale (listen and free speak)';
@@ -1060,29 +1198,29 @@ $string['aigentemplatedescription:youtubefinale_freespeak'] = 'This is a lesson 
 $string['aigentemplatename:passagegapfill_generate'] = 'Passage Gapfill (generate passage)';
 $string['aigentemplatedescription:passagegapfill_generate'] = 'Enter a list of keywords, the language level and a topic, AI will generate a passage and a number of "gaps" for students to complete.';
 $string['aigentemplatename:fluency_upload'] = 'Fluency (upload sentences)';
-$string['aigentemplatedescription:fluency_upload'] = 'Create a Fluency item by supplying  up to 10 sentences which students will practice saying aloud. A picture will be generated to go with each sentence in the item.';
+$string['aigentemplatedescription:fluency_upload'] = 'Create a Fluency item by supplying  up to 10 sentences which students will practice saying aloud. A picture in the specified image style will be generated to go with each sentence in the item.';
 $string['aigentemplatename:passagereading_generate'] = 'Passage Reading (generate passage)';
 $string['aigentemplatedescription:passagereading_generate'] = 'Enter a list of keywords, the language level and a topic, AI will generate a reading passage for a read aloud activity.';
 $string['aigentemplatename:freespeaking'] = 'Free Speaking';
-$string['aigentemplatedescription:freespeaking'] = 'A Free Speaking activity about the topic that you choose.';
+$string['aigentemplatedescription:freespeaking'] = 'A Free Speaking activity about the topic that you choose. AI will generate the discuussion question and an associated image to accompany it.';
 $string['aigentemplatename:wordshuffle_generate'] = 'Word Shuffle (generate sentences)';
-$string['aigentemplatedescription:wordshuffle_generate'] = 'Create a Word Shuffle activity by entering 4 - 10 keywords. The keywords will also be used to generate sentences, and a picture to go with each sentence in the shuffle activity.';
+$string['aigentemplatedescription:wordshuffle_generate'] = 'Create a Word Shuffle activity by entering 4 - 10 keywords and the user\'s language level. The keywords will also be used to generate sentences, and a picture in the specified image style to go with each sentence, and a translation of each sentence. Translations use the native language set in the MiniLesson settings.';
 $string['aigentemplatename:wordshuffle_keywords_generate'] = 'Choose the correct word (generate sentences)';
-$string['aigentemplatedescription:wordshuffle_keywords_generate'] = 'Create a choose-the-correct-word activity using a Word Shuffle item. Enter 4 - 10 keywords. The keywords will be used to generate sentences each with a gap and 4 possible word choices. A native language sentence translation and a picture will be generated for each sentence.';
+$string['aigentemplatedescription:wordshuffle_keywords_generate'] = 'Create a choose-the-correct-word activity using a Word Shuffle item. Enter 4 - 10 keywords. The keywords will be used to generate sentences each with a gap and 4 possible word choices. A native language sentence translation and a picture in the specified image style will be generated for each sentence. Translations use the native language set in the MiniLesson settings.';
 $string['aigentemplatename:scatter'] = 'Scatter';
-$string['aigentemplatedescription:scatter'] = 'Enter 4 - 10 keywords/phrases. The keywords/phrases will be used to generate a scatter activity with matching cards translated into the user\'s native language.';
+$string['aigentemplatedescription:scatter'] = 'Enter 4 - 10 keywords/phrases. The keywords/phrases will be used to generate a scatter activity with matching cards translated into the native language set in the MiniLesson settings.';
 $string['aigentemplatename:spacegame'] = 'Space Game';
-$string['aigentemplatedescription:spacegame'] = 'Enter 4 - 10 keywords/phrases. The keywords/phrases will be used to generate a space game activity with definitons in the user\'s native language.';
+$string['aigentemplatedescription:spacegame'] = 'Enter 4 - 10 keywords/phrases. The keywords/phrases will be used to generate a space game activity with definitions in the native language set in the MiniLesson settings.';
 $string['aigentemplatename:multichoice_image'] = 'Multi choice (image choices)';
 $string['aigentemplatedescription:multichoice_image'] = 'An image multi choice question that is created to test comprehension of a passage of text. You need to supply the text passage, user\'s language level, a brief description of the scene/context and an image style';
 $string['aigentemplatename:freewriting'] = 'Free Writing';
-$string['aigentemplatedescription:freewriting'] = 'A Free Writing activity about the specified topic.';
+$string['aigentemplatedescription:freewriting'] = 'A Free Writing activity about the specified topic. AI will generate the question and a picture to accompany it.';
 $string['aigentemplatename:listeninggapfill_generate'] = 'Listening GapFill (generate sentences)';
-$string['aigentemplatedescription:listeninggapfill_generate'] = 'Creates a Listening GapFill activity from a list of keywords (maximum 30).';
+$string['aigentemplatedescription:listeninggapfill_generate'] = 'Creates a Listening GapFill activity from a list of keywords (maximum 30).  A picture in the specified image style will be created to accompany each sentence.';
 $string['aigentemplatename:speakinggapfill_generate'] = 'Speaking GapFill (generate sentences)';
-$string['aigentemplatedescription:speakinggapfill_generate'] = 'Creates a Speaking GapFill activity from a list of keywords (maximum 30).';
+$string['aigentemplatedescription:speakinggapfill_generate'] = 'Creates a Speaking GapFill activity from a list of keywords (maximum 30).  A picture in the specified image style will be created to accompany each sentence.';
 $string['aigentemplatename:typinggapfill_generate'] = 'Typing GapFill (generate sentences)';
-$string['aigentemplatedescription:typinggapfill_generate'] = 'Creates a Typing GapFill activity from a list of keywords (maximum 30).';
+$string['aigentemplatedescription:typinggapfill_generate'] = 'Creates a Typing GapFill activity from a list of keywords (maximum 30). A picture in the specified image style will be created to accompany each sentence.';
 $string['aigentemplatename:gapfill_set'] = 'GapFill Set';
 $string['aigentemplatedescription:gapfill_set'] = 'Creates a full set of Listening, Speaking and Typing GapFills from a list of words (maximum 30).';
 $string['aigentemplatename:audiostory_generate'] = 'Audio Story (generate story)';
@@ -1090,7 +1228,7 @@ $string['aigentemplatedescription:audiostory_generate'] = 'Enter a topic, the le
 $string['aigentemplatename:shadow'] = 'Shadow';
 $string['aigentemplatedescription:shadow'] = 'Enter a YouTube URL or ID and it will be turned into an interactive shadowing exercise.';
 $string['aigentemplatename:listenandspeak_generate'] = 'Listen and Speak (generate sentences)';
-$string['aigentemplatedescription:listenandspeak_generate'] = 'Enter a topic and language level. A Listen and Speak item with  5 sentences will be created.';
+$string['aigentemplatedescription:listenandspeak_generate'] = 'Enter a topic and language level. A Listen and Speak item with 5 sentences will be created. A picture  in the specified image style will be created to accompany each sentence.';
 $string['aigentemplatename:dictation_generate'] = 'Dictation (generate sentences)';
 $string['aigentemplatedescription:dictation_generate'] = 'Enter a topic and language level. A Dictation item with 5 sentences will be created.';
 $string['aigentemplatename:dictationchat_generate'] = 'Dictation Chat (generate sentences)';
@@ -1104,76 +1242,83 @@ $string['aigentemplatedescription:passagegapfill_upload_keywords'] = 'Enter a te
 $string['aigentemplatename:passagereading_upload'] = 'Passage Reading (upload passage)';
 $string['aigentemplatedescription:passagereading_upload'] = 'Upload a passage of text, AI will prepare a passage reading activity from it.';
 $string['aigentemplatename:wordshuffle_upload'] = 'Word Shuffle (upload sentences)';
-$string['aigentemplatedescription:wordshuffle_upload'] = 'Create a Word Shuffle activity by supplying  4 - 10 sentences. A picture will be generated to go with each sentence in the shuffle activity.';
+$string['aigentemplatedescription:wordshuffle_upload'] = 'Create a Word Shuffle activity by supplying  4 - 10 sentences. A picture in the specified image style will be generated to go with each sentence in the shuffle activity.';
 $string['aigentemplatename:listenandspeak_upload'] = 'Listen and Speak (upload sentences)';
-$string['aigentemplatedescription:listenandspeak_upload'] = 'Create a Listen and Speak activity by supplying  up to 5 sentences. A picture will be generated to go with each sentence in the activity.';
+$string['aigentemplatedescription:listenandspeak_upload'] = 'Create a Listen and Speak activity by supplying  up to 5 sentences, and an image style. A picture will be generated to go with each sentence in the activity.';
 $string['aigentemplatename:dictation_upload'] = 'Dictation (upload sentences)';
 $string['aigentemplatedescription:dictation_upload'] = 'Create a Dictation item by supplying  up to 5 sentences.';
 $string['aigentemplatename:dictationchat_upload'] = 'Dictation Chat (upload sentences)';
 $string['aigentemplatedescription:dictationchat_upload'] = 'Create a Dictation Chat item by supplying  up to 5 sentences. A picture will be generated to go with each sentence in the item.';
 $string['aigentemplatename:audiostory_upload'] = 'Audio Story (upload story)';
-$string['aigentemplatedescription:audiostory_upload'] = 'Enter a passage of text as the story. AI will prepare a short narrated slide show with images using text to speech to narrate the story.';
+$string['aigentemplatedescription:audiostory_upload'] = 'Enter a passage of text as the story. AI will prepare a short narrated slide show with images in the specified image style using text to speech to narrate the story.';
 $string['aigentemplatename:fluency_generate'] = 'Fluency (generate sentences)';
-$string['aigentemplatedescription:fluency_generate'] = 'Create a Fluency item of up to 10 sentences by supplying keywords and the user\'s language level. Students will practice saying the sentences aloud. A picture will be generated to go with each sentence in the item.';
+$string['aigentemplatedescription:fluency_generate'] = 'Create a Fluency item of up to 10 sentences by supplying keywords and the user\'s language level. Students will practice saying the sentences aloud. A picture in the specified image style will be generated to go with each sentence in the item.';
 $string['aigentemplatename:typinggapfill_upload'] = 'Typing GapFill (upload sentences)';
-$string['aigentemplatedescription:typinggapfill_upload'] = 'Creates a Typing GapFill by supplying up to 30 sentences. A picture will be generated to go with each sentence in the item.';
+$string['aigentemplatedescription:typinggapfill_upload'] = 'Creates a Typing GapFill by supplying up to 30 sentences. A picture in the specified image style will be generated to go with each sentence in the item.';
 $string['aigentemplatename:speakinggapfill_upload'] = 'Speaking GapFill (upload sentences)';
-$string['aigentemplatedescription:speakinggapfill_upload'] = 'Creates a Speaking GapFill  by supplying up to 30 sentences. A picture will be generated to go with each sentence in the item.';
+$string['aigentemplatedescription:speakinggapfill_upload'] = 'Creates a Speaking GapFill  by supplying up to 30 sentences. A picturein the specified image style will be generated to go with each sentence in the item.';
 $string['aigentemplatename:listeninggapfill_upload'] = 'Listening GapFill (upload sentences)';
-$string['aigentemplatedescription:listeninggapfill_upload'] = 'Creates a Listening GapFill  by supplying up to 30 sentences. A picture will be generated to go with each sentence in the item.';
+$string['aigentemplatedescription:listeninggapfill_upload'] = 'Creates a Listening GapFill  by supplying up to 30 sentences. A picture in the  specfied image style will be generated to go with each sentence in the item.';
 $string['aigentemplatename:reading_speaking_upload'] = 'Reading and Speaking (upload story and keywords)';
-$string['aigentemplatedescription:reading_speaking_upload'] = 'Supply a short text story, and some keywords from the story. AI will prepare a simple text to speech narration, and some reading and speaking activities based on the story.';
+$string['aigentemplatedescription:reading_speaking_upload'] = 'Supply a short text story, and some keywords from the story. AI will prepare a simple text to speech narration, and some reading and speaking activities based on the story. Images will be generated in the specified image style.';
 $string['aigentemplatename:listentothestory_upload'] = 'Listen to the Story (upload story)';
 $string['aigentemplatedescription:listentothestory_upload'] = 'Upload a short story and the learners language level. AI will prepare an narrated audio story with images, and some listening and speaking activities.';
 $string['aigentemplatename:wordshuffle_upload_markup'] = 'Word Shuffle (upload with markup)';
 $string['aigentemplatedescription:wordshuffle_upload_markup'] = 'Create a Word Shuffle item by supplying:
  i)  4 - 10 sentences already marked up with shuffle words, hints and distractors.
 ii) The same sentences with no mark up, hints or distractors.
- A picture will be generated to go with each sentence in the Word Shuffle item.';
+iii) An image style
+ A picture in the specified image style will be generated to go with each sentence in the Word Shuffle item.';
 $string['aigentemplatename:listeninggapfill_upload_markup'] = 'Listening GapFill (upload sentences with markup)';
 $string['aigentemplatedescription:listeninggapfill_upload_markup'] = 'Create a Listening GapFill item by supplying:
  i)  1 - 30 sentences already marked up with gap words and hints (optional).
 ii) The same sentences with no mark up or hints.
- A picture will be generated to go with each sentence in the Listening GapFill item.';
+iii) An image style
+ A picture in the specified image style will be generated to go with each sentence in the  Listening GapFill item.';
 $string['aigentemplatename:speakinggapfill_upload_markup'] = 'Speaking GapFill (upload sentences with markup)';
 $string['aigentemplatedescription:speakinggapfill_upload_markup'] = 'Create a Speaking GapFill item by supplying:
  i)  1 - 30 sentences already marked up with gap words and hints (optional).
 ii) The same sentences with no mark up or hints.
- A picture will be generated to go with each sentence in the Speaking GapFill item.';
+iii) An image style
+ A picture in the specified image style will be generated to go with each sentence in the Speaking GapFill item.';
 $string['aigentemplatename:typinggapfill_upload_markup'] = 'Typing GapFill (upload sentences with markup)';
 $string['aigentemplatedescription:typinggapfill_upload_markup'] = 'Create a Typing GapFill item by supplying:
  i)  1 - 30 sentences already marked up with gap words and hints (optional).
 ii) The same sentences with no mark up or hints.
- A picture will be generated to go with each sentence in the Typing GapFill item.';
+iii) An image style
+ A picture will be generated in the specified image style to go with each sentence in the Typing GapFill item.';
 $string['aigentemplatename:listenandspeak_upload_markup'] = 'Listen and Speak (upload sentences with markup)';
-$string['aigentemplatedescription:listenandspeak_upload_markup'] = 'Create a Listen and Speak activity by supplying  up to 5 sentences. Optionally also supply  "correct response"s and "display sentence"s, for where the audio prompt to the user differs to what they see or are expected to say in response. A picture will be generated to go with each sentence in the activity.';
+$string['aigentemplatedescription:listenandspeak_upload_markup'] = 'Create a Listen and Speak activity by supplying  up to 5 formatted sentences. Optionally  in the formatted sentences also supply  "correct response"s and "display sentence"s, for where the audio prompt to the user differs to what they see or are expected to say in response. A picture in the specifieed image style will be generated to go with  each sentence from the "clean" unformatted sentence.';
 $string['aigentemplatename:spacegame_upload'] = 'Space Game (upload)';
 $string['aigentemplatedescription:spacegame_upload'] = 'Enter up to ten matching pairs that will be used to make a Space Game item where students will match the pair by shooting the correct alien.';
 $string['aigentemplatename:scatter_upload'] = 'Scatter (upload)';
 $string['aigentemplatedescription:scatter_upload'] = 'Enter up to ten matching pairs that will be used to make a Scatter item where students will match the pairs by tapping the correct cards.';
 $string['aigentemplatename:vocabcards_upload_markup'] = 'Vocab Cards (upload with markup)';
-$string['aigentemplatedescription:vocabcards_upload_markup'] = 'A set of vocabulary cards. Each card can have up to 3 lines of text: usually keyword | keyword-translation | keyword-examplesentence.
-An image will be generated for each card ';
+$string['aigentemplatedescription:vocabcards_upload_markup'] = 'A set of vocabulary cards. Each card can have up to 4 lines of text: usually keyword | keyword-translation | keyword-examplesentence|keyword-examplesentence-translation
+An image will be generated for each card based on the keyword and the image style specified';
 $string['aigentemplatename:fluency_upload_markup'] = 'Fluency (upload sentences with markup)';
-$string['aigentemplatedescription:fluency_upload_markup'] = 'Create a Fluency item by supplying  up to 10 sentences which students will practice saying aloud. A picture will be generated to go with each sentence in the item.';
+$string['aigentemplatedescription:fluency_upload_markup'] = 'Create a Fluency item by supplying  up to 10 formatted sentences which students will practice saying aloud. A picture will be generated to go with each sentence in the item from the specified image style and unformatted sentences.';
 $string['aigentemplatename:freewriting_upload'] = 'Free Writing (Upload question)';
-$string['aigentemplatedescription:freewriting_upload'] = 'Enter a question or topic about which students will write.';
+$string['aigentemplatedescription:freewriting_upload'] = 'Enter a question or topic about which students will write. A freewriting item and an accompanying image will be generated.';
 $string['aigentemplatename:freespeaking_upload'] = 'Free Speaking (upload question)';
-$string['aigentemplatedescription:freespeaking_upload'] = 'Enter a question or topic about which students will speak.';
+$string['aigentemplatedescription:freespeaking_upload'] = 'Enter a question or topic about which students will speak. A free speaking activity and an accompanying image will be generated.';
 $string['aigentemplatename:audiochat_generate'] = 'Audio Chat (Generate question)';
 $string['aigentemplatedescription:audiochat_generate'] = 'Enter a topic and the user\'s language level, AI will generate a discussion question suitable for the learner to chat about.';
 $string['aigentemplatename:audiochat_upload'] = 'Audio Chat (Upload discussion question)';
 $string['aigentemplatedescription:audiochat_upload'] = 'Enter a discussion question that will be used in an Audio Chat for the user and AI to talk about';
 $string['aigentemplatename:grammar_slides'] = 'Grammar Explanation Slides';
-$string['aigentemplatedescription:grammar_slides'] = 'This template will create a set of slides to teach the specified grammar point. The target language of the MiniLesson will be used for examples, and the instruction language you specify will the language used to do the explaining.';
+$string['aigentemplatedescription:grammar_slides'] = 'This template will create a set of slides to teach the specified grammar point. The target language of the MiniLesson will be used for examples, and the native language set in the MiniLesson settings will be used to do the explaining.';
 $string['aigentemplatename:grammar_choosewords_v1'] = 'Grammar Lesson (slides+choose words V1)';
-$string['aigentemplatedescription:grammar_choosewords_v1'] = 'Provide the grammar point, up to 6 keywords/keyphrases and the language of instruction. A  lesson with a slides tutorial, choose-the-word item and type-the-word item will be created. Use this template for grammar points where the correct choice of word/phrase is important. (e.g \'by\' or \'until\'). For this template the choose-the-word choices should be the same for each sentence. ';
+$string['aigentemplatedescription:grammar_choosewords_v1'] = 'Provide the grammar point, up to 6 keywords/keyphrases. The native language set in the MiniLesson settings is used for explanations. A  lesson with a slides tutorial, choose-the-word item and type-the-word item will be created. Use this template for grammar points where the correct choice of word/phrase is important. (e.g \'by\' or \'until\'). For this template the choose-the-word choices should be the same for each sentence. ';
 $string['aigentemplatename:grammar_shufflewords'] = 'Grammar Lesson (slides+shuffle words)';
-$string['aigentemplatedescription:grammar_shufflewords'] = 'Provide the grammar point, keywords and the language of instruction and a lesson with a slides tutorial and shuffle-the-words item and type-the-word item will be created. Use this template for grammar points where word order in the sentence is important. It is also a generally useful template because it can be used with most sets of sentences.';
+$string['aigentemplatedescription:grammar_shufflewords'] = 'Provide the grammar point and keywords, and a lesson with a slides tutorial and shuffle-the-words item and type-the-word item will be created. Use this template for grammar points where word order in the sentence is important. It is also a generally useful template because it can be used with most sets of sentences. The native language set in the MiniLesson settings is used for explanations.';
 $string['aigentemplatename:grammar_choosewords_v2'] = 'Grammar Lesson (slides+choose words V2)';
-$string['aigentemplatedescription:grammar_choosewords_v2'] = 'Provide the grammar point, language level, and the language of instruction. A  lesson with a slides tutorial, choose-the-word item and type-the-word item will be created (6 sentences each). Use this template for grammar points where phrase-composition/word-form is important (e.g  comparatives  "more X" vs "Xer"). For this template choose-the-word choices should be different for each sentence. ';
+$string['aigentemplatedescription:grammar_choosewords_v2'] = 'Provide the grammar point and language level. The native language set in the MiniLesson settings is used for explanations. A  lesson with a slides tutorial, choose-the-word item and type-the-word item will be created (6 sentences each). Use this template for grammar points where phrase-composition/word-form is important (e.g  comparatives  "more X" vs "Xer"). For this template choose-the-word choices should be different for each sentence. ';
+$string['aigentemplatename:cefr_a2'] = 'CEFR A2 Template';
+$string['aigentemplatedescription:cefr_a2'] = 'Enter 4 - 10 keywords, a passage of text that uses those keywords, some questions and topic for an audio chat, and an image style. Those inputs will be used to generate a set of vocab cards, word shuffle, listen and speak , audio chat and free speaking. Translations use the native language set in the MiniLesson settings.';
 $string['generationnotice'] = '<p>NB: After pressing save changes, please be patient. It may take a minute or two to complete</p>';
 $string['processaigentask'] = 'Process AI template generation task';
+$string['oauthresourcedescription'] = 'this site\'s MiniLesson AI generation tools - creating and managing MiniLessons on your behalf';
 $string['successful'] = 'Successful';
 $string['col:progress'] = 'Progress';
 $string['col:timecreated'] = 'Scheduled On';
@@ -1188,7 +1333,7 @@ $string['mcimageresponses'] = '(optional) Upload image files to be displayed wit
 $string['mcaudioresponses'] = '(optional) Upload audio files to match the answer option. The audio file will be used instead of TTS audio. The audio file name should match the answer number, eg. 1.mp3 or 2.mp3.  Make sure to also choose to use audio in the display options for this question.';
 $string['multiaudioaudioresponses'] = '(optional) Upload audio files to match the answer option. The audio file will be used instead of TTS audio. The audio file name should match the answer number, eg. 1.mp3 or 2.mp3.';
 $string['audiochat_instructions'] = 'Instructions for AI';
-$string['audiochat_instructions_instructions'] = 'The instructions are a template that combines with the AI role, AI voice, topic, AI custom data 1, AI custom data 2, student submission (on free writing or free speaking) and student native language to create the instructions passed to AI. You can use the following variables in the instructions: {ai role}, {ai voice}, {target language}, {native language}, {ai data1}, {ai data2}, {student submission} and {topic}. The default instructions are usually fine. But you can change them if you have a different use case.';
+$string['audiochat_instructions_instructions'] = 'The instructions are a template that combines with the AI role, AI voice, topic, AI custom data 1, AI custom data 2, student submission (on free writing or free speaking) and student native language to create the instructions passed to AI. You can use the following variables in the instructions: {ai role}, {ai voice}, {target language}, {native language}, {feedback language}, {ai data1}, {ai data2}, {student submission} and {topic}. {feedback language} is the native language, or easy target language if the native language is the target language. The default instructions are usually fine. But you can change them if you have a different use case.';
 $string['audiochat_role'] = 'AI Role';
 $string['audiochat_voice'] = 'AI Voice';
 $string['audiochat_role_default'] = 'A helpful language teacher';
@@ -1221,11 +1366,11 @@ $string['gradebywordcount'] = "This activity was graded based on the number of w
 $string['audiochat_gradeexplanation'] = 'Grade Explanation';
 $string['audiochat_conversation'] = 'Conversation';
 $string['audiochat_gradeinstructions'] = 'Feedback/Scoring Instructions for AI';
-$string['audiochat_gradeinstructions_instructions'] = 'The score/feedback instructions should tell how to build feedback, and a "score" from 0 - 100. They are a template that will be merged with the AI role, AI voice, topic, AI custom data 1, AI custom data 2,student submission, and student native language to create the instructions. You can use the following variables in the instructions: {ai role}, {ai voice}, {target language}, {native language}, {ai data1}, {ai data2}, {student submission} and {topic}. If left empty the grade will be calculated using the total words spoken over the target word count.';
+$string['audiochat_gradeinstructions_instructions'] = 'The score/feedback instructions should tell how to build feedback, and a "score" from 0 - 100. They are a template that will be merged with the AI role, AI voice, topic, AI custom data 1, AI custom data 2,student submission, and student native language to create the instructions. You can use the following variables in the instructions: {ai role}, {ai voice}, {target language}, {native language}, {feedback language}, {ai data1}, {ai data2}, {student submission} and {topic}. Use {feedback language} to set the language of the feedback. It is the native language, or easy target language if the native language is the target language.';
 $string['audiochat_aidata1'] = 'Custom AI Data 1';
 $string['audiochat_aidata2'] = 'Custom AI Data 2';
 $string['audiochat_autosend'] = 'Auto Send';
-$string['audiochat_autosend_desc'] = 'If checked, turn-detection is automatic. The AI will automatically send the student audio when it detects that they have stopped speaking. For young or slower speakers that might be frustrating. If unchecked, audio is submitted when the microphone stop button is pressed. Auto send can also be toggled during the activity.';
+$string['audiochat_autosend_desc'] = 'If checked, turn-detection is automatic. The AI will automatically send the student audio when it detects that they have stopped speaking. For young or slower speakers that might be frustrating. If unchecked, audio is submitted when the microphone stop button is pressed.';
 $string['clicktosend'] = 'click to send';
 $string['cantchat'] = 'Chat is NOT available. To use this item type you must have a valid {$a} key set in the MiniLesson activity admin settings.';
 
@@ -1287,21 +1432,21 @@ $string['defaultnativelanguage'] = "Default native language";
 $string['audiochat:instructionsprompt1'] = 'Open discussion - requires a topic';
 $string['audiochat:instructionsprompt2'] = 'Discussing a picture - requires a picture description (topic) and questions (ai data1)';
 $string['audiochat:instructionsprompt3'] = 'Discussing a passage - requires a passage (topic) and questions (ai data1)';
-$string['audiochat:instructionsprompt_dec1'] = "You are {ai role}. Your name is {ai voice}. You are teaching {target language}. The student is a native speaker of {native language}. Today the discussion topic is: {topic}. Please discuss it with your student. Speak simply and slowly. Your responses should be brief. Your aim is to give the student opportunity to speak. Explain words and concepts in the student's native language if they do not understand.";
-$string['audiochat:instructionsprompt_dec2'] = 'You are {ai role}. Your name is {ai voice}. You are teaching {target language}. The student is a native speaker of {native language}. The student is looking at a picture the depicts the following scene: "{topic}"
+$string['audiochat:instructionsprompt_dec1'] = "You are {ai role}. Your name is {ai voice}. You are teaching {target language}. The student is learning to speak {target language}. Today the discussion topic is: {topic}. Please discuss it with your student. Speak simply and slowly. Your responses should be brief. Your aim is to give the student opportunity to speak. Explain words and concepts in the student's native language if they do not understand.";
+$string['audiochat:instructionsprompt_dec2'] = 'You are {ai role}. Your name is {ai voice}. You are teaching {target language}. The student is learning to speak {target language}. The student is looking at a picture the depicts the following scene: "{topic}"
 
 Your task is to ask the student the following questions, one at a time: {ai data1}
 
 Speak simply and slowly. Your responses should be brief. Do not comment on the content of their response or if it was correct. But help them if they did not understand your question. When the student has answered all the questions, thank them and tell them to "press the end button."';
-$string['audiochat:instructionsprompt_dec3'] = 'You are {ai role}. Your name is {ai voice}. You are teaching {target language}. The student is a native speaker of {native language}. The student has just read the following passage: "{topic}"
+$string['audiochat:instructionsprompt_dec3'] = 'You are {ai role}. Your name is {ai voice}. You are teaching {target language}. The student is learning to speak {target language}. The student has just read the following passage: "{topic}"
 
 You task is to ask the student the following questions, one at a time: {ai data1}
 
 Speak simply and slowly. Your responses should be brief. Do not comment on the content of their response or if it was correct. But help them if they did not understand your question. When the student has answered all the questions, thank them and tell them to "press the end button."';
 $string['audiochat:feedbackprompt1'] = 'Open Discussion';
 $string['audiochat:feedbackprompt2'] = 'Discussion with questions - requires points and questions (ai data1)';
-$string['audiochat:feedbackprompt_dec1'] = "For the score consider the following criteria: relevance to topic: '{topic}', fluency, and vocabulary usage. For feedback it should be simple, and in the student native language: {native language}.";
-$string['audiochat:feedbackprompt_dec2'] = "Give 25 points for each correct answer to a question that was answered by the student. Give 0 points for incorrect answers. Give the student feedback on their use of language, and on their answers. Give feedback in the student native language: {native language}. These are the questions: {ai data1}";
+$string['audiochat:feedbackprompt_dec1'] = "For the score consider the following criteria: relevance to topic: '{topic}', fluency, and vocabulary usage. For feedback it should be simple, and in {feedback language}.";
+$string['audiochat:feedbackprompt_dec2'] = "Give 25 points for each correct answer to a question that was answered by the student. Give 0 points for incorrect answers. Give the student feedback on their use of language, and on their answers. Give feedback in {feedback language}. These are the questions: {ai data1}";
 
 $string['hidecorrection'] = 'Hide corrections';
 $string['showgrade'] = "Show Grade";
@@ -1354,6 +1499,8 @@ $string['enablelessonbank_details'] = 'Enable Lesson Bank';
 $string['lessonbankurl'] = 'Lesson Bank URL';
 $string['lessonbankurl_details'] = 'Lesson Bank URL';
 $string['notconfigured'] = 'Lesson Bank URL not configured';
+$string['lessonbank:badresponse'] = 'The lesson bank did not return a usable response.';
+$string['lessonbank:loadmoreerror'] = 'Could not load more lessons from the lesson bank: {$a}';
 
 $string['hideitemscores'] = 'Hide All Results';
 $string['shuffleanswer'] = 'Shuffle Answer';
@@ -1387,6 +1534,10 @@ $string['templateagentonly_help'] = 'If set to Yes, this template is hidden from
 $string['hideanswertext'] = 'Hide Answer Text';
 $string['hideanswertext_detail'] = 'When using images or audio as answers, check this option to hide the answer text from the
 student. The answer text will be used when displaying results';
+$string['hideanswer_abcd'] = 'Show A,B,C,D in place of text';
+$string['hidequestiontext'] = 'Hide Question Text';
+$string['hidequestion_no'] = 'No - show the question';
+$string['hidequestion_yes'] = 'Yes - hide the question';
 
 $string['answerlayout'] = "Answer Layout";
 $string['twocolumn'] = "2 Column";
@@ -1397,6 +1548,13 @@ $string['audiochat_student_submission'] = 'Student Submission';
 
 $string['translatetoimport'] = 'Translate to import';
 $string['nativelang'] = 'Learner\'s Native Language';
+$string['nativelang_details'] = 'The learner\'s first language. AI uses it for feedback, and for definitions and translations when it generates items.';
+$string['nativelang_help'] = 'The learner\'s first language. AI uses it for feedback, and for definitions and translations when it generates items. If it is not set, or is the same as the target language, AI uses easy target language instead.';
+$string['nativetranslation'] = 'Native Language Translation';
+$string['translatetext'] = 'Translate this text';
+$string['translating'] = 'Translating ...';
+$string['nativetranslation_details'] = 'When enabled certain item types will allow learners to translate text into their native language. These include: Fiction, TTS Dialog, and multichoice feedback.';
+$string['nativetranslation_help'] = 'When enabled certain item types will allow learners to translate text into their native language. These include: Fiction, TTS Dialog, and multichoice feedback.';
 $string['audioavatar'] = 'Audio Avatar';
 $string['audiochat_student_submission_instructions'] = 'If applicable set a Free Writing or Free Speaking item from earlier in the lesson. The transcript of the students submission can be passed into the AI prompt as context variable {student submission}. ';
 $string['aicontextheading'] = 'AI Context Data';
@@ -1411,10 +1569,22 @@ $string['presentationmode'] = 'Presentation Mode';
 $string['presentationmode_plain'] = 'Plain';
 $string['presentationmode_mobile_chat'] = 'Mobile Chat';
 $string['presentationmode_storymode'] = 'Story Mode';
+$string['presentationmode_immersivedark'] = 'Immersive Dark';
+$string['presentationmode_immersivebright'] = 'Immersive Bright';
+$string['presentationmode_immersivepaper'] = 'Immersive Paper';
+
+$string['fiction_start'] = 'Start';
+$string['fiction_restart'] = 'Restart';
+$string['fiction_mute'] = 'Mute sounds';
+$string['fiction_unmute'] = 'Unmute sounds';
+$string['fiction_translate'] = 'Show translation';
+$string['fiction_history'] = 'Show history';
+$string['fiction_history_close'] = 'Close history';
+$string['fiction_readaloud'] = 'Read aloud button';
+$string['fiction_readaloud_details'] = 'If checked, each message in the story will have a button underneath it which reads it aloud.';
+$string['fiction_readaloudaria'] = 'Read this text aloud';
 
 $string['fiction:syntaxcheckbutton'] = 'Syntax Check';
-$string['fiction:taptotranslate'] = 'Enable tap to translate';
-$string['fiction:taptotranslate_desc'] = 'If enabled, a translate icon appears in the lower right of each story text node. Tapping it translates that text into the learner\'s native language and shows the translation directly beneath the text. (Requires a browser with on-device translation support. i.e Chrome.)';
 $string['fiction:taptranslatearia'] = 'Translate this text';
 $string['yarnsyntaxok'] = 'Yarn Syntax Ok';
 $string['yarnsyntaxnotok'] = 'Yarn Syntax Not Ok';
@@ -1426,9 +1596,18 @@ $string['grade_student_submission_desc'] = 'Requests to MiniLesson for AI to gra
 $string['cloudpoodll'] = 'Cloud Poodll';
 $string['choosenativelanguageinstructions'] = 'Set your native language here. It may be used to provide feedback and help in the activity.';
 $string['downloadtranslationmodel'] = 'Download Translation Model';
-$string['downloadtranslationmodel_desc'] = 'This story uses translation features. Would you like to download the translation model? (This is a one-time download)';
+$string['downloadtranslationmodel_desc'] = 'This item uses translation features. Would you like to download the translation model? (This is a one-time download)';
 $string['download'] = 'Download';
 $string['downloadingtranslator'] = 'Downloading translator: {$a}%';
+$string['fiction:translating'] = 'Translating ...';
+$string['ttsdialog:translating'] = 'Translating ...';
+$string['ttsdialog:back'] = 'Previous line';
+$string['ttsdialog:forward'] = 'Next line';
+$string['ttsdialog:playpause'] = 'Play / pause';
+$string['ttsdialog:stop'] = 'Stop';
+$string['ttsdialog:translate'] = 'Translate this line';
+$string['ttsdialog:playline'] = 'Play this line';
+$string['ttsdialog:speed'] = 'Toggle playback speed';
 $string['customlayout'] = 'Custom Layout';
 $string['customkeys'] = 'Custom Virtual Keys';
 $string['customkeys_help'] = 'Add space separated list of keys for the virtual keyboard. E.g. "à â æ ç"';
@@ -1445,8 +1624,7 @@ $string['generatelessonitem_desc'] = 'Generate a lesson or lesson items using AI
 $string['generate'] = 'Generate';
 
 $string['audiochatstudent'] = 'Student';
-//$string['audiochataiassistant'] = 'AI Assistant';
-$string['audiochataiassistant'] = 'Gustave';
+$string['audiochataiassistant'] = 'AI Assistant';
 $string['targetwordcount_instructions'] = 'If target word count is greater than 0 then students will be penalized to the extent that their
 total word count is less than the target word count';
 
@@ -1488,3 +1666,131 @@ $string['subscription'] = 'Subscription';
 $string['thirty_days'] = '30 Days';
 $string['threehundredsixtyfive_days'] = '365 Days';
 $string['video'] = 'Video';
+
+// Chat agent.
+$string['chatagent'] = 'Assistant';
+$string['chatagent_tabhelp'] = 'Build this lesson by chatting with an AI assistant';
+$string['chatagent_context'] = 'You are working on one lesson only: the MiniLesson "{$a->lesson}" '
+    . '(cmid {$a->cmid}) in the course "{$a->course}" (courseid {$a->courseid}). It currently has '
+    . '{$a->itemcount} items. Pass cmid {$a->cmid} to every tool that writes, and do not call '
+    . 'aigen_list_minilessons or list_courses to find this lesson - you already have it. You may read '
+    . 'another lesson if the teacher asks you to reuse one as a model, but every change goes to '
+    . 'cmid {$a->cmid}: writes aimed anywhere else are rejected.';
+$string['chatagent_declined'] = 'The teacher declined this action. Do not repeat it. Ask what they would '
+    . 'like to change, or offer an alternative.';
+$string['chatagent_error_auth'] = 'The AI assistant could not sign in to the AI service. Check the Gemini '
+    . 'API key in the MiniLesson settings.';
+$string['chatagent_error_connection'] = 'The AI assistant could not reach the AI service. Check the '
+    . 'server\'s internet connection and any proxy settings, then try again.';
+$string['chatagent_error_nokey'] = 'The AI assistant is not set up: no Gemini API key has been entered in '
+    . 'the MiniLesson settings.';
+$string['chatagent_error_nopending'] = 'There is nothing waiting to be approved. The conversation may have '
+    . 'moved on since this was shown.';
+$string['chatagent_error_quota'] = 'The AI service quota has run out. Try again later, or raise the quota '
+    . 'in Google AI Studio.';
+$string['chatagent_error_stuck'] = 'The assistant used too many steps without finishing. Nothing was lost '
+    . '- try asking again, more specifically.';
+$string['chatagent_error_transport'] = 'The AI service sent a reply that could not be read. Try again.';
+$string['chatagent_error_unknown'] = 'The AI service could not complete that request. Try again.';
+$string['chatagent_error_cp_auth'] = 'The AI assistant could not sign in to Cloud Poodll. Check the Poodll '
+    . 'API user and secret in the MiniLesson settings.';
+$string['chatagent_error_cp_busy'] = 'The AI service is busy. Wait a minute or two and try again.';
+$string['chatagent_error_cp_connection'] = 'The AI assistant could not reach Cloud Poodll. Check the '
+    . 'server\'s internet connection and any proxy settings, then try again.';
+$string['chatagent_error_cp_licence'] = 'This site\'s Poodll subscription does not cover the AI assistant. '
+    . 'Check that the subscription is current, that it includes MiniLesson, and that this site\'s address is '
+    . 'registered with Poodll.';
+$string['chatagent_error_cp_nocredentials'] = 'The AI assistant is not set up: no Poodll API user and '
+    . 'secret have been entered in the MiniLesson settings.';
+$string['chatagent_error_cp_notsupported'] = 'Cloud Poodll does not offer the AI assistant yet. Try again '
+    . 'later, or switch the Assistant to the site\'s own Gemini API key in the meantime.';
+$string['chatagent_error_cp_quota'] = 'Today\'s AI assistant allowance for this site\'s Poodll account has '
+    . 'been used up. It resets at midnight UTC.';
+$string['chatagent_replay_preamble'] = 'This conversation continues an earlier session that the AI service '
+    . 'no longer holds. Here is what was said, oldest first. Continue from where it left off, and do '
+    . 'not repeat work that is already done.';
+$string['chatagent_task_cleanup'] = 'Clean up old assistant conversations';
+$string['privacy:path:chatagent'] = 'Assistant conversations';
+$string['privacy:metadata:chatagentconvtable'] = 'Assistant conversations a teacher has had about a lesson.';
+$string['privacy:metadata:chatagentconv:userid'] = 'The teacher who had the conversation.';
+$string['privacy:metadata:chatagentconv:cmid'] = 'The lesson the conversation was about.';
+$string['privacy:metadata:chatagentconv:interactionid'] = 'The AI provider\'s reference for the conversation history it holds.';
+$string['privacy:metadata:chatagentconv:pendingargs'] = 'The details of an action the assistant proposed and is waiting to have approved.';
+$string['privacy:metadata:chatagentconv:timemodified'] = 'When the conversation was last active.';
+$string['privacy:metadata:chatagentmsgtable'] = 'The messages making up an assistant conversation.';
+$string['privacy:metadata:chatagentmsg:role'] = 'Whether the message came from the teacher, the assistant, or a tool the assistant used.';
+$string['privacy:metadata:chatagentmsg:content'] = 'The text of the message.';
+$string['privacy:metadata:chatagentmsg:attachments'] = 'A record of any files the teacher attached to the message.';
+$string['privacy:metadata:chatagentmsg:timecreated'] = 'When the message was sent.';
+$string['privacy:metadata:gemini'] = 'To answer, the assistant sends the conversation to the Gemini API, using the API key the site has configured. The conversation is held in that Google project according to its own retention settings.';
+$string['privacy:metadata:gemini:prompts'] = 'What the teacher typed, and the assistant\'s replies.';
+$string['privacy:metadata:gemini:attachments'] = 'Any documents or images the teacher attached.';
+$string['privacy:metadata:cloudpoodllcom:chatagentprompts'] = 'Under the Cloud Poodll provider, the assistant conversation: what the teacher typed and the assistant\'s replies. Cloud Poodll passes it to the Gemini API in Poodll\'s own Google project, where it is held according to that project\'s retention settings.';
+$string['privacy:metadata:cloudpoodllcom:chatagentattachments'] = 'Under the Cloud Poodll provider, any documents or images the teacher attached to the assistant conversation.';
+$string['chatagent_error_attachmenttoobig'] = 'The file "{$a->name}" is {$a->size} MB, and the assistant accepts attachments up to {$a->max} MB. Try a shorter extract, just the pages you need, or split it across two messages. (Exported lessons in .json format have no size limit here.)';
+$string['chatagent_error_emptymessage'] = 'Type a message, or attach a file, before sending.';
+$string['chatagent_error_noconversation'] = 'That conversation could not be opened. Reload the page and try again.';
+$string['chatagent_error_toomanyturns'] = 'You have reached the limit of {$a} assistant messages an hour. Try again shortly.';
+$string['chatagent_error_unavailable'] = 'The assistant is not available on this site.';
+$string['chatagent_settings'] = 'AI Assistant';
+$string['chatagent_settings_details'] = 'The AI Assistant lets teachers build a lesson by describing it in a chat panel, attaching a PDF or an image if they have one. It reaches the AI through Cloud Poodll, using the site\'s Poodll API user and secret and the site\'s Poodll subscription, or through the site\'s own Gemini API key (set on the "Other API keys" page), in which case Google bills the site directly. Until the chosen provider has its credentials, the agent stays hidden however these settings are left.';
+$string['chatagentenabled'] = 'Enable the AI Assistant';
+$string['chatagentenabled_details'] = 'Show the Assistant tab to teachers who can use AI generation. Has no effect until the chosen provider has its credentials: a Poodll API user and secret for Cloud Poodll, or a Gemini API key for the site\'s own key.';
+$string['chatagentprovider'] = 'AI provider';
+$string['chatagentprovider_details'] = 'Where the AI Assistant sends its requests. Cloud Poodll needs nothing beyond the site\'s Poodll credentials, and each Poodll account has a daily allowance shared by all its sites. With the site\'s own Gemini API key, Google bills the site and the key\'s own quota applies. Either way the server must be able to reach the provider over the internet, through the site\'s proxy settings if it has them.';
+$string['chatagentprovider_cloudpoodll'] = 'Cloud Poodll (uses the site\'s Poodll subscription)';
+$string['chatagentprovider_ownkey'] = 'This site\'s own Gemini API key';
+$string['chatagentmodel'] = 'Model';
+$string['chatagentmodel_details'] = 'The Gemini model to use with the site\'s own key. Free text, so you can move to a newer model without waiting for a plugin update. Cloud Poodll chooses its own model.';
+$string['chatagentmaxtoolcalls'] = 'Actions per message';
+$string['chatagentmaxtoolcalls_details'] = 'How many things the assistant may do in answering one message before it is stopped. Reaching this limit usually means it is going round in circles.';
+$string['chatagentmaxturns'] = 'Messages per hour';
+$string['chatagentmaxturns_details'] = 'How many messages one teacher may send in an hour, across all their conversations.';
+$string['chatagentmaxattachmentmb'] = 'Largest attachment (MB)';
+$string['chatagentmaxattachmentmb_details'] = 'The biggest PDF or image a teacher may attach to a message. This is a cost control, not a technical limit: the AI service itself accepts far larger files (up to 50 MB for a PDF), so raise this if your teachers work from real lesson documents - the trade is the tokens they cost, not whether they work. Exported lessons (.json) are not affected, because their embedded media is stripped out before anything is sent.';
+$string['chatagentretaindays'] = 'Keep conversations for (days)';
+$string['chatagentretaindays_details'] = 'Conversations untouched for this long are deleted, along with anything attached to them. They are working notes, not part of the lesson.';
+$string['chatagent_additems'] = 'Add an item';
+$string['chatagent_approvalprompt'] = 'The assistant would like to make a change to your lesson.';
+$string['chatagent_approvaldetails'] = 'Show exactly what it will send';
+$string['chatagent_approve'] = 'Go ahead';
+$string['chatagent_decline'] = 'Not yet';
+$string['chatagent_conversation'] = 'Conversation with the assistant';
+$string['chatagent_cronwarning'] = 'Scheduled tasks do not appear to be running on this site. The assistant can still write items directly, but anything it generates in the background will stay queued and never finish.';
+$string['chatagent_generating'] = 'Generating items in the background. This can take a few minutes.';
+$string['chatagent_inputlabel'] = 'Message to the assistant';
+$string['chatagent_introheading'] = 'Build this lesson by describing it';
+$string['chatagent_introbody'] = 'Tell the assistant what you want and it will plan the items, show you the plan, and add them once you agree. You can attach a PDF, an image, or an exported minilesson (JSON) to work from.';
+$string['chatagent_example1'] = 'Add three multiple choice questions about ordering coffee, for beginners.';
+$string['chatagent_example2'] = 'Turn the attached worksheet into items, keeping the questions as they are.';
+$string['chatagent_example3'] = 'Use one of the vocabulary templates to make cards from these words: menu, waiter, bill.';
+$string['chatagent_itemcount'] = '{$a} items in this lesson';
+$string['chatagent_jobfinished'] = 'The background generation finished with status: {$a}.';
+$string['chatagent_noitemsyet'] = 'This lesson has no items yet.';
+$string['chatagent_placeholder'] = 'Describe what you would like to add...';
+$string['chatagent_send'] = 'Send';
+$string['chatagent_startover'] = 'Start over';
+$string['chatagent_startoverconfirm'] = 'This deletes the conversation and anything you attached to it. The items already added to the lesson are not affected.';
+$string['chatagent_thinking'] = 'Thinking...';
+$string['chatagent_working'] = 'Working...';
+$string['chatagent_files'] = 'Files for this conversation';
+$string['chatagent_fileshelp'] = 'Add a PDF, an image, or an exported lesson (.json) for the assistant to work from. Removing a file here takes it out of the conversation from your next message on.';
+$string['error:unknownfield'] = 'Field "{$a->field}" is not a field of the {$a->type} item type. Its content would have been lost, so the item was rejected.{$a->suggestion}';
+$string['error:unknownfieldsuggestion'] = ' Did you mean "{$a}"?';
+$string['chatagent_entry_desc'] = 'Describe the lesson you want and build it by chatting with an assistant.';
+$string['chatagent_openassistant'] = 'Build with the assistant';
+$string['chatagent_waitingonyou'] = 'waiting for you';
+$string['event:chatagent_action_performed'] = 'AI Assistant action performed';
+$string['privacy:metadata:chatagentmetrictable'] = 'Measurements of how the assistant behaved, one row per request it made to the AI service.';
+$string['privacy:metadata:chatagentmetric:conversationid'] = 'The conversation the request belonged to.';
+$string['privacy:metadata:chatagentmetric:toolname'] = 'The action the assistant took, if any.';
+$string['privacy:metadata:chatagentmetric:timecreated'] = 'When the request was made.';
+$string['chatagent_refreshitems'] = 'Refresh the item list';
+$string['chatagent_attachedfile'] = 'The teacher attached a file named "{$a}". Its contents follow.';
+$string['chatagent_attachedjson'] = 'The teacher attached a JSON file named "{$a}". Its contents follow, with any embedded media stripped out. If it is an exported MiniLesson, treat it as the shape to reuse: keep each item\'s type, layout and options, and rewrite only the wording for the new topic.';
+$string['chatagent_attachedjsonempty'] = 'The teacher attached a JSON file named "{$a}", but it could not be read.';
+$string['chatagent_attachedjsontrimmed'] = 'The teacher attached a JSON file named "{$a->name}". It was too large to include in full even with its media stripped out, so only the first {$a->max} MB of it follows. Say so, and ask the teacher to send a smaller export.';
+$string['chatagent_interrupted'] = 'The last reply was interrupted before it finished, at: {$a}';
+$string['chatagent_continue'] = 'Pick up where it left off';
+
+$string['taskcloudpoodllusagelog'] = 'CloudPoodll MiniLesson usage logging';

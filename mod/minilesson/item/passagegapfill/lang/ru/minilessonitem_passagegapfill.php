@@ -1,31 +1,16 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * English language pack for Passage GapFill
- *
- * @package    minilessonitem_passagegapfill
- * @category   string
- * @copyright  2026 Justin Hunt (poodllsupport@gmail.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
+// CampusFR translation integration preview: latest official FR where available, then legacy DEV translations.
+// Missing keys use Moodle's English fallback; see translation_gaps.csv.
 defined('MOODLE_INTERNAL') || die();
 
 $string['additem'] = 'Текст с пропусками';
 $string['item_desc'] = 'Элемент «Текст с пропусками» предлагает учащемуся текст, из которого удалено несколько слов. Учащийся должен прослушать соответствующее аудио и заполнить пропуски.';
 $string['pluginname'] = 'Текст с пропусками';
 $string['privacy:metadata'] = 'Плагин «Текст с пропусками» не хранит персональные данные.';
+
+// CampusFR 1.1.60a — newly translated strings (FR/RU).
+$string['choosegapoption'] = 'Выберите…';
+$string['gaptype'] = 'Тип пропуска';
+$string['gaptype_dropdown'] = 'Выпадающий список';
+$string['gaptype_help'] = 'Способ заполнения пропусков. «Текстовое поле»: ученик вводит недостающее слово. «Выпадающий список»: выбирает слово из списка всех пропущенных слов текста. При выборе из списка подсказки недоступны, а правильность ответов отображается только после нажатия «Завершить».';
+$string['gaptype_textbox'] = 'Текстовое поле';

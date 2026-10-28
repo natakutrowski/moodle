@@ -40,11 +40,13 @@ class import {
     private $modulecontext;
     private $course;
     private $cm;
-    private $errors;
-    private $upt;
     private $currentheader;
     private $keycolumns;
     private $allvoices;
+    private $preprocesserrors = [];
+
+    /** @var array Field names in the current item that its item type does not have. */
+    private $unknownfields = [];
 
 
     /**
@@ -60,7 +62,6 @@ class import {
         $this->course = $course;
         $this->allvoices = [];
         $this->cm = $cm;
-        $this->errors = 0;
         $this->currentheader = [];
         $this->keycolumns = local\itemtype\item::get_keycolumns();
 
@@ -73,24 +74,120 @@ class import {
         if ($isjson) {
             $this->isjson = true;
             $this->itemsfromjson = $reader->items;
-            $this->filesfromjson = $reader->files;
+            // A payload that carries no media has no files key at all - the common case when
+            // items are composed rather than exported - so fall back to the "no files" default
+            // the property is declared with instead of warning on every import.
+            $this->filesfromjson = $reader->files ?? false;
         } else {
             $this->cir = $reader;
         }
     }
 
+    /**
+     * Generate images for the "fileprompts" of a JSON import payload and merge them into its files.
+     *
+     * The prompts mirror the files structure: {"<filesid>": {"<filearea>": {"<filename>": "<prompt>"}}}.
+     * A generated image is stored under the same filesid, filearea and filename in the payload's
+     * "files", exactly as if the caller had supplied it as base64. A file the caller already supplied
+     * is left alone. Audio file areas are refused: only images are generated here.
+     *
+     * @param \stdClass $importdata the decoded payload; its files property is updated
+     * @return array of {filesid, filearea, filename, message} entries for prompts that produced no image
+     */
+    public function generate_images_from_prompts($importdata) {
+        $failures = [];
+        if (empty($importdata->fileprompts)) {
+            return $failures;
+        }
+        // Force objects so numeric filesids stay keys and the reader can use them as properties.
+        $prompts = json_decode(json_encode($importdata->fileprompts), true);
+        $files = json_decode(json_encode($importdata->files ?? new \stdClass(), JSON_FORCE_OBJECT), true);
+        if (!is_array($prompts)) {
+            return $failures;
+        }
+        if (!is_array($files)) {
+            $files = [];
+        }
+
+        $template = [];
+        $promptlist = [];
+        $targets = [];
+        foreach ($prompts as $filesid => $fileareas) {
+            foreach ((is_array($fileareas) ? $fileareas : []) as $filearea => $fileprompts) {
+                foreach ((is_array($fileprompts) ? $fileprompts : []) as $filename => $prompt) {
+                    $fail = function ($message) use (&$failures, $filesid, $filearea, $filename) {
+                        $failures[] = [
+                            'filesid' => (string)$filesid,
+                            'filearea' => (string)$filearea,
+                            'filename' => (string)$filename,
+                            'message' => $message,
+                        ];
+                    };
+                    $cleanname = clean_param((string)$filename, PARAM_FILE);
+                    if (
+                        substr($filearea, -6) === '_audio' || $filearea === constants::AUDIOSTORY
+                        || $filearea !== clean_param($filearea, PARAM_ALPHANUMEXT)
+                    ) {
+                        $fail(get_string('error:imagepromptarea', constants::M_COMPONENT));
+                    } else if ($cleanname === '' || $cleanname !== $filename || !is_string($prompt) || trim($prompt) === '') {
+                        $fail(get_string('error:imagepromptinvalid', constants::M_COMPONENT));
+                    } else if (!empty($files[$filesid][$filearea][$filename])) {
+                        continue;
+                    } else if (count($promptlist) >= constants::MAX_IMPORT_IMAGE_PROMPTS) {
+                        $fail(get_string('error:imagepromptlimit', constants::M_COMPONENT, constants::MAX_IMPORT_IMAGE_PROMPTS));
+                    } else {
+                        $key = count($promptlist);
+                        $template[$key] = '';
+                        $promptlist[] = trim($prompt);
+                        $targets[$key] = [$filesid, $filearea, $filename];
+                    }
+                }
+            }
+        }
+
+        if (!empty($promptlist)) {
+            $aimanager = new aimanager(
+                $this->modulecontext->id,
+                $this->moduleinstance->region,
+                $this->moduleinstance->ttslanguage
+            );
+            $context = !empty($importdata->imagecontext) && is_string($importdata->imagecontext)
+                ? $importdata->imagecontext : false;
+            $images = $aimanager->generate_images($template, $promptlist, $context, false);
+            foreach ($targets as $key => [$filesid, $filearea, $filename]) {
+                if (!empty($images[$key])) {
+                    $files[$filesid][$filearea][$filename] = $images[$key];
+                } else {
+                    $failures[] = [
+                        'filesid' => (string)$filesid,
+                        'filearea' => (string)$filearea,
+                        'filename' => (string)$filename,
+                        'message' => get_string('error:imagegenfailed', constants::M_COMPONENT),
+                    ];
+                }
+            }
+        }
+
+        $importdata->files = json_decode(json_encode($files, JSON_FORCE_OBJECT));
+        return $failures;
+    }
+
+    /**
+     * Run the import and return a summary of the results.
+     *
+     * @return \stdClass with total, imported and failed counts, plus an errors array
+     *         of {itemnum, type, name, message} objects (one per failed item)
+     */
     public function import_process() {
-        $this->errors = 0;
-        $this->upt = new import_tracker($this->keycolumns);
-        $this->upt->start(); // Start table.
+        $results = new \stdClass();
+        $results->total = 0;
+        $results->imported = 0;
+        $results->failed = 0;
+        $results->errors = [];
 
         if ($this->isjson) {
-            $linenum = 0;
             foreach ($this->itemsfromjson as $item) {
-                $linenum++;
-                $this->upt->flush();
-                $this->upt->track('line', $linenum);
-                $this->import_process_line($item);
+                $this->process_and_tally($item, $results);
             }
         } else {
             // Init csv import helper.
@@ -99,24 +196,157 @@ class import {
             // get the header line
             $this->currentheader = $this->cir->get_columns();
 
-            $linenum = 1; // Column header is first line.
             while ($item = $this->cir->next()) {
-                $linenum++;
-                $this->upt->flush();
-                $this->upt->track('line', $linenum);
-                $this->import_process_line($item);
+                $this->process_and_tally($item, $results);
             }
             $this->cir->close();
             $this->cir->cleanup(true);
         }
-        $this->upt->close(); // Close table.
+        return $results;
+    }
+
+    /**
+     * Import a single item and add the outcome to the results summary.
+     *
+     * @param object|array $itemdata one JSON item object or one CSV line
+     * @param \stdClass $results the running summary to update
+     */
+    private function process_and_tally($itemdata, $results) {
+        $results->total++;
+        $this->unknownfields = [];
+        $outcome = $this->import_process_line($itemdata);
+        if ($outcome === true) {
+            $results->imported++;
+        } else {
+            $outcome->itemnum = $results->total;
+            $results->failed++;
+            $results->errors[] = $outcome;
+        }
+    }
+
+    /**
+     * Reject a JSON item carrying a field name this item type does not have.
+     *
+     * The mapping below only ever reads the names the item type declares, so a name it does not
+     * declare is passed over in silence - the item imports, apparently cleanly, with whatever
+     * that field held missing from it. The CSV path has always reported this; the JSON path did
+     * not, which is how a reading passage sent as "passage" instead of "textarea" could vanish
+     * without anybody being told.
+     *
+     * The item is rejected rather than merely flagged. The content of these payloads is written
+     * by an AI, and often imported while nobody is watching closely, so anything short of a
+     * refusal is a slower way of losing the field in silence: a warning nobody reads leaves a
+     * lesson quietly missing its reading passage. A rejection names the field, suggests the one
+     * that was probably meant, and the caller resubmits - which is a correction loop the callers
+     * are already told to run.
+     *
+     * @param object $itemdata the item as the caller sent it
+     * @param array $keycolumns the item type's declared columns
+     * @return void
+     */
+    private function check_for_unknown_fields($itemdata, $keycolumns) {
+        $known = [];
+        foreach ($keycolumns as $coldef) {
+            $known[$coldef['jsonname']] = true;
+            // A column may accept an older name too; those are not unknown, just historical.
+            if (!empty($coldef['jsonalias'])) {
+                $known[$coldef['jsonalias']] = true;
+            }
+        }
+        // Structural, and belongs to the payload rather than to any one item type.
+        $known['filesid'] = true;
+
+        foreach (array_keys((array) $itemdata) as $field) {
+            if (isset($known[$field])) {
+                continue;
+            }
+            $this->unknownfields[] = get_string('error:unknownfield', constants::M_COMPONENT, (object) [
+                'field' => s($field),
+                'type' => s($itemdata->type ?? ''),
+                'suggestion' => $this->closest_field($field, array_keys($known)),
+            ]);
+        }
+    }
+
+    /**
+     * The declared field name closest to one the caller invented, if any is close enough.
+     *
+     * A near miss is the common case - "question" for "text", "passage" for "textarea" - and
+     * naming the right field turns the warning into something the caller can act on directly
+     * rather than a prompt to go and read the spec again.
+     *
+     * @param string $field the unrecognised name
+     * @param array $known the declared names
+     * @return string a phrase naming the likely field, or an empty string
+     */
+    private function closest_field($field, $known) {
+        $best = '';
+        $bestdistance = PHP_INT_MAX;
+        foreach ($known as $candidate) {
+            $distance = levenshtein(strtolower($field), strtolower($candidate));
+            if ($distance < $bestdistance) {
+                $bestdistance = $distance;
+                $best = $candidate;
+            }
+        }
+        // Only offer a name that is genuinely near, or the suggestion is noise.
+        if ($best === '' || $bestdistance > max(2, floor(strlen($field) / 2))) {
+            return '';
+        }
+        return get_string('error:unknownfieldsuggestion', constants::M_COMPONENT, s($best));
+    }
+
+    /**
+     * Build a failure entry for the import results summary.
+     *
+     * @param string $itemtype
+     * @param string $itemname
+     * @param string $message
+     * @return \stdClass
+     */
+    private function line_error($itemtype, $itemname, $message) {
+        $error = new \stdClass();
+        $error->type = $itemtype;
+        $error->name = $itemname;
+        $error->message = $message;
+        return $error;
+    }
+
+    /**
+     * Map a DB column name (eg customtext1) used in a validation error to the
+     * import field name (eg sentences) that the user would recognise.
+     *
+     * @param string $itemtypeclass the itemtype classname
+     * @param string $col the DB column name from the validation error
+     * @return string
+     */
+    private function get_col_label($itemtypeclass, $col) {
+        if (empty($col)) {
+            return '';
+        }
+        foreach ($itemtypeclass::get_keycolumns() as $coldef) {
+            if ($coldef['dbname'] === $col) {
+                return $coldef['jsonname'];
+            }
+        }
+        return $col;
     }
 
     public function map_json_to_csv($itemdata) {
         $itemtypeclass = local\itemtype\item::get_itemtype_class($itemdata->type);
         $keycolumns = $itemtypeclass::get_keycolumns();
+        $this->check_for_unknown_fields($itemdata, $keycolumns);
         $line = [];
         foreach ($keycolumns as $colname => $coldef) {
+            // A keycolumn may declare a legacy alias (jsonalias) for its import name, so that
+            // data exported before the jsonname was introduced still imports correctly.
+            if (
+                !isset($itemdata->{$coldef['jsonname']})
+                && isset($coldef['jsonalias'])
+                && isset($itemdata->{$coldef['jsonalias']})
+            ) {
+                $itemdata->{$coldef['jsonname']} = $itemdata->{$coldef['jsonalias']};
+            }
             if (isset($itemdata->{$coldef['jsonname']})) {
                 if ($coldef['type'] == 'stringarray') {
                     if (!is_array($itemdata->{$coldef['jsonname']})) {
@@ -127,16 +357,19 @@ class import {
                         } else {
                             // If generation failed for some reason, fall back (so we dont lose it all).
                             // First lets see if its array-like string (eg "line1,line2,line3") because it happens.
-                            $commacount = substr_count($itemdata->{$coldef['jsonname']}, ',');
-                            if ($commacount > 2) {
-                                $line[] = str_replace(',', PHP_EOL, $itemdata->{$coldef['jsonname']});
+                            // But only if it is not already line separated, and has no pipe delimited structure,
+                            // because the fields of such a line (eg wordshuffle distractors) may contain commas.
+                            $fallback = (string) $itemdata->{$coldef['jsonname']};
+                            $haslines = preg_match('/\R/', $fallback);
+                            $haspipes = strpos($fallback, '|') !== false;
+                            if (!$haslines && !$haspipes && substr_count($fallback, ',') > 2) {
+                                $line[] = str_replace(',', PHP_EOL, $fallback);
                             } else {
-                                // If its hopeless just put the string in one line and hope the teacher can fix it up.
-                                $line[] = $itemdata->{$coldef['jsonname']};
+                                // Its already line separated or structured, or its hopeless.
+                                // Either way pass it through as is and hope the teacher can fix it up.
+                                $line[] = $fallback;
                             }
-
                         }
-
                     } else {
                         // This is the normal case. Just join the array into lines. That is how we store stringarrays in CSV.
                         $line[] = join(PHP_EOL, $itemdata->{$coldef['jsonname']});
@@ -158,7 +391,8 @@ class import {
     /**
      * Process one line of CSV or JSON
      *
-     * @param array $line
+     * @param object|array $itemdata one JSON item object or one CSV line
+     * @return true|\stdClass true on success, or a failure entry (see line_error())
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
@@ -167,19 +401,26 @@ class import {
         global $DB, $CFG, $SESSION;
 
         if ($this->isjson) {
-            $itemtype = $itemdata->type;
-            $line = $this->map_json_to_csv($itemdata);
+            $itemtype = $itemdata->type ?? '';
+            $itemname = $itemdata->name ?? '';
         } else {
-            $line = $itemdata;
-            $itemtype = $line[0];
+            $itemtype = $itemdata[0];
+            $itemname = '';
         }
         $itemtypeclass = local\itemtype\item::get_itemtype_class($itemtype);
 
         // if the item type is invalid, we can't continue, just exit
         if (!$itemtypeclass) {
-            $this->upt->track('status', get_string('error:failed', constants::M_COMPONENT), 'error', true);
-            $this->upt->track('type', get_string('error:invaliditemtype', constants::M_COMPONENT), 'error');
-            return false;
+            return $this->line_error($itemtype, $itemname, get_string('error:invaliditemtype', constants::M_COMPONENT));
+        }
+
+        if ($this->isjson) {
+            $line = $this->map_json_to_csv($itemdata);
+            if (!empty($this->unknownfields)) {
+                return $this->line_error($itemtype, $itemname, implode(' ', $this->unknownfields));
+            }
+        } else {
+            $line = $itemdata;
         }
 
         // here we get the item specific keycolumns (it's the same columns, but with item specific col info for validation and data preprocessing)
@@ -197,7 +438,11 @@ class import {
         }
 
         // Pre-Process Import Data, and turn into DB Ready data.
+        $this->preprocesserrors = [];
         $newrecord = $this->preprocess_import_data($line, $keycolumns);
+        if (!empty($this->preprocesserrors)) {
+            return $this->line_error($itemtype, $itemname, implode('; ', $this->preprocesserrors));
+        }
 
         // set the defaults
         foreach ($keycolumns as $colname => $coldef) {
@@ -239,9 +484,12 @@ class import {
         // call the itemtype specific import validation function
         $error = $this->perform_import_validation($newrecord, $this->cm);
         if ($error) {
-            $this->upt->track('status', get_string('error:failed', constants::M_COMPONENT), 'error', true);
-            $this->upt->track($error->col, $error->message, 'error');
-            return false;
+            $message = $error->message;
+            $collabel = $this->get_col_label($itemtypeclass, $error->col);
+            if ($collabel !== '') {
+                $message = $collabel . ': ' . $message;
+            }
+            return $this->line_error($itemtype, $newrecord->name, $message);
         }
 
         // get itemorder
@@ -262,14 +510,11 @@ class import {
 
         // finally do the update
         $result = $theitem->update_insert_item();
-        if ($result) {
-            $this->upt->track('status', 'Success', 'normal');
-        } else {
-            $this->upt->track('status', 'Failed', 'error');
+        if ($result && !empty($result->error)) {
+            return $this->line_error($itemtype, $newrecord->name, $result->message);
         }
 
         return true;
-        // Do what we have to do
     }
 
     public function perform_import_validation($newrecord, $cm) {
@@ -283,6 +528,40 @@ class import {
             }
         }
         return false;
+    }
+
+    /**
+     * Resolve a human-readable voice name (eg "Alloy (en)") to its DB voicecode.
+     *
+     * Voice names are only guaranteed unique within a single language's list in
+     * constants::ALL_VOICES - eg "Alloy (en)" is shared by en-GB, en-AU, en-NZ etc, each
+     * with their own voicecode. $this->allvoices is a single flat map built across every
+     * language, so a name shared by several languages resolves to whichever language was
+     * inserted last. To avoid that, look in the current lesson's own language first, and
+     * only fall back to the flat cross-language map if that language has no match.
+     *
+     * @param string $name
+     * @return string|null the voicecode, or null if no match was found anywhere
+     */
+    private function resolve_voice_code($name) {
+        $name = strtolower($name);
+        $langcode = $this->moduleinstance->ttslanguage;
+
+        if (array_key_exists($langcode, constants::ALL_VOICES)) {
+            foreach (constants::ALL_VOICES[$langcode] as $voicecode => $voicename) {
+                if (strtolower($voicename) === $name || strtolower($voicename) === $name . '_g') {
+                    return $voicecode;
+                }
+            }
+        }
+
+        if (array_key_exists($name, $this->allvoices)) {
+            return $this->allvoices[$name];
+        } else if (in_array($name . '_g', $this->allvoices)) {
+            return $this->allvoices[$name . '_g'];
+        }
+
+        return null;
     }
 
     public function preprocess_import_data($line, $keycolumns) {
@@ -304,10 +583,8 @@ class import {
             }
 
             if (!isset($keycolumns[$colname])) {
-                // This should not happen.
-
-                $this->upt->track('status', 'unknown column ' . $colname, 'error');
-                $this->errors++;
+                // This should not happen, but a CSV file with a bad header row could cause it.
+                $this->preprocesserrors[] = get_string('error:unknowncolumn', constants::M_COMPONENT, s($colname));
                 continue;
             }
             $coldef = $keycolumns[$colname];
@@ -326,16 +603,14 @@ class import {
                         // this will return the name, not the key
                         $value = utils::fetch_auto_voice($this->moduleinstance->ttslanguage);
                         // here we go from name to key
-                        $value = $this->allvoices[strtolower($value)];
+                        $value = $this->resolve_voice_code($value);
                     } else {
-                        if (array_key_exists(strtolower($value), $this->allvoices)) {
-                            $value = $this->allvoices[strtolower($value)];
-                        } else if (in_array(strtolower($value) . '_g', $this->allvoices)) {
-                            $value = $this->allvoices[strtolower($value) . '_g'];
+                        $resolvedcode = $this->resolve_voice_code($value);
+                        if ($resolvedcode !== null) {
+                            $value = $resolvedcode;
                         } else {
-                            // not sure how to get this to user
-                            $this->upt->track($colname, 'UNKNOWN VOICE' . $value, 'warning');
-                            $value = utils::fetch_auto_voice($this->moduleinstance->ttslanguage);
+                            // Unknown voice, so fall back to the auto voice for the lesson language.
+                            $value = $this->resolve_voice_code(utils::fetch_auto_voice($this->moduleinstance->ttslanguage));
                         }
                     }
                     break;
@@ -399,15 +674,6 @@ class import {
                     $value = '';
             }
 
-            // set default values
-            if (in_array($colname, $this->upt->columns)) {
-                // Default value in progress tracking table, can be changed later.
-                if (is_array($value)) {
-                    $this->upt->track($colname, join(PHP_EOL, $value), 'normal');
-                } else {
-                    $this->upt->track($colname, s($value), 'normal');
-                }
-            }
             $newrecord[$coldef['dbname']] = $value;
         }
         return $newrecord;
@@ -463,12 +729,54 @@ class import {
     public function export_items($jsonformat = true) {
         global $DB;
         $allitems = $DB->get_records(constants::M_QTABLE, ['minilesson' => $this->moduleinstance->id], 'itemorder ASC');
+        $exportobj = $this->build_export_obj($allitems);
+
+        // Depending on export format return JSON or an object. (Translate prefers an object).
+        if ($jsonformat) {
+            return json_encode($exportobj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        } else {
+            return $exportobj;
+        }
+    }
+
+    /**
+     * Export a single item of this lesson, in the same format as export_items(), so it can be imported.
+     *
+     * @param int $itemid The id of the item in the minilesson_rsquestions table.
+     * @param bool $jsonformat Return JSON if true, or the export object if false.
+     * @return string|\stdClass
+     */
+    public function export_single_item($itemid, $jsonformat = true) {
+        global $DB;
+        // The item must belong to this lesson, so an item id from another lesson can not be exported here.
+        $item = $DB->get_record(
+            constants::M_QTABLE,
+            ['id' => $itemid, 'minilesson' => $this->moduleinstance->id],
+            '*',
+            MUST_EXIST
+        );
+        $exportobj = $this->build_export_obj([$item]);
+
+        if ($jsonformat) {
+            return json_encode($exportobj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        } else {
+            return $exportobj;
+        }
+    }
+
+    /**
+     * Build the export object (items and their files) for a set of item records.
+     *
+     * @param array $itemrecords Records from the minilesson_rsquestions table, in the order to export them.
+     * @return \stdClass
+     */
+    protected function build_export_obj($itemrecords) {
         $exportobj = new \stdClass();
         $exportobj->items = [];
         $exportobj->files = [];
-        if ($allitems && count($allitems) > 0) {
+        if ($itemrecords && count($itemrecords) > 0) {
             $i = 0;
-            foreach ($allitems as $theitem) {
+            foreach ($itemrecords as $theitem) {
                 $i++;
                 $itemobj = $this->export_item_as_jsonobj($theitem);
                 if ($itemobj) {
@@ -484,13 +792,7 @@ class import {
                 }
             }
         }
-
-        // Depending on export format return JSON or an object. (Translate prefers an object).
-        if ($jsonformat) {
-            return json_encode($exportobj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        } else {
-            return $exportobj;
-        }
+        return $exportobj;
     }
 
     public function export_item_as_jsonobj($itemrecord) {
@@ -533,6 +835,8 @@ class import {
 
         // Loop through columnns making a nice value for our json object.
         foreach ($keycolumns as $keycolumn) {
+            // Start each column empty, so a value from the previous column can never carry over.
+            $jsonvalue = null;
             $fieldvalue = property_exists($itemrecord, $keycolumn['dbname']) ? $itemrecord->{$keycolumn['dbname']} : null;
             // Skip any optional fields whose value is the default
             // Anonymous files are not in the DB record, so we need to process them a little later, to see if they are present

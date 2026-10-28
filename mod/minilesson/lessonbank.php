@@ -104,8 +104,16 @@ if (!empty($translateimportid) || ($restore && confirm_sesskey())) {
             $theimport->set_reader($importdata, true);
         }
         if (empty($errormessage)) {
-            $theimport->import_process();
-            redirect($url, get_string('lessonitemcreate', constants::M_COMPONENT), null, 'success');
+            $results = $theimport->import_process();
+            if ($results->failed == 0) {
+                redirect($url, get_string('lessonitemcreate', constants::M_COMPONENT), null, 'success');
+            }
+            $partialmessage = get_string(
+                'importpartial',
+                constants::M_COMPONENT,
+                ['imported' => $results->imported, 'total' => $results->total]
+            );
+            redirect($url, $partialmessage, null, 'warning');
         }
         redirect($url, $errormessage, null, 'warning');
     } else {
@@ -118,9 +126,9 @@ $searchform = new lessonbank_form($moduleinstance->ttslanguage);
 
 // Build item type icon map: label → icon URL.
 $itemtypeiconmap = [];
-foreach (constants::ITEMTYPES as $itemtype) {
-    $label = get_string($itemtype, constants::M_COMPONENT);
-    $iconurl = $OUTPUT->image_url('icon', 'minilessonitem_' . $itemtype)->out(false);
+foreach (utils::fetch_itemtypes() as $itemtype) {
+    $label = utils::get_subitem_name($itemtype);
+    $iconurl = $OUTPUT->image_url('icon', utils::get_sub_component($itemtype))->out(false);
     $itemtypeiconmap[$label] = $iconurl;
 }
 

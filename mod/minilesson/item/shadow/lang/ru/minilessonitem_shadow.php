@@ -1,28 +1,6 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * English language pack for Video Shadowing
- *
- * @package    minilessonitem_shadow
- * @category   string
- * @copyright  2026 Justin Hunt (poodllsupport@gmail.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
+// CampusFR translation integration preview: latest official FR where available, then legacy DEV translations.
+// Missing keys use Moodle's English fallback; see translation_gaps.csv.
 defined('MOODLE_INTERNAL') || die();
 
 $string['additem'] = 'Видео Shadowing';
@@ -64,3 +42,24 @@ $string['watchhint'] = 'Нажмите «Воспроизвести» и пос�
 $string['wordhighlight'] = 'Включить подсветку каждого слова';
 $string['wordhighlight_details'] = 'Подсвечивает каждое слово в момент его произнесения, используя временные метки слов в субтитрах. В некоторых видео временные метки YouTube могут быть неточными — в этом случае отключите эту функцию, чтобы подсвечивались целые строки. Если функция отключена, при загрузке субтитров также не загружаются временные метки слов.';
 $string['ytclipdetails'] = 'Фрагмент YouTube (ID/URL, время начала и окончания)';
+
+// CampusFR 1.1.60a — newly translated strings (FR/RU).
+$string['autoforward'] = 'Автоматический переход';
+$string['autoforward_details'] = 'После последнего повторения фразы автоматически переходить к следующей, не ожидая нажатия «ОК» или «Далее». В этом режиме кнопка «Повторить» отсутствует.';
+$string['pastevtt'] = 'Вставить расшифровку';
+$string['pastevtt_title'] = 'Вставить расшифровку YouTube';
+$string['pastevtt_convert'] = 'Преобразовать в субтитры';
+$string['paste_step_open_link'] = 'Открыть видео на YouTube в новой вкладке';
+$string['paste_step_open_novideo'] = 'Открыть видео на YouTube (сначала введите идентификатор видео в форме, чтобы здесь появилась ссылка)';
+$string['paste_step_showtranscript'] = 'Под видео разверните описание и нажмите «Показать расшифровку».';
+$string['paste_step_timestamps'] = 'В меню ⋮ панели расшифровки убедитесь, что отображение временных меток включено.';
+$string['paste_step_copy'] = 'Выделите всю расшифровку, скопируйте и вставьте её в поле ниже.';
+$string['paste_label'] = 'Расшифровка, скопированная с YouTube';
+$string['paste_placeholder'] = '0:00
+первая строка расшифровки
+0:03
+вторая строка расшифровки';
+$string['paste_empty'] = 'Сначала вставьте расшифровку, скопированную с YouTube.';
+$string['paste_failed'] = 'Не удалось преобразовать расшифровку.';
+$string['paste_success'] = 'Добавлено строк субтитров: {$a}.';
+$string['paste_wordhighlightoff'] = 'Подсветка отдельных слов отключена: во вставленной расшифровке есть временные метки только для целых строк. Теперь будут подсвечиваться строки целиком.';

@@ -4,6 +4,7 @@
             "itemnumber": 0,
             "prompt": "Generate a 1 dimensional array of 5 sentences in {language} suitable for {level} level learners on the topic of: [{topic}] ",
             "generatemethod": "generate",
+            "generatefileareasmethod": "generate",
             "generatefields": [
                 {
                     "name": "sentences",
@@ -43,7 +44,7 @@
                     "mapping": "sentences"
                 }
             ],
-            "overallimagecontext": "--",
+            "overallimagecontext": "user_customdata1",
             "promptfields": [
                 {
                     "name": "language",
@@ -61,9 +62,10 @@
         }
     ],
     "lessonTitle": "Listen and Speak (generate sentences)",
-    "lessonDescription": "Enter a topic and language level. A Listen and Speak item with  5 sentences will be created.",
+    "lessonDescription": "Enter a topic and language level. A Listen and Speak item with 5 sentences will be created. A picture  in the specified image style will be created to accompany each sentence.",
     "uniqueid": "6a33790712563",
-    "version": "1",
+    "version": "4",
+    "agentonly": 0,
     "fieldmappings": {
         "target_language": {
             "enabled": false,
@@ -74,13 +76,13 @@
         "user_topic": {
             "enabled": true,
             "title": "Topic",
-            "description": "",
+            "description": "Enter a topic which the generated sentences should be related to.",
             "type": "text"
         },
         "user_level": {
             "enabled": true,
             "title": "Language Level",
-            "description": "",
+            "description": "Enter the user's language level",
             "type": "dropdown",
             "options": [
                 "CEFR A1",
@@ -104,10 +106,19 @@
             "type": "text"
         },
         "user_customdata1": {
-            "enabled": false,
-            "title": "",
-            "description": "",
-            "type": "text"
+            "enabled": true,
+            "title": "Image Style",
+            "description": "Choose the style the images should be",
+            "type": "dropdown",
+            "options": [
+                "Flat vector illustration",
+                "Cartoon",
+                "Photorealistic",
+                "Black and white photo",
+                "Line drawing",
+                "Digital painting",
+                "3D Render"
+            ]
         },
         "user_customdata2": {
             "enabled": false,

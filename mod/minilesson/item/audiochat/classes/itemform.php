@@ -60,10 +60,14 @@ class itemform extends baseform {
         // The topic for the audio chat.
         $this->add_textarearesponse(itemtype::TOPIC, get_string('audiochat_topic', constants::M_COMPONENT), true);
         $mform->setDefault(itemtype::TOPIC, get_string('audiochat_topic_default', constants::M_COMPONENT));
+        // add some instructions for topic
+        $this->add_static_text('audiochat_topic_instructions', '', get_string('audiochat_topic_instructions', constants::M_COMPONENT));
 
         // The role of the AI.
         $this->add_textarearesponse(itemtype::ROLE, get_string('audiochat_role', constants::M_COMPONENT), true);
         $mform->setDefault(itemtype::ROLE, get_string('audiochat_role_default', constants::M_COMPONENT));
+        // add some instructions for role
+        $this->add_static_text('role_instructions', '', get_string('audiochat_role_instructions', constants::M_COMPONENT));
 
         // The voice of the AI.
         $options = ['alloy' => 'Alloy', 'ash' => 'Ash', 'ballad' => 'Ballad',
@@ -76,19 +80,7 @@ class itemform extends baseform {
         );
 
         // Students native language.
-        $defaultfeedbacklang = $this->moduleinstance->nativelang ?
-            constants::AIGRADE_FEEDBACK_NATIVE_LANGUAGE : $this->moduleinstance->ttslanguage;
-        // Add generic fallback languages so that items exported/imported will use the native lang of the parent minilesson
-        $extralangoptions = [];
-        $extralangoptions[constants::AIGRADE_FEEDBACK_TARGET_LANGUAGE] = get_string('defaulttargetlanguage', constants::M_COMPONENT);
-        $extralangoptions[constants::AIGRADE_FEEDBACK_NATIVE_LANGUAGE] = get_string('defaultnativelanguage', constants::M_COMPONENT);
-        $langoptions = $extralangoptions + utils::get_lang_options();
-        // Add the language select dropdown
-        $this->add_dropdown(itemtype::NATIVE_LANGUAGE,
-            get_string('aigrade_feedback_language', constants::M_COMPONENT),
-            $langoptions,
-            $defaultfeedbacklang);
-        $mform->addHelpButton(itemtype::NATIVE_LANGUAGE, 'aigrade_feedback_language', constants::M_COMPONENT);
+        $this->add_feedbacklanguageselect(itemtype::NATIVE_LANGUAGE);
 
         $options = utils::get_aiprompt_options('AUDIOCHAT_INSTRUCTIONSSELECTION');
         $mform->addElement(

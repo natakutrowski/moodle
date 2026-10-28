@@ -18,12 +18,13 @@
  * @copyright  2026 Justin Hunt (poodllsupport@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'mod_minilesson/progresstimer'], function ($) {
+define(['jquery', 'core/log', 'mod_minilesson/progresstimer'], function ($, log) {
     return {
         index: 0,
         quizhelper: null,
         itemdata: {},
         container: null,
+        swiperpromise: null,
 
         clone: function () {
             return $.extend(true, { correctitems: 0, totalitems: 0 }, this);
@@ -47,50 +48,115 @@ define(['jquery', 'mod_minilesson/progresstimer'], function ($) {
             this.$container = $(this.container);
             this.nextbutton = this.container.querySelector('.minilesson_nextbutton');
             this.register_events();
+            // Start fetching Swiper now rather than when the item is shown, so the carousel is
+            // interactive as soon as it appears. The list view has no carousel.
+            if (!this.itemdata.listview) {
+                this.load_swiper();
+            }
             return this;
         },
 
         register_events() {
-            this.nextbutton.addEventListener('click', e => {
-                e.preventDefault();
-                this.next_question();
-            });
+            // The next button is absent for a single ungradeable item (no quizfinished page).
+            if (this.nextbutton) {
+                this.nextbutton.addEventListener('click', e => {
+                    e.preventDefault();
+                    this.next_question();
+                });
+            }
             this.$container.on('showElement', () => {
-                this.load_swiper(Swiper => this.init_swiper(Swiper));
+                if (this.itemdata.listview) {
+                    this.start_timer();
+                } else {
+                    this.load_swiper().then(Swiper => this.init_swiper(Swiper)).catch(log.debug);
+                }
+            });
+            this.init_card_audio();
+        },
+
+        /**
+         * Wire up the card audio players: mutual exclusion between all players in the item,
+         * icon state syncing, and tap-to-play on card line 3. A card is a carousel slide in the
+         * cards view and a row in the list view; both carry the cards-unit class.
+         */
+        init_card_audio() {
+            // Only one player should sound at a time: starting one pauses the others. In the list
+            // view this spans every row, since all the cards are on screen together.
+            const audios = Array.from(this.container.querySelectorAll('.cards-unit audio'));
+            audios.forEach((audio) => {
+                audio.addEventListener('play', () => {
+                    audios.forEach((other) => {
+                        if (other !== audio) {
+                            other.pause();
+                        }
+                    });
+                });
+            });
+
+            this.container.querySelectorAll('.cards-unit').forEach((slide) => {
+                // Keep the line 1 round button icon in sync when its player is paused externally
+                // (mod_minilesson/ttsaudio only updates the icon on its own click and on 'ended').
+                const line1audio = slide.querySelector('audio.mod_minilesson_itemttsaudio');
+                if (line1audio) {
+                    line1audio.addEventListener('pause', () => {
+                        const icon = slide.querySelector('.samplettsaudio .fa');
+                        if (icon) {
+                            icon.classList.remove('fa-stop');
+                            icon.classList.add('fa-volume-up');
+                        }
+                    });
+                }
+
+                // Line 3: tapping the line or its speaker icon toggles playback of the hidden player.
+                const line3 = slide.querySelector('.cardline3-playable');
+                if (line3) {
+                    const audio = line3.querySelector('audio.cardline3-audio');
+                    const icon = line3.querySelector('.cardline3-audio-btn .fa');
+                    const showplaying = (playing) => {
+                        icon.classList.toggle('fa-stop', playing);
+                        icon.classList.toggle('fa-volume-up', !playing);
+                    };
+                    audio.addEventListener('play', () => showplaying(true));
+                    audio.addEventListener('pause', () => showplaying(false));
+                    audio.addEventListener('ended', () => showplaying(false));
+                    line3.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (!audio.paused && !audio.ended) {
+                            audio.pause();
+                            audio.currentTime = 0;
+                        } else {
+                            audio.play();
+                        }
+                    });
+                }
             });
         },
 
         /**
-         * Lazy-load the Swiper library (and its CSS) only when a cards item is shown.
+         * Lazy-load the Swiper library.
          *
          * Swiper is a >100kb MIT library vendored with the plugin (amd/src/external/swiper-lazy.js)
-         * and its CSS shipped locally (item/cards/css/swiper-bundle.min.css), rather than pulled from
-         * a CDN. This keeps it off the critical path and working on networks that cannot reach
-         * jsdelivr/cdnjs (e.g. China).
+         * rather than pulled from a CDN, so it keeps working on networks that cannot reach
+         * jsdelivr/cdnjs (e.g. China). Loading it on demand keeps it off the critical path of
+         * lessons that contain no cards item.
          *
-         * @param {Function} callback called with the Swiper constructor once it (and CSS) are ready.
+         * Its stylesheet is not loaded here: itemtype::page_requirements() puts it in the page
+         * head, because the un-styled carousel markup lays every card out side by side.
+         *
+         * The load is started at init() and only awaited when the item is shown, so by the time
+         * the learner reaches the card it is normally already resolved.
+         *
+         * @returns {Promise} resolves with the Swiper constructor.
          */
-        load_swiper(callback) {
-            this.ensure_swiper_css();
-            require(['mod_minilesson/external/swiper-lazy'], function(Swiper) {
-                callback(Swiper.default || Swiper);
-            });
-        },
-
-        /**
-         * Inject the local Swiper stylesheet once (shared across all cards items on the page).
-         */
-        ensure_swiper_css() {
-            const id = 'minilessonitem_cards_swiper_css';
-            if (document.getElementById(id)) {
-                return;
+        load_swiper() {
+            if (!this.swiperpromise) {
+                this.swiperpromise = new Promise((resolve, reject) => {
+                    require(['mod_minilesson/external/swiper-lazy'], function(Swiper) {
+                        resolve(Swiper.default || Swiper);
+                    }, reject);
+                });
             }
-            const wwwroot = (window.M && window.M.cfg && window.M.cfg.wwwroot) || '';
-            const link = document.createElement('link');
-            link.id = id;
-            link.rel = 'stylesheet';
-            link.href = wwwroot + '/mod/minilesson/item/cards/css/swiper-bundle.min.css';
-            document.head.appendChild(link);
+            return this.swiperpromise;
         },
 
         init_swiper(Swiper) {
@@ -122,6 +188,13 @@ define(['jquery', 'mod_minilesson/progresstimer'], function ($) {
                 }
             });
             this.settleAudioPlayback(swiper.slides[swiper.activeIndex], true);
+            this.start_timer();
+        },
+
+        /**
+         * Start the progress timer when the item has a time limit. On time out we move on.
+         */
+        start_timer() {
             if (this.itemdata.timelimit > 0) {
                 this.$container.find(".progress-container").show();
                 this.$container.find(".progress-container i").show();
@@ -129,24 +202,23 @@ define(['jquery', 'mod_minilesson/progresstimer'], function ($) {
                     height: '5px',
                     timeLimit: this.itemdata.timelimit,
                     onFinish: () => {
-                        this.nextbutton.click();
+                        if (this.nextbutton) {
+                            this.nextbutton.click();
+                        }
                     }
                 });
             }
         },
 
         settleAudioPlayback(slideEl, play) {
-            const audio = slideEl.querySelector('audio');
-            if (!audio) {
-                return;
-            }
             if (!play) {
-                audio.pause();
+                slideEl.querySelectorAll('audio').forEach((audio) => audio.pause());
                 return;
             }
-            if (audio.dataset.autoplay === '1') {
-                audio.play();
-                return;
+            // Only the line 1 player ever autoplays; line 3 audio is strictly tap-to-play.
+            const line1audio = slideEl.querySelector('audio.mod_minilesson_itemttsaudio');
+            if (line1audio && line1audio.dataset.autoplay === '1') {
+                line1audio.play();
             }
         }
     };

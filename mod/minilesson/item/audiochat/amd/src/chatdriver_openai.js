@@ -24,7 +24,8 @@
  * @copyright  2026 Justin Hunt (poodllsupport@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/log', 'core/fragment'], function ($, log, Fragment) {
+define(['jquery', 'core/log', 'core/fragment', 'minilessonitem_audiochat/gradingjson'],
+        function ($, log, Fragment, gradingjson) {
     "use strict";
 
     log.debug('MiniLesson AudioChat: OpenAI driver loading');
@@ -59,6 +60,11 @@ define(['jquery', 'core/log', 'core/fragment'], function ($, log, Fragment) {
         inputBufferInterval: null,
 
         // Turn detection (time-based works better for language learners than semantic_vad).
+        // silence_duration_ms is how long a student may pause before the model takes its
+        // turn. Overwritten in init() from the admin setting that also drives the Gemini
+        // driver, so a lesson paces the same way whichever provider is behind it. The
+        // literal here is only the fallback for itemdata that predates the setting; keep
+        // it in step with DEFAULT_SILENCEDURATION in classes/itemtype.php.
         timebased_vad: {
             type: "server_vad",
             silence_duration_ms: 3500,
@@ -92,6 +98,9 @@ define(['jquery', 'core/log', 'core/fragment'], function ($, log, Fragment) {
             self.audioElement = options.audioElement;
             self.callbacks = options.callbacks || {};
             self.autocreateresponse = options.itemdata.audiochat_autoresponse || false;
+            if (options.itemdata.audiochat_silenceduration) {
+                self.timebased_vad.silence_duration_ms = options.itemdata.audiochat_silenceduration;
+            }
             self.audiochat_voice = self._resolveVoice(options.itemdata.audiochat_voice);
             self.abortcontroller = new AbortController();
             self.items = {};
@@ -374,6 +383,9 @@ define(['jquery', 'core/log', 'core/fragment'], function ($, log, Fragment) {
                 "Please provide a percentage score for the session, an explanation of the score (for teachers), " +
                 "and feedback (for the student). " +
                 self.itemdata.audiochatgradeinstructions +
+                "Write the feedback as plain text in short paragraphs separated by a blank line. " +
+                "Where a list of points helps, put each point on its own line starting with a hyphen. " +
+                "Do not use markdown formatting: no headings, no asterisks and no bold. " +
                 "Return the response as JSON in the format: " +
                 "{\"score\": \"the score  ( 0-100 ) \", \"gradeexplanation\": \"the explanation\", " +
                 "\"feedback\": \"the feedback\"}.";
@@ -580,8 +592,8 @@ define(['jquery', 'core/log', 'core/fragment'], function ($, log, Fragment) {
                 var jsonresponse;
                 try {
                     jsonresponse = msg.response.output[0].content[0].text;
-                    const jsonextractregex = /\{[\s\S]*?\}/;
-                    if (!jsonresponse || jsonresponse === "" || !jsonresponse.match(jsonextractregex)) {
+                    var gradingdata = gradingjson.parse(jsonresponse);
+                    if (!gradingdata) {
                         log.debug("No valid grading data received .. msg is ..");
                         log.debug(msg);
                         if (self.gradeRequestTrial < self.maxGradeRequestTrial) {
@@ -596,7 +608,7 @@ define(['jquery', 'core/log', 'core/fragment'], function ($, log, Fragment) {
                     if (self.gradeRequestTrial > 0) {
                         self.gradeRequestTrial = 0;
                     }
-                    self.gradingData = JSON.parse(jsonresponse.match(jsonextractregex)[0]);
+                    self.gradingData = gradingdata;
                     log.debug("Grading and Feedback:", self.gradingData);
                     self._fire('onGradingData', self.gradingData);
                 } catch (err) {

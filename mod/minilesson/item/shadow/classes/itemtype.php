@@ -31,6 +31,17 @@ class itemtype extends item {
     /** @var array Language skills (or "content") this item type focuses on. */
     public static $skills = [constants::SKILL_LISTENING, constants::SKILL_SPEAKING, constants::SKILL_PRONUNCIATION];
 
+    /**
+     * This item type has a splash screen, drawn as a centred white card.
+     *
+     * @return bool
+     */
+    public function uses_boxed_layout() {
+        return true;
+    }
+
+    /** @var bool this item type produces no grade/result. */
+    public $gradeable = false;
 
     /** @var string the column holding the WebVTT subtitle text */
     public const VTT = 'customtext1';
@@ -49,6 +60,9 @@ class itemtype extends item {
 
     /** @var string the column holding the per-word highlighting flag (1 = on) */
     public const WORDHIGHLIGHT = 'customint3';
+
+    /** @var string the column holding the auto forward flag (1 = go to the next line without OK) */
+    public const AUTOFORWARD = 'customint4';
 
     /** @var int default pause between shadow attempts (milliseconds) */
     public const DEFAULT_SHADOWPAUSE = 2000;
@@ -122,6 +136,7 @@ class itemtype extends item {
 
         $shadowpause = (int)$this->itemrecord->{self::SHADOWPAUSE};
         $testitem->shadowpause = $shadowpause > 0 ? $shadowpause : self::DEFAULT_SHADOWPAUSE;
+        $testitem->autoforward = !empty($this->itemrecord->{self::AUTOFORWARD});
 
         return $testitem;
     }
@@ -214,14 +229,179 @@ class itemtype extends item {
             return $error;
         }
 
-        if (empty($newrecord->{self::VTT}) || count(vttparser::parse($newrecord->{self::VTT})) === 0) {
+        $start = (int) ($newrecord->{constants::YTVIDEOSTART} ?? 0);
+        $end = (int) ($newrecord->{constants::YTVIDEOEND} ?? 0);
+        if ($start > 0 && $end > 0 && $end <= $start) {
+            $error->col = constants::YTVIDEOEND;
+            $error->message = get_string('error:startafterend', 'minilessonitem_shadow');
+            return $error;
+        }
+
+        $shadowlines = trim((string) ($newrecord->{self::SHADOWLINES} ?? self::ALLLINES));
+        if ($shadowlines !== '' && !self::is_valid_shadowlines($shadowlines)) {
+            $error->col = self::SHADOWLINES;
+            $error->message = get_string('error:badshadowlines', 'minilessonitem_shadow');
+            return $error;
+        }
+
+        $cues = vttparser::parse((string) ($newrecord->{self::VTT} ?? ''));
+        if (count($cues) === 0) {
             $error->col = self::VTT;
             $error->message = get_string('error:badvtt', 'minilessonitem_shadow');
             return $error;
         }
 
+        // Cues outside the clip window are excluded at runtime, so at least one must fit inside it.
+        // array_filter preserves keys, so key + 1 is still the line number in the whole VTT.
+        $cuesinclip = array_filter($cues, function ($cue) use ($start, $end) {
+            if ($start > 0 && $cue['start'] < $start) {
+                return false;
+            }
+            if ($end > 0 && $cue['end'] > $end) {
+                return false;
+            }
+            return true;
+        });
+        if (count($cuesinclip) === 0) {
+            $error->col = self::VTT;
+            $error->message = get_string('error:nocuesinclip', 'minilessonitem_shadow');
+            return $error;
+        }
+
+        // At least one of the selected lines must survive the clip window.
+        $selectedlines = self::parse_shadowlines($shadowlines === '' ? self::ALLLINES : $shadowlines);
+        if ($selectedlines !== null) {
+            $shadowable = 0;
+            foreach ($cuesinclip as $i => $unused) {
+                if (in_array($i + 1, $selectedlines)) {
+                    $shadowable++;
+                }
+            }
+            if ($shadowable === 0) {
+                $error->col = self::SHADOWLINES;
+                $error->message = get_string('error:noshadowlines', 'minilessonitem_shadow');
+                return $error;
+            }
+        }
+
         // Return false to indicate no error.
         return false;
+    }
+
+    /**
+     * When and why to choose this item type (agent-facing, used by the aigen web services).
+     *
+     * @return string
+     */
+    public static function aigen_fetch_usage() {
+        return 'Video shadowing speaking practice: the learner watches a YouTube clip, then each subtitle line '
+            . 'replays several times while the learner speaks along with it, pacing themselves by the highlighted '
+            . 'text. There is no recording, speech recognition or grade - it is pure fluency/rhythm practice. '
+            . 'Use it with an authentic video at the learner\'s level. Only use videos whose subtitles are '
+            . 'available (writing a VTT by hand is impractical).';
+    }
+
+    /**
+     * The agent-facing import field spec for shadow. Option meanings mirror the authoring form
+     * (see custom_definition in itemform.php); keep the two in sync when changing form options.
+     *
+     * @return array the import spec (usage, fields, fileareas, example)
+     */
+    public static function aigen_fetch_import_spec() {
+        $fields = static::aigen_common_import_field_specs(['type', 'name', 'visible', 'instructions',
+            'ytid', 'ytstart', 'ytend', 'timelimit', 'layout']);
+        $fields['type']['example'] = 'shadow';
+        $fields['ytid']['required'] = true;
+        $fields['ytid']['description'] = 'The YouTube video to shadow: a video id (e.g. "dQw4w9WgXcQ") '
+            . 'or a full YouTube URL.';
+        $fields['ytstart']['description'] = 'Start of the clip to shadow, in seconds from the beginning of the '
+            . 'video. Keep clips short - shadowing a 30-60 second segment is plenty.';
+        $fields['ytend']['description'] = 'End of the clip, in seconds from the beginning of the video. '
+            . 'Must be after ytstart.';
+
+        $ownfields = [
+            'vtt' => [
+                'description' => 'The video subtitles in WebVTT format, starting with "WEBVTT". '
+                    . 'IMPORTANT: cue timestamps are in FULL-VIDEO time (the same clock as ytstart/ytend), '
+                    . 'not clip-relative - supply the whole video\'s subtitles and let ytstart/ytend select the '
+                    . 'segment; only cues that fall fully inside the clip window are used. Optional word-level '
+                    . 'timestamps like "I\'m <00:06:52.100>Jessica" enable per-word highlighting. '
+                    . 'Use real subtitles fetched for the video; do not invent timestamps.',
+                'example' => "WEBVTT\n\n00:06:51.060 --> 00:06:54.419\nThis is the first line to shadow.\n\n"
+                    . "00:06:54.419 --> 00:06:56.400\nAnd this is the second.",
+            ],
+            'shadowlines' => [
+                'description' => 'Which subtitle lines are shadowed: "*" for every line inside the clip (default), '
+                    . 'or a comma-separated list of line numbers counted from 1 against the whole VTT, '
+                    . 'e.g. "3,4,6". Unselected lines still display while watching.',
+                'example' => '*',
+            ],
+            'loopcount' => [
+                'description' => 'How many times each line is replayed for the learner to shadow (1-10).',
+                'example' => '3',
+            ],
+            'shadowpause' => [
+                'description' => 'The pause before each shadow replay, in MILLISECONDS.',
+                'options' => [
+                    ['value' => '1000', 'meaning' => '1 second'],
+                    ['value' => '1500', 'meaning' => '1.5 seconds'],
+                    ['value' => '2000', 'meaning' => '2 seconds (default)'],
+                    ['value' => '2500', 'meaning' => '2.5 seconds'],
+                    ['value' => '3000', 'meaning' => '3 seconds'],
+                    ['value' => '3500', 'meaning' => '3.5 seconds'],
+                    ['value' => '4000', 'meaning' => '4 seconds'],
+                ],
+            ],
+            'wordhighlight' => [
+                'description' => 'Whether each word highlights as it is spoken, using the word-level timestamps '
+                    . 'in the VTT. YouTube word timings are unreliable on some videos - use 0 to highlight whole '
+                    . 'lines instead.',
+                'options' => [
+                    ['value' => '1', 'meaning' => 'Highlight word by word (default; needs word timestamps in the VTT)'],
+                    ['value' => '0', 'meaning' => 'Highlight whole lines'],
+                ],
+            ],
+            'autoforward' => [
+                'description' => 'Whether the next line starts by itself after the last shadow of a line, instead '
+                    . 'of waiting for the learner to press OK. There is no retry button in this mode.',
+                'options' => [
+                    ['value' => '0', 'meaning' => 'Wait for the learner to press OK or retry (default)'],
+                    ['value' => '1', 'meaning' => 'Go on to the next line by itself'],
+                ],
+            ],
+        ];
+        foreach ($ownfields as $jsonname => $overlay) {
+            $fields[$jsonname] = static::aigen_seed_field_spec($jsonname, $overlay);
+        }
+
+        return [
+            'usage' => 'Compose one item object per video clip. Supply the YouTube video, the clip window '
+                . '(ytstart/ytend in seconds), and the video\'s real WebVTT subtitles in full-video time. '
+                . 'At least one subtitle cue must fall completely inside the clip window or the import is '
+                . 'rejected. Pick a clip with clear speech at the learner\'s level; 30-60 seconds and a handful '
+                . 'of lines is ideal.',
+            'fields' => array_values($fields),
+            'fileareas' => [],
+            'example' => [
+                'items' => [
+                    [
+                        'type' => 'shadow',
+                        'name' => 'Video shadowing',
+                        'instructions' => 'Watch the video. Then shadow each line: listen, and speak along '
+                            . 'with the video as it replays.',
+                        'ytid' => 'https://www.youtube.com/watch?v=fm6PtyM4qMw',
+                        'ytstart' => 410,
+                        'ytend' => 439,
+                        'vtt' => "WEBVTT\n\n00:06:51.060 --> 00:06:54.419\nThis is the first line to shadow.\n\n"
+                            . "00:06:54.419 --> 00:06:56.400\nAnd this is the second.\n\n"
+                            . "00:06:56.400 --> 00:06:59.220\nHere is one more line to practise.",
+                        'shadowlines' => '*',
+                        'loopcount' => 2,
+                        'shadowpause' => 2000,
+                    ],
+                ],
+            ],
+        ];
     }
 
     /*
@@ -235,6 +415,8 @@ class itemtype extends item {
         $keycols['int1'] = ['jsonname' => 'loopcount', 'type' => 'int', 'optional' => true, 'default' => self::DEFAULT_LOOPCOUNT, 'dbname' => self::LOOPCOUNT];
         $keycols['int2'] = ['jsonname' => 'shadowpause', 'type' => 'int', 'optional' => true, 'default' => self::DEFAULT_SHADOWPAUSE, 'dbname' => self::SHADOWPAUSE];
         $keycols['int3'] = ['jsonname' => 'wordhighlight', 'type' => 'int', 'optional' => true, 'default' => 1, 'dbname' => self::WORDHIGHLIGHT];
+        $keycols['int4'] = ['jsonname' => 'autoforward', 'type' => 'boolean', 'optional' => true, 'default' => 0,
+            'dbname' => self::AUTOFORWARD];
         return $keycols;
     }
 

@@ -38,6 +38,12 @@ use mod_minilesson\constants;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class utils {
+    /**
+     * A cached streaming speech token is only handed out if it has at least this many seconds left. A token about
+     * to expire would make the page refresh it almost at once, and again when the refresh hands back the same
+     * cached token, and each refresh costs the recording audio.
+     */
+    const STREAMING_TOKEN_MINLIFE = 2 * MINSECS;
 
     public static function get_cloud_poodll_server() {
         $conf = get_config(constants::M_COMPONENT);
@@ -457,6 +463,42 @@ class utils {
         return (json_last_error() == JSON_ERROR_NONE);
     }
 
+    /**
+     * Whether the chat agent can be used on this site at all.
+     *
+     * One question asked in one place: the tab, the entry point buttons and the web services all
+     * call this, so a site with the agent switched off or without a usable provider shows nothing
+     * rather than offering a panel that cannot answer.
+     *
+     * @return bool
+     */
+    public static function chatagent_available(): bool {
+        if (empty(get_config(constants::M_COMPONENT, 'chatagentenabled'))) {
+            return false;
+        }
+        return self::chatagent_driver()->is_available();
+    }
+
+    /**
+     * The chat agent provider this site is configured to use.
+     *
+     * The one place that turns the chatagentprovider setting into a driver, so a new provider
+     * means a new case here and a new class - and nothing else.
+     *
+     * @return \mod_minilesson\local\chatagent\provider_driver
+     */
+    public static function chatagent_driver() {
+        $provider = get_config(constants::M_COMPONENT, 'chatagentprovider');
+        switch ($provider) {
+            case 'ownkey':
+                return new \mod_minilesson\local\chatagent\gemini_driver();
+            default:
+                // Cloud Poodll is the default, and an unset or unrecognised setting falls back to
+                // it rather than failing, so a downgrade cannot leave the agent unable to start.
+                return new \mod_minilesson\local\chatagent\cloudpoodll_driver();
+        }
+    }
+
     // we use curl to fetch transcripts from AWS and Tokens from cloudpoodll
     // this is our helper
     public static function curl_fetch($url, $postdata = false, $method = 'get', $timeout = false) {
@@ -561,7 +603,7 @@ class utils {
     }
 
     // We need a Poodll token to make all this recording and transcripts happen
-    public static function fetch_token($apiuser, $apisecret, $force = false) {
+    public static function fetch_token($apiuser, $apisecret, $force = false, $timeout = false) {
 
         $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
         $tokenobject = $cache->get('recentpoodlltoken');
@@ -586,7 +628,7 @@ class utils {
             'password' => $apisecret,
             'service' => 'cloud_poodll',
         ];
-        $tokenresponse = self::curl_fetch($tokenurl, $postdata);
+        $tokenresponse = self::curl_fetch($tokenurl, $postdata, 'get', $timeout);
         if ($tokenresponse) {
             $respobject = json_decode($tokenresponse);
             if ($respobject && property_exists($respobject, 'token')) {
@@ -679,14 +721,14 @@ class utils {
     }
 
     // stage remote processing job ..just logging really
-    public static function stage_remote_process_job($language, $cmid) {
+    public static function stage_remote_process_job($language, $cmid, $timeout = 5, ?array $identity = null) {
 
         global $CFG, $USER;
 
         $token = false;
         $conf = get_config(constants::M_COMPONENT);
         if (!empty($conf->apiuser) && !empty($conf->apisecret)) {
-            $token = self::fetch_token($conf->apiuser, $conf->apisecret);
+            $token = self::fetch_token($conf->apiuser, $conf->apisecret, false, $timeout);
         }
         if (!$token || empty($token)) {
             return false;
@@ -696,9 +738,20 @@ class utils {
         if (!$host) {
             $host = "unknown";
         }
-        // owner
-        $owner = hash('md5', $USER->username);
-        $ownercomphash = hash('md5', $USER->username . constants::M_COMPONENT . $cmid . date("Y-m-d"));
+        // The ad hoc task must not rely on the cron's global $USER. Its caller provides
+        // the exact pseudonymous values calculated when the learner opened the lesson.
+        // Other existing callers retain the historical behaviour when identity is null.
+        if ($identity !== null) {
+            $owner = $identity['owner'] ?? null;
+            $ownercomphash = $identity['ownercomphash'] ?? null;
+            if (!is_string($owner) || !preg_match('/\A[a-f0-9]{32}\z/', $owner) ||
+                    !is_string($ownercomphash) || !preg_match('/\A[a-f0-9]{32}\z/', $ownercomphash)) {
+                return false;
+            }
+        } else {
+            $owner = hash('md5', $USER->username);
+            $ownercomphash = hash('md5', $USER->username . constants::M_COMPONENT . $cmid . date("Y-m-d"));
+        }
 
         // The REST API we are calling
         $functionname = 'local_cpapi_stage_remoteprocess_job';
@@ -725,7 +778,7 @@ class utils {
         $params['sourcemimetype'] = 'unknown';
 
         $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
-        $response = self::curl_fetch($serverurl, $params);
+        $response = self::curl_fetch($serverurl, $params, 'get', $timeout);
         if (!self::is_json($response)) {
             return false;
         }
@@ -806,7 +859,7 @@ class utils {
         $now = time();
         $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
         $tokenobject = $cache->get('azuretoken' . '_' . $apiregion);
-        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now) {
+        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now + self::STREAMING_TOKEN_MINLIFE) {
             // For js we set the valid number of seconds.
             $tokenobject->validseconds = $tokenobject->validuntil - $now;
             return $tokenobject;
@@ -851,7 +904,8 @@ class utils {
         }
     }
 
-    public static function fetch_cloudpoodll_audiochat_token($contextid, $voice, $disablevad, $resumehandle = '') {
+    public static function fetch_cloudpoodll_audiochat_token($contextid, $voice, $disablevad, $resumehandle = '',
+        $silencedurationms = 0, $turnmode = '', $model = '', $inputlanguage = '') {
 
         $cloudpoodlltoken = false;
         $conf = get_config(constants::M_COMPONENT);
@@ -876,10 +930,25 @@ class utils {
         $params['region'] = $poodllregion;
         $params['voice'] = $voice;
         $params['disablevad'] = $disablevad;
+        // How the turn is delimited, and how long a pause ends it in auto mode. The
+        // cloud endpoint bakes both into the token; disablevad is still sent so an
+        // older cloud server that does not know these two keeps working.
+        $params['silencedurationms'] = $silencedurationms;
+        $params['turnmode'] = $turnmode;
         // Resume handle for session resumption; the cloud endpoint must bake this
         // into the token's bidiGenerateContentSetup for the Constrained endpoint.
         if ($resumehandle !== '') {
             $params['resumehandle'] = $resumehandle;
+        }
+        // The Gemini Live model the admin chose, and the language hint for the transcript
+        // of the student's speech. The cloud endpoint bakes both into the token and returns
+        // them with it, so the client's setup matches. Sent only when set, but a cloud server
+        // that predates them rejects unknown keys, so it must be updated first.
+        if ($model !== '') {
+            $params['model'] = $model;
+        }
+        if ($inputlanguage !== '') {
+            $params['inputlanguage'] = $inputlanguage;
         }
 
         $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
@@ -921,7 +990,7 @@ class utils {
         $now = time();
         $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
         $tokenobject = $cache->get($tokentype . 'token' . '_' . $poodllregion);
-        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now) {
+        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now + self::STREAMING_TOKEN_MINLIFE) {
             // For js we set the valid number of seconds
             $tokenobject->validseconds = $tokenobject->validuntil - $now;
             return $tokenobject;
@@ -1034,7 +1103,7 @@ class utils {
 
         $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
         $tokenobject = $cache->get('msspeechtoken' . '_' . $msregion);
-        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now) {
+        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now + self::STREAMING_TOKEN_MINLIFE) {
             // For js we set the valid number of seconds
             $tokenobject->validseconds = $tokenobject->validuntil - $now;
             return $tokenobject;
@@ -1107,6 +1176,10 @@ class utils {
         } else if ($feedbacklanguage == constants::AIGRADE_FEEDBACK_NATIVE_LANGUAGE) {
             $feedbacklanguage = $moduleinstance->nativelang;
         }
+        // With no native language set ("--" is stored as '0'), feedback is in the target language.
+        if (empty($feedbacklanguage)) {
+            $feedbacklanguage = $moduleinstance->ttslanguage;
+        }
 
         if ($conf->setnativelanguage) {
             $userprefdeflanguage = get_user_preferences(constants::NATIVELANG_PREF);
@@ -1122,14 +1195,8 @@ class utils {
 
         // AI Grade
         $maxmarks = $item->{constants::TOTALMARKS};
-        switch ($item->type) {
-            case constants::TYPE_FREEWRITING:
-                $isspeech = false;
-                break;
-            case constants::TYPE_FREESPEAKING:
-            default:
-                $isspeech = true;
-        }
+        $itemtypeclass = self::fetch_itemtype_classname($item->type);
+        $isspeech = $itemtypeclass ? $itemtypeclass::ai_grade_uses_speech() : true;
         $instructions = new \stdClass();
         $instructions->feedbackscheme = $item->{constants::AIGRADE_FEEDBACK};
         $instructions->feedbacklanguage = $feedbacklanguage;
@@ -1140,6 +1207,19 @@ class utils {
 
         $instance = self::fetch_item_from_itemrecord($item, $moduleinstance);
         $instance->prepare_instructions_for_ai_grade($instructions);
+
+        // The grader is told the feedback language as a code, which it turns into a language name.
+        // "easy en-US" would not survive that, so the easy version is asked for in the prompt text instead.
+        $promptfeedbacklanguage = self::fetch_feedback_language($feedbacklanguage, $moduleinstance->ttslanguage);
+        $instructions->feedbackscheme = str_replace(
+            '{feedback language}',
+            $promptfeedbacklanguage,
+            (string) $instructions->feedbackscheme
+        );
+        if (trim($instructions->feedbackscheme) !== '' && $promptfeedbacklanguage !== $feedbacklanguage) {
+            $instructions->feedbackscheme = rtrim($instructions->feedbackscheme)
+                . ' Give feedback in ' . $promptfeedbacklanguage . '.';
+        }
 
         $cmcontext = context_module::instance($cm->id);
         $aigraderesults = self::fetch_ai_grade(
@@ -1169,9 +1249,15 @@ class utils {
             $aigraderesults->grammarerrors = $grammarerrors;
             $aigraderesults->grammarmatches = $grammarmatches;
             $aigraderesults->insertioncount = $insertioncount;
-            // For right to left languages we want to add the RTL direction and right justify.
-            if (self::is_rtl($feedbacklanguage)) {
-                $aigraderesults->rtl = constants::M_CLASS . '_rtl';
+        }
+        // The student's text and the corrections are in the lesson language, so they are shown in
+        // its direction (see get_text_direction()). The feedback direction comes from the feedback
+        // itself, because the AI does not always write in the language it was asked for.
+        if ($aigraderesults) {
+            $aigraderesults->contentdir = self::get_text_direction($moduleinstance->ttslanguage);
+            $aigraderesults->contentlang = $moduleinstance->ttslanguage;
+            if (!empty($aigraderesults->feedback)) {
+                $aigraderesults->feedbackdir = self::detect_text_direction($aigraderesults->feedback, $feedbacklanguage);
             }
         }
 
@@ -1215,6 +1301,50 @@ class utils {
             default:
                 return false;
         }
+    }
+
+    /**
+     * The writing direction of a language, for an HTML dir attribute.
+     *
+     * Lesson text should get its direction from a dir attribute, never from a CSS direction rule.
+     * On a right to left site Moodle flips every CSS direction rule in the theme, plugin styles
+     * included, so a rule cannot keep a passage left to right, or right to left, on all sites.
+     * The dir attribute is not touched, and the browser lays out text and punctuation from it.
+     *
+     * @param string $language A language code, e.g. en-US or ar-SA.
+     * @return string 'rtl' or 'ltr'
+     */
+    public static function get_text_direction($language) {
+        return self::is_rtl($language) ? 'rtl' : 'ltr';
+    }
+
+    /**
+     * The writing direction of AI feedback, for an HTML dir attribute.
+     *
+     * The AI does not always write in the language it was asked for, so that language alone cannot
+     * decide. Nor can dir="auto", which goes by the first letter: Arabic feedback often starts with a
+     * quoted English phrase. So we count letters, and lean towards the requested language: feedback
+     * asked for in a right to left language stays right to left while a fifth of its letters are in a
+     * right to left script (the rest being quoted examples); otherwise it takes a majority.
+     *
+     * @param string|array $text The text, or a list of lines.
+     * @param string $language The language the feedback was asked for, e.g. ar-SA.
+     * @return string 'rtl' or 'ltr'
+     */
+    public static function detect_text_direction($text, $language = '') {
+        if (is_array($text)) {
+            $text = implode(' ', array_filter($text, 'is_string'));
+        }
+        $text = (string) $text;
+        // Hebrew, Arabic, Syriac, Thaana, NKo and the other right to left scripts up to U+08FF,
+        // plus the Hebrew and Arabic presentation forms.
+        $rtlletters = preg_match_all('/[\x{0590}-\x{08FF}\x{FB1D}-\x{FDFF}\x{FE70}-\x{FEFF}]/u', $text);
+        $allletters = preg_match_all('/\p{L}/u', $text);
+        if ($allletters == 0) {
+            return self::get_text_direction($language);
+        }
+        $threshold = self::is_rtl($language) ? 0.2 : 0.5;
+        return $rtlletters / $allletters > $threshold ? 'rtl' : 'ltr';
     }
 
     // This function takes the 2-character language code ($lang) as input and returns the corresponding locale code.
@@ -1317,6 +1447,10 @@ class utils {
                 return 'cy-GB'; // Assuming Welsh (United Kingdom) is the default
             case 'vi':
                 return 'vi-VN'; // Assuming Vietnamese (Vietnam) is the default
+            case 'so':
+                return 'so-SO'; // Somali.
+            case 'ti':
+                return 'ti-ER'; // Assuming Tigrinya (Eritrea) is the default.
             default:
                 return $lang; // If no match, return the original lang code
         }
@@ -1857,7 +1991,7 @@ class utils {
     public static function pack_ttsdialogopts($data) {
         $opts = new \stdClass();
         // more overcaution
-        if (isset($opts->{constants::TTSDIALOGVISIBLE})) {
+        if (isset($data->{constants::TTSDIALOGVISIBLE})) {
             $opts->{constants::TTSDIALOGVISIBLE} = $data->{constants::TTSDIALOGVISIBLE};
         } else {
             $opts->{constants::TTSDIALOGVISIBLE} = false;
@@ -1870,6 +2004,13 @@ class utils {
             } else {
                 $opts->{$slot} = "Salli";
             }
+        }
+
+        // Speaker labels. Store blank when not set; a blank label falls back to the
+        // speakera/b/c language string at display time.
+        $labelslots = [constants::TTSDIALOGLABELA, constants::TTSDIALOGLABELB, constants::TTSDIALOGLABELC];
+        foreach ($labelslots as $slot) {
+            $opts->{$slot} = isset($data->{$slot}) ? trim($data->{$slot}) : '';
         }
 
         $optsjson = json_encode($opts);
@@ -1895,6 +2036,12 @@ class utils {
             } else {
                 $data->{$slot} = "Salli";
             }
+        }
+
+        // Speaker labels (may be absent on older records; default to blank).
+        $labelslots = [constants::TTSDIALOGLABELA, constants::TTSDIALOGLABELB, constants::TTSDIALOGLABELC];
+        foreach ($labelslots as $slot) {
+            $data->{$slot} = isset($opts->{$slot}) ? $opts->{$slot} : '';
         }
 
         return $data;
@@ -2122,6 +2269,61 @@ class utils {
         ];
     }
 
+    /**
+     * Languages a learner can pick as their first language.
+     *
+     * This is the taught-language list plus languages we can only translate into, not teach in.
+     * They are kept out of get_lang_options() because that list also drives the TTS voice pickers,
+     * the speech tester and the item forms, where a language with no voices does not belong.
+     *
+     * @return array of language code => display name
+     */
+    public static function get_nativelang_options() {
+        $langs = [];
+        // Walk the taught languages so the extra ones can be slotted into alphabetical order,
+        // rather than landing at the end of the list where nobody would look for them.
+        foreach (self::get_lang_options() as $langcode => $langname) {
+            $langs[$langcode] = $langname;
+            // No TTS or speech recognition for these, so they are offered as a first language only.
+            if ($langcode === constants::M_LANG_TEIN) {
+                $langs[constants::M_LANG_TIER] = get_string('ti-er', constants::M_COMPONENT);
+            }
+        }
+        return $langs;
+    }
+
+    /**
+     * The language to ask AI to write feedback in, for use inside a prompt.
+     *
+     * Some schools do not want the learner's first language used, so they set it to the target
+     * language. Feedback is then in the language being learned, so we ask for an easy version of it
+     * that the learner can follow. Only use this for prompt text: translation, RTL checks and anything
+     * that maps a language code to a name need the plain code.
+     *
+     * @param string $nativelang the learner's native language code, '' or '0' if not set
+     * @param string $targetlang the language the lesson teaches
+     * @return string the native language code, or "easy <targetlang>" if both are the same language
+     *                or the native language is not set
+     */
+    public static function fetch_feedback_language($nativelang, $targetlang) {
+        $nativelang = (string) $nativelang;
+        $targetlang = (string) $targetlang;
+        if ($targetlang === '') {
+            return $nativelang;
+        }
+        // The '0' value is the "--" option: no native language, so we use the target language.
+        if ($nativelang === '' || $nativelang === '0') {
+            return 'easy ' . $targetlang;
+        }
+        // Compare the base language, so that en-GB and en-US count as the same.
+        $basenative = strtolower(explode('-', $nativelang)[0]);
+        $basetarget = strtolower(explode('-', $targetlang)[0]);
+        if ($basenative === $basetarget) {
+            return 'easy ' . $targetlang;
+        }
+        return $nativelang;
+    }
+
     public static function has_compact_layout($langcode) {
         return array_key_exists($langcode, constants::KEYBOARD_LAYOUT_COMPACT);
     }
@@ -2172,6 +2374,8 @@ class utils {
             'tr' => constants::M_LANG_TRTR,
             'vi' => constants::M_LANG_VIVN,
             'uk' => constants::M_LANG_UKUA,
+            'so' => constants::M_LANG_SOSO,
+            'ti' => constants::M_LANG_TIER,
         ];
     }
 
@@ -2187,6 +2391,18 @@ class utils {
             constants::M_CONTWIDTH_COMPACT => get_string('contwidth-compact', constants::M_COMPONENT),
             constants::M_CONTWIDTH_WIDE => get_string('contwidth-wide', constants::M_COMPONENT),
             constants::M_CONTWIDTH_FULL => get_string('contwidth-full', constants::M_COMPONENT),
+        ];
+    }
+
+    /**
+     * Options for where the next page button sits under each item.
+     *
+     * @return array position key => display name
+     */
+    public static function get_nextbuttonalign_options() {
+        return [
+            constants::M_NEXTBUTTON_DEFAULT => get_string('nextbuttonalign-default', constants::M_COMPONENT),
+            constants::M_NEXTBUTTON_CENTER => get_string('nextbuttonalign-center', constants::M_COMPONENT),
         ];
     }
 
@@ -2313,10 +2529,21 @@ class utils {
         $mform->setDefault('richtextprompt', $config->prompttype);
 
         // Native lang options.
-        $langoptions = [0 => '--'] + self::get_lang_options();
+        $langoptions = [0 => '--'] + self::get_nativelang_options();
         $mform->addElement('select', 'nativelang', get_string('nativelang', constants::M_COMPONENT), $langoptions);
         $mform->setType('nativelang', PARAM_TEXT);
+        $mform->addHelpButton('nativelang', 'nativelang', constants::M_COMPONENT);
         $mform->setDefault('nativelang', $config->nativelang);
+
+        // Native language translation.
+        $mform->addElement(
+            'selectyesno',
+            'nativetranslation',
+            get_string('nativetranslation', constants::M_COMPONENT)
+        );
+        $mform->setType('nativetranslation', PARAM_INT);
+        $mform->addHelpButton('nativetranslation', 'nativetranslation', constants::M_COMPONENT);
+        $mform->setDefault('nativetranslation', $config->nativetranslation);
 
         // Allow continue attempts.
         $mform->addElement('selectyesno', 'allowcontinueattempts', get_string('allowcontinueattempts', constants::M_COMPONENT));
@@ -2352,6 +2579,12 @@ class utils {
         $mform->addElement('select', 'containerwidth', get_string('containerwidth', constants::M_COMPONENT), $widthoptions);
         $mform->addHelpButton('containerwidth', 'containerwidth', constants::M_COMPONENT);
         $mform->setDefault('containerwidth', $config->containerwidth);
+
+        // Next button alignment.
+        $alignoptions = self::get_nextbuttonalign_options();
+        $mform->addElement('select', 'nextbuttonalign', get_string('nextbuttonalign', constants::M_COMPONENT), $alignoptions);
+        $mform->addHelpButton('nextbuttonalign', 'nextbuttonalign', constants::M_COMPONENT);
+        $mform->setDefault('nextbuttonalign', $config->nextbuttonalign ?? constants::M_NEXTBUTTON_DEFAULT);
 
         // finishscreen
         $screenoptions = self::fetch_options_finishscreen();
@@ -2452,7 +2685,16 @@ class utils {
 
         $texttype = 'ssml';
         $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'polly');
-        $key = sha1($speaktext . '|' . $texttype . '|' . $voice);
+        // The speed option changes the synthesised audio, so it is part of the cache key - except
+        // for "normal" (and any unrecognised value, which also renders as normal), which is left
+        // out so that cache entries created before the speed option was keyed stay valid. Most
+        // audio is normal speed, so this avoids a site-wide re-generation.
+        $speedkey = in_array(
+            (int) $voiceoption,
+            [constants::TTS_SLOW, constants::TTS_VERYSLOW, constants::TTS_SSML],
+            true
+        ) ? '|' . (int) $voiceoption : '';
+        $key = sha1($speaktext . '|' . $texttype . '|' . $voice . $speedkey);
         $pollyurl = $cache->get($key);
         if ($pollyurl && !empty($pollyurl)) {
             return $pollyurl;
@@ -2777,19 +3019,23 @@ class utils {
             $itemorder = $DB->get_field(constants::M_QTABLE, 'itemorder', ['id' => $itemid]);
         }
 
-        [$in, $params] = $DB->get_in_or_equal(
-            [constants::TYPE_FREEWRITING, constants::TYPE_FREESPEAKING],
-            SQL_PARAMS_NAMED
-        );
-        $params['minilessonid'] = $lessonid;
-        $params['itemorder'] = $itemorder > 0 ? $itemorder : 0;
+        $params = [
+            'minilessonid' => $lessonid,
+            'itemorder' => $itemorder > 0 ? $itemorder : 0,
+        ];
         $alllessonitems = $DB->get_records_select(
             constants::M_QTABLE,
-            "minilesson = :minilessonid AND type {$in} AND itemorder < :itemorder",
+            "minilesson = :minilessonid AND itemorder < :itemorder",
             $params
         );
 
-        return $alllessonitems;
+        // Keep only the item types that collect a student response later items can be given as
+        // context. Asking the item types rather than naming them here means a new item type that
+        // collects one is included without the parent plugin knowing about it.
+        return array_filter($alllessonitems, function($lessonitem) {
+            $itemtypeclass = self::fetch_itemtype_classname($lessonitem->type);
+            return $itemtypeclass && $itemtypeclass::produces_student_text();
+        });
     }
 
     public static function latest_attempt($courseid, $lessonid) {
@@ -2945,6 +3191,12 @@ class utils {
             case  constants::M_LANG_VIVN:
                 $ret = "Vietnamese";
                 break; // => get_string('vi-vn',constants::M_COMPONENT)
+            case constants::M_LANG_SOSO:
+                $ret = "Somali";
+                break;
+            case constants::M_LANG_TIER:
+                $ret = "Tigrinya";
+                break;
         }
         return $ret;
     }
@@ -2961,11 +3213,47 @@ class utils {
         return rtrim(sprintf("%s_%s", $subplugintype, (string) $type), '_');
     }
 
-    public static function get_subitem_name($type = null, $subplugintype = constants::SUBPLUGINTYPES['item']) {
-        $itemtypename = get_string('pluginname', self::get_sub_component($type, $subplugintype));
-        if (get_string_manager()->string_exists($type, constants::M_COMPONENT)) {
-            $itemtypename = get_string($type, constants::M_COMPONENT);
+    /**
+     * Fetch the item types installed on this site.
+     *
+     * Item types are subplugins, so the installed set is whatever is present in item/ - it is
+     * never a list held by the parent plugin. Always use this rather than constants::ITEMTYPES,
+     * so that third party item types are included.
+     *
+     * @param bool $enabledonly Only return item types that are enabled (and configured) on this site.
+     * @return string[] Item type names, e.g. ['multichoice', 'page', ...].
+     */
+    public static function fetch_itemtypes($enabledonly = false) {
+        $plugins = \core_plugin_manager::instance()->get_plugins_of_type(constants::SUBPLUGINTYPES['item']);
+        $itemtypes = [];
+        foreach ($plugins as $plugin) {
+            if ($enabledonly && !$plugin->is_enabled()) {
+                continue;
+            }
+            $itemtypes[] = $plugin->name;
         }
-        return $itemtypename;
+        return $itemtypes;
+    }
+
+    /**
+     * Fetch the display name of an item type.
+     *
+     * The item type subplugin owns its own name (its 'pluginname' string). The parent plugin's
+     * lang file is only consulted as a legacy fallback, for the item types that were named there
+     * before item types became fully self describing.
+     *
+     * @param string $type The item type name, e.g. 'multichoice'.
+     * @param string $subplugintype The subplugin type, defaults to the item subplugin type.
+     * @return string
+     */
+    public static function get_subitem_name($type = null, $subplugintype = constants::SUBPLUGINTYPES['item']) {
+        $subcomponent = self::get_sub_component($type, $subplugintype);
+        if (get_string_manager()->string_exists('pluginname', $subcomponent)) {
+            return get_string('pluginname', $subcomponent);
+        }
+        if (get_string_manager()->string_exists($type, constants::M_COMPONENT)) {
+            return get_string($type, constants::M_COMPONENT);
+        }
+        return (string) $type;
     }
 }

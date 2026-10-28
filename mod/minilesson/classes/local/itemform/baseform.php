@@ -381,8 +381,17 @@ abstract class baseform extends \moodleform {
         // $this->add_static_text('ttsdialog_instructions',null,get_string('ttsdialoginstructions', constants::M_COMPONENT));
 
         $this->add_ttsaudioselect(constants::TTSDIALOGVOICEA, get_string('ttsdialogvoicea', constants::M_COMPONENT));
+        $mform->addElement('text', constants::TTSDIALOGLABELA, get_string('ttsdialoglabela', constants::M_COMPONENT),
+            ['placeholder' => get_string('speakera', constants::M_COMPONENT)]);
+        $mform->setType(constants::TTSDIALOGLABELA, PARAM_TEXT);
         $this->add_ttsaudioselect(constants::TTSDIALOGVOICEB, get_string('ttsdialogvoiceb', constants::M_COMPONENT));
+        $mform->addElement('text', constants::TTSDIALOGLABELB, get_string('ttsdialoglabelb', constants::M_COMPONENT),
+            ['placeholder' => get_string('speakerb', constants::M_COMPONENT)]);
+        $mform->setType(constants::TTSDIALOGLABELB, PARAM_TEXT);
         $this->add_ttsaudioselect(constants::TTSDIALOGVOICEC, get_string('ttsdialogvoicec', constants::M_COMPONENT));
+        $mform->addElement('text', constants::TTSDIALOGLABELC, get_string('ttsdialoglabelc', constants::M_COMPONENT),
+            ['placeholder' => get_string('speakerc', constants::M_COMPONENT)]);
+        $mform->setType(constants::TTSDIALOGLABELC, PARAM_TEXT);
         $mform->addElement('textarea', constants::TTSDIALOG, get_string('ttsdialog', constants::M_COMPONENT), ['wrap' => 'virtual', 'style' => 'width: 100%;', 'placeholder' => 'A) Hello&#10;B) Goodbye']);
         $mform->setType(constants::TTSDIALOG, PARAM_RAW);
         $mform->addElement('advcheckbox', constants::TTSDIALOGVISIBLE, get_string('ttsdialogvisible', constants::M_COMPONENT), get_string('ttsdialogvisible_desc', constants::M_COMPONENT));
@@ -859,6 +868,37 @@ abstract class baseform extends \moodleform {
     final protected function add_languageselect($name, $label = null, $default = false) {
         $langoptions = utils::get_lang_options();
         $this->add_dropdown($name, $label, $langoptions, $default);
+    }
+
+    /**
+     * Convenience function: Adds the dropdown for the language the AI writes its feedback in.
+     *
+     * The feedback is read by the student in their first language and is never spoken, so the
+     * options come from the native language list, which also carries the languages we have no
+     * voice for. Do not use the taught-language list here.
+     *
+     * @param string $name the form element name, as the item type stores it
+     * @return void
+     */
+    final protected function add_feedbacklanguageselect($name) {
+        // An item may be exported from one lesson and imported into another, so offer the two
+        // generic options that follow whatever the lesson it lands in is set to.
+        $langoptions = [
+            constants::AIGRADE_FEEDBACK_TARGET_LANGUAGE => get_string('defaulttargetlanguage', constants::M_COMPONENT),
+            constants::AIGRADE_FEEDBACK_NATIVE_LANGUAGE => get_string('defaultnativelanguage', constants::M_COMPONENT),
+        ] + utils::get_nativelang_options();
+
+        $default = $this->moduleinstance->nativelang
+            ? constants::AIGRADE_FEEDBACK_NATIVE_LANGUAGE
+            : $this->moduleinstance->ttslanguage;
+
+        $this->add_dropdown(
+            $name,
+            get_string('aigrade_feedback_language', constants::M_COMPONENT),
+            $langoptions,
+            $default
+        );
+        $this->_form->addHelpButton($name, 'aigrade_feedback_language', constants::M_COMPONENT);
     }
 
     /**

@@ -27,7 +27,7 @@
   {{/reviewsettings.showreviewdetailed}}
   <div class="mlfsr_originaltext_container">
     <b class="para-bold-title">{{#str}}original, mod_minilesson{{/str}}</b>
-    <br/><span class="mlfsr_originaltext">{{{markeduppassage}}}</span>
+    <br/><div class="mlfsr_originaltext"{{#contentdir}} dir="{{contentdir}}" lang="{{contentlang}}"{{/contentdir}}>{{{markeduppassage}}}</div>
   </div>
   {{^reviewsettings.hidecorrections}}
     <div class="mlfsr_correctedtext_container mb-3">
@@ -35,7 +35,7 @@
         <b class="para-bold-title">{{#str}}corrected, mod_minilesson{{/str}}</b>
         {{>mod_minilesson/summary_togglecorrections}}
       </div>
-      <span class="mlfsr_correctedtext">{{{markedupcorrections}}}</span>
+      <div class="mlfsr_correctedtext"{{#contentdir}} dir="{{contentdir}}" lang="{{contentlang}}"{{/contentdir}}>{{{markedupcorrections}}}</div>
     </div>
   {{/reviewsettings.hidecorrections}}
   <!--<div class="ml_freespeaking_results_summaries">
@@ -69,7 +69,7 @@
   </div>
   <br/>
   <b class="freewriting-feedback-title">{{#str}}feedback, mod_minilesson{{/str}}</b>
-  <ul class="freewriting-feedback-list {{rtl}}">
+  <ul class="freewriting-feedback-list" dir="{{#feedbackdir}}{{feedbackdir}}{{/feedbackdir}}{{^feedbackdir}}auto{{/feedbackdir}}">
     {{#feedback}}
       <li>
         {{.}}
@@ -77,6 +77,19 @@
     {{/feedback}}
   </ul>
 </div>
+{{#cpage}}
+  {{^teacherreport}}
+    {{#canshare}}
+      <div class="ml_cpage_consent form-check" data-itemid="{{itemid}}">
+        <input class="form-check-input ml_cpage_consent_checkbox" type="checkbox"
+               id="{{uniqid}}_cpage_consent" {{#consent}}checked{{/consent}}>
+        <label class="form-check-label" for="{{uniqid}}_cpage_consent">
+          <b>{{#str}}cpage_sharethis, mod_minilesson{{/str}}</b>: {{#str}}cpage_sharethis_details, mod_minilesson{{/str}}
+        </label>
+      </div>
+    {{/canshare}}
+  {{/teacherreport}}
+{{/cpage}}
 {{^noreattempt}}
   <div class="minilesson_actionbutton">
     <a class="btn center reattempt_btn" href="#" id = "{{uniqid}}_reattempt">
@@ -88,7 +101,15 @@
 
 {{^element.frozen}}
   {{#js}}
-      require(['jquery', 'core/notification', 'core/log'], function($, notification, log) {
+      require(['jquery', 'core/notification', 'core/log', 'core/ajax'], function($, notification, log, Ajax) {
+        var consentbox = $('#{{uniqid}}_cpage_consent');
+        consentbox.on('change', function(e) {
+          var itemid = consentbox.closest('.ml_cpage_consent').data('itemid');
+          Ajax.call([{
+              methodname: 'mod_minilesson_set_cpage_consent',
+              args: {itemid: itemid, consent: e.target.checked}
+          }])[0].fail(notification.exception);
+        });
         var reattemptbutton = $('#{{uniqid}}_reattempt');
         reattemptbutton.on('click',function(e){
           e.preventDefault();
@@ -96,6 +117,7 @@
                               '{{#str}}reallyreattempt, mod_minilesson{{/str}}',
                               '{{#str}}reattempt, mod_minilesson{{/str}}','',
                               function(){
+                                  reattemptbutton.trigger('reattempted');
                                   reattemptbutton .closest('.ml_freewriting_resultsbox').hide();
                                   reattemptbutton .closest('.ml_freewriting_pendingbox').hide();
                                   reattemptbutton .closest('.ml_freewriting_resultsbox').siblings('.ml_freewriting_actionbox').show();

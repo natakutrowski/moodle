@@ -17,6 +17,22 @@ define(['jquery', 'core/log'], function ($, log) {
         ready: false,
         finaltext: '',
         lang: 'en-US',
+        //turn_order restarts at zero on each new socket, so shift incoming turns past the previous
+        //session's turns rather than letting them overwrite it.
+        turnbase: 0,
+        //highest turn_order seen on the current socket generation.
+        maxturn: -1,
+        //set while finish() waits for the server to flush its last turn, see finish().
+        onterminated: null,
+        //how long finish() waits for the server's Termination message before giving up, in ms.
+        terminatetimeout: 3000,
+        //the current socket generation: {epoch, turnbase, maxturn}. Each socket keeps its own, so a socket that is
+        //still flushing after a token refresh files its last turn under its own numbering.
+        generation: null,
+        //bumped by init() and cancel(), so a socket still flushing from an earlier recording cannot write into this one.
+        epoch: 0,
+        //turn slots left free after a generation, for a turn the old socket starts while it is flushing.
+        turngap: 5,
 
         //for making multiple instances
         clone: function () {
@@ -27,11 +43,39 @@ define(['jquery', 'core/log'], function ($, log) {
             this.speechtoken = speechtoken;
             this.audiohelper = theaudiohelper;
             this.lang = theaudiohelper.therecorder.lang;
+            this.finals = [];
+            this.finaltext = '';
+            this.turnbase = 0;
+            this.maxturn = -1;
+            this.generation = null;
+            this.epoch++;
             this.preparesocket();
+        },
+
+        /*
+        * A socket generation is one AssemblyAI session. A token refresh closes the socket and opens a new
+        * one, and the new session restarts turn_order at zero. Push turn numbering past whatever the previous
+        * generation used, otherwise the incoming turns overwrite it and everything spoken before the refresh
+        * is silently lost.
+         */
+        rollgeneration: function () {
+            var previous = this.generation;
+            this.generation = {
+                epoch: this.epoch,
+                //leave a few free turn slots after the previous generation: it may still be flushing, see updatetoken()
+                turnbase: previous ? previous.turnbase + previous.maxturn + 1 + this.turngap : 0,
+                maxturn: -1
+            };
+            //the flat fields mirror the current generation, for anything reading them
+            this.turnbase = this.generation.turnbase;
+            this.maxturn = -1;
+            log.debug('TT Streamer new generation. turnbase=' + this.turnbase);
         },
 
         preparesocket: function () {
             var that = this;
+
+            this.rollgeneration();
 
             // establish wss with AssemblyAI Universal Streaming at 16000 sample rate
             var basehost = 'wss://streaming.assemblyai.com';
@@ -66,6 +110,11 @@ define(['jquery', 'core/log'], function ($, log) {
 
 
             // handle incoming messages which contain the transcription
+            //These handlers must only act on their own socket and generation. After a token refresh the old socket
+            //is still open for a moment, flushing its last turn, while the new one is already in place.
+            var thissocket = this.socket;
+            var thisgeneration = this.generation;
+
             this.socket.onmessage = function (message) {
                 try {
                     const payload = JSON.parse(message.data);
@@ -78,10 +127,16 @@ define(['jquery', 'core/log'], function ($, log) {
                             break;
 
                         case 'Turn':
-                            that.handlefinalresponse(payload);
+                            //a socket still flushing from an earlier recording has nothing to add to this one
+                            if (thisgeneration.epoch === that.epoch) {
+                                that.handlefinalresponse(payload, thisgeneration);
+                            }
                             break;
                         case 'Termination':
-                            //Do something on termination if we need to
+                            //the server has sent everything it is going to send, see finish()
+                            if (that.socket === thissocket && that.onterminated) {
+                                that.onterminated();
+                            }
                             break;
 
                         default:
@@ -95,26 +150,63 @@ define(['jquery', 'core/log'], function ($, log) {
 
             this.socket.onopen = () => {
                 log.debug('TT Streamer socket opened');
-                that.finaltext = '';
-                that.finals = [];
+                //note: we deliberately do NOT clear finals/finaltext here. On a token refresh this fires
+                //again mid recording, and clearing would discard everything captured so far. init() resets.
                 that.audiohelper.onSocketReady('fromsocketopen');
             };
 
+            //Clearing that.socket from an old socket's close event would silently stop everything after a refresh
+            //from being transcribed, hence the checks.
             this.socket.onerror = (event) => {
                 log.debug(event);
-                that.doclosesocket();
+                if (that.socket === thissocket) {
+                    that.doclosesocket();
+                    if (that.onterminated) {
+                        that.onterminated();
+                    }
+                }
             };
 
             this.socket.onclose = (event) => {
                 log.debug(event);
-                that.socket = null;
+                if (that.socket === thissocket) {
+                    that.socket = null;
+                    if (that.onterminated) {
+                        that.onterminated();
+                    }
+                }
             };
         },
 
+        /*
+        * Move to a new socket with a fresh token. The old socket is asked to Terminate but left open, so the server
+        * can still send the turn that was in progress: closing it straight away lost the end of whatever the student
+        * was saying at the moment of the refresh. New audio goes to the new socket, buffered until its session begins.
+         */
         updatetoken: function (newtoken) {
             var that = this;
-            if (that.socket) {
-                that.doclosesocket();
+            var oldsocket = that.socket;
+            that.socket = null;
+            if (oldsocket) {
+                if (oldsocket.readyState === WebSocket.OPEN) {
+                    try {
+                        oldsocket.send(JSON.stringify({type: 'Terminate'}));
+                    } catch (error) {
+                        log.debug('TT Streamer could not Terminate the old socket: ' + error);
+                    }
+                    //the server closes it after its Termination message, but do not rely on that
+                    setTimeout(function () {
+                        if (oldsocket.readyState === WebSocket.OPEN || oldsocket.readyState === WebSocket.CONNECTING) {
+                            oldsocket.close();
+                        }
+                    }, that.terminatetimeout);
+                } else {
+                    try {
+                        oldsocket.close();
+                    } catch (error) {
+                        log.debug('TT Streamer could not close the old socket: ' + error);
+                    }
+                }
             }
             that.speechtoken = newtoken;
             that.preparesocket();
@@ -159,8 +251,8 @@ define(['jquery', 'core/log'], function ($, log) {
 
         sendaudio: function (audiodata) {
             var that = this;
-            //Send it off !!
-            if (that.socket && that.socket.readyState === WebSocket.OPEN) {
+            //Send it off !! (but never after we have told the server we are finished)
+            if (that.socket && that.socket.readyState === WebSocket.OPEN && !that.onterminated) {
                 that.socket.send(audiodata);
             }
         },
@@ -172,24 +264,46 @@ define(['jquery', 'core/log'], function ($, log) {
             if (this.ready === undefined || !this.ready) {
                 return;
             }
+            //already finishing
+            if (this.onterminated) {
+                return;
+            }
             log.debug('committing universal response');
 
-            this.doclosesocket();
-
-
-            log.debug('setting time out to build transcript');
-            setTimeout(function () {
+            //Terminate asks the server to flush the turn in progress, which arrives after it, followed by a Termination
+            //message. Closing the socket straight away (as we used to) threw that last turn away, so a student who
+            //stopped right after speaking lost their last words. So we wait for Termination, the socket closing, or a
+            //timeout, whichever comes first, and only then build the transcript.
+            var timer = null;
+            var complete = function () {
+                if (that.onterminated !== complete) {
+                    return;
+                }
+                that.onterminated = null;
+                clearTimeout(timer);
                 var finaltranscript = that.buildtranscript();
                 log.debug('sending final speech capture event');
                 that.audiohelper.onfinalspeechcapture(finaltranscript);
                 that.cleanup();
-            }, 1000);
+            };
+            this.onterminated = complete;
+
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                log.debug('sending Terminate and waiting for the last turn');
+                this.socket.send(JSON.stringify({type: 'Terminate'}));
+                timer = setTimeout(complete, this.terminatetimeout);
+            } else {
+                complete();
+            }
         },
 
         cancel: function () {
+            //a pending finish() must not deliver a transcript after we have been cancelled
+            this.onterminated = null;
+            this.epoch++;
             this.ready = false;
             this.earlyaudio = [];
-            this.finals = {};
+            this.finals = [];
             this.finaltext = '';
             if (this.socket) {
                 this.doclosesocket();
@@ -234,14 +348,27 @@ define(['jquery', 'core/log'], function ($, log) {
         },
 
 
-        handlefinalresponse: function (payload) {
+        handlefinalresponse: function (payload, generation) {
             var that = this;
             var thistranscript = payload.transcript || "";
+            generation = generation || that.generation;
+
+            //turn_order is per session, so shift it past any earlier socket generation
+            var turnorder = payload.turn_order || 0;
+            if (turnorder > generation.maxturn) {
+                generation.maxturn = turnorder;
+                if (generation === that.generation) {
+                    that.maxturn = turnorder;
+                }
+            }
+            var turnindex = generation.turnbase + turnorder;
+
              //process finals
-            that.finals[payload.turn_order] = thistranscript;
+            that.finals[turnindex] = thistranscript;
             that.finaltext = this.buildtranscript();
-            that.audiohelper.oninterimspeechcapture(thistranscript);
-            log.debug('TT Streamer final transcript update: ' + thistranscript);
+            //the interim callback expects the cumulative transcript, not just this turn's text
+            that.audiohelper.oninterimspeechcapture(that.finaltext);
+            log.debug('TT Streamer final transcript update (turn ' + turnindex + '): ' + thistranscript);
         },
 
 

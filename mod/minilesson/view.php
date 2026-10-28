@@ -81,8 +81,36 @@ $event->trigger();
 $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 
-// Log usage to CloudPoodll.
-utils::stage_remote_process_job($moduleinstance->ttslanguage, $cm->id);
+// CampusFR performance fix: queue CloudPoodll usage logging outside the web request.
+// This is best-effort instrumentation, not part of displaying or grading the lesson.
+// In particular, a slow CloudPoodll request must not hold the Moodle session lock.
+// Throttle repeated hits for the same user and activity for 60 seconds to limit floods.
+try {
+    $logcache = \cache::make_from_params(\cache_store::MODE_APPLICATION, 'mod_minilesson', 'cloudpoodllviewthrottle');
+    $logcachekey = 'u' . (int)$USER->id . 'cm' . (int)$cm->id;
+    $lastqueued = $logcache->get($logcachekey);
+    if ($lastqueued === false || (int)$lastqueued <= time() - 60) {
+        $task = new \mod_minilesson\task\cloudpoodll_usage_log();
+        $task->set_userid((int)$USER->id);
+        // Capture the pseudonymous CloudPoodll identity while the original user is active.
+        // Do not store the username in the task payload. Preserve the view's calendar date,
+        // since the cron may run after midnight.
+        $ownername = (string)$USER->username;
+        $task->set_custom_data([
+            'cmid' => (int)$cm->id,
+            'language' => (string)$moduleinstance->ttslanguage,
+            'owner' => md5($ownername),
+            'ownercomphash' => md5($ownername . constants::M_COMPONENT . (int)$cm->id . date('Y-m-d')),
+        ]);
+        $task->set_attempts_available(2);
+        // Do not enqueue a duplicate task for the same user/activity while one is pending.
+        \core\task\manager::queue_adhoc_task($task, true);
+        $logcache->set($logcachekey, time());
+    }
+} catch (\Throwable $e) {
+    // Optional analytics must never make a lesson inaccessible.
+    error_log('[mod_minilesson] Unable to queue CloudPoodll usage log: ' . $e->getMessage());
+}
 
 // are we a teacher or a student?
 $mode = "view";
@@ -113,6 +141,20 @@ if ($moduleinstance->foriframe == 1 || $moduleinstance->pagelayout == 'embedded'
 // Get our renderers.
 /** @var mod_minilesson\output\renderer $renderer */
 $renderer = $PAGE->get_renderer('mod_minilesson');
+
+// Without working Cloud Poodll credentials the lesson cannot run at all. Admins get an in page
+// setup panel, everybody else gets an explanation. This happens before any attempt is created.
+$credentialserror = $embed == 0 ? \mod_minilesson\cbcredentials::credentials_error() : '';
+if (!empty($credentialserror)) {
+    if (has_capability('mod/minilesson:evaluate', $modulecontext)) {
+        echo $renderer->header($moduleinstance, $cm, $mode, null, get_string('view', constants::M_COMPONENT));
+    } else {
+        echo $renderer->notabsheader($moduleinstance, $embed);
+    }
+    echo $renderer->show_cbcredentials_setup($PAGE->url, $credentialserror);
+    echo $renderer->footer();
+    die;
+}
 
 $continue_form_url = $PAGE->url; //new moodle_url('/mod/minilesson/view.php', ['id' => $cm->id, 'embed' => $embed]);
 $continue_form = new attempt_continue_form($continue_form_url);
@@ -196,10 +238,14 @@ if (!empty($moduleinstance->lessonfont)) {
 $comptest = new \mod_minilesson\comprehensiontest($cm);
 $itemcount = $comptest->fetch_item_count();
 
-// If we have slides, load the (locally shipped) reveal.js CSS. The theme CSS is loaded lazily by
-// the slides item JS (item/slides/amd/src/reveal.js) from the same local css directory.
-if ($comptest->has_slides_items()) {
-    $PAGE->requires->css(new moodle_url('/mod/minilesson/item/slides/css/reveal.min.css'));
+// Let the item types used in this lesson add their own page requirements (CSS/JS they ship).
+$comptest->add_item_page_requirements($PAGE);
+
+// Moodle 5.3+ can add a course navigation footer with its own next/previous buttons. Hide it while the
+// lesson is running so it is not confused with our next button, but keep it on the finished screen.
+$lessonrunning = $itemcount > 0 && $latestattempt->status != constants::M_STATE_COMPLETE;
+if ($lessonrunning && method_exists($PAGE, 'set_show_navigation_footer')) {
+    $PAGE->set_show_navigation_footer(false);
 }
 
 // From here we actually display the page.

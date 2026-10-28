@@ -32,11 +32,34 @@ class itemtype extends item {
     /** @var array Language skills (or "content") this item type focuses on. */
     public static $skills = [constants::SKILL_VOCABULARY];
 
+    /** @var bool this item type produces no grade/result. */
+    public $gradeable = false;
 
     protected $needsspeechrec = false;
 
-    protected $nofile = "nofile";
+    /** @var string The column holding the display mode (cards or list). */
+    public const DISPLAYMODE = 'customint3';
 
+    /** @var int Display mode: one card at a time in a carousel. */
+    public const DISPLAY_CARDS = 0;
+
+    /** @var int Display mode: all cards on one page as a glossary list. */
+    public const DISPLAY_LIST = 1;
+
+    /**
+     * Load the (locally shipped) Swiper CSS in the page head. The carousel markup relies on
+     * these rules to clip to a single card, and this item's own stylesheet makes the slide list
+     * a flex row from first paint, so fetching the Swiper CSS lazily would leave a window in
+     * which every card is laid out side by side. The Swiper library itself is still loaded
+     * lazily by this item's JS (amd/src/itemtype.js).
+     *
+     * @param \moodle_page $page The page to add requirements to.
+     * @return void
+     */
+    #[Override]
+    public static function page_requirements(\moodle_page $page) {
+        $page->requires->css(new \moodle_url('/mod/minilesson/item/cards/css/swiper-bundle.min.css'));
+    }
 
     /**
      * Export the data for the mustache template.
@@ -54,6 +77,11 @@ class itemtype extends item {
         $testitem->rtl = utils::is_rtl($this->language);
 
         $testitem->readsentence = $this->itemrecord->{constants::READSENTENCE} == 1;
+
+        // Display mode: cards (carousel) or list (glossary, all cards on one page).
+        $testitem->listview = !empty($this->itemrecord->{self::DISPLAYMODE})
+            && $this->itemrecord->{self::DISPLAYMODE} == self::DISPLAY_LIST;
+        $testitem->cardsview = !$testitem->listview;
 
         // Cloud Poodll.
         $maxtime = 0;
@@ -80,10 +108,10 @@ class itemtype extends item {
 
         foreach ($testitem->sentences as $sentence) {
             $sentence->uniqid = uniqid('audio-' . $sentence->index . '-');
-            $sentence->ttsautoplay = $sentence->audiourl == $this->nofile ? 0 : 1;
+            // In the list view every card is on screen at once, so nothing autoplays.
+            $sentence->ttsautoplay = (empty($sentence->audiourl) || $testitem->listview) ? 0 : 1;
             $sentence->ttsaudiovoice = $testitem->usevoice;
             $sentence->audiosrc = $sentence->audiourl;
-            $sentence->audiourl = $sentence->audiourl == $this->nofile ? null : $sentence->audiourl;
         }
         return $testitem;
     }
@@ -99,9 +127,12 @@ class itemtype extends item {
         $index = 0;
         $sentenceobjects = [];
 
-        // Prepare sentence media.
+        // Prepare sentence media. Line 1 audio lives in customfile1_audio, line 3 audio in customfile2_audio.
         $sentenceimages = $this->fetch_sentence_media('image', 1);
         $sentenceaudio = $this->fetch_sentence_media('audio', 1);
+        $line3audio = $this->fetch_sentence_media('audio', 2);
+
+        $readsentence = !empty($this->itemrecord->{constants::READSENTENCE});
 
         $sentenceindex = 0;
         foreach ($sentences as $sentence) {
@@ -116,6 +147,7 @@ class itemtype extends item {
             $cardline1 = "";
             $cardline2 = "";
             $cardline3 = "";
+            $cardline4 = "";
 
             // if we have a pipe prompt = array[0] and response = array[1]
             $cardlines = explode('|', $sentence);
@@ -125,15 +157,17 @@ class itemtype extends item {
                 if (count($cardlines) > 2) {
                     $cardline3 = utils::super_trim($cardlines[2]);
                 }
+                if (count($cardlines) > 3) {
+                    $cardline4 = utils::super_trim($cardlines[3]);
+                }
             } else {
                 $cardline1 = $sentence;
             }
 
-            // We prepare the audio url.
+            // Card (line 1) audio: an uploaded file always wins, otherwise TTS when "read card text" is on.
             if (isset($sentenceaudio[$sentenceindex])) {
                 $theaudiourl = $sentenceaudio[$sentenceindex];
-            } else {
-                // If we have no custom audio then we use the polly audio.
+            } else if ($readsentence) {
                 $theaudiourl = utils::fetch_polly_url(
                     $this->token,
                     $this->region,
@@ -142,6 +176,24 @@ class itemtype extends item {
                     $this->itemrecord->{constants::POLLYVOICE},
                     $this->moduleinstance->id
                 );
+            } else {
+                $theaudiourl = false;
+            }
+
+            // Line 3 audio: same rule, but it never autoplays (tap the line/speaker icon to play).
+            if (isset($line3audio[$sentenceindex])) {
+                $line3audiourl = $line3audio[$sentenceindex];
+            } else if ($readsentence && $cardline3 !== '') {
+                $line3audiourl = utils::fetch_polly_url(
+                    $this->token,
+                    $this->region,
+                    $cardline3,
+                    $this->itemrecord->{constants::POLLYOPTION},
+                    $this->itemrecord->{constants::POLLYVOICE},
+                    $this->moduleinstance->id
+                );
+            } else {
+                $line3audiourl = false;
             }
 
             // Build the sentence object.
@@ -152,9 +204,11 @@ class itemtype extends item {
             $s->cardline1 = $cardline1;
             $s->cardline2 = $cardline2;
             $s->cardline3 = $cardline3;
+            $s->cardline4 = $cardline4;
             $s->length = \core_text::strlen($s->sentence);
             $s->imageurl = isset($sentenceimages[$sentenceindex]) ? $sentenceimages[$sentenceindex] : false;
             $s->audiourl = $theaudiourl;
+            $s->line3audiourl = $line3audiourl;
 
             $index++;
             $sentenceobjects[] = $s;
@@ -163,17 +217,157 @@ class itemtype extends item {
     }
 
 
+    /**
+     * Validates an import record for this item type.
+     *
+     * @param \stdClass $newrecord the db-ready import record
+     * @param \stdClass $cm the course module
+     * @return false|\stdClass false when valid, or an error object with col and message
+     */
     public static function validate_import($newrecord, $cm) {
         $error = new \stdClass();
         $error->col = '';
         $error->message = '';
 
-        if ($newrecord->customtext1 == '') {
+        $cards = array_filter(array_map('trim', explode(PHP_EOL, (string) $newrecord->customtext1)), function ($card) {
+            return $card !== '';
+        });
+        if (count($cards) == 0) {
             $error->col = 'customtext1';
             $error->message = get_string('error:emptyfield', constants::M_COMPONENT);
             return $error;
         }
         return false;
+    }
+
+    /**
+     * When and why to choose this item type (agent-facing, used by the aigen web services).
+     *
+     * @return string
+     */
+    public static function aigen_fetch_usage() {
+        return 'A series of browsable cards, each showing a word or phrase with optional extra text lines '
+            . '(translation, model sentence, model sentence translation), an optional picture and optional audio. '
+            . 'There is no question and no grade. Use it to introduce new vocabulary or phrases before they are '
+            . 'practised by other item types.';
+    }
+
+    /**
+     * The agent-facing import field spec for cards. Option meanings mirror the authoring form
+     * (see custom_definition in itemform.php); keep the two in sync when changing form options.
+     *
+     * @return array the import spec (usage, fields, fileareas, example)
+     */
+    public static function aigen_fetch_import_spec() {
+        $fields = static::aigen_common_import_field_specs(['type', 'name', 'visible', 'instructions',
+            'timelimit', 'layout']);
+        $fields['type']['example'] = 'cards';
+
+        $ownfields = [
+            'sentences' => [
+                'required' => true,
+                'description' => 'The cards, as an array of strings, one card per entry with up to four '
+                    . 'pipe-separated text lines: "word|translation|model sentence|model sentence translation". '
+                    . 'Only the first line is required. Around 5 to 10 cards works well.',
+                'example' => '["airport|Flughafen|The airport is always busy.|Der Flughafen ist immer voll."]',
+            ],
+            'dictationstyle' => [
+                'description' => 'Whether the card word (line 1) and model sentence (line 3) are read aloud '
+                    . 'by TTS using the promptvoice.',
+                'options' => [
+                    ['value' => '0', 'meaning' => 'No TTS audio (default)'],
+                    ['value' => '1', 'meaning' => 'Read the word and model sentence aloud'],
+                ],
+            ],
+            'promptvoice' => [
+                'description' => 'The TTS voice that reads the card text aloud (used with dictationstyle=1). '
+                    . 'A voice display name (case-insensitive), e.g. "Joey" (en-US) or "Mathieu" (fr-FR), '
+                    . 'or "auto" to let the server pick a voice matching the lesson language.',
+                'example' => 'auto',
+            ],
+            'promptvoiceopt' => [
+                'description' => 'Reading speed / processing option for the card TTS audio.',
+                'options' => [
+                    ['value' => 'normal', 'meaning' => 'Normal speed (default; any unrecognised value also maps to normal)'],
+                    ['value' => 'slow', 'meaning' => 'Slow reading speed'],
+                    ['value' => 'veryslow', 'meaning' => 'Very slow reading speed'],
+                ],
+            ],
+            'displaymode' => [
+                'description' => 'How the cards are shown to the learner.',
+                'options' => [
+                    ['value' => '0', 'meaning' => 'Cards: one card at a time, with next and back buttons (default)'],
+                    ['value' => '1', 'meaning' => 'List: all cards on one page as a glossary list '
+                        . '(term, translation, model sentence, picture)'],
+                ],
+            ],
+            'shuffleorder' => [
+                'description' => 'Whether the card order is randomized for each learner. Each card keeps its '
+                    . 'matching image and audio.',
+                'options' => [
+                    ['value' => '0', 'meaning' => 'Keep the authored order (default)'],
+                    ['value' => '1', 'meaning' => 'Shuffle the card order'],
+                ],
+            ],
+        ];
+        foreach ($ownfields as $jsonname => $overlay) {
+            $fields[$jsonname] = static::aigen_seed_field_spec($jsonname, $overlay);
+        }
+
+        $fields['filesid'] = [
+            'jsonname' => 'filesid',
+            'type' => 'int',
+            'required' => false,
+            'default' => '',
+            'description' => 'Links this item to its entry in the top level "files" object of the payload. '
+                . 'Only needed when the cards have images or uploaded audio.',
+            'example' => '1',
+        ];
+
+        return [
+            'usage' => 'Compose one item object per set of cards. Line 1 is the word or phrase in the lesson '
+                . 'language; add a translation, model sentence and model sentence translation as further pipe '
+                . 'separated lines where helpful. Set dictationstyle=1 so learners hear the words; card images '
+                . 'go in the ' . constants::FILEANSWER . '1_image file area, numbered by card.',
+            'fields' => array_values($fields),
+            'fileareas' => [
+                [
+                    'filearea' => constants::FILEANSWER . '1_image',
+                    'description' => 'A picture for each card.',
+                    'filenames' => 'Name each file for its 1-based card number: '
+                        . '"1.png", "2.png", ... (.jpg is also fine).',
+                ],
+                [
+                    'filearea' => constants::FILEANSWER . '1_audio',
+                    'description' => 'Uploaded audio for card text line 1, the word/phrase '
+                        . '(overrides the dictationstyle TTS audio). Usually unnecessary: prefer TTS.',
+                    'filenames' => 'Name each file for its 1-based card number: "1.mp3", "2.mp3", ...',
+                ],
+                [
+                    'filearea' => constants::FILEANSWER . '2_audio',
+                    'description' => 'Uploaded audio for card text line 3, the model sentence '
+                        . '(overrides the dictationstyle TTS audio). Usually unnecessary: prefer TTS.',
+                    'filenames' => 'Name each file for its 1-based card number: "1.mp3", "2.mp3", ...',
+                ],
+            ],
+            'example' => [
+                'items' => [
+                    [
+                        'type' => 'cards',
+                        'name' => 'New vocabulary',
+                        'instructions' => 'Review the cards on screen. You can use the next and back buttons '
+                            . 'to see other cards.',
+                        'sentences' => [
+                            'airport|空港|The airport in that city is always busy.|その町にある空港はいつも人が多いです。',
+                            'brochure|パンフレット|This brochure has information about our company.|このパンフレットには当社の情報が書かれています。',
+                            'deadline|締め切り|The deadline for this project is in three hours.|このプロジェクトの締め切りは3時間後です。',
+                        ],
+                        'dictationstyle' => 1,
+                        'promptvoice' => 'auto',
+                    ],
+                ],
+            ],
+        ];
     }
 
     #[Override]
@@ -192,6 +386,13 @@ class itemtype extends item {
             'optional' => true,
             'default' => 0,
             'dbname' => constants::CARDSSHUFFLEORDER,
+        ];
+        $keycolumns['int3'] = [
+            'jsonname' => 'displaymode',
+            'type' => 'int',
+            'optional' => true,
+            'default' => self::DISPLAY_CARDS,
+            'dbname' => self::DISPLAYMODE,
         ];
         $keycolumns['int4'] = [
             'jsonname' => 'promptvoiceopt',
@@ -221,6 +422,13 @@ class itemtype extends item {
             'default' => null,
             'dbname' => false,
         ];
+        $keycolumns['fileanswer2_audio'] = [
+            'jsonname' => constants::FILEANSWER . '2_audio',
+            'type' => 'anonymousfile',
+            'optional' => true,
+            'default' => null,
+            'dbname' => false,
+        ];
         $keycolumns['fileanswer_image'] = [
             'jsonname' => constants::FILEANSWER . '1_image',
             'type' => 'anonymousfile',
@@ -229,26 +437,6 @@ class itemtype extends item {
             'dbname' => false,
         ];
         return $keycolumns;
-    }
-
-    protected function fetch_sentence_media($mediatype, $index) {
-        $media = parent::fetch_sentence_media($mediatype, $index);
-        if ($mediatype == 'image') {
-            return $media;
-        }
-
-        $sentences = [];
-        if (isset($this->itemrecord->customtext1)) {
-            $sentences = explode(PHP_EOL, $this->itemrecord->customtext1);
-        }
-
-        foreach ($sentences as $key => $sentence) {
-            $mediacount = $key + 1;
-            if (!isset($media[$mediacount]) && empty($this->itemrecord->{constants::READSENTENCE})) {
-                $media[$mediacount] = $this->nofile;
-            }
-        }
-        return $media;
     }
 
       /*

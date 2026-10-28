@@ -606,6 +606,13 @@ function minilesson_delete_instance($id)
     $DB->delete_records(constants::M_TEMPL_USAGES_TABLE, ['minilessonid' => $minilesson->id]);
     $DB->delete_records(constants::M_MEDIA_CACHE_TABLE, ['minilesson' => $minilesson->id]);
 
+    // Chat agent conversations are keyed by course module, not by instance, because that is what
+    // the chat agent pins its writes to. The module row still exists at this point - core removes it
+    // after this function returns - so it can still be looked up.
+    if ($cm = get_coursemodule_from_instance(constants::M_MODNAME, $minilesson->id)) {
+        \mod_minilesson\local\chatagent\conversation_store::delete_where(['cmid' => $cm->id]);
+    }
+
     $DB->delete_records(constants::M_TABLE, ['id' => $minilesson->id]);
 
     return true;
@@ -848,16 +855,35 @@ function minilesson_pluginfile($course, $cm, $context, $filearea, array $args, $
                 return false;
             }
         }
+        // A single item export carries the item id in the url, eg /exportitem/{itemid}/item.json.
+        $issingleitem = $filearea === 'exportitem';
+        if ($issingleitem) {
+            // MUST_EXIST and the lesson id together stop an item from another lesson being exported here.
+            $item = $DB->get_record(
+                constants::M_QTABLE,
+                ['id' => $itemid, 'minilesson' => $moduleinstance->id],
+                'id, name',
+                MUST_EXIST
+            );
+        }
+
         // Make a nice filename.
         $cleanfilename = strip_tags(format_string($name));
         if ($istranslate) {
             $cleanfilename .= '_' . $tolang;
         }
+        if ($issingleitem) {
+            $cleanfilename .= '-' . strip_tags(format_string($item->name));
+        }
 
         $filename = clean_filename($cleanfilename . '.json');
         $filename = preg_replace('/\s+/', '_', $filename);
         $theimport = new \mod_minilesson\import($moduleinstance, $context, $course, $cm);
-        if ($istranslate) {
+        // Items with media carry it as base64 in the JSON, which can be large.
+        raise_memory_limit(MEMORY_HUGE);
+        if ($issingleitem) {
+            $jsondata = $theimport->export_single_item($item->id);
+        } else if ($istranslate) {
             $jsondata = $theimport->translate_and_export_items($fromlang, $tolang);
         } else {
             $jsondata = $theimport->export_items();
@@ -913,6 +939,27 @@ function minilesson_output_fragment_preview($args)
     $ret = $renderer->show_quiz_preview($comptest, $args->itemid);
     $ret .= $renderer->fetch_activity_amd($comptest, $cm, $moduleinstance, $args->itemid);
     return $ret;
+}
+
+/**
+ * Outputs the lesson's item list, for the chat agent page to refresh after the assistant
+ * changes something.
+ *
+ * @param array $args
+ * @return string
+ */
+function minilesson_output_fragment_chatagent_items($args)
+{
+    global $DB, $PAGE;
+
+    $args = (object) $args;
+    $context = $args->context;
+    $cm = get_coursemodule_from_id(constants::M_MODNAME, $context->instanceid, 0, false, MUST_EXIST);
+    require_capability('mod/minilesson:canuseaigen', $context);
+
+    $items = $DB->get_records(constants::M_QTABLE, ['minilesson' => $cm->instance], 'itemorder');
+    $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
+    return $renderer->chatagent_item_list($items, $cm);
 }
 
 /**
@@ -1310,81 +1357,43 @@ function mod_minilesson_output_fragment_ai_prompt($args)
 }
 
 /**
- * Renders preview slides from markdown input
+ * Renders an item type's preview of unsaved authoring form data.
  *
+ * The item type does the rendering (see item::render_preview()), so this stays generic and any
+ * item type can offer a preview without lib.php knowing anything about it.
+ *
+ * @param array $args Must carry 'itemtype' and the serialised 'formdata'.
+ * @return string HTML fragment
+ */
+function minilesson_output_fragment_preview_item($args)
+{
+    global $CFG;
+    require_once($CFG->libdir . '/externallib.php');
+    $args = (object) $args;
+
+    $itemtypeclass = \mod_minilesson\utils::fetch_itemtype_classname($args->itemtype ?? '');
+    if (!$itemtypeclass) {
+        return '';
+    }
+
+    $formdata = [];
+    parse_str($args->formdata, $formdata);
+    return $itemtypeclass::render_preview($formdata);
+}
+
+/**
+ * Renders preview slides from markdown input.
+ *
+ * @deprecated Use the generic 'preview_item' fragment instead. Kept so that any cached or third
+ * party caller of the old fragment name keeps working.
  * @param array $args
  * @return string HTML fragment
  */
 function minilesson_output_fragment_preview_slides($args)
 {
-    global $CFG, $OUTPUT;
-    require_once($CFG->libdir . '/externallib.php');
-    $formdata = [];
-    $args = (object) $args;
-    parse_str($args->formdata, $formdata);
-
-    $imageserveurl = moodle_url::make_draftfile_url(
-        $formdata[constants::FILEANSWER . '1'],
-        '/',
-        '{filename}'
-    );
-
-    $testitem = new stdClass();
-    $testitem->inajax = AJAX_SCRIPT;
-    $slidescontenttype = $formdata[\minilessonitem_slides\itemtype::CONTENTTYPE] ?? \minilessonitem_slides\itemtype::CONTENTTYPE_MARKDOWN;
-    $slidescontent = $formdata[\minilessonitem_slides\itemtype::MARKDOWN];
-
-    if ($slidescontenttype == \minilessonitem_slides\itemtype::CONTENTTYPE_MARKDOWN) {
-        $testitem->slidesmarkdown = preg_replace_callback(
-            '/!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<optionalpart>\".*\")?\)/',
-            function ($matches) use ($imageserveurl) {
-                $filename = trim($matches['filename']);
-
-                // Skip if it's already a full URL (http/https).
-                if (preg_match('/^https?:\/\//', $filename)) {
-                    return $matches[0];
-                }
-
-                // Add base path (and escape spaces if needed).
-                $newsrc = str_replace('{filename}', rawurlencode($filename), urldecode($imageserveurl));
-
-                // Replace only the filename part.
-                return str_replace($filename, $newsrc, $matches[0]);
-            },
-            $slidescontent
-        );
-
-        // Standardize markdown output, applying layout formatting, before rendering the preview template.
-        $testitem->slidesmarkdown = \minilessonitem_slides\itemtype::sanitize_markdown($testitem->slidesmarkdown);
-        $testitem->slidesmarkdown = \minilessonitem_slides\itemtype::process_layout_markdown($testitem->slidesmarkdown);
-    } else {
-        // HTML mode.
-        $testitem->slidesmarkdown = preg_replace_callback(
-            '/(src|data-background-image)=\"(?<filename>.*?)\"/',
-            function ($matches) use ($imageserveurl) {
-                $filename = trim($matches['filename']);
-
-                // Skip if it's already a full URL (http/https).
-                if (preg_match('/^https?:\/\//', $filename)) {
-                    return $matches[0];
-                }
-
-                // Add base path (and escape spaces if needed).
-                $newsrc = str_replace('{filename}', rawurlencode($filename), urldecode($imageserveurl));
-
-                // Replace only the filename part.
-                return str_replace($filename, $newsrc, $matches[0]);
-            },
-            $slidescontent
-        );
-    }
-
-    $testitem->slidescontenttype = $slidescontenttype;
-    $testitem->ishtml = $slidescontenttype == \minilessonitem_slides\itemtype::CONTENTTYPE_HTML;
-    $testitem->selectedtheme = $formdata[\minilessonitem_slides\itemtype::SLIDETHEME];
-    $testitem->selectedfontsize = $formdata[\minilessonitem_slides\itemtype::SLIDEFONTSIZE];
-
-    return $OUTPUT->render_from_template('minilessonitem_slides' . '/slidesinner', $testitem);
+    $args = (array) $args;
+    $args['itemtype'] = \mod_minilesson\constants::TYPE_SLIDES;
+    return minilesson_output_fragment_preview_item($args);
 }
 
 /**
@@ -1402,6 +1411,32 @@ function minilesson_output_fragment_templates($args)
     $filters = !empty($args->filters) ? json_decode($args->filters, true) : [];
     $renderable = new mod_minilesson\output\aigentemplates($cm, $filters);
     return $OUTPUT->render($renderable);
+}
+
+/**
+ * Declares mod_minilesson's protected resource (mcp.php) to the shared local_oauthmcp
+ * authorization server, if it is installed. Discovered via Moodle's get_plugins_with_function()
+ * mechanism (see \local_oauthmcp\oauth\registry for the declaration contract), so this has no
+ * effect and no error if local_oauthmcp is absent - MCP still works via static tokens either way.
+ *
+ * The "access token" local_oauthmcp mints via mintcallback is just a real aigenservice web
+ * service token (see facade::mint_or_reuse_token()), so mcp.php/aigen_rest.php's own
+ * request-time auth path needs no knowledge of OAuth at all.
+ *
+ * @return array
+ */
+function mod_minilesson_mcp_oauth_resources(): array {
+    global $CFG;
+    return [
+        [
+            'resource' => $CFG->wwwroot . '/mod/minilesson/mcp.php',
+            'scope' => 'aigen',
+            'capability' => 'mod/minilesson:usemcp',
+            'mintcallback' => [\mod_minilesson\local\aigen\facade::class, 'mint_or_reuse_token'],
+            'revokecallback' => [\mod_minilesson\local\aigen\facade::class, 'revoke_tokens'],
+            'description' => get_string('oauthresourcedescription', constants::M_COMPONENT),
+        ],
+    ];
 }
 
 /**

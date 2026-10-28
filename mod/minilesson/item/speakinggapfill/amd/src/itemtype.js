@@ -150,6 +150,8 @@ define(['jquery',
 
         show_item_review: function () {
             var self = this;
+            // On the lesson's last item, the results page is where the next button finishes the lesson.
+            self.quizhelper.set_finish_label(self.index, true);
             var review_data = {};
 
             self.items.forEach(function (item, index) {
@@ -184,6 +186,9 @@ define(['jquery',
             var resultsbox = self.controls.resultscontainer;
 
             //display results
+            // The results list the lesson text, so they take its direction.
+            review_data.contentdir = self.itemdata.contentdir;
+            review_data.contentlang = self.itemdata.contentlang;
             templates.render('mod_minilesson/listitemresults', review_data).then(
                 function (html, js) {
                     resultsbox.html(html);
@@ -611,9 +616,10 @@ define(['jquery',
             }
             //hint - definition
             if (hasdefinition) {
-                var rtl = self.itemdata.hintrtl ? ' rtl' : '';
+                // The hint is in the native language, so it does not take the direction of the lesson text.
+                var hintdir = self.itemdata.hintrtl ? 'rtl' : 'auto';
                 code += "<div class='definition-container'>";
-                code += "<div class='definition" + rtl + "'>";
+                code += "<div class='definition' dir='" + hintdir + "'>";
                 code += "<div class='hinticon-container'><img class='icon' src='" + M.util.image_url('lightbulb-icon', 'mod_minilesson') + "' alt='hint'></div>";
                 code += "<h4 class='hint-title'>" + self.strings.hint + "</h4>";
                 code += self.items[self.game.pointer].definition + "</div>";

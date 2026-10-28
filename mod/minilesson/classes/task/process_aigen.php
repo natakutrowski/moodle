@@ -82,7 +82,7 @@ class process_aigen extends adhoc_task {
 
             // Call any tools whose results need to be added to the context data
             // Loop through contextdata looking for fields that start with tool_
-            // It will be like tool_user_custonmdata2 with value "fetch_vtt PHP_EOL user_customdata1"
+            // It will be like tool_user_customdata2 with value "fetch_vtt PHP_EOL user_customdata1"
             // That will tell the tool to call the fetch_vtt function with the value of the usercustomdata1 field.
             foreach ($contextdata as $fieldname => $fieldvalue) {
                 if (strpos($fieldname, 'tool_') === 0) {
@@ -121,7 +121,29 @@ class process_aigen extends adhoc_task {
             // Do the import.
             $theimport = new import($moduleinstance, $modulecontext, $course, $cm);
             $theimport->set_reader($importdata, true);
-            $theimport->import_process();
+            $results = $theimport->import_process();
+            mtrace("mod_minilesson aigen: imported {$results->imported} of {$results->total} items");
+            $errormessages = [];
+            foreach ($results->errors as $importerror) {
+                mtrace("mod_minilesson aigen: item {$importerror->itemnum} ({$importerror->type}) failed: "
+                    . $importerror->message);
+                $errormessages[] = "item {$importerror->itemnum} ({$importerror->type}): {$importerror->message}";
+            }
+            // Record rejected items on the usage, so that the caller polling the job status is told
+            // which items did not make it and why. Without this a job whose items were all rejected
+            // still reports as completed, and only the cron log says otherwise.
+            if (!empty($errormessages)) {
+                $usage->error = get_string(
+                    'error:aigenitemsrejected',
+                    constants::M_COMPONENT,
+                    (object) [
+                        'failed' => count($errormessages),
+                        'total' => $results->total,
+                        'messages' => implode('; ', $errormessages),
+                    ]
+                );
+                $DB->update_record(constants::M_TEMPL_USAGES_TABLE, $usage);
+            }
 
             // Complete Progress bar.
             $progressbar->end_progress();

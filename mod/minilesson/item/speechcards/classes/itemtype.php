@@ -32,6 +32,8 @@ class itemtype extends item {
     /** @var array Language skills (or "content") this item type focuses on. */
     public static $skills = [constants::SKILL_READING, constants::SKILL_SPEAKING, constants::SKILL_PRONUNCIATION];
 
+    /** Whether the card shows a listen button, which reads the card aloud. */
+    public const SHOWLISTENBUTTON = 'customint1';
 
     // the item type
     /**
@@ -71,18 +73,32 @@ class itemtype extends item {
         $dottify = false;
         $testitem->sentences = $this->process_spoken_sentences($sentences, $phonetics, $dottify, $isssml);
 
+        // The listen button reads the current card aloud, using its uploaded audio or its TTS audio.
+        // Each card carries its own audiourl, so the button is only shown for cards that have one.
+        $testitem->showlistenbutton = !empty($this->itemrecord->{self::SHOWLISTENBUTTON});
+
         // cloudpoodll
         $testitem = $this->set_cloudpoodll_details($testitem);
 
         return $testitem;
     }
 
+    /**
+     * Validates an import record for this item type.
+     *
+     * @param \stdClass $newrecord the db-ready import record
+     * @param \stdClass $cm the course module
+     * @return false|\stdClass false when valid, or an error object with col and message
+     */
     public static function validate_import($newrecord, $cm) {
         $error = new \stdClass();
         $error->col = '';
         $error->message = '';
 
-        if ($newrecord->customtext1 == '') {
+        $sentences = array_filter(array_map('trim', explode(PHP_EOL, (string) $newrecord->customtext1)), function ($sentence) {
+            return $sentence !== '';
+        });
+        if (count($sentences) == 0) {
             $error->col = 'customtext1';
             $error->message = get_string('error:emptyfield', constants::M_COMPONENT);
             return $error;
@@ -99,7 +115,118 @@ class itemtype extends item {
         // get the basic key columns and customize a little for instances of this item type
         $keycols = parent::get_keycolumns();
         $keycols['text1'] = ['jsonname' => 'sentences', 'type' => 'stringarray', 'optional' => true, 'default' => [], 'dbname' => 'customtext1'];
+        $keycols['int1'] = ['jsonname' => 'listenbutton', 'type' => 'boolean', 'optional' => true,
+            'default' => 0, 'dbname' => self::SHOWLISTENBUTTON];
+        $keycols['int4'] = ['jsonname' => 'promptvoiceopt', 'type' => 'voiceopts', 'optional' => true,
+            'default' => null, 'dbname' => constants::POLLYOPTION];
+        $keycols['text5'] = ['jsonname' => 'promptvoice', 'type' => 'voice', 'optional' => true,
+            'default' => null, 'dbname' => constants::POLLYVOICE];
+        $keycols['fileanswer_audio'] = ['jsonname' => constants::FILEANSWER . '1_audio', 'type' => 'anonymousfile', 'optional' => true, 'default' => null, 'dbname' => false];
         return $keycols;
+    }
+
+    /**
+     * When and why to choose this item type (agent-facing, used by the aigen web services).
+     *
+     * @return string
+     */
+    public static function aigen_fetch_usage() {
+        return 'Displays a series of cards, each with a phrase or sentence; the learner reads each card aloud '
+            . 'and speech recognition grades their attempt. Use it for pronunciation drilling of words, phrases '
+            . 'or short sentences, e.g. key vocabulary or expressions from the lesson. '
+            . 'Requires a lesson language with speech recognition support.';
+    }
+
+    /**
+     * The agent-facing import field spec for speechcards.
+     *
+     * @return array the import spec (usage, fields, fileareas, example)
+     */
+    public static function aigen_fetch_import_spec() {
+        $fields = static::aigen_common_import_field_specs(['type', 'name', 'visible', 'instructions', 'text',
+            'layout']);
+        $fields['type']['example'] = 'speechcards';
+        $fields['text']['description'] = 'Optional heading text shown above the cards, '
+            . 'e.g. "Speak the phrases on the cards".';
+
+        $ownfields = [
+            'sentences' => [
+                'required' => true,
+                'description' => 'The card texts, as an array of strings, one card per entry. The learner reads '
+                    . 'each card aloud, so use words, phrases or short sentences. An entry can use the format '
+                    . '"prompt|correct response|text prompt" where the later parts are optional, when the text '
+                    . 'shown should differ from what the learner must say.',
+                'example' => '["Nice to meet you.", "How are you today?", "See you tomorrow."]',
+            ],
+            'listenbutton' => [
+                'description' => 'Whether each card shows a listen button, which reads the card aloud. '
+                    . 'It plays the card\'s uploaded audio if there is any, otherwise its TTS audio. '
+                    . 'Turn it on to model the pronunciation, off to make the learner read unaided.',
+                'options' => [
+                    ['value' => '0', 'meaning' => 'No listen button (default)'],
+                    ['value' => '1', 'meaning' => 'Show a listen button on each card'],
+                ],
+            ],
+            'promptvoice' => [
+                'description' => 'The TTS voice that reads a card aloud when the listen button is used. '
+                    . 'A voice display name (case-insensitive), e.g. "Joey" (en-US) or "Mathieu" (fr-FR), '
+                    . 'or "auto" to let the server pick a voice matching the lesson language.',
+                'example' => 'auto',
+            ],
+            'promptvoiceopt' => [
+                'description' => 'Reading speed / processing option for the card TTS audio.',
+                'options' => [
+                    ['value' => 'normal', 'meaning' => 'Normal speed (default; any unrecognised value also maps to normal)'],
+                    ['value' => 'slow', 'meaning' => 'Slow reading speed'],
+                    ['value' => 'veryslow', 'meaning' => 'Very slow reading speed'],
+                ],
+            ],
+        ];
+        foreach ($ownfields as $jsonname => $overlay) {
+            $fields[$jsonname] = static::aigen_seed_field_spec($jsonname, $overlay);
+        }
+
+        $fields['filesid'] = [
+            'jsonname' => 'filesid',
+            'type' => 'int',
+            'required' => false,
+            'default' => '',
+            'description' => 'Links this item to its entry in the top level "files" object of the payload. '
+                . 'Only needed when the cards have uploaded model audio.',
+            'example' => '1',
+        ];
+
+        return [
+            'usage' => 'Compose one item object per set of cards (around 4 to 8 cards per item works well). '
+                . 'The card texts should be in the lesson language and match the learner level. '
+                . 'The learner speaks each card. Set listenbutton to 1 if they should also be able to hear '
+                . 'the card read aloud (in the promptvoice) before they speak.',
+            'fields' => array_values($fields),
+            'fileareas' => [
+                [
+                    'filearea' => constants::FILEANSWER . '1_audio',
+                    'description' => 'Optional uploaded model audio for the cards, played by the listen button '
+                        . 'in place of the promptvoice TTS audio. Usually unnecessary: prefer TTS via promptvoice.',
+                    'filenames' => 'Name each file for its 1-based card number: "1.mp3", "2.mp3", ...',
+                ],
+            ],
+            'example' => [
+                'items' => [
+                    [
+                        'type' => 'speechcards',
+                        'name' => 'Speak the phrases',
+                        'text' => 'Speak the phrases on the cards',
+                        'listenbutton' => 1,
+                        'promptvoice' => 'auto',
+                        'sentences' => [
+                            'Nice to meet you.',
+                            'How are you today?',
+                            'See you tomorrow.',
+                        ],
+                    ],
+                ],
+            ],
+        ];
     }
 
     /*

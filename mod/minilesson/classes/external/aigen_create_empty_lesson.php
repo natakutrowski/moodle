@@ -54,6 +54,21 @@ class aigen_create_empty_lesson extends external_api {
             'grade' => new external_value(PARAM_INT, 'Grade', VALUE_DEFAULT, 0),
             'visible' => new external_value(PARAM_INT, 'Visible', VALUE_DEFAULT, 0),
             'nativelang' => new external_value(PARAM_TEXT, 'Native Language', VALUE_DEFAULT, $config->nativelang),
+            'nativetranslation' => new external_value(
+                PARAM_INT,
+                'Native Language Translation: 1 lets learners translate item text into their native language '
+                    . '(fiction stories, TTS dialogs and multichoice feedback offer it), 0 turns that off. '
+                    . 'Needs nativelang set to a language other than ttslanguage to have any effect.',
+                VALUE_DEFAULT,
+                $config->nativetranslation ?? 1
+            ),
+            'nextbuttonalign' => new external_value(
+                PARAM_ALPHA,
+                'Where the next page button sits under each item: default (right on left to right sites, '
+                    . 'left on right to left sites) or center.',
+                VALUE_DEFAULT,
+                $config->nextbuttonalign ?? constants::M_NEXTBUTTON_DEFAULT
+            ),
         ]);
     }
 
@@ -74,11 +89,31 @@ class aigen_create_empty_lesson extends external_api {
      * @param int $foriframe
      * @param int $grade
      * @param int $visible
+     * @param string $nativelang
+     * @param int $nativetranslation
+     * @param string $nextbuttonalign
      * @return array
      */
-    public static function execute($courseid, $title, $section, $pagelayout, $showqtitles,
-            $maxattempts, $ttslanguage, $region, $transcriber, $richtextprompt, $containerwidth,
-            $activitylink, $foriframe, $grade, $visible, $nativelang) {
+    public static function execute(
+        $courseid,
+        $title,
+        $section,
+        $pagelayout,
+        $showqtitles,
+        $maxattempts,
+        $ttslanguage,
+        $region,
+        $transcriber,
+        $richtextprompt,
+        $containerwidth,
+        $activitylink,
+        $foriframe,
+        $grade,
+        $visible,
+        $nativelang,
+        $nativetranslation,
+        $nextbuttonalign = constants::M_NEXTBUTTON_DEFAULT
+    ) {
         $params = self::validate_parameters(self::execute_parameters(), [
             'courseid' => $courseid,
             'title' => $title,
@@ -95,7 +130,9 @@ class aigen_create_empty_lesson extends external_api {
             'foriframe' => $foriframe,
             'grade' => $grade,
             'visible' => $visible,
-            'nativelang' => $nativelang
+            'nativelang' => $nativelang,
+            'nativetranslation' => $nativetranslation,
+            'nextbuttonalign' => $nextbuttonalign,
         ]);
 
         $context = context_course::instance($params['courseid']);
@@ -120,6 +157,13 @@ class aigen_create_empty_lesson extends external_api {
         $moduledata->grade = $params['grade'];
         $moduledata->visible = $params['visible'];
         $moduledata->nativelang = $params['nativelang'];
+        $moduledata->nativetranslation = $params['nativetranslation'];
+        $alignoptions = utils::get_nextbuttonalign_options();
+        $moduledata->nextbuttonalign = array_key_exists($params['nextbuttonalign'], $alignoptions)
+            ? $params['nextbuttonalign'] : constants::M_NEXTBUTTON_DEFAULT;
+
+        // Any other defaults
+        $moduledata->showitemreview = 1;
 
         try {
             $cmid = utils::create_instance($moduledata, $course, $params['section']);

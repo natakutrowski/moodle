@@ -75,10 +75,23 @@ class itemform extends baseform {
             0,
             $nossml
         );
+        // Uploaded audio for card line 1 (filearea customfile1_audio) and line 3 (filearea customfile2_audio).
         $label = get_string('cardaudio', 'minilessonitem_cards');
         $this->add_sentenceaudio(1, $label, false);
+        $label = get_string('cardaudioline3', 'minilessonitem_cards');
+        $this->add_sentenceaudio(2, $label, false);
         $this->add_checkbox(constants::CARDSSHUFFLEORDER, get_string('cards_shuffleorder', 'minilessonitem_cards'),
             get_string('cards_shuffleorder_desc', 'minilessonitem_cards'));
+        $this->add_dropdown(
+            itemtype::DISPLAYMODE,
+            get_string('displaymode', 'minilessonitem_cards'),
+            [
+                itemtype::DISPLAY_CARDS => get_string('displaymode_cards', 'minilessonitem_cards'),
+                itemtype::DISPLAY_LIST => get_string('displaymode_list', 'minilessonitem_cards'),
+            ],
+            itemtype::DISPLAY_CARDS
+        );
+        $mform->addHelpButton(itemtype::DISPLAYMODE, 'displaymode', 'minilessonitem_cards');
         $this->add_timelimit(constants::TIMELIMIT, get_string(constants::TIMELIMIT, constants::M_COMPONENT));
 
     }

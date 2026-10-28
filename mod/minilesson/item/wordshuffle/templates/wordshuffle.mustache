@@ -2,8 +2,8 @@
 <div class="minilesson_wordshuffle_player_box item-container">
     <div style="display:none;" class="wordshuffle_results">{{#str}}wordshuffle_results, mod_minilesson{{/str}}</div>
 
-    <div class="maintitle wordshuffle_maintitle" style="display: none">{{iteminstructions}}</div>
-    <div class="wordshuffle_itemtext mod_minilesson_itemtext {{rtl}}" style="display: none">{{{itemtext}}}</div>
+    <div class="maintitle wordshuffle_maintitle" dir="auto" style="display: none">{{iteminstructions}}</div>
+    <div class="wordshuffle_itemtext mod_minilesson_itemtext" dir="{{contentdir}}" lang="{{contentlang}}" style="display: none">{{{itemtext}}}</div>
 
     <div class="startmodule_image_container wordshuffle_image_container">
         <img class="startmodule_image wordshuffle_image" src="{{{itemimageurl}}}" alt="{{#str}}wordshuffle, mod_minilesson{{/str}}">
@@ -11,7 +11,7 @@
 
     <div class="startmodule_title wordshuffle_title">{{#str}}wordshuffle, mod_minilesson{{/str}}</div>
 
-    <div class="startmodule_description wordshuffle_description">{{iteminstructions}}</div>
+    <div class="startmodule_description wordshuffle_description" dir="auto">{{iteminstructions}}</div>
 
     <div class="start_mainmenu wordshuffle_mainmenu">
         <div class="wordshuffle_loaded" style="display:none;">
@@ -25,7 +25,7 @@
     </div>
 
     {{> mod_minilesson/progresstimer }}
-    {{#audiocontent}}
+    {{#readbefore}}
     <div style="display:none;" class="wordshuffle_listen_cont text-center mb-2">
         <button class="btn animatesoundbtn position-relative wordshuffle_listen_btn">
             <div class='soundWave'>
@@ -37,9 +37,9 @@
             </div>
         </button>
     </div>
-    {{/audiocontent}}
+    {{/readbefore}}
 
-    <div style="display:none;" class="question">
+    <div style="display:none;" class="question" dir="{{contentdir}}" lang="{{contentlang}}">
         {{#sentences}}
             <div class="wordshuffle_wordset_container wordshuffle_wordset_{{index}} text-center" style="display:none;" data-index="{{index}}" >
                 <div class="question-sentence d-flex flex-wrap justify-content-center align-items-start mb-2">
@@ -57,6 +57,23 @@
                     {{/gapwords}}
                 </div>
 
+                {{#readafter}}
+                {{! The sentence is read here after a correct attempt. }}
+                <div class="wordshuffle_after_cont text-center mb-2" style="display:none;">
+                    <button type="button" class="btn animatesoundbtn position-relative wordshuffle_after_btn"
+                            title="{{#str}}playsentence, minilessonitem_wordshuffle{{/str}}"
+                            aria-label="{{#str}}playsentence, minilessonitem_wordshuffle{{/str}}">
+                        <div class='soundWave'>
+                            <div class='bar'></div>
+                            <div class='bar'></div>
+                            <div class='bar'></div>
+                            <div class='bar'></div>
+                            <div class='bar'></div>
+                        </div>
+                    </button>
+                </div>
+                {{/readafter}}
+
                 {{! Word bank  }}
                 <div id="word-bank" class="word-bank bank d-flex flex-wrap justify-content-center p-2 mb-3">
                     {{#randomgaps}}
@@ -72,7 +89,7 @@
                 </div>
                 {{/imageurl}}
                 {{#hint}}
-                <div class='definition-container'><div class='definition {{#hintrtl}}rtl{{/hintrtl}}'>
+                <div class='definition-container'><div class='definition' dir='{{#hintrtl}}rtl{{/hintrtl}}{{^hintrtl}}auto{{/hintrtl}}'>
                     <div class='hinticon-container'>{{#pix}}lightbulb-icon, mod_minilesson{{/pix}}</div>
                     {{hint}}
                 </div></div>

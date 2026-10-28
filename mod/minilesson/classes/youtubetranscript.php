@@ -53,8 +53,49 @@ class youtubetranscript {
     /** @var string the user agent matching the InnerTube client */
     const USERAGENT = 'com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip';
 
+    /**
+     * @var array the InnerTube clients to try, in order.
+     *
+     * YouTube throttles automated requests per client, so a server it refuses on
+     * one client is often still served on another. Each entry is the client half
+     * of the InnerTube context plus the user agent that client would really send.
+     */
+    const CLIENTS = [
+        'ANDROID' => [
+            'context' => ['clientName' => 'ANDROID', 'clientVersion' => self::CLIENT_VERSION,
+                'androidSdkVersion' => 30],
+            'useragent' => self::USERAGENT,
+        ],
+        'IOS' => [
+            'context' => ['clientName' => 'IOS', 'clientVersion' => '20.10.4', 'deviceMake' => 'Apple',
+                'deviceModel' => 'iPhone16,2', 'osName' => 'iPhone', 'osVersion' => '18.3.2.22D82'],
+            'useragent' => 'com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)',
+        ],
+        'ANDROID_VR' => [
+            'context' => ['clientName' => 'ANDROID_VR', 'clientVersion' => '1.60.19', 'deviceMake' => 'Oculus',
+                'deviceModel' => 'Quest 3', 'androidSdkVersion' => 32, 'osName' => 'Android',
+                'osVersion' => '12L'],
+            'useragent' => 'com.google.android.apps.youtube.vr.oculus/1.60.19 (Linux; U; Android 12L; GB) gzip',
+        ],
+        'MWEB' => [
+            'context' => ['clientName' => 'MWEB', 'clientVersion' => '2.20250312.04.00'],
+            'useragent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 ' .
+                '(KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+        ],
+    ];
+
     /** @var string[] default language preference order */
     const DEFAULT_LANGS = ['en', 'en-GB', 'en-US'];
+
+    /** @var string the user agent of the client that was served the caption track list */
+    protected $useragent = self::USERAGENT;
+
+    /** @var string[] playabilityStatus reasons that really do mean the video is age restricted */
+    const AGERESTRICTED_REASONS = [
+        'inappropriate for some users',
+        'confirm your age',
+        'age-restricted',
+    ];
 
     /**
      * Extract the video ID from a YouTube URL, or accept a bare video ID.
@@ -125,40 +166,132 @@ class youtubetranscript {
     }
 
     /**
-     * Ask the InnerTube player API for the video's caption track list.
+     * Ask the InnerTube player API for the video's caption track list, trying each
+     * client in turn until one is served.
+     *
+     * YouTube refuses automated requests per client rather than outright, so a
+     * server turned away as a suspected bot on one client is frequently served on
+     * the next. Only when every client has refused is the failure reported, using
+     * the first refusal - that being the most representative of the video itself.
      *
      * @param string $videoid the video ID
      * @return array the caption tracks (each with baseUrl, languageCode, kind ...)
-     * @throws \moodle_exception error:youtubefetchfailed
+     * @throws \moodle_exception error:youtubefetchfailed, error:youtubeblocked,
+     *                           error:youtubeagerestricted or error:youtubeunplayable
      */
     protected function fetch_caption_tracks(string $videoid): array {
+        $firstrefusal = null;
+
+        foreach (self::CLIENTS as $client) {
+            try {
+                $playerresponse = $this->call_player($videoid, $client);
+                self::assert_playable($playerresponse);
+            } catch (\moodle_exception $e) {
+                $firstrefusal = $firstrefusal ?? $e;
+                continue;
+            }
+
+            $tracks = $playerresponse['captions']['playerCaptionsTracklistRenderer']['captionTracks'] ?? [];
+            if (!empty($tracks)) {
+                // Fetch the track content as the same client that was served the list.
+                $this->useragent = $client['useragent'];
+                return $tracks;
+            }
+        }
+
+        if ($firstrefusal !== null) {
+            throw $firstrefusal;
+        }
+
+        // Every client was served but none listed captions, so there genuinely are none.
+        return [];
+    }
+
+    /**
+     * Make one InnerTube player request as the given client.
+     *
+     * @param string $videoid the video ID
+     * @param array $client an entry from self::CLIENTS
+     * @return array the decoded player response
+     * @throws \moodle_exception error:youtubefetchfailed or error:youtubeblocked
+     */
+    protected function call_player(string $videoid, array $client): array {
         $body = json_encode([
-            'context' => [
-                'client' => [
-                    'clientName' => 'ANDROID',
-                    'clientVersion' => self::CLIENT_VERSION,
-                    'androidSdkVersion' => 30,
-                    'hl' => 'en',
-                ],
-            ],
+            'context' => ['client' => array_merge($client['context'], ['hl' => 'en', 'gl' => 'US'])],
             'videoId' => $videoid,
         ]);
 
         $curl = new \curl();
         $curl->setHeader(['Content-Type: application/json']);
-        $response = $curl->post(self::INNERTUBE_URL, $body, [
-            'CURLOPT_USERAGENT' => self::USERAGENT,
-            'CURLOPT_TIMEOUT' => 30,
-        ]);
+        $response = $curl->post(self::INNERTUBE_URL, $body, self::curl_options($client['useragent']));
         if ($curl->get_errno() !== 0) {
             throw new \moodle_exception('error:youtubefetchfailed', constants::M_COMPONENT);
         }
 
+        // A rate limited or IP blocked request never reaches the player at all.
+        $httpcode = (int)($curl->get_info()['http_code'] ?? 0);
+        if ($httpcode === 429 || $httpcode === 403) {
+            throw new \moodle_exception('error:youtubeblocked', constants::M_COMPONENT, '', 'HTTP ' . $httpcode);
+        }
+
         $playerresponse = json_decode($response, true);
         if (!is_array($playerresponse)) {
+            // A challenge page rather than the API response we asked for.
+            if (stripos((string)$response, 'g-recaptcha') !== false) {
+                throw new \moodle_exception('error:youtubeblocked', constants::M_COMPONENT, '', 'captcha');
+            }
             throw new \moodle_exception('error:youtubefetchfailed', constants::M_COMPONENT);
         }
-        return $playerresponse['captions']['playerCaptionsTracklistRenderer']['captionTracks'] ?? [];
+
+        return $playerresponse;
+    }
+
+    /**
+     * Check the player response actually describes a playable video, and translate
+     * the ways it can refuse into distinct errors.
+     *
+     * Without this every refusal reaches the caller as an empty caption track list,
+     * which is indistinguishable from a video that genuinely has no subtitles - so a
+     * server blocked by YouTube reports "no subtitles are available" for every video.
+     *
+     * @param array $playerresponse the decoded InnerTube player response
+     * @return void
+     * @throws \moodle_exception error:youtubeblocked, error:youtubeagerestricted or error:youtubeunplayable
+     */
+    protected static function assert_playable(array $playerresponse): void {
+        $status = (string)($playerresponse['playabilityStatus']['status'] ?? '');
+        $reason = (string)($playerresponse['playabilityStatus']['reason'] ?? '');
+
+        if ($status === '' || $status === 'OK') {
+            return;
+        }
+
+        if ($status === 'LOGIN_REQUIRED') {
+            // Age restriction and the bot check both arrive as LOGIN_REQUIRED. Only claim
+            // age restriction when the reason positively says so - YouTube words the bot
+            // check several ways, and from a server a block is by far the likelier cause,
+            // so anything unrecognised is reported as a block rather than mislabelled.
+            foreach (self::AGERESTRICTED_REASONS as $needle) {
+                if (stripos($reason, $needle) !== false) {
+                    throw new \moodle_exception('error:youtubeagerestricted', constants::M_COMPONENT);
+                }
+            }
+            throw new \moodle_exception('error:youtubeblocked', constants::M_COMPONENT, '', $reason);
+        }
+        throw new \moodle_exception('error:youtubeunplayable', constants::M_COMPONENT, '', $reason);
+    }
+
+    /**
+     * The curl options every YouTube request shares.
+     *
+     * @param string $useragent the user agent of the client making the request
+     * @return array curl options for \curl::get() / \curl::post()
+     */
+    protected static function curl_options(string $useragent): array {
+        return [
+            'CURLOPT_USERAGENT' => $useragent,
+            'CURLOPT_TIMEOUT' => 30,
+        ];
     }
 
     /**
@@ -283,14 +416,101 @@ class youtubetranscript {
         }
 
         $curl = new \curl();
-        $response = $curl->get($url, null, [
-            'CURLOPT_USERAGENT' => self::USERAGENT,
-            'CURLOPT_TIMEOUT' => 30,
-        ]);
+        $response = $curl->get($url, null, self::curl_options($this->useragent));
         if ($curl->get_errno() !== 0) {
             throw new \moodle_exception('error:youtubefetchfailed', constants::M_COMPONENT);
         }
+        $httpcode = (int)($curl->get_info()['http_code'] ?? 0);
+        if ($httpcode === 429 || $httpcode === 403) {
+            throw new \moodle_exception('error:youtubeblocked', constants::M_COMPONENT);
+        }
         return (string)$response;
+    }
+
+    /**
+     * Convert a transcript copied out of YouTube's own "Show transcript" panel into WebVTT.
+     *
+     * This is the fallback for servers YouTube refuses to serve automated requests:
+     * the author opens the transcript panel with timestamps switched on, copies it and
+     * pastes it in. The panel writes each timestamp on its own line followed by its
+     * text, though some browsers put both on one line, so both shapes are accepted.
+     *
+     * The panel only shows whole seconds, and truncates rather than rounds, so a cue
+     * really starts somewhere inside the second it names. The truncated value is used
+     * as-is, which keeps every cue start at or before the true one: the item seeks to
+     * cue start to play a line, so a start even slightly late lands mid-word and clips
+     * it, while a start early only adds a moment of lead-in. Nudging starts towards the
+     * middle of their second would lower the average error but make roughly half of
+     * them late, which is the trade the wrong way round.
+     *
+     * Each cue runs until the next begins, so the ends inherit the same truncation and
+     * can fall up to a second early. That cannot be helped without overlapping cues,
+     * which would break the item's active-cue lookup - it takes the first match.
+     *
+     * @param string $pasted the text copied from the transcript panel
+     * @param float $lastcuelength seconds to allow for the final cue
+     * @return string the WebVTT text, with numbered cue identifiers
+     * @throws \moodle_exception error:notranscripttimestamps when no timestamps were found
+     */
+    public static function transcript_to_vtt(string $pasted, float $lastcuelength = 3.0): string {
+        $lines = explode("\n", str_replace(["\r\n", "\r"], "\n", $pasted));
+
+        // A timestamp is m:ss or h:mm:ss, either alone on its line or leading the text.
+        $timestampregex = '/^\s*(?:(\d{1,2}):)?(\d{1,3}):([0-5]\d)\s*(.*)$/u';
+
+        $cues = [];
+        foreach ($lines as $line) {
+            if (trim($line) === '') {
+                continue;
+            }
+            if (preg_match($timestampregex, $line, $m)) {
+                $seconds = ((int)$m[1] * 3600) + ((int)$m[2] * 60) + (int)$m[3];
+                $last = count($cues) - 1;
+                if ($last >= 0 && $cues[$last]['start'] === (float)$seconds) {
+                    // Two panel entries inside the same second. Emitting both would give the
+                    // first a zero length, which can never be the active cue and would end a
+                    // shadow segment the instant it started, so they become one cue.
+                    $cues[$last]['text'] = trim($cues[$last]['text'] . ' ' . trim($m[4]));
+                    continue;
+                }
+                $cues[] = ['start' => (float)$seconds, 'text' => trim($m[4])];
+            } else if (!empty($cues)) {
+                // A continuation of the current cue's text.
+                $last = count($cues) - 1;
+                $cues[$last]['text'] = trim($cues[$last]['text'] . ' ' . trim($line));
+            }
+        }
+
+        // Drop any cue the panel left without text (a timestamp on a purely visual row).
+        $cues = array_values(array_filter($cues, function ($cue) {
+            return $cue['text'] !== '';
+        }));
+
+        if (empty($cues)) {
+            throw new \moodle_exception('error:notranscripttimestamps', constants::M_COMPONENT);
+        }
+
+        $blocks = ['WEBVTT'];
+        foreach ($cues as $i => $cue) {
+            $end = isset($cues[$i + 1]) ? $cues[$i + 1]['start'] : $cue['start'] + $lastcuelength;
+            $blocks[] = self::format_timestamp($cue['start']) . ' --> ' . self::format_timestamp($end) .
+                "\n" . $cue['text'];
+        }
+
+        return self::add_cue_identifiers(implode("\n\n", $blocks) . "\n");
+    }
+
+    /**
+     * Format seconds as a WebVTT timestamp.
+     *
+     * @param float $seconds the offset in seconds
+     * @return string the timestamp, hh:mm:ss.mmm
+     */
+    protected static function format_timestamp(float $seconds): string {
+        $hours = (int)floor($seconds / 3600);
+        $minutes = (int)floor(($seconds - ($hours * 3600)) / 60);
+        $secs = $seconds - ($hours * 3600) - ($minutes * 60);
+        return sprintf('%02d:%02d:%06.3f', $hours, $minutes, $secs);
     }
 
     /**

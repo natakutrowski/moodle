@@ -1,28 +1,6 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * English language pack for Flexible Layout Card
- *
- * @package    minilessonitem_cards
- * @category   string
- * @copyright  2026 Justin Hunt (poodllsupport@gmail.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
+// CampusFR translation integration preview: latest official FR where available, then legacy DEV translations.
+// Missing keys use Moodle's English fallback; see translation_gaps.csv.
 defined('MOODLE_INTERNAL') || die();
 
 $string['additem'] = 'Карточки';
@@ -40,3 +18,11 @@ $string['readcardtext'] = 'Озвучивать текст карточки (TTS
 $string['readcardtext_desc'] = 'Если включено, текст карточки (первая строка) будет автоматически озвучиваться.';
 $string['cards_shuffleorder'] = 'Перемешать порядок карточек';
 $string['cards_shuffleorder_desc'] = 'Если включено, карточки будут показываться учащемуся в случайном порядке. Каждая карточка сохранит связанные с ней изображение и аудио.';
+
+// CampusFR 1.1.60a — newly translated strings (FR/RU).
+$string['cardaudioline3'] = 'Аудиострока 3';
+$string['playline3audio'] = 'Воспроизвести аудио';
+$string['displaymode'] = 'Отображение';
+$string['displaymode_cards'] = 'Карточки';
+$string['displaymode_help'] = 'Режим «Карточки» показывает по одной карточке с кнопками перехода вперёд и назад. Режим «Список» показывает все карточки на одной странице, по строке на каждую: слово, его перевод, пример предложения и изображение. Обязательны только слово и перевод; остальные элементы отображаются, если они добавлены в карточку.';
+$string['displaymode_list'] = 'Список';

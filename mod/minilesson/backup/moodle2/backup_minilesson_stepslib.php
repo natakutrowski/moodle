@@ -54,7 +54,7 @@ class backup_minilesson_activity_structure_step extends backup_activity_structur
             'grade', 'gradeoptions', 'maxattempts', 'mingrade', 'richtextprompt',
             'ttslanguage', 'transcriber', 'region', 'activitylink', 'pagelayout', 'showqtitles', 'showitemreview', 'foriframe',
             'lessonkey', 'csskey', 'containerwidth', 'lessonfont', 'timecreated', 'timemodified', 'viewstart', 'viewend', 'finishscreen', 'finishscreencustom',
-            'completionwhenfinished', 'nativelang', 'allowcontinueattempts',
+            'completionwhenfinished', 'nativelang', 'allowcontinueattempts', 'nativetranslation', 'nextbuttonalign',
             ]);
 
         // attempts
@@ -78,10 +78,23 @@ class backup_minilesson_activity_structure_step extends backup_activity_structur
             'itemytid', 'itemytstart', 'itemytend',
             'itemttsautoplay', 'itemaudiofname', 'itemtextarea', 'itemttsdialog', 'itemttsdialogopts', 'itemttspassage', 'itemttspassageopts', 'customtext1', 'customtext1format', 'customtext2', 'customtext2format', 'customtext3',
             'customtext3format', 'customtext4', 'customtext4format', 'customtext5', 'customtext5format', 'customtext6', 'customtext6format',
-                'customtext7', 'customtext7format', 'customdata1', 'customdata2', 'customdata3', 'customdata4', 'customdata5',
+                'customtext7', 'customtext7format', 'customtext8', 'customtext9', 'customtext10', 'customtext11', 'customtext12',
+                'customdata1', 'customdata2', 'customdata3', 'customdata4', 'customdata5',
                 'customint1', 'customint2', 'customint3', 'customint4', 'customint5',
-                'customint6', 'customint7', 'customint8', 'customint9', 'customint10', 'layout', 'correctanswer', 'timelimit', 'itemaudiostoryzoom',
+                'customint6', 'customint7', 'customint8', 'customint9', 'customint10',
+                'customint11', 'customint12', 'customint13', 'customint14', 'customint15',
+                'layout', 'correctanswer', 'timelimit', 'itemaudiostoryzoom',
             'timemodified', 'rsquestionkey', 'passagehash', 'alternatives', 'phonetic', 'createdby', 'modifiedby']);
+
+        // community page submissions (consent + likes), nested under each question
+        $cpagesubmissions = new backup_nested_element('cpagesubmissions');
+        $cpagesubmission = new backup_nested_element('cpagesubmission', ['id'], [
+            'itemid', 'userid', 'consent', 'likes', 'timecreated', 'timemodified',
+        ]);
+        $cpagelikes = new backup_nested_element('cpagelikes');
+        $cpagelike = new backup_nested_element('cpagelike', ['id'], [
+            'submissionid', 'userid', 'timecreated',
+        ]);
 
         // Build the tree.
         $oneactivity->add_child($attempts);
@@ -93,6 +106,11 @@ class backup_minilesson_activity_structure_step extends backup_activity_structur
         // questions
         $oneactivity->add_child($rsquestions);
         $rsquestions->add_child($rsquestion);
+
+        $rsquestion->add_child($cpagesubmissions);
+        $cpagesubmissions->add_child($cpagesubmission);
+        $cpagesubmission->add_child($cpagelikes);
+        $cpagelikes->add_child($cpagelike);
 
         // Define sources.
         $oneactivity->set_source_table(constants::M_TABLE, ['id' => backup::VAR_ACTIVITYID]);
@@ -111,10 +129,20 @@ class backup_minilesson_activity_structure_step extends backup_activity_structur
                 constants::M_ATTEMPTSTABLE,
                 ['moduleid' => backup::VAR_PARENTID]
             );
+            $cpagesubmission->set_source_table(
+                constants::M_CPAGESUBMISSIONS_TABLE,
+                ['itemid' => backup::VAR_PARENTID]
+            );
+            $cpagelike->set_source_table(
+                constants::M_CPAGELIKES_TABLE,
+                ['submissionid' => backup::VAR_PARENTID]
+            );
         }
 
         // Define id annotations.
         $attempt->annotate_ids('user', 'userid');
+        $cpagesubmission->annotate_ids('user', 'userid');
+        $cpagelike->annotate_ids('user', 'userid');
 
         // Define file annotations.
         // intro file area has 0 itemid.

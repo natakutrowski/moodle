@@ -2,7 +2,7 @@
     "items": [
         {
             "itemnumber": 0,
-            "prompt": "Create a one dimensional array of grammatically correct sentences (data1), of between 4 and 8 words per sentence, in {language} suitable for {level} level learners from the following keywords [{keywords}].\n\nCreate a second array of the same sentences (sentences), but for each sentence:\ni) surround the keyword with square brackets.\nii) create a translation of the sentence in {nativelanguage}\niii)  select 3 of the other keywords, and make a csv string with them\nAnd combine those three elements into a single pipe delimited string.\ne.g\nI watch [movies] at night|\u79c1\u306f\u591c\u306b\u6620\u753b\u3092\u898b\u308b\u3002|soccer,cake,healthy \nCreate a second array (data2) using the same sentences but without the square brackets.",
+            "prompt": "Create a one dimensional array of grammatically correct sentences (data1), of between 4 and 8 words per sentence, in {language} suitable for {level} level learners from the following keywords [{keywords}].\n\nCreate a second array of the same sentences (sentences), but for each sentence:\ni) surround the keyword with square brackets.\nii) create a translation of the sentence in {nativelanguage}\niii)  select 3 of the other keywords, and make a csv string with them\nAnd combine those three elements into a single pipe delimited string.\ne.g\nI watch [movies] at night|\u79c1\u306f\u591c\u306b\u6620\u753b\u3092\u898b\u308b\u3002|soccer,cake,healthy \nCreate a third array (data2) using the same sentences but without the square brackets.",
             "generatemethod": "generate",
             "generatefileareasmethod": "generate",
             "generatefields": [
@@ -33,7 +33,7 @@
                 },
                 {
                     "name": "data3",
-                    "generate": 0,
+                    "generate": 1,
                     "mapping": ""
                 },
                 {
@@ -54,7 +54,7 @@
                     "mapping": "data2"
                 }
             ],
-            "overallimagecontext": "--",
+            "overallimagecontext": "user_customdata2",
             "promptfields": [
                 {
                     "name": "language",
@@ -70,15 +70,15 @@
                 },
                 {
                     "name": "nativelanguage",
-                    "mapping": "user_customdata1"
+                    "mapping": "native_language"
                 }
             ]
         }
     ],
-    "lessonTitle": "Choose the correct word (generate sentences) ",
-    "lessonDescription": "Create a choose-the-correct-word activity using a Word Shuffle item. Enter 4 - 10 keywords. The keywords will be used to generate sentences each with a gap and 4 possible word choices. A native language sentence translation and a picture will be generated for each sentence.",
+    "lessonTitle": "Choose the correct word (generate sentences)",
+    "lessonDescription": "Create a choose-the-correct-word activity using a Word Shuffle item. Enter 4 - 10 keywords. The keywords will be used to generate sentences each with a gap and 4 possible word choices. A native language sentence translation and a picture in the specified image style will be generated for each sentence. Translations use the native language set in the MiniLesson settings.",
     "uniqueid": "6a349d7edd597",
-    "version": "2",
+    "version": "7",
     "agentonly": 0,
     "fieldmappings": {
         "target_language": {
@@ -120,16 +120,25 @@
             "type": "textarea"
         },
         "user_customdata1": {
-            "enabled": true,
+            "enabled": false,
             "title": "Native language",
             "description": "The language for the sentence translations",
             "type": "text"
         },
         "user_customdata2": {
-            "enabled": false,
-            "title": "",
-            "description": "",
-            "type": "text"
+            "enabled": true,
+            "title": "Image Style",
+            "description": "Choose the style the images should be",
+            "type": "dropdown",
+            "options": [
+                "Flat vector illustration",
+                "Cartoon",
+                "Photorealistic",
+                "Black and white photo",
+                "Line drawing",
+                "Digital painting",
+                "3D Render"
+            ]
         },
         "user_customdata3": {
             "enabled": false,

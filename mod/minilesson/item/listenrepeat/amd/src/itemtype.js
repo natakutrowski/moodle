@@ -143,6 +143,8 @@ define(['jquery',
 
             show_item_review: function () {
                 var self = this;
+                // On the lesson's last item, the results page is where the next button finishes the lesson.
+                self.quizhelper.set_finish_label(self.index, true);
 
                 self.items.forEach(function (item) {
                             var itemwordlist = [];
@@ -171,6 +173,9 @@ define(['jquery',
                 var recorderbox = self.controls.speakbtncontainer;
                 var resultsbox = self.controls.resultscontainer;
                 var audioplayerbtn = self.controls.landr_listen_btn;
+                // The results list the lesson text, so they take its direction.
+                review_data.contentdir = self.itemdata.contentdir;
+                review_data.contentlang = self.itemdata.contentlang;
                 templates.render('mod_minilesson/listitemresults', review_data).then(
                     function (html, js) {
                             resultsbox.html(html);
@@ -244,6 +249,17 @@ define(['jquery',
 
       //on skip button click
                 self.controls.skip_btn.on("click", function () {
+                            //in continue mode the sentence is already answered, so just move on
+                            if (self.controls.skip_btn.hasClass('landr_continue_mode')) {
+                                self.setContinueMode(false);
+                                if (self.game.pointer < self.items.length - 1) {
+                                    self.game.pointer++;
+                                    self.nextPrompt();
+                                } else {
+                                    self.end();
+                                }
+                                return;
+                            }
                             //disable the buttons
                             self.controls.ctrl_btn.prop("disabled", true);
                             //reveal the prompt
@@ -365,14 +381,19 @@ define(['jquery',
                             //stop timer
                             self.stopTimer(self.items[self.game.pointer].timer);
 
-                            self.controls.ctrl_btn.prop("disabled", true);
-                    if (self.game.pointer < self.items.length - 1) {
-                        setTimeout(function () {
-                                  self.game.pointer++;
-                                  self.nextPrompt();
-                        }, 2200);
+                    if (self.itemdata.noautoforward) {
+                        //stay on this sentence so the learner can retry; they press continue when ready
+                        self.setContinueMode(true);
                     } else {
-                        self.end();
+                        self.controls.ctrl_btn.prop("disabled", true);
+                        if (self.game.pointer < self.items.length - 1) {
+                            setTimeout(function () {
+                                self.game.pointer++;
+                                self.nextPrompt();
+                            }, 2200);
+                        } else {
+                            self.end();
+                        }
                     }
                 } else {
                     //mark up the words as correct or not
@@ -477,9 +498,18 @@ define(['jquery',
                 self.nextPrompt();
             },
 
+            setContinueMode: function (on) {
+                var self = this;
+                var btn = self.controls.skip_btn;
+                btn.toggleClass('landr_continue_mode', on);
+                btn.find('.landr_skip_label').toggle(!on);
+                btn.find('.landr_continue_label').toggle(on);
+            },
+
             nextPrompt: function () {
                 var showText = parseInt(this.itemdata.show_text);
                 var self = this;
+                self.setContinueMode(false);
 
       //target is the speech we expect
                 var target = self.items[self.game.pointer].target;

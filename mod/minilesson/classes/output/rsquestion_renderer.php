@@ -52,18 +52,16 @@ class rsquestion_renderer extends \plugin_renderer_base
         // The modaleditform flag is acted on on additemlink template and rsquestionmanager js.
         $modaleditform = $config->modaleditform == "1";
         $allitems = [];
-        $i = 0;
         /** @var \mod_minilesson\plugininfo\minilessonitem @qplugininfo */
         foreach ($availableitems as $qplugininfo) {
             if (!$qplugininfo->is_enabled()) {
                 continue;
             }
-            $i++;
             $addurl = new moodle_url(
                 '/mod/minilesson/rsquestion/managersquestions.php',
                 ['id' => $this->page->cm->id, 'type' => $qplugininfo->name]
             );
-            $data = [
+            $allitems[] = [
                 'type' => $qplugininfo->name,
                 'cmid' => $this->page->cm->id,
                 'label' => (string) $qplugininfo->get_add_label(),
@@ -72,10 +70,15 @@ class rsquestion_renderer extends \plugin_renderer_base
                 'description' => (string) $qplugininfo->get_description(),
                 'videourl' => $qplugininfo->get_intro_video_url()->out(false),
                 'addurl' => $addurl->out(false),
-                'first' => $i == 1 ? true : false,
             ];
-            $links[] = $this->render_from_template('mod_minilesson/additemlink', $data);
-            $allitems[] = $data;
+        }
+
+        // Sort by the displayed label in the current language, not by the plugin's folder name.
+        \core_collator::asort_array_of_arrays_by_key($allitems, 'label');
+        $allitems = array_values($allitems);
+        foreach ($allitems as $i => $data) {
+            $allitems[$i]['first'] = $i == 0;
+            $links[] = $this->render_from_template('mod_minilesson/additemlink', $allitems[$i]);
         }
 
         // Pass all lesson items to javascript via a hidden input field
@@ -95,7 +98,8 @@ class rsquestion_renderer extends \plugin_renderer_base
         );
 
         $props = ['contextid' => $context->id, 'tableid' => $tableid, 'modaleditform' => $modaleditform,
-        'wwwroot' => $CFG->wwwroot, 'cmid' => $this->page->cm->id, 'lessonitems' => $datatagid];
+        'wwwroot' => $CFG->wwwroot, 'cmid' => $this->page->cm->id, 'lessonitems' => $datatagid,
+        'canexport' => has_capability('mod/minilesson:export', $context)];
                 $this->page->requires->js_call_amd(constants::M_COMPONENT . '/rsquestionmanager', 'init', [$props]);
         return $this->output->box(
             $output . $datatag . implode("", $links),
@@ -187,8 +191,10 @@ class rsquestion_renderer extends \plugin_renderer_base
         $itemsarray = [];
         $availableitems = core_plugin_manager::instance()->get_plugins_of_type(constants::SUBPLUGINTYPES['item']);
 
+        $canexport = has_capability('mod/minilesson:export', \context_module::instance($cm->id));
         foreach (array_values($items) as $i => $item) {
             $arrayitem = (array) $item;
+            $arrayitem['canexport'] = $canexport;
             if (!array_key_exists($arrayitem['type'], $availableitems)) {
                 continue;
             }
@@ -200,7 +206,7 @@ class rsquestion_renderer extends \plugin_renderer_base
             $itemsarray[] = $arrayitem;
         }
 
-        foreach (['arrowup', 'arrowdown', 'edit', 'copy', 'zoom', 'trash'] as $actionicon) {
+        foreach (['arrowup', 'arrowdown', 'edit', 'copy', 'download', 'zoom', 'trash'] as $actionicon) {
             $data[$actionicon] = new moodle_url('/mod/minilesson/pix/' . $actionicon . '.svg', ['ver' => $CFG->themerev]);
         }
 

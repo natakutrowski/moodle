@@ -2,8 +2,9 @@
     "items": [
         {
             "itemnumber": 0,
-            "prompt": "Generate an written response question(text) suitable for {level} level learners of {language} on the topic of: [{topic}] \n",
+            "prompt": "Generate a written response question(text) suitable for {level} level learners of {language} on the topic of: [{topic}] \n",
             "generatemethod": "generate",
+            "generatefileareasmethod": "generate",
             "generatefields": [
                 {
                     "name": "text",
@@ -68,7 +69,7 @@
                     "mapping": "text"
                 }
             ],
-            "overallimagecontext": "user_topic",
+            "overallimagecontext": "user_customdata1",
             "promptfields": [
                 {
                     "name": "level",
@@ -86,9 +87,10 @@
         }
     ],
     "lessonTitle": "Free Writing",
-    "lessonDescription": "A Free Writing activity about the topic that you choose.",
+    "lessonDescription": "A Free Writing activity about the specified topic. AI will generate the question and a picture to accompany it.",
     "uniqueid": "6a3141279b845",
-    "version": "0",
+    "version": "3",
+    "agentonly": 0,
     "fieldmappings": {
         "target_language": {
             "enabled": false,
@@ -129,10 +131,19 @@
             "type": "text"
         },
         "user_customdata1": {
-            "enabled": false,
-            "title": "",
-            "description": "",
-            "type": "text"
+            "enabled": true,
+            "title": "Image Style",
+            "description": "Choose the style the images should be",
+            "type": "dropdown",
+            "options": [
+                "Flat vector illustration",
+                "Cartoon",
+                "Photorealistic",
+                "Black and white photo",
+                "Line drawing",
+                "Digital painting",
+                "3D Render"
+            ]
         },
         "user_customdata2": {
             "enabled": false,
@@ -189,5 +200,7 @@
             "type": "text"
         }
     },
-    "tags": []
+    "tags": [
+        "Writing"
+    ]
 }

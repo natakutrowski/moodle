@@ -1,31 +1,8 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * English language pack for Short Answer
- *
- * @package    minilessonitem_shortanswer
- * @category   string
- * @copyright  2026 Justin Hunt (poodllsupport@gmail.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
+// CampusFR 1.1.60a: French language pack, including new strings.
 defined('MOODLE_INTERNAL') || die();
 
 $string['additem'] = 'Réponse courte';
-$string['item_desc'] = 'L’élément Réponse courte présente une question unique à laquelle l’élève doit répondre oralement. Les réponses correctes sont définies à l’avance par l’auteur de l’activité.';
+$string['item_desc'] = 'L\'élément Réponse courte est une question unique à laquelle l\'apprenant doit répondre à l\'oral. Les réponses correctes sont déterminées à l\'avance par l\'auteur de l\'élément.';
 $string['pluginname'] = 'Réponse courte';
 $string['privacy:metadata'] = 'Le plugin Réponse courte ne stocke aucune donnée personnelle.';

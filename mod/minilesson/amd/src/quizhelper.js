@@ -64,20 +64,22 @@ define(
                 var dd = this;
                 $.each(quizdata, function (index, item) {
                     dd.loadpromises.push(new Promise(resolve => require(
-                            [`${def.get_sub_component(item.type)}/itemtype`],
-                            module => {
-                                resolve(module.clone().init(index, item, dd, polly));
-                            })
-                        )
+                        [`${def.get_sub_component(item.type)}/itemtype`],
+                        module => {
+                            resolve(module.clone().init(index, item, dd, polly));
+                        })
+                    )
                     );
                 });
 
-                //TTS in question headers
+                // TTS in question headers.
                 $("audio.mod_minilesson_itemttsaudio").each(function () {
                     var that = this;
-                    if (that.src !== '') {
+                    // if the URL is set (it should be set) continue.
+                    if ($(that).attr('src')) {
                         return;
                     }
+                    // If it is not set, fetch it now.
                     polly.fetch_polly_url(
                         $(this).data('text'),
                         $(this).data('ttsoption'),
@@ -113,7 +115,7 @@ define(
                     slice.forEach(function (i) {
                         innerclass = i < current ? "minilesson_quiz_progress_completed" : "minilesson_quiz_progress_incompleted";
                         innerhtml = (i !== (slice.length - 1)) ?
-                        "<div class='" + innerclass + "' style='width: " + itemWidth + "%; '></div>" : "";
+                            "<div class='" + innerclass + "' style='width: " + itemWidth + "%; '></div>" : "";
                         if (i === current) {
                             html += "<div class='minilesson_quiz_progress_current'>";
                         }
@@ -141,11 +143,11 @@ define(
                             html += "<div class='minilesson_quiz_progress_current'>";
                         }
                         html += "<div class='minilesson_quiz_progress_item " +
-                        (i === current ? 'minilesson_quiz_progress_item_current' : '') + " " +
-                        (i < current ? 'minilesson_quiz_progress_item_completed' : '') + "'>" +
-                        (i < current ? '<i class="fa fa-check"></i>' : i + 1) + "</div>";
+                            (i === current ? 'minilesson_quiz_progress_item_current' : '') + " " +
+                            (i < current ? 'minilesson_quiz_progress_item_completed' : '') + "'>" +
+                            (i < current ? '<i class="fa fa-check"></i>' : i + 1) + "</div>";
                         innerclass = (i === lastvalue && i < total - 2) ? "minilesson_quiz_progress_dashedline" :
-                        i < current ? "minilesson_quiz_progress_completed" : "minilesson_quiz_progress_incompleted";
+                            i < current ? "minilesson_quiz_progress_completed" : "minilesson_quiz_progress_incompleted";
                         innerhtml = "<div class='" + innerclass + "' style='width: " + itemWidth + "%; '></div>";
                         if (i === current) {
                             html += "</div>";
@@ -159,6 +161,24 @@ define(
                 html += "";
                 $(".minilesson_quiz_progress").html(html);
 
+            },
+
+            /**
+             * Switch the lesson's last item's next button between "Next Page" and "Finish".
+             * Item types with a results page of their own call this when they show it, because
+             * only on the results page does the button finish the lesson. Other items ignore it.
+             *
+             * @param {number} index The item's index in the lesson
+             * @param {boolean} finish True to show "Finish", false to go back to "Next Page"
+             */
+            set_finish_label: function (index, finish) {
+                var item = this.quizdata[index];
+                if (!item || !item.finishonresults) {
+                    return;
+                }
+                var $button = $("#" + item.uniqueid + "_container .minilesson_nextbutton");
+                $button.find('[data-label="next"]').prop('hidden', finish);
+                $button.find('[data-label="finish"]').prop('hidden', !finish);
             },
 
             do_next: function (stepdata) {

@@ -27,6 +27,8 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['additem'] = 'Video Shadowing';
 $string['aihelper_placeholder_shadow'] = 'e.g. Add punctuation and fix any spelling and capitalization mistakes';
+$string['autoforward'] = 'Auto forward';
+$string['autoforward_details'] = 'After a line\'s last shadow, go on to the next line by itself instead of waiting for OK / Next. There is no Retry button in this mode.';
 $string['enablesubtitlefetch'] = 'Enable subtitle fetch button';
 $string['enablesubtitlefetch_details'] = 'Shows a "Fetch subtitles" button on the item form that downloads a YouTube video\'s subtitles into the subtitle editor. Note: fetching subtitles will not always work, and may stop working at any time. It is a utility tool that Poodll does not guarantee will always be available.';
 $string['error:badtimestamp'] = 'Clip start and end times must be in hh:mm:ss format, e.g. 00:01:30.';
@@ -41,6 +43,23 @@ $string['fetchvtt_fetching'] = 'Fetching...';
 $string['fetchvtt_invalidurl'] = 'Enter a valid YouTube URL or 11 character video ID first.';
 $string['fetchvtt_overwrite'] = 'This will replace the subtitles currently in the editor. Continue?';
 $string['fetchvtt_overwrite_title'] = 'Replace subtitles?';
+$string['pastevtt'] = 'Paste transcript';
+$string['pastevtt_title'] = 'Paste YouTube transcript';
+$string['pastevtt_convert'] = 'Convert to subtitles';
+$string['paste_step_open_link'] = 'Open the video on YouTube in a new tab';
+$string['paste_step_open_novideo'] = 'Open the video on YouTube (enter the video ID in the form first to get a link here)';
+$string['paste_step_showtranscript'] = 'Below the video, expand the description and click "Show transcript"';
+$string['paste_step_timestamps'] = 'In the transcript panel\'s ⋮ menu, make sure timestamps are switched on';
+$string['paste_step_copy'] = 'Select the whole transcript, copy it, and paste it into the box below';
+$string['paste_label'] = 'Transcript copied from YouTube';
+$string['paste_placeholder'] = '0:00
+the first line of the transcript
+0:03
+the second line of the transcript';
+$string['paste_empty'] = 'Paste the transcript you copied from YouTube first.';
+$string['paste_failed'] = 'Could not convert the transcript.';
+$string['paste_success'] = 'Added {$a} subtitle lines.';
+$string['paste_wordhighlightoff'] = 'Per-word highlighting has been switched off, because a pasted transcript only carries timings for whole lines. The clip will highlight a line at a time.';
 $string['error:nocuesinclip'] = 'No subtitle lines fall fully inside the clip start and end times. Adjust the times or the subtitles.';
 $string['error:novideoid'] = 'A YouTube video ID or URL is required.';
 $string['error:startafterend'] = 'The clip end time must be after the start time.';

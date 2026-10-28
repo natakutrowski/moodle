@@ -20,25 +20,31 @@
     <div class="panel-group" id="accordion">
         <div class="btn-primary mod_minilesson_result_index">{{index}}</div>
         <div class="panel panel-default">
-            <div class="panel-heading">
+            <div class="panel-heading d-flex justify-content-between align-items-center">
                 <h4 class="panel-title"> <a class="accordion-toggle mod_minilesson_result_title " data-bs-toggle="collapse" data-toggle="collapse" data-parent="#accordion" href="#accordion{{index}}">  {{title}}</a> </h4>
+                {{#hascommunitypage}}
+                    <button type="button" class="btn btn-secondary btn-sm mod_minilesson_finishedcpagelink"
+                            data-itemid="{{cpageitemid}}" data-target="ml_cpage_container_{{index}}">
+                        {{#str}}cpage_title, mod_minilesson{{/str}}
+                    </button>
+                {{/hascommunitypage}}
             </div>
             <div id="accordion{{index}}" class="panel-collapse collapse show in">
                 <div class="panel-body">
                     <ul class="minilesson_result">
-                        <li><div class="mod_minilesson_question_text"><b>{{#str}}questiontext, mod_minilesson{{/str}}: </b><br/>{{{questext}}}</div></li>
+                        <li><div class="mod_minilesson_question_text"><b>{{#str}}questiontext, mod_minilesson{{/str}}: </b><br/><div dir="{{contentdir}}" lang="{{contentlang}}">{{{questext}}}</div></div></li>
                         <li><div class="mod_minilesson_result_score"><b>{{#str}}score, mod_minilesson{{/str}}: </b><br/>{{correctitems}}/{{totalitems}}</div></li>
                         <li><div class="mod_minilesson_result_grade"><b>{{#str}}grade, mod_minilesson{{/str}}: </b><br/>{{grade}}%</div></li>
                         {{#hascorrectanswer}}
                             <li>
                                 <div class="mod_minilesson_result_correctanswer"><b>{{#str}}correctanswer, mod_minilesson{{/str}}</b><br/>
-                                    {{#correctans}}<span class="mod_minilesson_finishedanswer">{{{sentence}}}</span>{{/correctans}}
+                                    {{#correctans}}<span class="mod_minilesson_finishedanswer" dir="{{contentdir}}" lang="{{contentlang}}">{{{sentence}}}</span>{{/correctans}}
                                 </div>
                             </li>
                         {{/hascorrectanswer}}
                         {{#hasincorrectanswer}}
                             <li><div class="mod_minilesson_result_incorrectanswer"><b>{{#str}}incorrectanswer, mod_minilesson{{/str}} </b><br/>
-                                {{#incorrectans}}<span class="mod_minilesson_finishedanswer">{{{sentence}}}</span>{{/incorrectans}}
+                                {{#incorrectans}}<span class="mod_minilesson_finishedanswer" dir="{{contentdir}}" lang="{{contentlang}}">{{{sentence}}}</span>{{/incorrectans}}
                             </div>
                             </li>
                         {{/hasincorrectanswer}}
@@ -62,6 +68,9 @@
                     <div id="ml_answerdetails_container_{{index}}" class="ml_qf_itemresults" style="display: none"></div>
                 </div>
             </div>
+            {{#hascommunitypage}}
+                <div id="ml_cpage_container_{{index}}" class="ml_qf_cpage" style="display: none"></div>
+            {{/hascommunitypage}}
         </div>
     </div>
 </div>

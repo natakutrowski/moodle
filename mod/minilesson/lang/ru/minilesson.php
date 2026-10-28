@@ -1,15 +1,6 @@
 <?php
-/**
- * English strings for Mini Lesson
- *
- * You can have a rather longer description of the file as well,
- * if you like, and it can span multiple lines.
- *
- * @package    mod_minilesson
- * @copyright  2015 Justin Hunt (poodllsupport@gmail.com)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
+// CampusFR translation integration preview: latest official FR where available, then legacy DEV translations.
+// Missing keys use Moodle's English fallback; see translation_gaps.csv.
 defined('MOODLE_INTERNAL') || die();
 
 $string['modulename'] = 'Poodll MiniLesson';
@@ -24,9 +15,7 @@ $string['modulename_help'] = 'Poodll MiniLesson объединяет неско�
 * Текст с пропусками по отрывку  
 * Аудио-диалог  
 * Свободное говорение или письмо';
-
 $string['minilessonname'] = 'Poodll MiniLesson';
-
 $string['minilessonname_help'] = 'Название MiniLesson';
 $string['minilesson'] = 'Poodll MiniLesson';
 $string['activitylink'] = 'Ссылка на следующую активность';
@@ -34,16 +23,10 @@ $string['activitylink_help'] = 'Чтобы предоставить ссылку
 $string['activitylinkname'] = 'Продолжить к следующей активности: {$a}';
 $string['pluginadministration'] = 'Управление Mini Lesson';
 $string['pluginname'] = 'Poodll MiniLesson';
-//$string['someadminsetting'] = 'Некоторые административные настройки';
-//$string['someadminsetting_details'] = 'Дополнительная информация о некоторых административных настройках';
-//$string['someinstancesetting'] = 'Некоторые настройки экземпляра';
-//$string['someinstancesetting_details'] = 'Дополнительная информация о некоторых настройках экземпляра';
-//$string['minilessonsettings'] = 'Настройки MiniLesson';
 $string['minilesson:addinstance'] = 'Добавить новый Mini Lesson';
-$string['minilesson:view'] = 'Просмотр MiniLesson';
 $string['minilesson:view'] = 'Предпросмотр MiniLesson';
-$string['minilesson:itemview'] = 'Просмотр элементов урока';
-$string['minilesson:itemedit'] = 'Редактирование элементов урока';
+$string['minilesson:itemview'] = 'Просмотр элементов';
+$string['minilesson:itemedit'] = 'Редактирование элементов';
 $string['minilesson:tts'] = 'Может использовать Text To Speech (tts)';
 $string['minilesson:managequestions'] = 'Может управлять элементами урока';
 $string['minilesson:export'] = 'Может экспортировать элементы урока';
@@ -53,17 +36,15 @@ $string['minilesson:canpreview'] = 'Может просматривать акт
 $string['minilesson:evaluate'] = 'Может оценивать попытки MiniLesson студентов';
 $string['minilesson:submit'] = 'Может отправлять попытки MiniLesson';
 $string['minilesson:push'] = 'Переносить настройки из одного экземпляра в другие';
-
-$string['id']='ID';
+$string['id'] = 'ID';
 $string['name']='Имя';
-$string['timecreated']='Время создания';
+$string['timecreated'] = 'Время создания';
 $string['basicheading']='Основной отчет';
 $string['attemptsheading']='Отчет о попытках';
 $string['incompleteattemptsheading']='Отчет о незавершенных попытках';
 $string['gradereport']='Отчет об оценках';
 $string['gradereport_explanation']='Список оценок';
 $string['gradereportheading']='Отчет об оценках';
-//$string['attemptsbyuserheading']='Отчет о попытках пользователей';
 $string['gradingheading']='Оценки за последние попытки каждого пользователя.';
 $string['gradingbyuserheading']='Оценки за все попытки от: {$a}';
 $string['totalattempts']='Попытки';
@@ -79,7 +60,6 @@ $string['showingattempt']='Показ попытки для: {$a}';
 $string['showingmachinegradedattempt']='Попытка, оцененная автоматически, для: {$a}';
 $string['basicreport']='Основной отчет';
 $string['basicreport_explanation']='Основной отчет';
-
 $string['returntoreports']='Вернуться к отчетам';
 $string['returntogradinghome']='Вернуться к оценкам';
 $string['exportexcel']='Экспорт в CSV';
@@ -93,42 +73,21 @@ $string['gradelowest'] ='оценка за попытку с наименьши�
 $string['gradehighest'] ='оценка за попытку с наивысшим баллом';
 $string['gradelatest'] ='оценка за последнюю попытку';
 $string['gradeaverage'] ='средний балл за все попытки';
-//$string['defaultsettings'] ='Настройки по умолчанию';
 $string['exceededattempts'] ='Вы завершили максимальное количество попыток: {$a}.';
-//$string['minilessontask'] ='Задание Mini Lesson';
-$string['welcomelabel'] ='Приветствие по умолчанию';
-$string['welcomelabel_details'] ='Текст по умолчанию, который отображается в поле приветствия при создании новой активности Mini Lesson.';
-//$string['feedbacklabel'] ='Обратная связь по умолчанию';
-//$string['feedbacklabel_details'] ='Текст по умолчанию, который отображается в поле обратной связи при создании новой активности Mini Lesson.';
 $string['welcomelabel'] = 'Сообщение приветствия';
-//$string['feedbacklabel'] = 'Сообщение обратной связи';
+$string['welcomelabel_details'] ='Текст по умолчанию, который отображается в поле приветствия при создании новой активности Mini Lesson.';
 $string['alternatives']='Альтернативы';
 $string['alternatives_descr']='Укажите подходящие варианты для конкретных слов в тексте. Один набор слов на строку. Например: their|there|they\'re. Подробнее см. <a href="https://support.poodll.com/support/solutions/articles/19000096937-tuning-your-read-aloud-activity">документация</a>.';
-//$string['defaultwelcome'] = 'Чтобы начать активность, сначала проверьте свой микрофон. Когда мы сможем услышать звук от вашего микрофона, появится кнопка "Начать". После нажатия на кнопку "Начать" появится текст для чтения. Читайте текст вслух как можно яснее.';
-//$string['defaultfeedback'] = 'Спасибо за чтение. Пожалуйста, подождите, пока ваша попытка будет оценена.';
-$string['timelimit'] = 'Лимит времени';
-//$string['gotnosound'] = 'Мы не смогли вас услышать. Пожалуйста, проверьте настройки и разрешения микрофона и попробуйте снова.';
-//$string['done'] = 'Готово';
+$string['timelimit'] = 'Ограничение по времени';
 $string['processing'] = 'Обработка';
-//$string['feedbackheader'] = 'Завершено';
-//$string['beginreading'] = 'Начать чтение';
 $string['errorheader'] = 'Ошибка';
-//$string['uploadconverterror'] = 'Произошла ошибка при отправке вашего файла на сервер. Ваша попытка НЕ была получена. Пожалуйста, обновите страницу и попробуйте снова.';
 $string['attemptsreport'] = 'Отчет о попытках';
 $string['attemptsreport_explanation']='Список попыток';
 $string['incompleteattemptsreport'] = 'Отчет о незавершенных попытках';
 $string['incompleteattemptsreport_explanation']='Список незавершенных попыток';
-//$string['submitted'] = 'отправлено';
-$string['id'] = 'ID';
 $string['username'] = 'Пользователь';
-//$string['audiofile'] = 'Аудио';
-$string['timecreated'] = 'Время создания';
 $string['nodataavailable'] = 'Данные еще не доступны';
 $string['saveandnext'] = 'Сохранить ... и продолжить';
-//$string['notgradedyet'] = 'Ваша попытка была получена, но еще не оценена.';
-//$string['enabletts'] = 'Включить TTS (экспериментально)';
-//$string['enabletts_details'] = 'TTS в настоящее время не реализован';
-//we hijacked this setting for both TTS STT .... bad ... but they are always the same aren't they?
 $string['ttslanguage'] = 'Целевой язык / Язык озвучки';
 $string['deleteattemptconfirm'] = "Вы уверены, что хотите удалить эту попытку?";
 $string['deletenow']='Удалить сейчас';
@@ -139,14 +98,10 @@ $string['grade']='Оценка';
 $string['grade_p']='Оценка (%)';
 $string['quiz_p']='Тест (%)';
 $string['quizanswers']='Ответы';
-
 $string['apiuser']='Пользователь API Poodll';
 $string['apiuser_details']='Имя пользователя аккаунта Poodll, который авторизует Poodll на этом сайте.';
 $string['apisecret']='Секрет API Poodll';
 $string['apisecret_details']='Секрет API Poodll. Подробнее см. <a href= "https://support.poodll.com/support/solutions/articles/19000083076-cloud-poodll-api-secret">здесь</a>.';
-
-
-
 $string['useast1'] = 'Восток США';
 $string['tokyo'] = 'Токио, Япония';
 $string['sydney'] = 'Сидней, Австралия';
@@ -159,9 +114,6 @@ $string['singapore'] = 'Сингапур';
 $string['mumbai'] = 'Мумбаи, Индия';
 $string['capetown'] = 'Кейптаун, Южная Африка';
 $string['bahrain'] = 'Бахрейн';
-
-//$string['forever'] = 'Никогда не истекает';
-
 $string['en-us'] = 'Английский (США)';
 $string['es-us'] = 'Испанский (США)';
 $string['en-au'] = 'Английский (Австралия)';
@@ -199,12 +151,10 @@ $string['ru-ru'] = 'Русский';
 $string['ta-in'] = 'Тамильский';
 $string['te-in'] = 'Телугу';
 $string['tr-tr'] = 'Турецкий';
-
 $string['uk-ua'] = 'Украинский';
 $string['eu-es'] = 'Баскский';
 $string['fi-fi'] = 'Финский';
 $string['hu-hu'] = 'Венгерский';
-
 $string['sv-se'] = 'Шведский';
 $string['no-no'] = 'Норвежский';
 $string['nb-no'] = 'Норвежский (Букмол)';
@@ -212,7 +162,6 @@ $string['nn-no'] = 'Норвежский (Нюнорск)';
 $string['pl-pl'] = 'Польский';
 $string['ro-ro'] = 'Румынский';
 $string['mi-nz'] = 'Маори';
-
 $string['bg-bg'] = 'Болгарский';
 $string['cs-cz'] = 'Чешский';
 $string['el-gr'] = 'Греческий';
@@ -225,65 +174,22 @@ $string['is-is'] = 'Исландский';
 $string['mk-mk'] = 'Македонский';
 $string['sr-rs'] = 'Сербский';
 $string['vi-vn'] = 'Вьетнамский';
-
 $string['awsregion']='Регион AWS';
 $string['region']='Регион AWS';
-//$string['expiredays']='Количество дней для хранения файла';
-
-//$string['machinegrading']='Автоматическая оценка';
-//$string['viewmachinegrading']='Просмотр автоматической оценки';
 $string['review']='Просмотр';
 $string['regrade']='Пересчитать оценку';
-
-//$string['humanevaluatedmessage']='Ваша последняя попытка была оценена вашим преподавателем, результаты отображены ниже.';
-//$string['machineevaluatedmessage']='Ваша последняя попытка была оценена <i>автоматически</i>, результаты отображены ниже.';
-
-//$string['dospotcheck']="Проверка выборочных попыток";
-//$string['spotcheckbutton']="Быстрая оценка";
-//$string['gradingbutton']="Ручная оценка";
-//$string['transcriptcheckbutton']="Проверка транскрипта";
-//$string['doclear']="Очистить все маркеры";
-
-//$string['gradethisattempt']="Оценить эту попытку";
 $string['rawgrade_p']='Оценка (%)';
 $string['adjustedgrade_p']='Скорректированная оценка (%)';
-
-//$string['evaluationview']="Отображение оценки";
-//$string['evaluationview_details']="Что показывать студентам после выполнения попытки и получения оценки";
-//$string['humanpostattempt']="Отображение оценки (человеческая)";
-//$string['humanpostattempt_details']="Что показывать студентам после получения человеческой оценки";
-//$string['machinepostattempt']="Отображение оценки (автоматическая)";
-//$string['machinepostattempt_details']="Что показывать студентам после получения автоматической оценки";
-//$string['postattempt_none']="Показать текст. Не показывать оценку или ошибки.";
-//$string['postattempt_eval']="Показать текст и оценку (баллы)";
-//$string['postattempt_evalerrors']="Показать текст, оценку (баллы) и ошибки";
 $string['attemptsperpage']="Количество попыток на страницу: ";
 $string['backtotop']="Вернуться на страницу курса";
-//$string['transcript']="Транскрипт";
-//$string['quickgrade']="Быстрая оценка";
-//$string['ok']="ОК";
-//$string['ng']="Не ОК";
-//$string['notok']="Не ОК";
-//$string['machinegrademethod']="Метод оценки (человек/машина)";
-//$string['machinegrademethod_help']="Используйте автоматическую или человеческую оценку в журнале оценок.";
-//$string['machinegradenone']="Никогда не использовать автоматическую оценку";
-//$string['machinegrademachine']="Использовать автоматическую или человеческую оценку";
-
-//$string['noattemptsregrade']='Нет попыток для пересчета оценки';
-//$string['machineregraded']='Успешно пересчитано {$a->done} попыток. Пропущено {$a->skipped} попыток.';
-//$string['machinegradespushed']='Оценки успешно добавлены в журнал оценок';
-
-
 $string['notimelimit']='Без ограничения по времени';
 $string['xsecs']='{$a} секунд';
 $string['onemin']='1 минута';
 $string['xmins']='{$a} минут';
 $string['oneminxsecs']='1 минута {$a} секунд';
 $string['xminsecs']='{$a->minutes} минут {$a->seconds} секунд';
-
 $string['postattemptheader']='Параметры после попытки';
 $string['recordingaiheader']='Параметры записи и ИИ';
-
 $string['displaysubs'] = '{$a->subscriptionname} : истекает {$a->expiredate}';
 $string['noapiuser'] = "API пользователь не указан. MiniLesson не будет работать правильно.";
 $string['noapisecret'] = "API секрет не указан. MiniLesson не будет работать правильно.";
@@ -292,11 +198,9 @@ $string['appauthorised']= "Poodll MiniLesson авторизован для эт�
 $string['appnotauthorised']= "Poodll MiniLesson НЕ авторизован для этого сайта.";
 $string['refreshtoken']= "Обновить информацию о лицензии";
 $string['notokenincache']= "Обновите, чтобы увидеть информацию о лицензии. Свяжитесь с поддержкой Poodll, если возникла проблема.";
-//these errors are displayed on activity page
 $string['nocredentials'] = 'API пользователь и секрет не указаны. Введите их на <a href="{$a}">странице настроек.</a> Вы можете получить их на <a href="https://poodll.com/member">Poodll.com.</a>';
 $string['novalidcredentials'] = 'API пользователь и секрет были отклонены и не могут получить доступ. Проверьте их на <a href="{$a}">странице настроек.</a> Вы можете получить их на <a href="https://poodll.com/member">Poodll.com.</a>';
 $string['nosubscriptions'] = "На этом сайте/плагине нет действующей подписки.";
-
 $string['privacy:metadata:attemptid']='Уникальный идентификатор попытки пользователя в MiniLesson.';
 $string['privacy:metadata:minilessonid']='Уникальный идентификатор экземпляра активности MiniLesson.';
 $string['privacy:metadata:userid']='ID пользователя для попытки MiniLesson';
@@ -313,14 +217,12 @@ $string['privacy:metadata:cloudpoodllcom']='Плагин MiniLesson сохран
 $string['privacy:metadata'] = 'Плагин Poodll MiniLesson хранит личные данные.';
 $string['privacy:metadata:moduleid'] = 'Уникальный идентификатор экземпляра активности MiniLesson.';
 $string['privacy:metadata:errorcount']='Количество ошибок попытки пользователя в MiniLesson.';
-
-//rsquestions
 $string['rsquestions'] ='Элементы урока';
 $string['managersquestions'] ='Управление элементами урока';
 $string['correctanswer'] ='Правильный ответ';
 $string['incorrectanswer'] ='Неправильный ответ';
 $string['whatdonow'] = 'Добавить элементы урока в активность:';
-$string['addnewitem'] = 'Добавить новый элемент урока';
+$string['addnewitem'] = 'Добавить новый элемент';
 $string['addingitem'] = 'Добавление нового элемента {$a}';
 $string['editingitem'] = 'Редактирование элемента {$a}';
 $string['createaitem'] = 'Создать элемент урока';
@@ -334,10 +236,10 @@ $string['audioitemfile'] = 'Аудио элемента (MP3)';
 $string['itemname'] = 'Имя элемента';
 $string['itemorder'] = 'Порядок элементов';
 $string['correct'] = 'Правильно';
-$string['itemtype'] = 'Тип элемента';
+$string['itemtype']= 'Тип элемента';
 $string['actions'] = 'Действия';
 $string['edititem'] = 'Редактировать элемент';
-$string['previewitem'] = 'Предпросмотр элемента';
+$string['previewitem'] ='Предпросмотр элемента';
 $string['duplicateitem'] = 'Дублировать элемент';
 $string['deleteitem'] = 'Удалить элемент';
 $string['confirmitemdelete'] = 'Вы уверены, что хотите <i>УДАЛИТЬ</i> элемент? : {$a}';
@@ -346,31 +248,10 @@ $string['confirmattemptdeletetitle'] = 'Действительно удалит�
 $string['confirmattemptdelete'] = 'Вы уверены, что хотите <i>УДАЛИТЬ</i> эту попытку?';
 $string['confirmattemptdeletealltitle'] = 'Действительно удалить ВСЕ попытки?';
 $string['confirmattemptdeleteall'] = 'Вы уверены, что хотите <i>УДАЛИТЬ ВСЕ</i> попытки?';
-$string['noitems'] = 'Этот MiniLesson не содержит элементов урока';
-//$string['itemdetails'] = 'Детали элемента: {$a}';
-//$string['itemsummary'] = 'Краткое описание элемента: {$a}';
-//$string['viewreport'] = 'Просмотр отчета';
-//$string['translate'] = 'Перевести';
-//$string['iscorrectlabel'] = 'Правильно/Неправильно';
-//$string['correcttranslationtitle'] = 'Правильный перевод';
+$string['noitems'] ='В этой активности пока нет элементов урока';
 $string['edit'] = 'Редактировать';
-//$string['gotoactivity'] = 'Начать активность';
-//$string['tryactivityagain'] = 'Попробовать снова';
-//$string['shuffleanswers'] = 'Перемешать ответы';
-//$string['shufflequestions'] = 'Перемешать вопросы';
-$string['minilesson:itemview'] = 'Просмотр элементов';
-$string['minilesson:itemedit'] = 'Редактирование элементов';
-//$string['fbquestionname'] = 'Элемент';
 $string['avgcorrect'] = 'Среднее значение правильных ответов';
 $string['avgtotaltime'] = 'Средняя продолжительность';
-//$string['quiz'] = 'Тест';
-
-
-//MSV stuff
-//$string['error']="Ошибка";
-//$string['notes']="Заметки";
-
-
 $string['addmultichoiceitem']='Множественный выбор';
 $string['addmultiaudioitem']='Множественный выбор (Аудио)';
 $string['adddictationchatitem']='Диктовка (Чат)';
@@ -390,7 +271,6 @@ $string['addfreespeakingitem']='Свободное говорение';
 $string['addfluencyitem']='Беглость речи';
 $string['addpassagereadingitem']='Чтение текста';
 $string['addconversationitem']='Беседа';
-
 $string['multichoice'] = 'Множественный выбор';
 $string['multiaudio'] = 'Множественный выбор (Аудио)';
 $string['dictation']='Диктовка';
@@ -413,53 +293,28 @@ $string['transcriber'] = 'Транскриптор';
 $string['transcriber_details'] = 'Движок транскрипции для использования';
 $string['transcriber_auto'] = 'Открытая STT (Строгий режим)';
 $string['transcriber_poodll'] = 'Руководимая STT (Poodll)';
-
-
 $string['pagelayout'] = 'Макет страницы';
-
 $string['thatsnotright'] = 'Что-то пошло не так';
-//$string['invalidattempt'] = 'Неверная попытка';
-//$string['notyourattempt'] = 'Я думаю, что это не ваша попытка чтения.';
-//$string['notfinished'] = 'Это чтение не завершено';
-
-//$string['title'] = 'Название';
-//$string['level'] = 'Уровень';
-//$string['errors'] = 'Ошибки';
-//$string['studentname'] = 'Ученик';
-//$string['goback'] = 'Вернуться назад';
-//$string['teacher'] = 'Учитель';
-//$string['close'] = 'Закрыть';
-
-//$string['submitrawaudio'] = 'Отправить несжатое аудио';
-//$string['submitrawaudio_details'] = 'Отправка несжатого аудио может повысить точность транскрипции, но снизить скорость загрузки и надёжность.';
-
-//dictation chat
 $string['dc_results'] = 'Результаты';
 $string['listenandtype'] = 'Слушать и Писать';
 $string['listen'] = 'Слушать';
 $string['check'] = 'Проверить';
 $string['skip'] = 'Пропустить';
-$string['start'] = 'Начать';
-//$string['next'] = 'Далее';
+$string['start'] = 'Начало';
 $string['nextlessonitem'] = 'Следующая страница';
 $string['loading'] = 'Загрузка...';
 $string['dictation_instructions1'] = 'Слушайте и записывайте каждое предложение, которое вы слышите.';
 $string['sc_instructions1'] = 'Прочитайте вслух фразу на каждой карточке.';
 $string['dc_instructions1'] = 'Слушайте и записывайте услышанные предложения.';
-//$string['dc_instructions2'] = 'Нажмите "Начать", чтобы приступить!';
-//dictation
 $string['d_question'] = 'Элемент';
-//listen and repeat
 $string['listenandrepeat'] = 'Слушать и Говорить';
 $string['lr_instructions1'] = 'Слушайте и отвечайте на услышанные предложения.';
-//$string['lr_instructions2'] = 'Нажмите "Начать", чтобы приступить!';
 $string['spacegame_instructions1'] = 'Уничтожайте пришельцев, выбирая правильные ответы.';
 $string['freespeaking_instructions1'] = 'Используйте микрофон, чтобы записать свой ответ на вопрос.';
 $string['passagereading_instructions1'] = 'Используйте микрофон, чтобы записать своё чтение текста.';
 $string['freewriting_instructions1'] = 'Введите свой ответ на вопрос в текстовое поле ниже.';
-$string['fluency_instructions1'] = 'Замените эти инструкции.';
+$string['fluency_instructions1'] = 'Прочитайте предложения вслух. Нажмите на иконку микрофона, чтобы начать запись.';
 $string['conversation_instructions1'] = 'Замените эти инструкции.';
-
 $string['choosevoice'] = "Выберите голос диктора";
 $string['choosemultiaudiovoice'] = "Выберите голос для чтения ответа";
 $string['showoptionsastext'] = 'Показать ответы в виде текста';
@@ -471,36 +326,25 @@ $string['listenorread_read'] = 'простой текст';
 $string['listenorread_listen']= 'аудиоплееры + точки';
 $string['listenorread_listenandread']= 'аудиоплееры + простой текст';
 $string['listenorread_image']= 'изображения + простой текст';
-
-//$string['gradenow']= 'Оценить сейчас';
-
-$string['itemtype']= 'Тип элемента';
 $string['action']= 'Действие';
 $string['order']= 'Порядок';
-$string['deleteitem'] = 'Удалить элемент';
 $string['deleteitem_message'] = 'Действительно удалить элемент:&nbsp;';
 $string['deletebuttonlabel'] = 'УДАЛИТЬ';
-
-$string['noitems'] ='В этой активности пока нет элементов урока';
 $string['letsadditems'] ='Давайте добавим несколько элементов урока!';
 $string['additems'] ='Добавить элементы';
 $string['showqtitles'] ='Показать названия элементов в уроке';
-$string['previewitem'] ='Предпросмотр элемента';
 $string['showitemscores'] ='Просмотреть все результаты';
-//$string['ttshorturl'] = 'URL SmartFrame:';
-$string['reattempt'] ='Попробовать снова';
+$string['reattempt'] = 'Попробовать снова';
 $string['attemptresultsheading']='{$a->username}: Попытка({$a->attemptid}): Оценка: {$a->sessionscore}% : - {$a->date} ';
 $string['result'] ='Результат';
 $string['qnumber'] ='Номер';
 $string['title'] ='Заголовок';
 $string['type'] ='Тип';
-$string['sentences'] ='Предложения';
+$string['sentences'] = 'Предложения';
 $string['correctresponses'] ='Правильные ответы';
-$string['enterresponses'] ='Введите список правильных ответов в текстовое поле ниже. Каждый ответ на новой строке.';
+$string['enterresponses'] = 'Введите ниже список правильных ответов и, при необходимости, список частично правильных ответов.';
 $string['sentenceprompts'] ='Предложения (запросы)';
-//$string['entersentences'] ='Введите список предложений в текстовое поле ниже. Каждое предложение на новой строке.';
 $string['phraseresponses'] ='Введите список элементов в текстовое поле ниже. Каждый элемент должен быть на новой строке. Формат:<br> аудиозапрос | правильный ответ (необязательно)| текстовый запрос (необязательно) <br>например: How are you?|I am fine.';
-
 $string['itemmedia'] ='Изображение, аудио или видео для отображения';
 $string['itemttsquestion'] ='Текст запроса TTS';
 $string['itemttsquestionvoice'] ='Голос диктора TTS';
@@ -510,19 +354,8 @@ $string['prompt-separate'] ='Текст и медиа отдельно (реко
 $string['prompt-richtext'] ='Форматированный текст';
 $string['prompttype'] ='Текст и Медиа';
 $string['prompttype_help'] ='Используйте простой текст и отдельные селекторы для добавления медиафайлов или текстовый редактор с форматированием.';
-
-//repeatable
-//$string['sentence'] ='Предложение';
-//$string['sentence_help'] ='Помощь по предложению';
-//$string['sentenceno'] ='Номер предложения';
-//$string['sentence_add_fields'] ='Добавить еще одно предложение';
-
-//reattempt
-$string['reattempt'] = 'Попробовать снова';
 $string['reattempttitle'] = 'Действительно попробовать снова?';
 $string['reattemptbody'] = 'Если вы продолжите, ваша предыдущая попытка будет заменена на эту. Продолжить?';
-
-//media toggles
 $string['addmedia'] = 'Изображение / аудио или видео';
 $string['addmedia_instructions'] = 'Выберите тип медиа, который вы хотите показать в элементе урока.';
 $string['addiframe'] = 'iFrame / пользовательский HTML';
@@ -538,37 +371,25 @@ $string['addttsdialog_instructions'] = "Добавить диалог TTS";
 $string['addttspassage'] = "Пассаж TTS";
 $string['ttspassageinstructions']="Выберите голос диктора и скорость, а затем введите текст для чтения.";
 $string['addttspassage_instructions']="Выберите голос диктора и скорость, а затем введите текст для чтения.";
-
-//showtextprompt
 $string['enablesetuptab']="Включить вкладку настроек";
 $string['enablesetuptab_details']="Вероятно, не отмечайте это. Это покажет вкладку с настройками экземпляра активности для администраторов. Это для особых случаев, и страницы MiniLesson будут отображаться без заголовков, подвалов или блоков.";
 $string['setup']="Настройка";
-
-//TTS options
 $string['ttsnormal']='Нормальная';
-$string['ttsslow']='Медленная';
 $string['ttsslow']='Очень медленная';
 $string['ttsssml']='SSML';
 $string['choosevoiceoption']='Параметры запроса TTS';
 $string['autoplay']='Автовоспроизведение';
-
 $string['reportsmenutoptext'] = "Проверьте оценки и детали попыток, используя кнопки отчётов ниже.";
-
 $string['mediaprompts']="Медиа запросы";
 $string['ignorepunctuation'] = 'Игнорировать пунктуацию';
-
 $string['chooselayout']='Выберите макет';
 $string['layoutauto']='Авто';
 $string['layoutvertical']='Вертикальный';
 $string['layouthorizontal']='Горизонтальный';
 $string['layoutmagazine']='Журнальный';
-
 $string['freetrial'] = "Получить учетные данные API Cloud Poodll и бесплатную пробную версию";
 $string['freetrial_desc'] = "Должно появиться диалоговое окно, позволяющее вам зарегистрироваться на бесплатную пробную версию Poodll. После регистрации войдите в панель управления членами, чтобы получить ваш API пользователь и секретный ключ. А также зарегистрировать URL вашего сайта.";
-//$string['memberdashboard'] = "Панель управления";
-//$string['memberdashboard_desc'] = "";
 $string['fillcredentials']="Настроить API пользователя и секретный ключ с использованием существующих учетных данных";
-
 $string['viewstart']="Открытие активности";
 $string['viewend']="Закрытие активности";
 $string['viewstart_help']="Если установлено, предотвращает доступ учащегося к активности до указанного времени и даты.";
@@ -581,29 +402,24 @@ $string['activityisclosed']="Эта активность закрыта.";
 $string['open']="Открыто: ";
 $string['until']="До: ";
 $string['activityopenscloses']="Даты открытия/закрытия активности";
-
 $string['ytclipdetails'] = "Клип Youtube";
 $string['itemytid'] = "ID видео Youtube";
 $string['itemytstart'] = "Секунды начала";
 $string['itemytend'] = "Секунды окончания";
 $string['itemscomplete'] = "Элементы завершены";
-
 $string['ttsdialog'] = "Диалог TTS";
 $string['ttsdialogvoicea'] = "Голос A";
 $string['ttsdialogvoiceb'] = "Голос B";
 $string['ttsdialogvoicec'] = "Голос C";
 $string['ttsdialogvisible'] = "Диалог видим";
 $string['ttsdialogvisible_desc'] = "Снимите отметку, если студенты не должны видеть текст диалога.";
-
 $string['ttspassage']="Пассаж TTS";
 $string['ttspassagespeed']="Скорость";
 $string['ttspassagevoice']="Голос";
-
 $string['totalscore'] = 'Общий счёт:';
 $string['score'] = 'Счёт';
 $string['questiontext'] = 'Вопрос';
 $string['ttsdialoginstructions']="Выберите голоса дикторов для ролей A, B и C и введите диалог. Начните каждую строку диалога с роли диктора + ')'. Например, A) Привет. Звуковые эффекты начинаются с >>, например, >>чайки";
-
 $string['courseattempts'] = 'Попытки курса';
 $string['courseattemptsreport'] = 'Отчёт о попытках курса';
 $string['courseattemptsheading'] = 'Отчёт о попытках курса';
@@ -611,7 +427,7 @@ $string['courseattemptsreport_explanation']='Все попытки MiniLesson в
 $string['studentid']="Номер студента";
 $string['studentname']="Имя студента";
 $string['activityname']="Название урока";
-$string['itemcount']="Количество элементов";
+$string['itemcount'] = 'Количество элементов';
 $string['correctcount']="Количество правильных элементов";
 $string['lessonkey']="Ключ урока";
 $string['lessonkey_details'] =
@@ -647,16 +463,15 @@ $string['multiaudio_instructions1'] = 'Выберите правильный о�
 $string['multichoice_instructions1'] = 'Выберите правильный ответ.';
 $string['shortanswer_instructions1'] = 'Ответьте на вопрос, используя микрофон.';
 $string['smartframe_instructions1'] = 'Содержимое страницы загрузится ниже.';
-
 $string['lg_results'] = 'Результаты';
 $string['sg_results'] = 'Результаты';
 $string['listeninggapfill'] = 'Заполнение пробелов на слух';
 $string['speakinggapfill'] = 'Заполнение пробелов при разговоре';
 $string['typinggapfill'] = 'Заполнение пробелов при вводе текста';
 $string['comprehensionquiz'] = 'Тест на понимание';
-$string['lg_instructions1'] = 'Инструкции для заполнения пробелов на слух';
-$string['sg_instructions1'] = 'Инструкции для заполнения пробелов при разговоре';
-$string['tg_instructions1'] = 'Инструкции для заполнения пробелов при вводе текста';
+$string['lg_instructions1'] = 'Прослушайте и заполните пропуски';
+$string['sg_instructions1'] = 'Используйте микрофон и произнесите полное предложение, включая пропущенные слова';
+$string['tg_instructions1'] = 'Заполните пропущенные слова или буквы';
 $string['compquiz_results'] = 'Результаты';
 $string['compquiz_instructions1'] = 'Инструкции для теста на понимание';
 $string['iteminstructions'] = 'Инструкции для элемента';
@@ -664,9 +479,8 @@ $string['modaleditform'] = 'Форма редактирования элемен
 $string['modaleditform_details'] = 'Добавление или редактирование элементов в MiniLesson можно выполнить через всплывающую форму или на новой странице';
 $string['modaleditform_newpage'] = 'Новая страница';
 $string['modaleditform_modalform'] = 'Всплывающая форма (popup)';
-$string['timelimit'] = 'Ограничение по времени';
 $string['gapfillitemsdesc'] ='Введите список элементов в текстовое поле ниже. Каждый элемент должен быть на новой строке. Пропущенные буквы должны быть заключены в квадратные скобки: [ ]. Формат:<br>Текстовый запрос | подсказка<br>. Например: Это мой д[о]м| обычный питомец';
-$string['listeninggapfillitemsdesc'] ='Введите список элементов в текстовое поле ниже. Каждый элемент должен быть на новой строке. Пропущенные буквы должны быть заключены в квадратные скобки: [ ]. Формат:<br>Текстовый запрос<br>. Например: Это мой д[о]м';
+$string['listeninggapfillitemsdesc'] = 'Введите список элементов в текстовое поле ниже. Каждый элемент должен быть с новой строки. Пропущенные буквы необходимо заключить в квадратные скобки: [ ]. Формат:<br>Текст | подсказка<br>Например: This is my d[og].| Обычное домашнее животное.';
 $string['readsentences'] = 'Читать предложения (TTS)';
 $string['readsentences_desc'] = 'Если установлено, каждое предложение будет озвучено. Это будет форма диктанта';
 $string['allowretry'] = 'Разрешить повторную попытку';
@@ -685,7 +499,6 @@ $string['examplecsv'] = 'Пример CSV/текстового файла';
 $string['examplecsv_help'] = 'Чтобы использовать пример CSV файла, загрузите его, а затем откройте с помощью текстового или табличного редактора. Оставьте первую строку без изменений, затем редактируйте последующие строки (записи) и добавляйте свои данные MiniLesson. Сохраните файл в формате CSV, затем загрузите его.';
 $string['examplejson'] = 'Пример JSON файла';
 $string['examplejson_help'] = 'Чтобы использовать пример JSON файла, загрузите его, откройте с помощью текстового или табличного редактора. Редактируйте и используйте элементы в массиве items, которые соответствуют нужным вам типам элементов, и удаляйте те, что вам не нужны. Сохраните файл в формате JSON и загрузите его.';
-
 $string['error:emptyfield'] = 'НЕ МОЖЕТ БЫТЬ ПУСТЫМ';
 $string['error:failed'] = 'ОШИБКА';
 $string['error:correctanswer'] = 'НЕДОПУСТИМЫЙ ОТВЕТ';
@@ -693,55 +506,20 @@ $string['error:invaliditemtype'] = 'НЕДОПУСТИМЫЙ ТИП ЭЛЕМЕН
 $string['error:invalidjson'] = 'НЕДОПУСТИМЫЙ JSON';
 $string['error:noitemsinjson'] = 'НЕТ ЭЛЕМЕНТОВ В JSON';
 $string['error:csvloaderror'] = 'ОШИБКА ЗАГРУЗКИ CSV';
-
 $string['bulkdelete'] = 'Удалить выбранное';
 $string['bulkdeletequestion'] = 'Вы уверены, что хотите удалить выбранный вопрос?';
-
 $string['speechtester_recordinstructions'] = 'Запишите аудио здесь для использования в тестировании. Вы также можете выбрать загрузку аудио, нажав кнопку загрузки аудио.';
 $string['modelaudio_playerinstructions'] = 'Текущее аудио можно прослушать с помощью проигрывателя ниже.';
 $string['speechtester_recordtitle'] = 'Записать аудио';
 $string['speechtester_playertitle'] = 'Воспроизвести аудио';
-$string["savestaudio"]='Записать аудио';
-$string["uploadstaudio"]='Загрузить аудио';
-$string["sttstaudio"]='STT аудио';
-$string["speechtester"]='Тестировщик речи';
-$string["exportinstructions"]='Экспортировать элементы этого MiniLesson в файл JSON. Это можно использовать для резервного копирования или переноса элементов в другой MiniLesson. Также вы можете редактировать экспортированные элементы и повторно импортировать их как новые.';
-$string["exportitems"]='Экспортировать элементы';
-$string["importformat"]="Формат импорта";
-$string["exportheading"]='Экспорт элементов в JSON';
-$string["importheading"]="Импорт элементов JSON или CSV";
-$string["allowmicaccess"]="Пожалуйста, разрешите доступ к вашему микрофону.";
-$string["nomicdetected"]="Микрофон не обнаружен.";
-$string["speechnotrecognized"]="Не удалось распознать вашу речь.";
-$string["nominilessons"]="Нет MiniLesson.";
-
-$string["reallydeletemediaprompt"]="Действительно удалить медиафайл: ";
-$string["deletemediaprompt"]="Удалить медиафайл?";
-$string["choosemediaprompt"]="Выберите тип медиа ..";
-$string["deletefilesfirst"]="Удалите все файлы, добавленные вручную. Они не будут удалены автоматически.";
-$string["cleartextfirst"]="Очистите весь добавленный вручную контент. Он не будет удалён автоматически.";
-
-$string["itemsettingsheadings"]="Настройки элемента";
-
-$string["finishscreen"]="Экран завершения";
-$string["finishscreen_details"]="Когда вы завершаете активность, вы можете увидеть простой экран, полный экран или пользовательский экран. Пользовательский экран — это страница, которую вы можете создать сами.";
-$string["finishscreen_help"]="Когда вы завершаете активность, вы можете увидеть простой экран, полный экран или пользовательский экран. Пользовательский экран — это страница, которую вы можете создать сами.";
-$string["finishscreen_simple"]="Простой";
-$string["finishscreen_full"]="Полный";
-$string["finishscreen_custom"]="Пользовательский";
-$string["finishscreencustom"]="Пользовательский экран завершения";
-$string["finishscreencustom_help"]="Пользовательский экран — это продвинутая функция, которая позволяет создать собственный экран завершения, используя нотацию Mustache и переменные. Некоторые переменные: {total} {courseurl} {coursename} {yellowstars} {graystars} {reattempturl} и массив {results}, содержащий {title}, {grade}, {yellowstars} и {graystars}.";
 $string['finishscreencustom_details'] = "Если параметры экрана завершения активности установлены как 'Пользовательский', это будет шаблон Mustache по умолчанию, который создаёт экран завершения. Его можно изменить на уровне активности.";
-
 $string['freewritingdesc'] ='Установите целевое количество слов и правила оценки и обратной связи для AI. Студенты должны ввести свой ответ на тему, и они получат оценку и обратную связь, созданные искусственным интеллектом.';
 $string['freespeakingdesc'] ='<b>Free Speaking — БЕТА-версия.</b> Разные браузеры и мобильные устройства могут работать по-разному.<br/><br/> Установите целевое количество слов и правила оценки и обратной связи для AI. Студенты должны записать свой ответ на тему, и они получат оценку и обратную связь, созданные искусственным интеллектом.';
 $string['conversationdesc'] ='[Описание разговора здесь]';
 $string['fluencydesc'] ='[Описание беглости здесь]';
 $string['spacegamedesc'] ='[Описание космической игры здесь]';
 $string['passagereadingdesc'] ='<b>Passage Reading — БЕТА-версия.</b> Разные браузеры и мобильные устройства могут работать по-разному.<br/><br/> Введите текст для чтения в текстовом поле ниже. Студент должен прочитать текст вслух.';
-
 $string['passagetoread'] ='Текст для чтения';
-
 $string['achievedhighscoreof'] = 'Достигнут высокий результат: {$a}';
 $string['addtomywords'] = "Нажмите, чтобы добавить в Мои Слова";
 $string['emptyquiz'] = 'В выбранной категории нет вопросов с множественным выбором.';
@@ -755,7 +533,6 @@ $string['playerscores'] = 'Результаты игроков';
 $string['points'] = 'Очки';
 $string['removefrommywords'] = "Нажмите, чтобы удалить из Моих Слов";
 $string['removescores'] = 'Удалить все результаты пользователей';
-$string['score'] = 'Счёт';
 $string['scoreheader'] = 'Счёт';
 $string['scoreslink'] = 'Посмотреть все попытки';
 $string['scoreslink_help'] = 'Посмотреть все попытки и результаты игроков';
@@ -776,10 +553,9 @@ $string['enterspacegameitems'] = 'Введите список элементов
 $string['showdetailedresults'] = 'Показать подробные результаты';
 $string['hidestartpage'] = 'Скрыть стартовую страницу';
 $string['hidestartpage_desc'] = 'Если отмечено, элемент активности начнётся, как только он загрузится.';
-
 $string['aigrade_modelanswer'] = 'Образец ответа';
 $string['relevancetype'] = 'Тип релевантности';
-$string['relevancetype_desc'] = 'Искусственный интеллект будет наказывать за ответы с низкой релевантностью. Выберите тип релевантности для использования.';
+$string['relevancetype_desc'] = 'ИИ может снижать балл за ответы с низкой релевантностью. Выберите тип релевантности.';
 $string['aigrade_instructions'] = 'Инструкции по оценке для AI';
 $string['aigrade_feedback'] = 'Инструкции по обратной связи для AI';
 $string['aigrade_feedback_language'] = 'Язык обратной связи AI';
@@ -788,32 +564,26 @@ $string['totalmarks'] = 'Общее количество баллов';
 $string['relevancetype_none'] = 'Релевантность не учитывается';
 $string['relevancetype_question'] = 'Релевантность к вопросу (текст элемента)';
 $string['relevancetype_modelanswer'] = 'Релевантность к образцовому ответу';
-
 $string['numberonly'] = 'Только числа';
 $string['targetwordcount'] = 'Целевое количество слов: {$a}';
 $string['currentwordcount'] = 'Количество слов: ';
 $string['reallyreattempt'] = 'Ваша предыдущая попытка будет перезаписана. Вы уверены, что хотите попробовать снова?';
 $string['pr_totalmarks_instructions'] = 'Общее количество баллов, которые чтение текста вносит в общий результат Minilesson. Оставьте 0, и общее количество баллов будет равно количеству слов в тексте. Оценка будет рассчитана на основе процента правильно прочитанных слов.';
-
 $string['alternates'] = 'Альтернативы';
 $string['pr_alternates_instructions'] =  'Альтернативы позволяют автору активности указывать допустимые ошибки в транскрипции для конкретных слов текста. Один набор слов на строку. Например: их|там|их. См. <a href="https://support.poodll.com/support/solutions/articles/19000096937-tuning-your-read-aloud-activity">документацию</a> для получения подробной информации.';
-
 $string['rp_result_read'] = "Прочитанные слова";
 $string['rp_result_correct'] = "Правильно";
 $string['rp_result_incorrect'] = "Неправильно";
 $string['rp_result_unreached'] = "Не прочитано";
 $string['rp_result_accuracy'] = "Точность";
 $string['rp_result_score'] = "Оценка";
-
 $string['showcorrections'] = "Показать исправления";
 $string['hidecorrections'] = "Скрыть исправления";
 $string['showitemreview'] = "Показать обзор элемента";
 $string['showitemreview_help']="Сразу после того, как ученик завершил элемент, показать ему правильный ответ и любой обратный отзыв, если элемент поддерживает это.";
 $string['showitemreview_details']="Сразу после того, как ученик завершил элемент, показать ему правильный ответ и любой обратный отзыв, если элемент поддерживает это.";
-
 $string['enablepushtab'] = "Включить вкладку Push";
 $string['enablepushtab_details'] = "Вкладка Push позволяет пользователю с возможностью Minilesson Push (по умолчанию — менеджерам) передавать настройки из этой активности в другие активности на сайте.";
-
 $string['push'] = 'Отправить';
 $string['pushpage'] = 'Страница Push';
 $string['pushpage_explanation'] = 'Используйте кнопки на этой странице, чтобы отправить настройку из ЭТОЙ Minilesson активности в другие активности Minilesson. Будьте осторожны. Назад дороги нет.';
@@ -826,12 +596,10 @@ $string['pushpage_scopesite'] = 'Все активности Minilesson на с�
 $string['pushpage_scopenone'] = 'Нет активностей Minilesson';
 $string['pushconfirm'] = 'Вы собираетесь отправить настройку: <b>{$a->pushthing}</b> в {$a->clonecount} других активностей. Вы уверены?';
 $string['scopeselector']  = 'Объём: ';
-
 $string['writehere']  = 'Пишите здесь ..';
 $string['submit']='Отправить';
 $string['feedback']='Обратная связь';
 $string['totalwords'] = 'Общее количество слов';
-$string['sentences'] = 'Предложения';
 $string['uniquewords'] = 'Уникальные слова';
 $string['ideacount'] = 'Концепции';
 $string['relevance'] = 'Релевантность';
@@ -843,25 +611,16 @@ $string['notsubmit'] = 'Не отправлено';
 $string['notsubmitted'] = 'Вы не отправили свой ответ. Отправить сейчас?';
 $string['submitnow'] = 'Отправить';
 $string['enablenativelanguage'] = "Включить родной язык";
-$string['enablenativelanguage_details'] = 'Если установлено, ученик может выбрать свой родной язык, что заменяет язык обратной связи AI. Язык должен быть установлен в <a href="https://support.poodll.com/en/support/solutions/articles/19000163890-definitions-in-user-s-native-language">Poodll WordCards</a>, и он используется здесь.';
-
+$string['enablenativelanguage_details'] = 'Если включено, учащийся сможет выбрать свой родной язык. В этом случае он заменит язык обратной связи, который ИИ использует при выдаче результатов.';
 $string['nopasting'] = "Отключить копирование/вставку";
 $string['nopasting_desc'] = "Отключить возможность копирования и вставки в текстовую область. Это предотвращает вставку ответов из других источников.";
 $string['attemptfor'] = 'Попытка: {$a}';
-
 $string['alternatestreaming'] = 'Включить альтернативную трансляцию';
-
 $string['cloudpoodllserver'] = 'Сервер Cloud Poodll';
 $string['cloudpoodllserver_details'] = 'Сервер для использования Cloud Poodll. Изменяйте его только в случае, если Poodll предоставил другой.';
-$string['fluency_instructions1'] = 'Прочитайте предложения вслух. Нажмите на иконку микрофона, чтобы начать запись.';
 $string['fluencyresults'] = 'Результаты беглости речи';
-$string['lg_instructions1'] = 'Прослушайте и заполните пропуски';
 $string['ningxia'] = 'Нинся, Китай';
-$string['sg_instructions1'] = 'Используйте микрофон и произнесите полное предложение, включая пропущенные слова';
-$string['tg_instructions1'] = 'Заполните пропущенные слова или буквы';
-
 $string['minilesson:canuseaigen'] = 'Может использовать функцию генерации ИИ';
-$string['fa-ir'] = 'Персидский';
 $string['so-so'] = 'Сомалийский';
 $string['ps-af'] = 'Пушту (афганский)';
 $string['region_details'] = 'Регион AWS определяет, где хранятся и обрабатываются данные.';
@@ -878,9 +637,9 @@ $string['skip-fluency'] = 'Продолжить';
 $string['audiochat_instructions1'] = 'Потренируйтесь говорить с партнёром-ИИ на заданную тему.';
 $string['wordshuffle_instructions1'] = 'Расставьте слова в правильном порядке, чтобы получилось предложение.';
 $string['scatter_instructions1'] = 'Выберите пары слов';
-$string['fluencyresponses'] = 'Введите список фраз/предложений в поле ниже. Каждую с новой строки.';
+$string['fluencyresponses'] = 'Введите список фраз или предложений в текстовое поле ниже. Каждый элемент должен быть с новой строки. При желании добавьте перевод или подсказку для каждой фразы в формате: фраза | <i>подсказка</i> <br>например Hello|<i>Hola</i>';
 $string['addaudiostory'] = 'Аудио-история';
-$string['addaudiostory_instructions'] = 'Чтобы создать аудио-историю, загрузите аудио, изображения с номерами (например, 1.png, 2.jpg) и по желанию — субтитры (.vtt). Укажите время показа изображений (формат ЧЧ:ММ:СС).';
+$string['addaudiostory_instructions'] = 'Чтобы создать аудиоисторию, добавьте аудиофайл, изображения с числовыми именами (например, 1.png, 2.jpg) и, при необходимости, файл субтитров (.vtt). Укажите моменты показа изображений (формат HH:MM:SS) в текстовом поле. Если аудиофайл отсутствует и задан медиа-промпт TTS, аудиоистория будет использовать его.';
 $string['audiostorytimes'] = 'Время показа изображений';
 $string['audiostoryfiles'] = 'Файлы аудио-истории';
 $string['lessonfont_details'] = "Название шрифта, которое заменит шрифт сайта для этого мини-урока. Важно точное совпадение (например: Andika или Comic Sans MS).";
@@ -918,7 +677,6 @@ $string['aigenpage'] = 'Генерация ИИ (бета)';
 $string['aigenpage_done'] = 'Генерация завершена: {$a} элементов добавлено в активность.';
 $string['aigenpage_explanation'] = 'Выберите шаблон урока и его параметры. ИИ создаст элементы на основе настроек текущей активности.';
 $string['aigenpage_notemplates'] = 'Нет доступных шаблонов. Пожалуйста, создайте один.';
-$string['itemcount'] = 'Количество элементов';
 $string['aigenconfirm'] = 'Вы собираетесь использовать шаблон <b>{$a->title}</b> для генерации {$a->templatecount} элементов. Продолжить?';
 $string['contextmapping:enabled'] = 'Включено';
 $string['contextmapping:title'] = 'Заголовок';
@@ -960,20 +718,20 @@ $string['error:configfile:uniqueidmissing'] = 'Не задан уникальн�
 $string['error:configfile:lessontitlemissing'] = 'Не задано название урока в конфигурации';
 $string['error:configfile:lessondescriptionmissing'] = 'Не задано описание урока в конфигурации';
 $string['action:uploadtemplate'] = 'Загрузить';
-$string['aigentemplatename:passagereading'] = 'Чтение текста';
+$string['aigentemplatename:passagereading'] = 'Чтение и говорение (сгенерировать рассказ)';
 $string['aigentemplatename:ayoutubelesson'] = 'Урок по YouTube';
-$string['aigentemplatename:youtubefinalelesson'] = 'Итоговый YouTube-урок';
-$string['aigentemplatename:wordpractice'] = 'Практика слов';
-$string['aigentemplatename:audiostory'] = 'Аудио-история';
+$string['aigentemplatename:youtubefinalelesson'] = 'Финал YouTube (прослушивание и говорение)';
+$string['aigentemplatename:wordpractice'] = 'Практика слов v1';
+$string['aigentemplatename:audiostory'] = 'Прослушивание истории (сгенерировать рассказ)';
 $string['aigentemplatename:keywordstogapfillsfluency'] = 'Ключевые слова → пропуски / беглость';
 $string['aigentemplatedescription:passagereading'] = 'Введите список ключевых слов и тему. ИИ создаст текст с заданиями на чтение и речь.';
 $string['aigentemplatedescription:ayoutubelesson'] = 'Введите ID видео YouTube (или ссылку) и краткое описание. Poodll создаст короткий урок с заданиями.';
-$string['aigentemplatedescription:youtubefinalelesson'] = 'Урок по видео YouTube, которое показывается только в конце.';
-$string['aigentemplatedescription:wordpractice'] = 'Введите 5 слов — Poodll создаст задание на их отработку.';
+$string['aigentemplatedescription:youtubefinalelesson'] = 'Урок основан на сюжете видео YouTube. Создаётся связанная, но упрощённая история, на основе которой строятся задания на понимание и говорение. В конце ученик смотрит оригинальное видео, которое изучал.';
+$string['aigentemplatedescription:wordpractice'] = 'Введите список слов (5) и тему. Poodll создаст упражнение с карточками слов, заданиями на аудирование и ввод пропущенных слов, космической игрой и заданием на свободное письмо.';
 $string['aigentemplatedescription:audiostory'] = 'Введите тему, уровень и тип истории. ИИ создаст аудио с заданиями на слух и речь.';
-$string['aigentemplatedescription:keywordstogapfillsfluency'] = 'Введите до 10 слов — Poodll создаст задание на отработку.';
+$string['aigentemplatedescription:keywordstogapfillsfluency'] = 'Введите список слов (до 30), и Poodll создаст короткое упражнение для тренировки этих слов.';
 $string['generationnotice'] = '<p>NB: После нажатия «Сохранить», подождите 1–2 минуты.</p>';
-$string['processaigentask'] = 'Запустить генерацию шаблона ИИ';
+$string['processaigentask'] = 'Обработать задачу генерации AI-шаблона';
 $string['successful'] = 'Успешно';
 $string['col:progress'] = 'Прогресс';
 $string['col:timecreated'] = 'Запланировано';
@@ -988,7 +746,7 @@ $string['mcimageresponses'] = '(необязательно) Загрузите �
 $string['mcaudioresponses'] = '(необязательно) Загрузите аудио вместо синтеза речи. Названия: 1.mp3, 2.mp3 и т. д.';
 $string['multiaudioaudioresponses'] = '(необязательно) Загрузите аудио вместо синтеза речи. Названия: 1.mp3, 2.mp3 и т. д.';
 $string['audiochat_instructions'] = 'Инструкции для ИИ';
-$string['audiochat_instructions_instructions'] = 'Этот шаблон объединяет роль, язык, тему и родной язык ученика. Используйте переменные: {ai role}, {target language}, {native language}, {topic}.';
+$string['audiochat_instructions_instructions'] = 'Инструкции — это шаблон, который объединяется с ролью ИИ, голосом ИИ, темой, данными ИИ 1 и 2, ответом студента и его родным языком для создания запроса к ИИ. Доступные переменные: {ai role}, {ai voice}, {target language}, {native language}, {ai data1}, {ai data2}, {student submission}, {topic}.';
 $string['audiochat_role'] = 'Роль ИИ';
 $string['audiochat_voice'] = 'Голос ИИ';
 $string['audiochat_role_default'] = 'Добрый преподаватель языка';
@@ -1000,39 +758,25 @@ $string['wordshuffle_results'] = 'Результаты — Перемешанн�
 $string['scatteritems'] = 'Элементы для соотнесения';
 $string['enterscatteritems'] = 'Введите пары в формате:<br>Термин | Определение<br>например: Яйцо|Белый овальный объект';
 $string['openaikey'] = 'Ключ OpenAI';
-$string['openaikey_details'] = 'Ключ OpenAI используется для аудио-чата. Для других типов не требуется.';
+$string['openaikey_details'] = 'Ключ OpenAI используется для AudioChat. В настоящее время не требуется для других типов.';
 $string['textgenerationfailed'] = 'Не удалось сгенерировать текст для элемента {$a->itemindex} ({$a->itemtype})';
 $string['failed'] = 'Ошибка';
-
-
 $string['promptsettings'] = 'Настройки промпта';
-$string['addnewitem'] = 'Добавить новый элемент';
-$string['enterresponses'] = 'Введите ниже список правильных ответов и, при необходимости, список частично правильных ответов.';
-$string['addaudiostory_instructions'] = 'Чтобы создать аудиоисторию, добавьте аудиофайл, изображения с числовыми именами (например, 1.png, 2.jpg) и, при необходимости, файл субтитров (.vtt). Укажите моменты показа изображений (формат HH:MM:SS) в текстовом поле. Если аудиофайл отсутствует и задан медиа-промпт TTS, аудиоистория будет использовать его.';
 $string['audiochatretry_desc'] = 'Если включено, студенты могут сразу снова запустить чат после завершения.';
-$string['relevancetype_desc'] = 'ИИ может снижать балл за ответы с низкой релевантностью. Выберите тип релевантности.';
-
 $string['relevancetype_help'] = 'ИИ может снижать балл за нерелевантные ответы. Если выбрать «релевантность вопросу», ИИ проверит, соответствует ли ответ теме. Если выбрать «релевантность образцовому ответу», ИИ сравнит содержание ответа с предоставленным образцовым ответом.';
 $string['aigrade_instructions_desc'] = 'Инструкции объясняют ИИ, как получить «оценку» от 0 до максимума за этот элемент. Это шаблон, который объединяется с темой ИИ, данными ИИ 1 и 2. Можно использовать переменные: {topic}, {ai data1}, {ai data2}. Итоговая оценка ИИ будет умножена на количество слов, сказанных сверх целевого объёма, чтобы наказывать слишком краткие ответы. Установите целевой объём слов в 0, если это не требуется.';
-
 $string['aigrade_instructions_help'] = 'Инструкции сообщают ИИ, как вычислить «оценку» от 0 до максимума. Шаблон объединяется с темой ИИ и данными ИИ 1/2. Доступные переменные: {topic}, {ai data1}, {ai data2}. Итоговая оценка ИИ умножается на число слов сверх целевого объёма, чтобы штрафовать слишком краткие ответы. Установите целевой объём слов в 0, если это не требуется.';
 $string['aigrade_feedback_desc'] = 'Инструкции для обратной связи подсказывают ИИ, как комментировать ответ студента. Это шаблон, который объединяется с темой ИИ и данными ИИ 1/2. Переменные: {topic}, {ai data1}, {ai data2}.';
 $string['aigrade_instructions_preset'] = 'Выберите пресет из списка, чтобы загрузить готовые инструкции в поле ниже. Вы можете их изменить.';
 $string['aigrade_feedback_help'] = 'Инструкции для обратной связи описывают, как ИИ должен дать фидбек студенту. Шаблон объединяется с темой ИИ и данными ИИ 1/2. Переменные: {topic}, {ai data1}, {ai data2}.';
-
 $string['aigentemplatename:reading_aic_passagegen'] = 'Чтение + AI-чат (сгенерированный текст)';
-$string['aigentemplatename:reading_aic_passageupload'] = 'Чтение + AI-чат (загруженный текст)';
+$string['aigentemplatename:reading_aic_passageupload'] = 'Чтение + ИИ-чат (загруженный текст)';
 $string['aigentemplatename:keywords_to_ws_sc'] = 'Ключевые слова → Word Shuffle и Scatter';
-$string['aigentemplatename:keywords_to_ws_sc_sg'] = 'Ключевые слова → Word Shuffle, Scatter и Space Game';
-
-$string['aigentemplatedescription:keywordstogapfillsfluency'] = 'Введите список слов (до 30), и Poodll создаст короткое упражнение для тренировки этих слов.';
-$string['aigentemplatedescription:reading_aic_passagegen'] = 'На основе темы и уровня ученика будет сгенерирован текст для чтения, который затем используется в чтении и аудио-чате.';
-$string['aigentemplatedescription:reading_aic_passageupload'] = 'Вставьте текст для чтения и 4 кратких вопроса. Они будут использованы в упражнении на чтение и последующем аудио-чате.';
+$string['aigentemplatename:keywords_to_ws_sc_sg'] = 'Практика слов v3';
+$string['aigentemplatedescription:reading_aic_passagegen'] = 'Введите тему и уровень учащихся. ИИ создаст текст для чтения, который будет использоваться в упражнении по чтению вслух, а затем в аудиочате по содержанию текста.';
+$string['aigentemplatedescription:reading_aic_passageupload'] = 'Вставьте текст для чтения и 4 вопроса с коротким ответом. Они будут использованы в упражнении по чтению, а затем в аудиочате по содержанию текста.';
 $string['aigentemplatedescription:keywords_to_ws_sc'] = 'Введите 4–10 ключевых слов. Они будут использованы для создания упражнений Word Shuffle и Scatter, а также для генерации картинки каждого слова на школьной доске с милым котом-учителем рядом.';
-$string['aigentemplatedescription:keywords_to_ws_sc_sg'] = 'Введите 4–10 ключевых слов. Будут созданы упражнения Word Shuffle, Scatter и Space Game, а также картинки слов на доске с милым пуделем-учителем.';
-
-$string['audiochat_instructions_instructions'] = 'Это шаблон инструкций, который объединяется с ролью ИИ, голосом ИИ, темой, пользовательскими данными ИИ 1/2 и родным языком студента, чтобы сформировать подсказки для ИИ. Доступные переменные: {ai role}, {ai voice}, {target language}, {native language}, {ai data1}, {ai data2}, {topic}. Обычно инструкции по умолчанию подходят, но вы можете их изменить под свой кейс.';
-
+$string['aigentemplatedescription:keywords_to_ws_sc_sg'] = 'Введите от 4 до 10 ключевых слов. Они будут использованы для создания набора карточек слов, упражнения Word Shuffle, упражнения Scatter и элементов для Space Game.';
 $string['addingcontent'] = 'Нажмите «Add new item», чтобы начать добавление контента';
 $string['ai_data1'] = 'Данные ИИ 1';
 $string['ai_data1_help'] = 'AI Data1 — необязательное поле {ai data1}, которое можно объединить с инструкциями по оценке или обратной связи, чтобы дать ИИ контекст.';
@@ -1066,18 +810,18 @@ $string['audiochat_autosend_desc'] = 'Если включено, распозн�
 $string['audiochat_conversation'] = 'Разговор';
 $string['audiochat_gradeexplanation'] = 'Пояснение к оценке';
 $string['audiochat_gradeinstructions'] = 'Инструкции по оцениванию/обратной связи для ИИ';
-$string['audiochat_gradeinstructions_instructions'] = 'Инструкции должны описывать, как формировать обратную связь и выставлять «оценку» от 0 до 100. Это шаблон, который объединяется с ролью ИИ, голосом ИИ, темой, пользовательскими данными ИИ 1 и 2 и родным языком студента. Вы можете использовать переменные: {ai role}, {ai voice}, {target language}, {native language}, {ai data1}, {ai data2}, {topic}. Если оставить пустым, оценка будет рассчитана по общему числу сказанных слов относительно целевого объёма.';
+$string['audiochat_gradeinstructions_instructions'] = 'Инструкции должны описывать, как формировать обратную связь и оценку от 0 до 100. Доступные переменные: {ai role}, {ai voice}, {target language}, {native language}, {ai data1}, {ai data2}, {student submission}, {topic}.';
 $string['audiochatcancelconnecting'] = 'Отменить';
 $string['audiochatsessionactive'] = 'Чат активен!!';
 $string['audiochatsessionconnecting'] = 'Запуск. Подключение может занять ~15 сек.';
-$string['audiochatsessionend'] = 'Завершить';
+$string['audiochatsessionend'] = "Завершить чат";
 $string['audiochatsessionfinished'] = 'Завершено';
 $string['audiochatsessionstart'] = 'Начать';
 $string['audiochatsessiontryagain'] = 'Повторить';
 $string['audiorecorder'] = 'Аудиозапись';
 $string['audiostoryzoomandpan'] = 'Масштаб и панорама';
 $string['basciresult'] = 'Базовый результат';
-$string['cantchat'] = 'Чат недоступен. Для этого типа элемента требуется действительный ключ OpenAI в настройках активности MiniLesson. Чат также недоступен в Китае (регион Нинся).';
+$string['cantchat'] = 'Чат НЕДОСТУПЕН. Чтобы использовать этот тип элемента, необходимо указать действительный ключ {$a} в административных настройках MiniLesson.';
 $string['chooseitem'] = 'Выберите элемент';
 $string['clicktosend'] = 'нажмите, чтобы отправить';
 $string['completiondetail:finished'] = 'Завершить все шаги активности';
@@ -1089,19 +833,19 @@ $string['detailedresults'] = 'Подробные результаты — по �
 $string['feedbackprompt'] = 'Шаблон обратной связи';
 $string['feedbackprompt_header'] = 'Заголовок шаблона обратной связи';
 $string['freespeaking:feedbackprompt1'] = 'По умолчанию';
-$string['freespeaking:feedbackprompt2'] = 'Опишите картинку';
+$string['freespeaking:feedbackprompt2'] = 'Описание изображения — требуется описание изображения (topic)';
 $string['freespeaking:feedbackprompt_dec1'] = 'Просто объясняйте каждую грамматическую ошибку. Не комментируйте орфографию и пунктуацию.';
 $string['freespeaking:feedbackprompt_dec2'] = 'Просто объясняйте существенные грамматические ошибки. Не комментируйте орфографию и пунктуацию. Укажите элементы сцены, которые студент не описал.';
 $string['freespeaking:gradingprompt1'] = 'По умолчанию';
 $string['freespeaking:gradingprompt2'] = 'Короткий ответ — требуется правильный ответ (ai data1)';
-$string['freespeaking:gradingprompt3'] = 'Опишите картинку — требуется описание картинки (ai data1)';
+$string['freespeaking:gradingprompt3'] = 'Описание изображения — требуется описание изображения (topic)';
 $string['freespeaking:gradingprompt_dec1'] = 'Вычитайте 1 балл за каждую грамматическую ошибку.';
 $string['freespeaking:gradingprompt_dec2'] = 'Правильный ответ: «{ai data1}». 0 баллов — за неверный ответ.
 2 балла — за полное предложение с правильным смыслом, 1 балл — за предложение с ошибками, но правильным смыслом.';
 $string['freespeaking:gradingprompt_dec3'] = 'Студент описывает картинку. Картинка изображает сцену: [{topic}].
 Давайте 2 балла за грамматически верное предложение, описывающее часть картинки. 1 балл — если предложение почти правильное.';
 $string['freewriting:feedbackprompt1'] = 'По умолчанию';
-$string['freewriting:feedbackprompt2'] = 'Опишите картинку';
+$string['freewriting:feedbackprompt2'] = 'Описание изображения — требуется описание изображения (ai data1)';
 $string['freewriting:feedbackprompt_dec1'] = 'Просто объясняйте каждую ошибку.';
 $string['freewriting:feedbackprompt_dec2'] = 'Просто объясняйте основные грамматические ошибки. Укажите элементы сцены, которые студент не описал.';
 $string['freewriting:gradingprompt1'] = 'По умолчанию';
@@ -1166,13 +910,12 @@ $string['zoomandpanlite'] = 'медленно';
 $string['zoomandpanmedium'] = 'средне';
 $string['zoomandpanmore'] = 'быстрее';
 $string['zoomandpannone'] = 'без движения';
-
 $string['addslidesitem'] = 'Слайды';
 $string['slides'] = 'Слайды';
 $string['slides_instructions1'] = 'Нажимайте > или <, чтобы переходить вперёд или назад по слайдам.';
 $string['aigentemplatename:set_of_slides'] = 'Набор слайдов';
 $string['aigentemplatename:set_of_slides_nopics'] = 'Набор слайдов (без изображений)';
-$string['aigentemplatedescription:set_of_slides'] = 'Введите описание учебного материала, который вы хотите сгенерировать с помощью ИИ, — он создаст для вас набор слайдов с текстом и изображениями, готовыми к использованию.';
+$string['aigentemplatedescription:set_of_slides'] = 'Этот шаблон создаст обучающие слайды на основе описания темы, которую вы хотите преподавать.';
 $string['aigentemplatedescription:set_of_slides_nopics'] = 'Введите описание учебного материала, который вы хотите сгенерировать с помощью ИИ, — он создаст для вас набор слайдов, готовых к использованию.';
 $string['item_slides_desc'] = 'Элемент «Слайды» позволяет автору создать серию слайдов. Их можно использовать для показа учебной презентации. Слайды создаются с помощью синтаксиса Markdown, поэтому эта функция рассчитана на продвинутых пользователей.';
 $string['lessonbank'] = 'Банк уроков';
@@ -1205,28 +948,21 @@ $string['slides:fontlarger'] = 'Больше';
 $string['slides:fontlarge'] = 'Большой';
 $string['slides:preview'] = 'Предпросмотр';
 $string['slides:previewmodaltitle'] = 'Предпросмотр';
-
 $string['wordshuffle_wordbank_label'] = 'Банк слов';
 $string['wordshuffle_drop_slot_label'] = 'Область размещения {$a}';
 $string['wordshuffle_a11y_returned_to_bank'] = '«{$a}» возвращено в банк слов';
 $string['wordshuffle_a11y_placed_in_slot'] = '«{$a}» помещено в область размещения';
-
 $string['aigentemplatename:dialog_multichoice'] = 'Прослушайте 4 диалога';
-$string['aigentemplatename:image_slides'] = 'Слайды с изображениями';
-$string['aigentemplatename:choose_best_reply'] = 'Выберите правильную реплику';
-
-$string['aigentemplatedescription:dialog_multichoice'] = 'Студенты выбирают картинку, которая лучше всего соответствует воспроизводимому диалогу. Для создания задания введите 4 диалога. На их основе будет создано 4 задания с выбором ответа, где варианты ответов — изображения, соответствующие текущему диалогу. Диалоги должны быть в формате TTS Dialog, например: A) I like toast. [new line] B) Me too.';
-$string['aigentemplatedescription:image_slides'] = 'Введите 5 описаний изображений и стиль изображения, чтобы получить 5 слайдов с картинками.';
-$string['aigentemplatedescription:choose_best_reply'] = 'Студент слушает 10 коротких диалогов и должен выбрать лучшую следующую реплику из 3 предложенных вариантов. Каждый вопрос сопровождается картинкой. Шаблон основан на разделе аудирования экзамена Eiken уровня 3 по английскому языку. Вам нужно указать место и ситуацию (обычно какую-то проблему) для каждого диалога, например: «two friends at the beach and one has lost their wallet.»';
-
+$string['aigentemplatename:image_slides'] = 'Слайды с изображениями (5)';
+$string['aigentemplatename:choose_best_reply'] = 'Выберите правильный ответ.';
+$string['aigentemplatedescription:dialog_multichoice'] = 'Введите 4 диалога. На их основе будут созданы 4 вопроса с выбором ответа, где варианты представлены изображениями, соответствующими текущему воспроизводимому диалогу. Диалоги должны быть в формате TTS Dialog. Например: A) I like toast. [новая строка] B) Me too.';
+$string['aigentemplatedescription:image_slides'] = 'Введите 5 описаний изображений и стиль изображений, чтобы получить 5 слайдов.';
+$string['aigentemplatedescription:choose_best_reply'] = 'Ученик прослушивает 10 коротких диалогов и должен выбрать лучший следующий ответ из трёх предложенных вариантов. Каждый вопрос сопровождается изображением. Упражнение основано на разделе аудирования экзамена Eiken Level 3. Для каждого диалога необходимо указать место действия и ситуацию (обычно проблему). Например: «два друга на пляже, один из них потерял кошелёк».';
 $string['templatetags'] = 'Теги шаблона';
-
 $string['hideanswertext'] = 'Скрыть текст ответа';
 $string['hideanswertext_detail'] = 'Если в качестве ответов используются изображения или аудио, отметьте этот параметр, чтобы скрыть текст ответа от студента. Текст ответа будет использоваться при отображении результатов.';
-
 $string['answerlayout'] = 'Расположение ответов';
 $string['twocolumn'] = '2 колонки';
-
 $string['continuepreviousattempt'] = 'Продолжить предыдущую попытку?';
 $string['allowcontinueattempts'] = 'Разрешить продолжение предыдущей попытки';
 $string['allowcontinueattempts_details'] = 'Если включено, студенты могут продолжить незавершённую попытку с того места, где остановились.';
@@ -1251,22 +987,12 @@ $string['importdotranslate'] = 'Переводить элементы при и�
 $string['importdotranslate_help'] = 'Если включено, элементы JSON переводятся с выбранного исходного языка на целевой перед импортом.';
 $string['importfromlang'] = 'Перевести с языка';
 $string['importtolang'] = 'Перевести на язык';
-$string["exportandtranslateinstructions"] = 'Переведите и экспортируйте элементы этого урока MiniLesson в формате JSON. Это позволяет перевести текст с языка A на язык B, чтобы затем импортировать элементы в новую активность с другим языковым профилем. Сначала выберите язык-источник (страница перезагрузится), затем целевой язык (страница снова перезагрузится). Появится кнопка перевода — нажмите её, чтобы перевести и экспортировать активность.';
-$string["exportandtranslateitems"] = 'Перевести и экспортировать элементы';
-$string["exportandtranslateheading"] = 'Перевести и экспортировать элементы в JSON';
-$string["fromlang"] = 'Исходный язык';
-$string["tolang"] = 'Целевой язык';
-$string["importheading"] = "Импорт элементов JSON или CSV";
-$string['aigentemplatename:wordpractice2'] = 'Практика слов 2';
+$string['aigentemplatename:wordpractice2'] = 'Практика слов v2';
 $string['aigentemplatename:fiction_withpics'] = 'Интерактивная история (с изображениями)';
 $string['aigentemplatename:fiction_nopics'] = 'Интерактивная история (без изображений)';
 $string['aigentemplatedescription:wordpractice2'] = 'На основе списка слов, примеров предложений и родного языка ученика этот шаблон создаёт набор упражнений с изображениями и подсказками на родном языке. Можно использовать до 9 слов.';
-$string['aigentemplatedescription:fiction_withpics'] = 'Введите подробный сценарий, чтобы получить интерактивную историю с изображениями.';
-$string['aigentemplatedescription:fiction_nopics'] = 'Введите подробный сценарий, чтобы получить текстовую интерактивную историю.';
-$string['audiochat_instructions_instructions'] = 'Инструкции — это шаблон, который объединяется с ролью ИИ, голосом ИИ, темой, данными ИИ 1 и 2, ответом студента и его родным языком для создания запроса к ИИ. Доступные переменные: {ai role}, {ai voice}, {target language}, {native language}, {ai data1}, {ai data2}, {student submission}, {topic}.';
-$string['openaikey_details'] = 'Ключ OpenAI используется для AudioChat. В настоящее время не требуется для других типов.';
-$string['audiochatsessionend'] = "Завершить чат";
-$string['audiochat_gradeinstructions_instructions'] = 'Инструкции должны описывать, как формировать обратную связь и оценку от 0 до 100. Доступные переменные: {ai role}, {ai voice}, {target language}, {native language}, {ai data1}, {ai data2}, {student submission}, {topic}.';
+$string['aigentemplatedescription:fiction_withpics'] = 'Интерактивная история с изображениями.';
+$string['aigentemplatedescription:fiction_nopics'] = 'Интерактивная история без изображений, кроме вступительного экрана.';
 $string['item_fiction_desc'] = 'Тип «Интерактивная история» позволяет создавать сюжет с выбором вариантов. Используется формат Yarn (для продвинутых пользователей).';
 $string['fiction:preview'] = 'Предпросмотр';
 $string['fiction:previewmodaltitle'] = 'Предпросмотр';
@@ -1316,29 +1042,21 @@ $string['attemptquestioncountmessage'] = 'Вы завершили {$a->completed
 $string['fullscreen_toggle'] = 'Полноэкранный режим';
 $string['hidedetailedresults'] = 'Скрыть подробные результаты';
 $string['defaultitemlayout'] = 'Макет по умолчанию';
-
-$string['fluencyresponses'] = 'Введите список фраз или предложений в текстовое поле ниже. Каждый элемент должен быть с новой строки. При желании добавьте перевод или подсказку для каждой фразы в формате: фраза | <i>подсказка</i> <br>например Hello|<i>Hola</i>';
 $string['hint'] = 'Подсказка';
 $string['hintrtl'] = 'Подсказка RTL';
 $string['hintrtl_desc'] = 'Если отмечено, подсказка будет отображаться справа налево.';
 $string['scatterdefrtl'] = 'Определение RTL';
 $string['scatterdefrtl_desc'] = 'Если отмечено, определение будет отображаться справа налево.';
-$string['aigentemplatename:narrativefiction_withpics'] = 'Интерактивная художественная история (с изображениями)';
-$string['aigentemplatedescription:fiction_nopics'] = 'Введите подробный план истории, чтобы создать текстовую интерактивную историю (с одним постерным изображением).';
-$string['aigentemplatedescription:narrativefiction_withpics'] = 'Введите подробный план истории, чтобы создать интерактивную историю с меньшим количеством выборов, большим количеством повествования и изображениями.';
-
+$string['aigentemplatename:narrativefiction_withpics'] = 'Повествовательная история (с изображениями)';
+$string['aigentemplatedescription:narrativefiction_withpics'] = 'Интерактивная история с меньшим количеством вариантов выбора, более развёрнутым сюжетом и изображениями.';
 $string['slides:fontsmallest'] = 'Самый маленький';
 $string['slides:fontlargest'] = 'Самый большой';
-
 $string['addlessonitem_desc'] = 'Добавляйте элементы урока вручную, чтобы создать свой урок';
 $string['chooselessonitem_desc'] = 'Выберите готовый урок из банка уроков';
 $string['generatelessonitem_desc'] = 'Создайте урок или элементы урока с помощью ИИ';
 $string['generate'] = 'Создать';
-
 $string['audiochatstudent'] = 'Студент';
-//$string['audiochataiassistant'] = 'ИИ-ассистент';
 $string['audiochataiassistant'] = 'Gustave';
-
 $string['shadow'] = 'Теневое повторение видео';
 $string['cards'] = 'Карточки';
 $string['error:invalidyoutubeurl'] = 'URL-адрес YouTube или идентификатор видео недействителен.';
@@ -1349,36 +1067,9 @@ $string['aigentemplate_itemtypes'] = 'Типы элементов';
 $string['aigentemplate_tags'] = 'Теги';
 $string['gapfill_shuffleorder'] = 'Перемешать порядок предложений';
 $string['gapfill_shuffleorder_desc'] = 'Если включено, предложения будут показываться ученику в случайном порядке. Каждое предложение сохранит соответствующие ему изображение и аудио.';
-$string['listeninggapfillitemsdesc'] = 'Введите список элементов в текстовое поле ниже. Каждый элемент должен быть с новой строки. Пропущенные буквы необходимо заключить в квадратные скобки: [ ]. Формат:<br>Текст | подсказка<br>Например: This is my d[og].| Обычное домашнее животное.';
 $string['aigrade_feedback_language_help'] = 'Определяет язык, на котором будет возвращаться обратная связь. По умолчанию используются родной язык и изучаемый язык, указанные в настройках этого мини-урока. Однако этот выбор может быть переопределён, если пользователь указал собственный родной язык.';
-$string['enablenativelanguage_details'] = 'Если включено, учащийся сможет выбрать свой родной язык. В этом случае он заменит язык обратной связи, который ИИ использует при выдаче результатов.';
 $string['generatingitemdata'] = 'Создание элемента: {$a}';
-$string['aigentemplatename:passagereading'] = 'Чтение и говорение (сгенерировать рассказ)';
-$string['aigentemplatename:youtubefinalelesson'] = 'Финал YouTube (прослушивание и говорение)';
-$string['aigentemplatename:wordpractice'] = 'Практика слов v1';
-$string['aigentemplatename:wordpractice2'] = 'Практика слов v2';
-$string['aigentemplatename:audiostory'] = 'Прослушивание истории (сгенерировать рассказ)';
-$string['aigentemplatename:reading_aic_passageupload'] = 'Чтение + ИИ-чат (загруженный текст)';
-$string['aigentemplatename:keywords_to_ws_sc_sg'] = 'Практика слов v3';
-$string['aigentemplatename:dialog_multichoice'] = 'Прослушайте 4 диалога';
-$string['aigentemplatename:image_slides'] = 'Слайды с изображениями (5)';
-$string['aigentemplatename:choose_best_reply'] = 'Выберите правильный ответ.';
-$string['aigentemplatename:fiction_withpics'] = 'Интерактивная история (с изображениями)';
-$string['aigentemplatename:fiction_nopics'] = 'Интерактивная история (без изображений)';
-$string['aigentemplatename:narrativefiction_withpics'] = 'Повествовательная история (с изображениями)';
 $string['aigentemplatename:vocabcards'] = 'Карточки слов';
-$string['aigentemplatedescription:youtubefinalelesson'] = 'Урок основан на сюжете видео YouTube. Создаётся связанная, но упрощённая история, на основе которой строятся задания на понимание и говорение. В конце ученик смотрит оригинальное видео, которое изучал.';
-$string['aigentemplatedescription:wordpractice'] = 'Введите список слов (5) и тему. Poodll создаст упражнение с карточками слов, заданиями на аудирование и ввод пропущенных слов, космической игрой и заданием на свободное письмо.';
-$string['aigentemplatedescription:set_of_slides'] = 'Этот шаблон создаст обучающие слайды на основе описания темы, которую вы хотите преподавать.';
-$string['aigentemplatedescription:reading_aic_passagegen'] = 'Введите тему и уровень учащихся. ИИ создаст текст для чтения, который будет использоваться в упражнении по чтению вслух, а затем в аудиочате по содержанию текста.';
-$string['aigentemplatedescription:reading_aic_passageupload'] = 'Вставьте текст для чтения и 4 вопроса с коротким ответом. Они будут использованы в упражнении по чтению, а затем в аудиочате по содержанию текста.';
-$string['aigentemplatedescription:keywords_to_ws_sc_sg'] = 'Введите от 4 до 10 ключевых слов. Они будут использованы для создания набора карточек слов, упражнения Word Shuffle, упражнения Scatter и элементов для Space Game.';
-$string['aigentemplatedescription:dialog_multichoice'] = 'Введите 4 диалога. На их основе будут созданы 4 вопроса с выбором ответа, где варианты представлены изображениями, соответствующими текущему воспроизводимому диалогу. Диалоги должны быть в формате TTS Dialog. Например: A) I like toast. [новая строка] B) Me too.';
-$string['aigentemplatedescription:image_slides'] = 'Введите 5 описаний изображений и стиль изображений, чтобы получить 5 слайдов.';
-$string['aigentemplatedescription:choose_best_reply'] = 'Ученик прослушивает 10 коротких диалогов и должен выбрать лучший следующий ответ из трёх предложенных вариантов. Каждый вопрос сопровождается изображением. Упражнение основано на разделе аудирования экзамена Eiken Level 3. Для каждого диалога необходимо указать место действия и ситуацию (обычно проблему). Например: «два друга на пляже, один из них потерял кошелёк».';
-$string['aigentemplatedescription:fiction_withpics'] = 'Интерактивная история с изображениями.';
-$string['aigentemplatedescription:fiction_nopics'] = 'Интерактивная история без изображений, кроме вступительного экрана.';
-$string['aigentemplatedescription:narrativefiction_withpics'] = 'Интерактивная история с меньшим количеством вариантов выбора, более развёрнутым сюжетом и изображениями.';
 $string['aigentemplatedescription:vocabcards'] = 'Набор карточек словаря. Введите список слов или выражений, разделённых запятыми, и родной язык учащихся. Будут созданы карточки со словом/выражением, переводом, примером предложения и изображением.';
 $string['aigentemplatename:youtubefinale_freewrite'] = 'Финал YouTube (прослушивание и свободное письмо)';
 $string['aigentemplatedescription:youtubefinale_freewrite'] = 'Урок основан на сюжете видео YouTube. Создаётся связанная, но упрощённая история, на основе которой строятся задания на понимание и письмо.';
@@ -1499,21 +1190,16 @@ $string['aigentemplatename:grammar_shufflewords'] = 'Урок грамматик
 $string['aigentemplatedescription:grammar_shufflewords'] = 'Укажите грамматическую тему, ключевые слова и язык инструкций. Будет создан урок со слайдами-объяснениями, упражнением на расстановку слов в правильном порядке и упражнением на ввод слов. Используйте этот шаблон для грамматических тем, где важен порядок слов в предложении. Это также универсальный шаблон, который подходит для большинства наборов предложений.';
 $string['aigentemplatename:grammar_choosewords_v2'] = 'Урок грамматики (слайды + выбор слов V2)';
 $string['aigentemplatedescription:grammar_choosewords_v2'] = 'Укажите грамматическую тему, уровень языка и язык инструкций. Будет создан урок со слайдами-объяснениями, упражнением на выбор слова и упражнением на ввод слова (по 6 предложений в каждом). Используйте этот шаблон для грамматических тем, где важны состав выражения или форма слова (например, comparatives: “more X” vs “Xer”). В этом шаблоне варианты выбора слова должны отличаться для каждого предложения.';
-$string['processaigentask'] = 'Обработать задачу генерации AI-шаблона';
 $string['wordshuffle_shuffleorder'] = 'Перемешать порядок предложений';
 $string['wordshuffle_shuffleorder_desc'] = 'Если включено, наборы предложений будут показываться учащемуся в случайном порядке. Каждое предложение сохранит соответствующие ему изображение и аудио.';
-$string['cantchat'] = 'Чат НЕДОСТУПЕН. Чтобы использовать этот тип элемента, необходимо указать действительный ключ {$a} в административных настройках MiniLesson.';
 $string['freewriting:gradingprompt4'] = 'Пересказ истории — требуется краткое содержание истории (ai data1)';
 $string['freewriting:gradingprompt_dec4'] = 'Учащийся пересказывает историю. История: [{topic}]
 Давайте 2 балла за каждое грамматически правильное предложение, использованное учащимся в ответе. Давайте 1 балл, если предложение почти правильное.';
-$string['freewriting:feedbackprompt2'] = 'Описание изображения — требуется описание изображения (ai data1)';
 $string['freewriting:feedbackprompt3'] = 'Пересказ истории — требуется краткое содержание истории (ai data1)';
 $string['freewriting:feedbackprompt_dec3'] = 'Просто объясните основные грамматические ошибки. Предложите добавить элементы истории, которые учащийся не включил.';
-$string['freespeaking:gradingprompt3'] = 'Описание изображения — требуется описание изображения (topic)';
 $string['freespeaking:gradingprompt4'] = 'Пересказ истории — требуется краткое содержание истории (topic)';
 $string['freespeaking:gradingprompt_dec4'] = 'Учащийся пересказывает историю. История, которую он пересказывает: [{topic}]
 Давайте 2 балла за каждое грамматически правильное предложение, использованное учащимся в ответе. Давайте 1 балл, если предложение почти правильное.';
-$string['freespeaking:feedbackprompt2'] = 'Описание изображения — требуется описание изображения (topic)';
 $string['freespeaking:feedbackprompt3'] = 'Пересказ истории — требуется краткое содержание истории (topic)';
 $string['freespeaking:feedbackprompt_dec3'] = 'Просто объясните незначительные грамматические ошибки. Не комментируйте орфографию или пунктуацию. Предложите добавить элементы истории, которые учащийся не описал.';
 $string['defaulttargetlanguage'] = "Изучаемый язык по умолчанию";
@@ -1525,7 +1211,6 @@ $string['fiction:taptotranslate_desc'] = 'Если включено, в прав
 $string['fiction:taptranslatearia'] = 'Перевести этот текст';
 $string['targetwordcount_instructions'] = 'Если целевое количество слов больше 0, учащиеся будут терять баллы в той степени, в какой их
 общее количество слов меньше целевого количества слов';
-
 $string['geminiapikey_details'] = 'Ключ Gemini используется для AudioChat. В настоящее время он не требуется и не используется для других типов элементов.';
 $string['geminiapikey'] = 'API-ключ Gemini';
 $string['aihelper_modal_title'] = 'AI-помощник';
@@ -1538,14 +1223,11 @@ $string['aihelper_response_label'] = 'Ответ ИИ';
 $string['aihelper_generating'] = 'Создание контента...';
 $string['aihelper_generate_btn'] = 'Создать';
 $string['aihelper_apply_btn'] = 'Применить в редакторе';
-
 $string['completed'] = 'Завершено';
 $string['progress'] = 'Прогресс';
 $string['notfound'] = 'Не найдено';
 $string['jobnotfound'] = 'Задача с этим ID не найдена';
 $string['notaccess'] = 'У вас нет прав для просмотра статуса';
-
-// Account dashboard.
 $string['accountdashboard'] = 'Панель аккаунта';
 $string['audio'] = 'Аудио';
 $string['end'] = 'Окончание';
@@ -1559,8 +1241,331 @@ $string['per_recording_type'] = 'По типу записи';
 $string['poodll_users'] = 'Пользователи Poodll';
 $string['recording_min'] = 'Минуты записи';
 $string['recordings'] = 'Записи';
-$string['start'] = 'Начало';
 $string['subscription'] = 'Подписка';
 $string['thirty_days'] = '30 дней';
 $string['threehundredsixtyfive_days'] = '365 дней';
 $string['video'] = 'Видео';
+
+// CampusFR 1.1.60a — newly translated strings (FR/RU).
+$string['startagain'] = 'Начать заново';
+$string['minilesson:usemcp'] = 'Разрешено использовать веб-сервис MCP / генерации с ИИ';
+$string['managemcp'] = 'Управление MCP';
+$string['mcpuserrolename'] = 'Пользователь MiniLesson MCP';
+$string['mcpuserroledesc'] = 'Роль, автоматически создаваемая модулем MiniLesson. Разрешает использовать веб-сервис генерации с ИИ / MCP для MiniLesson.';
+$string['managemcp_intro'] = 'MiniLesson MCP позволяет ИИ-помощникам и агентам (например, Claude или пользовательскому GPT) напрямую создавать и изменять упражнения MiniLesson на этом сайте через протокол Model Context Protocol. Чтобы ИИ-клиент мог действовать от имени пользователя, ему нужно явно предоставить соответствующее разрешение. Агенты также могут напрямую использовать API генерации MiniLesson с ИИ — требования к доступу для них те же, что и для MCP.';
+$string['managemcp_endpointurlheading'] = 'URL точки подключения MCP';
+$string['managemcp_endpointurlbody'] = 'Укажите этот адрес при настройке ИИ-агента или клиента MCP (например, Claude Desktop, Claude.ai, коннекторы ChatGPT или Gemini):';
+$string['managemcp_copied'] = 'Скопировано в буфер обмена';
+$string['managemcp_enableheading'] = 'Включение MCP для пользователя';
+$string['managemcp_enablebody'] = 'Чтобы разрешить пользователю использовать MCP, назначьте ему на уровне системы роль с правом mod/minilesson:usemcp. По умолчанию это роль «{$a}», которую можно создать ниже. После назначения ИИ-клиент с поддержкой OAuth (например, Claude.ai или Gemini) сможет подключиться через обычную авторизацию и согласие пользователя. Для клиентов, поддерживающих только статический токен, можно создать токен от имени пользователя.';
+$string['managemcp_oauthrequirements'] = 'Требования к серверу OAuth: после обмена данными с сервером Moodle OAuth выдаёт ИИ-агенту токен доступа. Пользователь должен иметь право mod/minilesson:usemcp. Также необходимо установить плагин local_oauthmcp.';
+$string['managemcp_helplink'] = 'Полная инструкция по настройке';
+$string['managemcp_oauthclientslink'] = 'Если ИИ-клиент не поддерживает автоматическую регистрацию, создайте здесь клиент OAuth вручную';
+$string['managemcp_oauthpluginmissing'] = 'Подключения по OAuth (нужные для веб-интерфейсов Claude.ai, ChatGPT и Gemini) требуют плагина local_oauthmcp, который сейчас не установлен. Клиенты со статическим токеном (например, Claude Desktop или Claude Code) продолжат работать.';
+$string['managemcp_createroleheading'] = 'Создать роль пользователя MiniLesson MCP';
+$string['managemcp_createrolebody'] = 'Кнопка ниже создаст роль «{$a->rolename}», назначаемую только на уровне системы и содержащую единственное право «{$a->capability}». Затем роль можно назначить пользователю по пути: Администрирование сайта → Пользователи → Права → Назначить системные роли.';
+$string['managemcp_createrolebtn'] = 'Создать роль «{$a}»';
+$string['managemcp_createroleconfirm'] = 'Создать роль «{$a}»?';
+$string['managemcp_rolealreadyexists'] = 'Недоступно: роль «{$a}» уже существует.';
+$string['managemcp_migrateheading'] = 'Перенести пользователей из старого списка доступа';
+$string['managemcp_migratebody'] = 'Ранее доступ к API MCP / генерации с ИИ предоставлялся добавлением пользователей в список разрешённых пользователей сервиса генерации. Этот список больше не используется. Кнопка назначит роль MCP всем пользователям из старого списка на уровне системы, чтобы сохранить их доступ. Записи из старого списка не удаляются; операцию можно выполнять повторно.';
+$string['managemcp_migratebtn'] = 'Перенести пользователей из старого списка доступа ({$a})';
+$string['managemcp_migrateconfirm'] = 'Назначить роль MCP пользователям из старого списка ({$a})?';
+$string['managemcp_migratedisabled_norole'] = 'Недоступно: сначала создайте роль MCP выше.';
+$string['managemcp_migratedisabled_nousers'] = 'Недоступно: в старом списке нет пользователей для переноса.';
+$string['managemcp_rolecreated'] = 'Роль «{$a}» создана.';
+$string['managemcp_migratedone'] = 'Готово: роль «{$a->rolename}» назначена пользователям: {$a->migrated} (у {$a->skipped} она уже была).';
+$string['managemcp_usersheading'] = 'Пользователи с доступом MCP';
+$string['managemcp_nousers'] = 'Сейчас ни у одного пользователя нет права mod/minilesson:usemcp.';
+$string['managemcp_hastoken'] = 'Есть токен';
+$string['managemcp_tokenexpiry'] = 'Срок действия токена';
+$string['managemcp_neverexpires'] = 'Никогда';
+$string['managemcp_upgradenotice'] = 'На этом сайте есть пользователи в старом списке доступа к сервису генерации с ИИ. Теперь доступ контролируется правом «mod/minilesson:usemcp». Перейдите на страницу {$a} и перенесите пользователей, иначе они потеряют доступ.';
+$string['subplugintype_minilessonitem'] = 'Элемент MiniLesson';
+$string['subplugintype_minilessonitem_plural'] = 'Элементы MiniLesson';
+$string['ti-er'] = 'Тигринья';
+$string['multichoicequiz'] = 'Тест с выбором ответа';
+$string['wordcards'] = 'Карточки слов';
+$string['error:youtubeblocked'] = 'YouTube не предоставил этому серверу субтитры. Обычно это означает, что сервис отклоняет автоматические запросы с IP-адреса сервера, а не что-то не так с видео. Субтитры можно добавить вручную, скопировав их в поле субтитров. (Ответ YouTube: {$a})';
+$string['error:youtubeagerestricted'] = 'У этого видео YouTube есть возрастные ограничения, поэтому получить субтитры невозможно.';
+$string['error:youtubeunplayable'] = 'Это видео недоступно для воспроизведения на YouTube, поэтому получить субтитры невозможно. ({$a})';
+$string['error:notranscripttimestamps'] = 'Во вставленном тексте нет временных меток. На YouTube откройте панель расшифровки, включите временные метки в её меню и скопируйте расшифровку целиком.';
+$string['finishlesson'] = 'Завершить';
+$string['enablecommunitypage'] = 'Включить страницу сообщества';
+$string['enablecommunitypage_details'] = 'Разрешить подходящим типам заданий (например, «Свободная речь») показывать страницу сообщества. На ней ученики смогут слушать записи других учеников, получивших высокую оценку и согласившихся поделиться своими ответами.';
+$string['cpage_enable'] = 'Страница сообщества';
+$string['cpage_enable_details'] = 'Показывать страницу сообщества после экрана результатов. Там ученики смогут слушать записи, которыми другие ученики согласились поделиться. Публикуются только ответы с оценкой не ниже заданного порога.';
+$string['cpage_disabled'] = 'Отключено';
+$string['cpage_threshold_option'] = 'Включено: показывать ответы с оценкой не ниже {$a}%';
+$string['cpage_enablelikes'] = 'Разрешить лайки на странице сообщества';
+$string['cpage_enablelikes_details'] = 'Показывать кнопку «Нравится» под каждой опубликованной записью и разрешить сортировку по количеству лайков.';
+$string['cpage_title'] = 'Страница сообщества';
+$string['cpage_intro'] = 'Послушай записи, которыми поделились другие ученики.';
+$string['cpage_nosubmissions'] = 'Пока нет опубликованных записей.';
+$string['cpage_sharethis'] = 'Поделиться записью';
+$string['cpage_sharethis_details'] = 'Я согласен(на) на публикацию моего ответа, включая запись моего голоса, для других учеников на странице сообщества.';
+$string['cpage_consentsaved'] = 'Настройки публикации сохранены.';
+$string['cpage_yoursubmission'] = 'Твоя запись';
+$string['cpage_like'] = 'Нравится';
+$string['cpage_more'] = 'ещё…';
+$string['cpage_sortby'] = 'Сортировать по';
+$string['cpage_sortdate'] = 'Сначала новые';
+$string['cpage_sortlikes'] = 'По количеству лайков';
+$string['privacy:metadata:cpagesubmissionstable'] = 'Сохраняет согласие пользователя на публикацию его ответа на странице сообщества и количество полученных лайков.';
+$string['privacy:metadata:cpagesubmissions:itemid'] = 'Элемент урока, к которому относится согласие.';
+$string['privacy:metadata:cpagesubmissions:userid'] = 'Пользователь, предоставивший согласие или отказавшийся от публикации.';
+$string['privacy:metadata:cpagesubmissions:consent'] = 'Согласился ли пользователь на публикацию своего ответа.';
+$string['privacy:metadata:cpagesubmissions:likes'] = 'Количество лайков у опубликованного ответа.';
+$string['privacy:metadata:cpagelikestable'] = 'Сохраняет сведения о том, какие ответы на странице сообщества понравились пользователю.';
+$string['privacy:metadata:cpagelikes:submissionid'] = 'Опубликованный ответ, получивший лайк.';
+$string['privacy:metadata:cpagelikes:userid'] = 'Пользователь, поставивший лайк.';
+$string['privacy:metadata:cpagelikes:timecreated'] = 'Время, когда был поставлен лайк.';
+$string['cbsetupheading'] = 'Настройте учётные данные Poodll API';
+$string['cbsetupintro'] = 'MiniLesson не сможет работать, пока на этом сайте не будут указаны пользователь Poodll API и секретный ключ. Это общие настройки сайта, их нужно заполнить только один раз.';
+$string['cbsetupfound'] = 'В другом плагине Poodll на этом сайте уже есть учётные данные. Их можно перенести кнопкой ниже и сохранить.';
+$string['cbsetupnotfound'] = 'На сайте не найдены учётные данные Poodll. Если их ещё нет, можно оформить бесплатный пробный доступ. Пользователь API и секретный ключ придут по электронной почте.';
+$string['cbsavecredentials'] = 'Сохранить учётные данные';
+$string['cbgotosettings'] = 'Перейти к настройкам MiniLesson';
+$string['cbcredentialssaved'] = 'Учётные данные Poodll API сохранены и приняты.';
+$string['cbnocredentialsset'] = 'MiniLesson пока не может работать: на сайте не заданы пользователь Poodll API и секретный ключ.';
+$string['cbaskadmin'] = 'Обратитесь к администратору сайта, чтобы он настроил учётные данные Poodll API.';
+$string['nocredentialsentered'] = 'Пользователь API и секретный ключ не указаны.';
+$string['cbgetfreetrial'] = 'Получить пробный доступ бесплатно';
+$string['cbtrialstep1'] = 'Нажмите кнопку «Получить пробный доступ бесплатно» и заполните форму Poodll. Платить ничего не нужно, банковская карта не требуется.';
+$string['cbtrialstep2'] = 'Проверьте электронную почту. Данные пользователя Poodll API и секретный ключ придут вскоре после регистрации.';
+$string['cbtrialstep3'] = 'Вернитесь на исходную вкладку, вставьте пользователя API и секретный ключ в форму и сохраните.';
+$string['cbtrialsiteurl'] = 'Подписка будет зарегистрирована для адреса сайта:';
+$string['cbtrialsiteurl_desc'] = 'Если ученики открывают этот Moodle по другому адресу, после регистрации укажите правильный URL в личном кабинете на member.poodll.com.';
+$string['cbaftercheckout'] = 'Почти готово: проверьте электронную почту';
+$string['cbaftercheckout_desc'] = 'Пользователь Poodll API и секретный ключ скоро придут по электронной почте. После получения вернитесь на исходную вкладку, вставьте их в форму и сохраните.';
+$string['cbtrialfailed'] = 'Не удалось загрузить форму регистрации Poodll. Проверьте подключение к интернету и повторите попытку или зарегистрируйтесь на member.poodll.com.';
+$string['speakera'] = 'Говорящий A';
+$string['speakerb'] = 'Говорящий B';
+$string['speakerc'] = 'Говорящий C';
+$string['ttsdialoglabela'] = 'Подпись говорящего A';
+$string['ttsdialoglabelb'] = 'Подпись говорящего B';
+$string['ttsdialoglabelc'] = 'Подпись говорящего C';
+$string['nextbuttonalign'] = 'Расположение кнопки «Далее»';
+$string['nextbuttonalign_details'] = 'Место кнопки перехода на следующую страницу под каждым заданием. По умолчанию она находится справа (слева для языков с письмом справа налево). Вариант «По центру» размещает её посередине, чтобы не путать с кнопкой перехода внизу страницы, добавленной темой оформления.';
+$string['nextbuttonalign_help'] = 'Место кнопки перехода на следующую страницу под каждым заданием. По умолчанию она находится справа (слева для языков с письмом справа налево). Вариант «По центру» размещает её посередине, чтобы не путать с кнопкой перехода внизу страницы, добавленной темой оформления.';
+$string['nextbuttonalign-default'] = 'По умолчанию';
+$string['nextbuttonalign-center'] = 'По центру';
+$string['audiochat_topic_instructions'] = 'Укажите тему разговора для инструкции ИИ. Поле используется ИИ, но также отображается ученику как тема обсуждения, если поле текста задания или вопроса пустое.';
+$string['audiochat_role_instructions'] = 'Укажите роль, которую ИИ-собеседник будет играть в диалоге, например доброжелательного преподавателя.';
+$string['importcompleted'] = 'Импорт завершён. Ниже показано импортированных элементов: {$a}.';
+$string['importpartial'] = 'Импортировано элементов: {$a->imported} из {$a->total}.';
+$string['importnoitems'] = 'В файле импорта не найдено элементов.';
+$string['importfailures'] = 'Элементы, которые не удалось импортировать';
+$string['importitemnumber'] = 'Элемент';
+$string['importproblem'] = 'Проблема';
+$string['backtoitems'] = 'Вернуться к элементам урока';
+$string['error:unknowncolumn'] = 'Неизвестный столбец: {$a}';
+$string['error:correctanswerrange'] = 'Правильный ответ должен быть числом от 1 до {$a} (количество вариантов ответа).';
+$string['error:toomanyanswers'] = 'Слишком много вариантов ответа. Максимум: {$a}.';
+$string['error:invalidoptionvalue'] = 'Значение «{$a->value}» не входит в список допустимых: {$a->allowed}.';
+$string['error:pagenocontent'] = 'Элемент страницы должен содержать хотя бы что-то одно: текст, tts, ttsdialog, ttspassage, ytid, iframe или загруженный медиафайл.';
+$string['error:nogaps'] = 'Пропуски не найдены. Заключите пропущенные буквы в квадратные скобки, например: «This is my d[og]».';
+$string['error:needspipepair'] = 'Каждая строка должна содержать пару значений, разделённых символом «|», например: «Слово|Значение».';
+$string['error:invalidyarn'] = 'Сценарий Yarn должен начинаться с узла «title: Start», после заголовка каждого узла должно стоять «---», а после его содержимого — «===».';
+$string['error:yarnproblems'] = 'В сценарии Yarn обнаружены ошибки, которые нужно исправить: {$a}.';
+$string['error:aigenitemsrejected'] = 'Не удалось принять и добавить в урок {$a->failed} из {$a->total} элементов. {$a->messages}';
+$string['error:noh5ppackage'] = 'В область файлов customfile1 необходимо добавить пакет H5P (.h5p).';
+$string['error:imagepromptarea'] = 'Изображения можно генерировать только в областях файлов изображений, а не аудио.';
+$string['error:imagepromptinvalid'] = 'Для генерации изображения необходимо указать простое имя файла и непустое текстовое описание.';
+$string['error:imagepromptlimit'] = 'Слишком много запросов на генерацию изображений за один импорт: максимум {$a}. Остальные отправьте отдельным импортом.';
+$string['error:imagegenfailed'] = 'Не удалось сгенерировать изображение. Загрузите его в формате base64 или повторно отправьте запрос.';
+$string['exportitem'] = 'Экспортировать элемент';
+$string['aigennativelangeasy'] = 'Определения и переводы будут на простом {$a} языке.';
+$string['aigennativelangnotset'] = 'Не задано';
+$string['aigeninputdefaults:nativelang'] = 'Оставьте поле пустым, если пользователь явно не указал язык. Тогда будет использован родной язык, заданный в настройках урока. Генерация завершится ошибкой, только если язык не указан и в уроке.';
+$string['aigenmissingrequiredinputs'] = 'Для шаблона «{$a->template}» необходимо заполнить все поля, однако следующие поля пустые: {$a->missing}. Значений по умолчанию нет, поэтому пустые поля приведут к созданию неполного материала. Не придумывайте значения и не отправляйте пустые поля: уточните их у пользователя или выберите другой шаблон и попробуйте снова.';
+$string['aigentemplatename:wordpractice_v4'] = 'Тренировка слов v4';
+$string['aigentemplatename:fiction_addpics'] = 'Интерактивная история (написанная агентом, с иллюстрациями)';
+$string['aigentemplatedescription:wordpractice_v4'] = 'Введите 4–10 ключевых слов или выражений и стиль изображений. Для перевода будет использоваться родной язык из настроек MiniLesson. На основе этих данных будут созданы:
+i) карточки слов с переводами и примерами предложений;
+ii) упражнение на сопоставление слова или выражения с переводом;
+iii) упражнение «Карточки слов»: слушай и выбирай;
+iv) упражнение «Карточки слов»: слушай и пиши;
+v) упражнение «Карточки слов»: выбери слово;
+vi) упражнение «Карточки слов»: напиши слово.';
+$string['aigentemplatedescription:fiction_addpics'] = 'Используйте этот шаблон, когда преподаватель предлагает идею или завязку истории: напишите историю самостоятельно на Yarn по руководству по созданию интерактивных историй — так результат будет лучше стандартных шаблонов генерации. Готовый сценарий преподавателю не нужен. Выберите тип истории и предоставьте полный текст с местами для изображений, запросом на генерацию изображения для каждого места, отдельным запросом для постера и общим стилем иллюстраций. История будет использована точно в том виде, в котором вы её написали. Шаблон создаёт иллюстрации и постер, затем два элемента: страницу с постером и интерактивную историю с иллюстрациями для всех отмеченных мест.';
+$string['aigentemplatename:cefr_a2'] = 'Шаблон CEFR A2';
+$string['aigentemplatedescription:cefr_a2'] = 'Введите 4–10 ключевых слов, текст с этими словами, несколько вопросов, тему для аудиочата и стиль изображений. На их основе будут созданы карточки слов, упражнение на порядок слов, задания «Слушай и говори», аудиочат и свободная устная речь. Переводы будут выполнены на родной язык из настроек MiniLesson.';
+$string['oauthresourcedescription'] = 'Инструменты генерации MiniLesson с ИИ на этом сайте — создание и управление уроками MiniLesson от вашего имени';
+$string['basicresult'] = 'Основные результаты';
+$string['lessonbank:badresponse'] = 'Банк уроков вернул ответ в неподдерживаемом формате.';
+$string['lessonbank:loadmoreerror'] = 'Не удалось загрузить дополнительные уроки из банка: {$a}';
+$string['hideanswer_abcd'] = 'Показывать A, B, C, D вместо текста';
+$string['hidequestiontext'] = 'Скрывать текст вопроса';
+$string['hidequestion_no'] = 'Нет — показывать вопрос';
+$string['hidequestion_yes'] = 'Да — скрывать вопрос';
+$string['nativelang_details'] = 'Родной язык ученика. ИИ использует его для комментариев, определений и переводов при создании заданий.';
+$string['nativelang_help'] = 'Родной язык ученика. ИИ использует его для комментариев, определений и переводов при создании заданий. Если язык не задан или совпадает с изучаемым, ИИ использует простой изучаемый язык.';
+$string['nativetranslation'] = 'Перевод на родной язык';
+$string['translatetext'] = 'Перевести этот текст';
+$string['translating'] = 'Перевод…';
+$string['nativetranslation_details'] = 'При включении этой функции некоторые типы заданий позволяют ученикам переводить текст на родной язык, включая интерактивные истории, диалоги с озвучиванием и комментарии к ответам в тестах с выбором ответа.';
+$string['nativetranslation_help'] = 'При включении этой функции некоторые типы заданий позволяют ученикам переводить текст на родной язык, включая интерактивные истории, диалоги с озвучиванием и комментарии к ответам в тестах с выбором ответа.';
+$string['presentationmode_immersivedark'] = 'Иммерсивный тёмный';
+$string['presentationmode_immersivebright'] = 'Иммерсивный светлый';
+$string['presentationmode_immersivepaper'] = 'Иммерсивный бумажный';
+$string['fiction_start'] = 'Начать';
+$string['fiction_restart'] = 'Начать заново';
+$string['fiction_mute'] = 'Выключить звук';
+$string['fiction_unmute'] = 'Включить звук';
+$string['fiction_translate'] = 'Показать перевод';
+$string['fiction_history'] = 'Показать историю';
+$string['fiction_history_close'] = 'Закрыть историю';
+$string['fiction_readaloud'] = 'Кнопка «Прочитать вслух»';
+$string['fiction_readaloud_details'] = 'Если включено, под каждым сообщением истории будет кнопка для озвучивания текста.';
+$string['fiction_readaloudaria'] = 'Прочитать этот текст вслух';
+$string['fiction:translating'] = 'Перевод…';
+$string['ttsdialog:translating'] = 'Перевод…';
+$string['ttsdialog:back'] = 'Предыдущая реплика';
+$string['ttsdialog:forward'] = 'Следующая реплика';
+$string['ttsdialog:playpause'] = 'Воспроизвести / пауза';
+$string['ttsdialog:stop'] = 'Остановить';
+$string['ttsdialog:translate'] = 'Перевести эту реплику';
+$string['ttsdialog:playline'] = 'Воспроизвести реплику';
+$string['ttsdialog:speed'] = 'Изменить скорость воспроизведения';
+$string['chatagent'] = 'Ассистент';
+$string['chatagent_tabhelp'] = 'Создавайте этот урок в диалоге с ИИ-помощником';
+$string['chatagent_context'] = 'Вы работаете только над одним уроком: MiniLesson «{$a->lesson}» (cmid {$a->cmid}) в курсе «{$a->course}» (courseid {$a->courseid}). Сейчас в уроке {$a->itemcount} элементов. Передавайте cmid {$a->cmid} каждому инструменту, изменяющему данные. Не вызывайте aigen_list_minilessons или list_courses для поиска этого урока — он уже известен. Если преподаватель просит использовать другой урок как образец, вы можете его прочитать, но любые изменения должны относиться только к cmid {$a->cmid}: попытки изменить другие уроки будут отклонены.';
+$string['chatagent_declined'] = 'Преподаватель отказался от этого действия. Не повторяйте его. Уточните, что нужно изменить, или предложите альтернативу.';
+$string['chatagent_error_auth'] = 'ИИ-помощник не смог авторизоваться в сервисе ИИ. Проверьте ключ Gemini API в настройках MiniLesson.';
+$string['chatagent_error_connection'] = 'ИИ-помощнику не удалось подключиться к сервису ИИ. Проверьте интернет-соединение сервера и настройки прокси, затем повторите попытку.';
+$string['chatagent_error_nokey'] = 'ИИ-помощник не настроен: в настройках MiniLesson отсутствует ключ Gemini API.';
+$string['chatagent_error_nopending'] = 'Нет действий, ожидающих подтверждения. Возможно, разговор продолжился после появления этого сообщения.';
+$string['chatagent_error_quota'] = 'Квота сервиса ИИ исчерпана. Повторите попытку позже или увеличьте квоту в Google AI Studio.';
+$string['chatagent_error_stuck'] = 'Ассистент выполнил слишком много шагов, не завершив задачу. Данные не потеряны — попробуйте сформулировать запрос точнее.';
+$string['chatagent_error_transport'] = 'Сервис ИИ прислал ответ, который не удалось прочитать. Повторите попытку.';
+$string['chatagent_error_unknown'] = 'Сервис ИИ не смог выполнить запрос. Повторите попытку.';
+$string['chatagent_error_cp_auth'] = 'ИИ-помощник не смог авторизоваться в Cloud Poodll. Проверьте пользователя и секретный ключ Poodll API в настройках MiniLesson.';
+$string['chatagent_error_cp_busy'] = 'Сервис ИИ перегружен. Подождите одну-две минуты и повторите попытку.';
+$string['chatagent_error_cp_connection'] = 'ИИ-помощник не смог подключиться к Cloud Poodll. Проверьте интернет-соединение сервера и настройки прокси, затем повторите попытку.';
+$string['chatagent_error_cp_licence'] = 'Подписка Poodll этого сайта не включает ИИ-помощника. Проверьте, что подписка действительна, включает MiniLesson, а адрес сайта зарегистрирован в Poodll.';
+$string['chatagent_error_cp_nocredentials'] = 'ИИ-помощник не настроен: в настройках MiniLesson не указаны пользователь и секретный ключ Poodll API.';
+$string['chatagent_error_cp_notsupported'] = 'Cloud Poodll пока не поддерживает ИИ-помощника. Повторите попытку позже или временно переключите ассистента на собственный ключ Gemini API сайта.';
+$string['chatagent_error_cp_quota'] = 'Суточная квота ИИ-помощника для учётной записи Poodll этого сайта исчерпана. Она обновится в полночь по UTC.';
+$string['chatagent_replay_preamble'] = 'Этот разговор продолжает предыдущую сессию, история которой больше не хранится в сервисе ИИ. Ниже приведены сообщения от старых к новым. Продолжайте с того места, где разговор прервался, и не повторяйте уже выполненные действия.';
+$string['chatagent_task_cleanup'] = 'Удаление старых бесед с ИИ-помощником';
+$string['privacy:path:chatagent'] = 'Беседы с ассистентом';
+$string['privacy:metadata:chatagentconvtable'] = 'Беседы преподавателя с ассистентом об уроке.';
+$string['privacy:metadata:chatagentconv:userid'] = 'Преподаватель, участвовавший в беседе.';
+$string['privacy:metadata:chatagentconv:cmid'] = 'Урок, о котором шла беседа.';
+$string['privacy:metadata:chatagentconv:interactionid'] = 'Идентификатор истории беседы, хранящейся у провайдера ИИ.';
+$string['privacy:metadata:chatagentconv:pendingargs'] = 'Подробности действия, предложенного ассистентом и ожидающего подтверждения.';
+$string['privacy:metadata:chatagentconv:timemodified'] = 'Время последней активности в беседе.';
+$string['privacy:metadata:chatagentmsgtable'] = 'Сообщения, составляющие беседу с ассистентом.';
+$string['privacy:metadata:chatagentmsg:role'] = 'Источник сообщения: преподаватель, ассистент или использованный им инструмент.';
+$string['privacy:metadata:chatagentmsg:content'] = 'Текст сообщения.';
+$string['privacy:metadata:chatagentmsg:attachments'] = 'Сведения о файлах, прикреплённых преподавателем к сообщению.';
+$string['privacy:metadata:chatagentmsg:timecreated'] = 'Время отправки сообщения.';
+$string['privacy:metadata:gemini'] = 'Для ответа ассистент отправляет переписку в Gemini API с ключом API, настроенным на сайте. Переписка хранится в соответствующем проекте Google согласно его настройкам хранения данных.';
+$string['privacy:metadata:gemini:prompts'] = 'Текст сообщений преподавателя и ответов ассистента.';
+$string['privacy:metadata:gemini:attachments'] = 'Документы или изображения, прикреплённые преподавателем.';
+$string['privacy:metadata:cloudpoodllcom:chatagentprompts'] = 'При использовании Cloud Poodll переписка с ассистентом включает сообщения преподавателя и ответы ассистента. Cloud Poodll передаёт её в Gemini API в проекте Google компании Poodll, где данные хранятся в соответствии с настройками этого проекта.';
+$string['privacy:metadata:cloudpoodllcom:chatagentattachments'] = 'Документы или изображения, прикреплённые преподавателем к беседе с ассистентом при использовании Cloud Poodll.';
+$string['chatagent_error_attachmenttoobig'] = 'Файл «{$a->name}» имеет размер {$a->size} МБ, но ассистент принимает вложения не более {$a->max} МБ. Отправьте более короткий фрагмент, только нужные страницы или разделите файл на два сообщения. (Для экспортированных уроков в формате .json это ограничение размера не действует.)';
+$string['chatagent_error_emptymessage'] = 'Перед отправкой напишите сообщение или прикрепите файл.';
+$string['chatagent_error_noconversation'] = 'Не удалось открыть беседу. Перезагрузите страницу и повторите попытку.';
+$string['chatagent_error_toomanyturns'] = 'Вы достигли лимита сообщений ассистенту: {$a} в час. Повторите попытку немного позже.';
+$string['chatagent_error_unavailable'] = 'Ассистент недоступен на этом сайте.';
+$string['chatagent_settings'] = 'ИИ-помощник';
+$string['chatagent_settings_details'] = 'ИИ-помощник позволяет преподавателям создавать урок, описывая его в чате и при необходимости прикрепляя PDF или изображение. Он обращается к ИИ через Cloud Poodll, используя учётные данные и подписку Poodll сайта, либо через собственный ключ Gemini API сайта (задаётся на странице «Другие ключи API»); во втором случае расходы оплачивает сайт напрямую Google. Пока для выбранного провайдера не указаны учётные данные, ассистент скрыт независимо от этих настроек.';
+$string['chatagentenabled'] = 'Включить ИИ-помощника';
+$string['chatagentenabled_details'] = 'Показывать вкладку ассистента преподавателям с доступом к генерации заданий с ИИ. Настройка начнёт действовать только после ввода учётных данных выбранного провайдера: пользователя и секретного ключа Poodll API для Cloud Poodll или ключа Gemini API для собственного подключения сайта.';
+$string['chatagentprovider'] = 'Провайдер ИИ';
+$string['chatagentprovider_details'] = 'Сервис, которому ИИ-помощник отправляет запросы. Для Cloud Poodll достаточно учётных данных Poodll сайта; каждая учётная запись Poodll имеет общую суточную квоту для всех подключённых сайтов. При использовании собственного ключа Gemini API Google выставляет счёт владельцу сайта, а квота определяется этим ключом. В обоих случаях сервер должен иметь доступ к провайдеру через интернет, при необходимости — с учётом настроек прокси сайта.';
+$string['chatagentprovider_cloudpoodll'] = 'Cloud Poodll (использует подписку Poodll сайта)';
+$string['chatagentprovider_ownkey'] = 'Собственный ключ Gemini API сайта';
+$string['chatagentmodel'] = 'Модель';
+$string['chatagentmodel_details'] = 'Модель Gemini для использования с собственным ключом сайта. Название вводится вручную, чтобы можно было перейти на новую модель без обновления плагина. При работе с Cloud Poodll модель выбирает сам сервис.';
+$string['chatagentmaxtoolcalls'] = 'Действий на одно сообщение';
+$string['chatagentmaxtoolcalls_details'] = 'Максимальное число действий ассистента при ответе на одно сообщение. Если лимит достигнут, обычно это означает, что ассистент зациклился.';
+$string['chatagentmaxturns'] = 'Сообщений в час';
+$string['chatagentmaxturns_details'] = 'Максимальное число сообщений, которые один преподаватель может отправить за час во всех своих беседах.';
+$string['chatagentmaxattachmentmb'] = 'Максимальный размер вложения (МБ)';
+$string['chatagentmaxattachmentmb_details'] = 'Наибольший размер PDF или изображения, прикрепляемого преподавателем к сообщению. Это ограничение расходов, а не техническая граница: сам сервис ИИ принимает гораздо более крупные файлы (PDF до 50 МБ), поэтому для работы с реальными материалами лимит можно увеличить. При этом вырастет расход токенов. Экспортированные уроки (.json) не затрагиваются, поскольку встроенные медиа удаляются перед отправкой.';
+$string['chatagentretaindays'] = 'Хранить беседы (дней)';
+$string['chatagentretaindays_details'] = 'Неактивные беседы удаляются по истечении указанного количества дней вместе со всеми вложениями. Это рабочие заметки, а не часть урока.';
+$string['chatagent_additems'] = 'Добавить элемент';
+$string['chatagent_approvalprompt'] = 'Ассистент предлагает внести изменение в ваш урок.';
+$string['chatagent_approvaldetails'] = 'Показать точные данные, которые будут отправлены';
+$string['chatagent_approve'] = 'Подтвердить';
+$string['chatagent_decline'] = 'Пока нет';
+$string['chatagent_conversation'] = 'Беседа с ассистентом';
+$string['chatagent_cronwarning'] = 'Похоже, на этом сайте не выполняются запланированные задачи. Ассистент может добавлять элементы напрямую, но задания, создаваемые в фоновом режиме, останутся в очереди и не завершатся.';
+$string['chatagent_generating'] = 'Элементы создаются в фоновом режиме. Это может занять несколько минут.';
+$string['chatagent_inputlabel'] = 'Сообщение ассистенту';
+$string['chatagent_introheading'] = 'Создайте урок, описав его';
+$string['chatagent_introbody'] = 'Расскажите ассистенту, что вы хотите получить. Он составит план заданий, покажет его вам и добавит задания после вашего согласия. Можно прикрепить PDF, изображение или экспортированный урок MiniLesson (JSON).';
+$string['chatagent_example1'] = 'Добавь три вопроса с выбором ответа о заказе кофе для начинающих.';
+$string['chatagent_example2'] = 'Преврати приложенный рабочий лист в задания, сохранив формулировки вопросов.';
+$string['chatagent_example3'] = 'Используй шаблон словарных карточек для слов: меню, официант, счёт.';
+$string['chatagent_itemcount'] = 'Элементов в этом уроке: {$a}';
+$string['chatagent_jobfinished'] = 'Фоновая генерация завершилась со статусом: {$a}.';
+$string['chatagent_noitemsyet'] = 'В этом уроке пока нет элементов.';
+$string['chatagent_placeholder'] = 'Опишите, что вы хотите добавить…';
+$string['chatagent_send'] = 'Отправить';
+$string['chatagent_startover'] = 'Начать заново';
+$string['chatagent_startoverconfirm'] = 'Будут удалены беседа и все прикреплённые к ней файлы. Уже добавленные в урок элементы останутся без изменений.';
+$string['chatagent_thinking'] = 'Думаю…';
+$string['chatagent_working'] = 'Работаю…';
+$string['chatagent_files'] = 'Файлы этой беседы';
+$string['chatagent_fileshelp'] = 'Добавьте PDF, изображение или экспортированный урок (.json), с которыми ассистент будет работать. Если удалить файл здесь, он больше не будет учитываться начиная со следующего сообщения.';
+$string['error:unknownfield'] = 'Поле «{$a->field}» не существует для элемента типа {$a->type}. Чтобы не потерять содержимое, элемент отклонён.{$a->suggestion}';
+$string['error:unknownfieldsuggestion'] = ' Возможно, вы имели в виду «{$a}»?';
+$string['chatagent_entry_desc'] = 'Опишите нужный урок и создайте его в диалоге с ассистентом.';
+$string['chatagent_openassistant'] = 'Создать с помощью ассистента';
+$string['chatagent_waitingonyou'] = 'ожидает вашего решения';
+$string['event:chatagent_action_performed'] = 'Действие ИИ-помощника выполнено';
+$string['privacy:metadata:chatagentmetrictable'] = 'Показатели работы ассистента: одна строка на каждый запрос к сервису ИИ.';
+$string['privacy:metadata:chatagentmetric:conversationid'] = 'Беседа, к которой относился запрос.';
+$string['privacy:metadata:chatagentmetric:toolname'] = 'Действие, выполненное ассистентом, если оно было.';
+$string['privacy:metadata:chatagentmetric:timecreated'] = 'Время выполнения запроса.';
+$string['chatagent_refreshitems'] = 'Обновить список элементов';
+$string['chatagent_attachedfile'] = 'Преподаватель прикрепил файл «{$a}». Ниже его содержимое.';
+$string['chatagent_attachedjson'] = 'Преподаватель прикрепил JSON-файл «{$a}». Ниже его содержимое без встроенных медиа. Если это экспорт MiniLesson, используйте его как образец: сохраните тип, оформление и настройки каждого элемента, изменяя только текст под новую тему.';
+$string['chatagent_attachedjsonempty'] = 'Преподаватель прикрепил JSON-файл «{$a}», но его не удалось прочитать.';
+$string['chatagent_attachedjsontrimmed'] = 'Преподаватель прикрепил JSON-файл «{$a->name}». Он слишком велик, чтобы включить его целиком даже без медиа, поэтому ниже приведены только первые {$a->max} МБ. Сообщите об этом и попросите преподавателя отправить меньший экспорт.';
+$string['chatagent_interrupted'] = 'Последний ответ был прерван до завершения на этапе: {$a}';
+$string['chatagent_continue'] = 'Продолжить с места остановки';
+
+// CampusFR 1.1.60a — restored translations for older core MiniLesson UI strings.
+$string['allowmicaccess'] = 'Разрешите доступ к микрофону.';
+$string['savestaudio'] = 'Записать аудио';
+$string['cleartextfirst'] = 'Сначала удалите текст, который вы добавили вручную. Автоматически он не удаляется.';
+$string['uploadstaudio'] = 'Загрузить аудио';
+$string['tolang'] = 'На какой язык';
+$string['fromlang'] = 'С какого языка';
+$string['importheading'] = 'Импорт элементов из JSON или CSV';
+$string['exportandtranslateheading'] = 'Перевод и экспорт элементов в JSON';
+$string['finishscreen_help'] = 'После завершения упражнения можно показать простой экран, полный экран результатов или пользовательский экран. Пользовательский экран можно настроить самостоятельно.';
+$string['importformat'] = 'Формат импорта';
+$string['reallydeletemediaprompt'] = 'Действительно удалить медиафайл: ';
+$string['exportitems'] = 'Экспортировать элементы';
+$string['finishscreencustom'] = 'Пользовательский экран завершения';
+$string['finishscreen'] = 'Экран завершения';
+$string['exportinstructions'] = 'Экспорт элементов этого упражнения MiniLesson в JSON-файл. Его можно использовать для резервного копирования или переноса элементов в другое упражнение MiniLesson. Также можно отредактировать экспортированные элементы и импортировать их как новые.';
+$string['deletemediaprompt'] = 'Удалить медиафайл?';
+$string['choosemediaprompt'] = 'Выберите тип медиафайла…';
+$string['finishscreen_details'] = 'После завершения упражнения можно показать простой экран, полный экран результатов или пользовательский экран. Пользовательский экран можно настроить самостоятельно.';
+$string['speechtester'] = 'Проверка речи';
+$string['speechnotrecognized'] = 'Не удалось распознать твою речь.';
+$string['finishscreen_simple'] = 'Простой';
+$string['exportheading'] = 'Экспорт элементов в JSON';
+$string['sttstaudio'] = 'Аудио для распознавания речи';
+$string['deletefilesfirst'] = 'Сначала удалите файлы, которые вы добавили вручную. Автоматически они не удаляются.';
+$string['itemsettingsheadings'] = 'Настройки элемента';
+$string['finishscreen_full'] = 'Полный';
+$string['finishscreencustom_help'] = 'Пользовательский экран — расширенная функция, позволяющая создавать экран завершения с помощью синтаксиса Mustache и переменных. Доступные переменные: {total}, {courseurl}, {coursename}, {yellowstars}, {graystars}, {reattempturl}, а также массив {results}, каждый элемент которого содержит {title}, {grade}, {yellowstars} и {graystars}.';
+$string['finishscreen_custom'] = 'Пользовательский';
+$string['nomicdetected'] = 'Микрофон не обнаружен.';
+$string['exportandtranslateitems'] = 'Перевести и экспортировать элементы';
+$string['exportandtranslateinstructions'] = 'Переведите и экспортируйте элементы этого упражнения MiniLesson в JSON-файл. Эта функция позволяет перевести тексты с языка A на язык B, чтобы затем импортировать их в другое упражнение MiniLesson с другим языковым профилем. Она предназначена для создания версий одного урока для учеников с разными родными языками. Сначала выберите исходный язык (страница перезагрузится), затем язык перевода (страница перезагрузится). Появится кнопка «Перевести» — нажмите её, чтобы перевести и экспортировать упражнение.';
+$string['nominilessons'] = 'Нет уроков MiniLesson';
+$string['aigentemplatename:scatter'] = 'Сопоставление'; // CampusFR translated label.
+$string['aigentemplatename:shadow'] = 'Повторение за диктором'; // CampusFR translated label.
+
+$string['taskcloudpoodllusagelog'] = 'Регистрация использования MiniLesson в CloudPoodll';

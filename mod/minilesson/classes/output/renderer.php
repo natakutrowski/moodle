@@ -20,6 +20,7 @@ namespace mod_minilesson\output;
 use core_collator;
 use html_writer;
 use mod_minilesson\aigen_contextform;
+use mod_minilesson\cbcredentials;
 use mod_minilesson\constants;
 use mod_minilesson\utils;
 use mod_minilesson\comprehensiontest;
@@ -35,6 +36,76 @@ use stdClass;
  */
 class renderer extends \plugin_renderer_base
 {
+    /**
+     * A way through to the chat agent, for the pages a teacher builds a lesson from.
+     *
+     * Returns nothing at all when the agent is unavailable or the teacher cannot use it, so the
+     * calling pages do not each have to ask. When a conversation is waiting on the teacher it
+     * says so: without that, somebody who navigated away mid-approval has no way back to it
+     * except remembering the tab exists.
+     *
+     * @param \stdClass $cm
+     * @return string
+     */
+    public function chatagent_entry($cm) {
+        global $USER;
+
+        $context = \context_module::instance($cm->id);
+        if (!\mod_minilesson\utils::chatagent_available() || !has_capability('mod/minilesson:canuseaigen', $context)) {
+            return '';
+        }
+
+        $pending = \mod_minilesson\local\chatagent\conversation_store::pending_for($USER->id, $cm->id);
+        return $this->render_from_template('mod_minilesson/chatagent_entry', [
+            'url' => (new \moodle_url(constants::M_URL . '/chatagent.php', ['id' => $cm->id]))->out(false),
+            'pending' => (bool) $pending,
+        ]);
+    }
+
+    /**
+     * The lesson's items, read only, for the pane beside the chat agent.
+     *
+     * Not the editing table from the item manager: that one carries drag handles, delete
+     * buttons and the JavaScript to drive them, none of which belong next to a conversation.
+     * What a teacher wants here is to see what the assistant just did, and a way through to
+     * the real editor.
+     *
+     * @param array $items rows from the items table, in order
+     * @param \stdClass $cm
+     * @return string
+     */
+    public function chatagent_item_list($items, $cm) {
+        $available = \core_plugin_manager::instance()->get_plugins_of_type(
+            \mod_minilesson\constants::SUBPLUGINTYPES['item']
+        );
+
+        $rows = [];
+        foreach (array_values($items) as $index => $item) {
+            $plugininfo = $available[$item->type] ?? null;
+            $rows[] = [
+                'index' => $index + 1,
+                'name' => format_string($item->name),
+                'typelabel' => $plugininfo ? $plugininfo->displayname : $item->type,
+                'icon' => $plugininfo ? $plugininfo->get_logo_url() : null,
+                'editurl' => (new \moodle_url('/mod/minilesson/rsquestion/managersquestions.php', [
+                    'id' => $cm->id,
+                    'itemid' => $item->id,
+                    'type' => $item->type,
+                    'action' => 'edititem',
+                ]))->out(false),
+            ];
+        }
+
+        return $this->render_from_template('mod_minilesson/chatagent_items', [
+            'items' => $rows,
+            'hasitems' => !empty($rows),
+            'count' => count($rows),
+            'additemurl' => (new \moodle_url('/mod/minilesson/rsquestion/managersquestions.php', [
+                'id' => $cm->id,
+            ]))->out(false),
+        ]);
+    }
+
     /**
      * Returns the header for the module
      *
@@ -186,6 +257,35 @@ class renderer extends \plugin_renderer_base
         return $ret;
     }
 
+    /**
+     * back to lesson items button
+     * @param object $cm
+     * @return string
+     */
+    public function back_to_items_button($cm)
+    {
+        $button = $this->output->single_button(new \moodle_url(
+            constants::M_PATH . '/rsquestion/rsquestions.php',
+            ['id' => $cm->id]
+        ), get_string('backtoitems', constants::M_COMPONENT));
+
+        $ret = \html_writer::div($button, constants::M_CLASS . '_backtoitems_cont');
+        return $ret;
+    }
+
+    /**
+     * Table of items which failed to import
+     * @param array $errors failure entries with itemnum, type, name and message fields
+     * @return string
+     */
+    public function import_failures($errors)
+    {
+        return $this->render_from_template(
+            constants::M_COMPONENT . '/importfailures',
+            ['errors' => array_values($errors)]
+        );
+    }
+
 
     /**
      * reattempt button
@@ -288,6 +388,9 @@ class renderer extends \plugin_renderer_base
         $context['lessonbankitemurl'] = new moodle_url('/mod/minilesson/lessonbank.php', ['id' => $cm->id]);
         $context['showlessonbank'] = !empty(get_config(constants::M_COMPONENT, 'setlessonbank')) &&
             !empty(get_config(constants::M_COMPONENT, 'lessonbankurl'));
+        $context['showchatagent'] = $showadditemlinks && \mod_minilesson\utils::chatagent_available()
+            && has_capability('mod/minilesson:canuseaigen', \context_module::instance($cm->id));
+        $context['chatagenturl'] = new moodle_url(constants::M_URL . '/chatagent.php', ['id' => $cm->id]);
         $context['additemicon'] = $this->output->image_url('add', constants::M_COMPONENT);
         $context['aiitemicon'] = $this->output->image_url('generate', constants::M_COMPONENT);
         $context['lessonbankicon'] = $this->output->image_url('choose', constants::M_COMPONENT);
@@ -371,6 +474,13 @@ class renderer extends \plugin_renderer_base
             $gstarcnt = 5 - $ystarcnt;
             $result->graystars = array_fill(0, $gstarcnt, true);
 
+            // The results templates show lesson text in the lesson's direction. Attempts made
+            // before the direction was stored in the results data get it here.
+            if (isset($result->resultsdata) && is_object($result->resultsdata) && !isset($result->resultsdata->contentdir)) {
+                $result->resultsdata->contentdir = utils::get_text_direction($moduleinstance->ttslanguage);
+                $result->resultsdata->contentlang = $moduleinstance->ttslanguage;
+            }
+
             $iteminstance = utils::fetch_item_from_itemrecord($items, $moduleinstance, $context);
             $iteminstance->prepare_result($result, $itemquizdata);
 
@@ -382,6 +492,9 @@ class renderer extends \plugin_renderer_base
 
         // Course name at top of page.
         $tdata->coursename = $course->fullname;
+        // The direction and language of the lesson text in the results.
+        $tdata->contentdir = utils::get_text_direction($moduleinstance->ttslanguage);
+        $tdata->contentlang = $moduleinstance->ttslanguage;
         // Item stars.
         if ($latestattempt->sessionscore == 0) {
             $ystarcnt = 0;
@@ -493,6 +606,9 @@ class renderer extends \plugin_renderer_base
 
         $quizclass = constants::M_QUIZ_CONTAINER . ' ' . $moduleinstance->csskey . '
             ' . constants::M_COMPONENT . '_' . $moduleinstance->containerwidth;
+        if (($moduleinstance->nextbuttonalign ?? '') === constants::M_NEXTBUTTON_CENTER) {
+            $quizclass .= ' ' . constants::M_COMPONENT . '_nextbutton_center';
+        }
         $quizattributes = ['id' => constants::M_QUIZ_CONTAINER];
         if (!empty($moduleinstance->lessonfont)) {
             $quizattributes['style'] = "font-family: '$moduleinstance->lessonfont', serif;";
@@ -786,6 +902,26 @@ class renderer extends \plugin_renderer_base
     }
 
     /**
+     * Show the in page Cloud Poodll credentials setup panel to administrators, and an explanation
+     * of who can fix it to everybody else.
+     *
+     * @param \moodle_url|string $returnurl where to send the user after they save the credentials
+     * @param string $errormessage what is currently wrong with the credentials
+     * @return string
+     */
+    public function show_cbcredentials_setup($returnurl, $errormessage = '')
+    {
+        if (cbcredentials::can_manage()) {
+            return $this->render_from_template(
+                constants::M_COMPONENT . '/cbcredentialspanel',
+                cbcredentials::export_panel_data($returnurl, $errormessage)
+            );
+        }
+        // Users who cannot fix it get no technical detail, just who to ask.
+        return $this->show_problembox(get_string('cbaskadmin', constants::M_COMPONENT));
+    }
+
+    /**
      * Show open and close dates
      * @param object $moduleinstance
      * @return string HTML to display the open and close dates
@@ -864,10 +1000,12 @@ class renderer extends \plugin_renderer_base
             'allowcontinueattempts',
             'region',
             'containerwidth',
+            'nextbuttonalign',
             'csskey',
             'lessonfont',
             'finishscreen',
             'finishscreencustom',
+            'nativelang',
         ];
 
         if ($scope == constants::PUSHMODE_MODULENAME) {
@@ -893,6 +1031,12 @@ class renderer extends \plugin_renderer_base
                     break;
                 case 'containerwidth':
                     $action = constants::M_PUSH_CONTAINERWIDTH;
+                    break;
+                case 'nextbuttonalign':
+                    $action = constants::M_PUSH_NEXTBUTTONALIGN;
+                    break;
+                case 'nativelang':
+                    $action = constants::M_PUSH_NATIVELANG;
                     break;
                 case 'csskey':
                     $action = constants::M_PUSH_CSSKEY;
@@ -1137,5 +1281,15 @@ class renderer extends \plugin_renderer_base
     public function count_pusers($pusers) {
         $pusers = trim($pusers);
         return count(array_unique(explode(',', $pusers)));
+    }
+
+    /**
+     * Render the Manage MCP admin page body.
+     *
+     * @param array $data template context, see templates/managemcp.mustache
+     * @return string
+     */
+    public function render_managemcp(array $data) {
+        return $this->render_from_template(constants::M_COMPONENT . '/managemcp', $data);
     }
 }

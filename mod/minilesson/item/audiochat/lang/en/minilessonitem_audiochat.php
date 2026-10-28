@@ -26,9 +26,14 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['additem'] = 'Audio Chat';
-$string['cantchat_ningxia'] = 'Chat is NOT available. To use this item type you must have a valid {$a} key set in the MiniLesson activity admin settings. Chat is also not available in China (Ningxia region)';
+$string['audiochat_silenceduration'] = 'Pause before the AI replies';
+$string['audiochat_silenceduration_details'] = 'How long the student must stop speaking, in milliseconds, before the AI treats their turn as finished and replies. Raise it to give learners more room to pause and think mid sentence. Lower it for a quicker, more conversational back and forth. The default is 3500 (3.5 seconds). Values outside the range 500 to 30000 fall back to the default. This applies only after the student has spoken, and only when Auto Send is on for the item.';
+$string['cantchat_ningxia'] ='Chat is NOT available. To use this item type you must have a valid {$a} key set in the MiniLesson activity admin settings. Chat is also not available in China (Ningxia region)';
 $string['gemini'] = 'Gemini';
 $string['cloudpoodll'] = 'Cloud Poodll';
+$string['geminilivemodel'] = 'Gemini Live model';
+$string['geminilivemodel_details'] = 'The Gemini Live model used when the provider is Gemini. Gemini 3.8 Live is Google\'s current default for low latency voice. The 3.1 preview is the older model and Google recommends moving off it. This applies to the Gemini and Cloud Poodll providers, not to OpenAI.';
+$string['gradingfailed'] = 'The AI could not grade this chat, so it scored 0. The transcript has been saved.';
 $string['item_desc'] = 'The Audio Chat item sets up an audio conversation with an AI partner. It can be used for discussing a topic, or asking questions about a picture. The prompts to the AI bot are free text and editable.';
 $string['openai'] = 'OpenAI';
 $string['pluginname'] = 'Audio chat';

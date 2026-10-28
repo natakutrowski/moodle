@@ -68,10 +68,24 @@ class comprehensiontest
         }
     }
 
-    public function has_slides_items()
+    /**
+     * Let every item type used in this lesson add whatever it needs to the page (most often CSS
+     * or JS the item type ships itself). Asking the item types rather than naming them here
+     * means a new item type can carry its own page requirements.
+     *
+     * @param \moodle_page $page The page to add requirements to.
+     * @return void
+     */
+    public function add_item_page_requirements(\moodle_page $page)
     {
         global $DB;
-        return $DB->count_records(constants::M_QTABLE, ['minilesson' => $this->mod->id, 'type' => constants::TYPE_SLIDES]) > 0;
+        $types = $DB->get_fieldset_select(constants::M_QTABLE, 'DISTINCT type', 'minilesson = ?', [$this->mod->id]);
+        foreach ($types as $type) {
+            $itemtypeclass = utils::fetch_itemtype_classname($type);
+            if ($itemtypeclass) {
+                $itemtypeclass::page_requirements($page);
+            }
+        }
     }
 
     public function fetch_latest_attempt($userid)
@@ -124,6 +138,7 @@ class comprehensiontest
         // prepare data array for test
         $testitems = [];
         $currentitem = 0;
+        $singletitem = null;
         foreach ($items as $item) {
             $currentitem++;
             $titem = utils::fetch_item_from_itemrecord($item, $this->mod, $this->context);
@@ -137,7 +152,25 @@ class comprehensiontest
                 $renderer = $OUTPUT;
             }
             $testitems[] = $titem->export_for_template($renderer);
+            $singletitem = $titem;
         }//end of loop
+
+        // If the lesson is a single ungradeable item, there are no results to show
+        // and nothing to reset, so there is no quizfinished page to advance to. Hide
+        // the "next" button (the questionfooter partial inherits the item's context).
+        if (count($testitems) === 1 && $singletitem !== null && !$singletitem->gradeable) {
+            $testitems[0]->hidenextbutton = true;
+        }
+
+        // The last item's "next" button finishes the lesson, so it is labelled "Finish". An item with
+        // a results page of its own starts with "Next Page" and switches to "Finish" on its results page.
+        if (count($testitems) > 0) {
+            $lastitem = $testitems[array_key_last($testitems)];
+            $lastitem->islastitem = true;
+            if ($this->mod->showitemreview && $singletitem->has_results_page()) {
+                $lastitem->finishonresults = true;
+            }
+        }
 
         //Store the test items in the class property for later use
         $this->quizdata = $testitems;

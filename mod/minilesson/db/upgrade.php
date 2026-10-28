@@ -1119,5 +1119,540 @@ function xmldb_minilesson_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2026062200, 'minilesson');
     }
 
+    if ($oldversion < 2026070300) {
+        // Community page: sharing consent + like counts, one row per item + user.
+        $table = new xmldb_table('minilesson_cpagesubmissions');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('consent', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('likes', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_index('idx_itemid_userid', XMLDB_INDEX_UNIQUE, ['itemid', 'userid']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Community page: which user liked which submission.
+        $table = new xmldb_table('minilesson_cpagelikes');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('submissionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('fksubmissionid', XMLDB_KEY_FOREIGN, ['submissionid'], 'minilesson_cpagesubmissions', ['id']);
+        $table->add_index('idx_submission_userid', XMLDB_INDEX_UNIQUE, ['submissionid', 'userid']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026070300, 'minilesson');
+    }
+
+    if ($oldversion < 2026070600) {
+        // The free speaking community page setting (customint9) changed from a
+        // checkbox (1 = on) to the minimum eligible grade (0 = off). Migrate
+        // items enabled under the old scheme to the default threshold.
+        $DB->execute(
+            "UPDATE {minilesson_rsquestions} SET customint9 = 80 WHERE type = ? AND customint9 = 1",
+            [constants::TYPE_FREESPEAKING]
+        );
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026070600, 'minilesson');
+    }
+
+    if ($oldversion < 2026070700) {
+        // Register the new CEFR A2 default AI-generation template and pick up
+        // edits to existing default templates. Re-seeding is idempotent.
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026070700, 'minilesson');
+    }
+
+    if ($oldversion < 2026070900) {
+        // Add the wordcards item type to the config enableditems.
+        $enableditems = get_config(constants::M_MODNAME, 'enableditems');
+        if ($enableditems !== false) {
+            $items = empty($enableditems) ? [] : explode(',', $enableditems);
+            if (!in_array(constants::TYPE_WORDCARDS, $items)) {
+                $items[] = constants::TYPE_WORDCARDS;
+            }
+            set_config('enableditems', implode(',', $items), constants::M_MODNAME);
+        }
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026070900, 'minilesson');
+    }
+
+    if ($oldversion < 2026071400) {
+        // Add the multichoicequiz item type to the config enableditems.
+        $enableditems = get_config(constants::M_MODNAME, 'enableditems');
+        if ($enableditems !== false) {
+            $items = empty($enableditems) ? [] : explode(',', $enableditems);
+            if (!in_array(constants::TYPE_MULTICHOICEQUIZ, $items)) {
+                $items[] = constants::TYPE_MULTICHOICEQUIZ;
+            }
+            set_config('enableditems', implode(',', $items), constants::M_MODNAME);
+        }
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026071400, 'minilesson');
+    }
+
+    if ($oldversion < 2026071600) {
+        // Add customint11 - customint15 to the minilesson question table.
+        $table = new xmldb_table(constants::M_QTABLE);
+
+        $fields = [];
+        $fields[] = new xmldb_field('customint11', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+        $fields[] = new xmldb_field('customint12', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+        $fields[] = new xmldb_field('customint13', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+        $fields[] = new xmldb_field('customint14', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+        $fields[] = new xmldb_field('customint15', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+        // Register the new AI-generation templates and pick up
+        // edits to existing default templates.
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026071600, 'minilesson');
+    }
+
+    if ($oldversion < 2026072500) {
+        // Item types used to be enabled by an allow list ('enableditems') held by the parent
+        // plugin, which meant an item type not named in that list - in particular a third party
+        // one - was invisible until an admin turned it on, and was switched off again whenever
+        // MiniLesson reseeded the list on upgrade. Item types are now enabled unless explicitly
+        // disabled, and the flag lives in the item type's own config namespace. Carry the
+        // existing choices over by disabling whatever the allow list left out.
+        // An unset or empty allow list meant "everything is enabled" under the old scheme, which
+        // is what the new scheme gives us for free, so there is only work to do when it has
+        // entries.
+        $enableditems = get_config(constants::M_MODNAME, 'enableditems');
+        if (!empty($enableditems)) {
+            $enabled = explode(',', $enableditems);
+            foreach (utils::fetch_itemtypes() as $itemtype) {
+                if (!in_array($itemtype, $enabled)) {
+                    set_config('disabled', 1, utils::get_sub_component($itemtype));
+                }
+            }
+        }
+        unset_config('enableditems', constants::M_MODNAME);
+        core_plugin_manager::reset_caches();
+
+        // Register the new AI-generation templates and pick up
+        // edits to existing default templates.
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026072500, 'minilesson');
+    }
+
+    if ($oldversion < 2026080101) {
+        // An interim build offered an outbound proxy for YouTube subtitle fetching.
+        // The approach was dropped, so clear the setting rather than leave it orphaned.
+        unset_config('youtubeproxy', constants::M_MODNAME);
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026080101, 'minilesson');
+    }
+
+    if ($oldversion < 2026081500) {
+        // Many template changes
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026081500, 'minilesson');
+    }
+
+    if ($oldversion < 2026082300) {
+        // Access to the AI Generation / MCP web service is now gated by the
+        // mod/minilesson:usemcp capability instead of the aigenservice external
+        // service's allowed-users list. Only nag the admin if this site actually
+        // has legacy allowed users who would otherwise silently lose access.
+        $serviceid = $DB->get_field('external_services', 'id', ['shortname' => 'aigenservice']);
+        if ($serviceid && $DB->record_exists('external_services_users', ['externalserviceid' => $serviceid])) {
+            $managemcpurl = new moodle_url(constants::M_URL . '/managemcp.php');
+            $managemcplink = html_writer::link($managemcpurl, get_string('managemcp', constants::M_COMPONENT));
+            \core\notification::add(
+                get_string('managemcp_upgradenotice', constants::M_COMPONENT, $managemcplink),
+                \core\notification::WARNING
+            );
+        }
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026082300, 'minilesson');
+    }
+
+    if ($oldversion < 2026082301) {
+        // OAuth 2.1 authorization server for MCP clients that only support OAuth
+        // (Claude.ai, Gemini Spark). Access tokens it mints are ordinary
+        // external_tokens rows, so only new storage for clients/codes/refresh
+        // tokens is needed here - the existing token-auth path is unchanged.
+        $table = new xmldb_table('minilesson_oauth_clients');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('clientid', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('clientsecrethash', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+            $table->add_field('clientname', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+            $table->add_field('clienturi', XMLDB_TYPE_CHAR, '1333', null, null, null, null);
+            $table->add_field('logouri', XMLDB_TYPE_CHAR, '1333', null, null, null, null);
+            $table->add_field('redirecturis', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+            $table->add_field('granttypes', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, 'authorization_code,refresh_token');
+            $table->add_field('responsetypes', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, 'code');
+            $table->add_field('tokenendpointauthmethod', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, 'none');
+            $table->add_field('scope', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+            $table->add_field('origin', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, 'dcr');
+            $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('lastusedtime', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_index('idx_clientid', XMLDB_INDEX_UNIQUE, ['clientid']);
+            $table->add_index('idx_origin', XMLDB_INDEX_NOTUNIQUE, ['origin']);
+            $dbman->create_table($table);
+        }
+
+        $table = new xmldb_table('minilesson_oauth_codes');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('codehash', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('clientid', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('redirecturi', XMLDB_TYPE_CHAR, '1333', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('codechallenge', XMLDB_TYPE_CHAR, '128', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('codechallengemethod', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, 'S256');
+            $table->add_field('resource', XMLDB_TYPE_CHAR, '1333', null, null, null, null);
+            $table->add_field('scope', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+            $table->add_field('clientnamesnapshot', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+            $table->add_field('expires', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('fkuserid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+            $table->add_index('idx_codehash', XMLDB_INDEX_UNIQUE, ['codehash']);
+            $table->add_index('idx_expires', XMLDB_INDEX_NOTUNIQUE, ['expires']);
+            $dbman->create_table($table);
+        }
+
+        $table = new xmldb_table('minilesson_oauth_refresh');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('tokenhash', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('clientid', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('externalserviceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('resource', XMLDB_TYPE_CHAR, '1333', null, null, null, null);
+            $table->add_field('scope', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+            $table->add_field('familyid', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('revoked', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('expires', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('lastused', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('fkuserid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+            $table->add_index('idx_tokenhash', XMLDB_INDEX_UNIQUE, ['tokenhash']);
+            $table->add_index('idx_familyid', XMLDB_INDEX_NOTUNIQUE, ['familyid']);
+            $table->add_index('idx_clientid', XMLDB_INDEX_NOTUNIQUE, ['clientid']);
+            $dbman->create_table($table);
+        }
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026082301, 'minilesson');
+    }
+
+    if ($oldversion < 2026082801) {
+        // The OAuth 2.1 authorization server moved to the shared local_oauthmcp plugin (this
+        // is a test-site-only feature so far, no live client data to migrate - see
+        // mod_minilesson_mcp_oauth_resources() in lib.php for how this plugin now registers
+        // itself with local_oauthmcp instead).
+        $tables = ['minilesson_oauth_clients', 'minilesson_oauth_codes', 'minilesson_oauth_refresh'];
+        foreach ($tables as $tablename) {
+            $table = new xmldb_table($tablename);
+            if ($dbman->table_exists($table)) {
+                $dbman->drop_table($table);
+            }
+        }
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026082801, 'minilesson');
+    }
+
+    if ($oldversion < 2026083101) {
+        // Update default templates - five upload templates had an input enabled that nothing
+        // consumed (and scatter_upload's prompt read two inputs it never offered), so the
+        // inputs they ask for now match the inputs they use.
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026083101, 'minilesson');
+    }
+
+    if ($oldversion < 2026090101) {
+        // Update default templates - the "Add Pics to Interactive Story" template now points
+        // agents at the fiction item type's authoring guide before they write the yarn script
+        // it takes as an input.
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026090101, 'minilesson');
+    }
+
+    if ($oldversion < 2026090103) {
+        // Update default templates - "Add Pics to Interactive Story" now tells the agent the
+        // picture command format to write into the story, spells out the image prompts JSON it
+        // expects, and prepends the chosen image style to each generated image description.
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026090103, 'minilesson');
+    }
+
+    if ($oldversion < 2026090600) {
+        // Define field nativetranslation to be added to minilesson.
+        $table = new xmldb_table(constants::M_TABLE);
+        $field = new xmldb_field('nativetranslation', XMLDB_TYPE_INTEGER, '2', null, null, null, 1, 'allowcontinueattempts');
+
+        // Conditionally launch add field nativetranslation.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+            // Existing activities keep the translation they already offer (the TTS dialog's
+            // translate icon has always been on whenever a native language was set).
+            $DB->set_field(constants::M_TABLE, 'nativetranslation', 1, []);
+        }
+
+        // Update default templates - the fiction item type's per item "tap to translate" setting
+        // is retired in favour of the activity level one, so the templates no longer set it.
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026090600, 'minilesson');
+    }
+
+    if ($oldversion < 2026090700) {
+        // Five more generic text columns on the items table. The multichoice quiz item type needs
+        // one per question for its optional answer feedback, and every text column was already spoken for.
+        $table = new xmldb_table(constants::M_QTABLE);
+        $previous = 'customtext7format';
+        for ($colnumber = 8; $colnumber <= 12; $colnumber++) {
+            $field = new xmldb_field('customtext' . $colnumber, XMLDB_TYPE_TEXT, null, null, null, null, null, $previous);
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+            $previous = 'customtext' . $colnumber;
+        }
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026090700, 'minilesson');
+    }
+
+    if ($oldversion < 2026091100) {
+        // Tables for the in-Moodle chat agent: one row per teacher-plus-lesson conversation, one
+        // per message in it, and one per model call. The conversation is kept server side because
+        // the provider's handle on the history and the arguments of a call awaiting approval are
+        // both things a browser must not be able to choose. The metric rows are what let the
+        // agent's behaviour and cost be read off measurements rather than judged by impression.
+        $tables = [
+            constants::M_CHATAGENTCONV_TABLE,
+            constants::M_CHATAGENTMSG_TABLE,
+            constants::M_CHATAGENTMETRIC_TABLE,
+        ];
+        foreach ($tables as $tablename) {
+            $table = new xmldb_table($tablename);
+            if (!$dbman->table_exists($table)) {
+                $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', $tablename);
+            }
+        }
+
+        // Update default templates - new imagestyle settings for vocab cards.
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026091100, 'minilesson');
+    }
+
+    if ($oldversion < 2026091105) {
+        // Update default templates - fluency upload-with-markup keeps the teacher's sentences as typed.
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026091105, 'minilesson');
+    }
+
+    if ($oldversion < 2026091112) {
+        // The agent-only "Add Pics to Interactive Story" template is renamed "Interactive Story (agent-written,
+        // with pics)", and its description now leads with why an agent would pick it. The template sync keeps an
+        // existing record's name and description, so set them here. Only where a default name is in place, so an
+        // admin's own rename is kept.
+        // The poster image prompt is now an input too: the poster is no longer written by the AI.
+        // Its tag is now "Reading" (was "Vocabulary Practice").
+        // It also has a Story Type input, so the story shape shows in the agent's plan.
+        // The story now goes into the fiction item as written, with no AI step that could lose it.
+        $newname = get_string('aigentemplatename:fiction_addpics', constants::M_COMPONENT);
+        $newdescription = get_string('aigentemplatedescription:fiction_addpics', constants::M_COMPONENT);
+        $defaultnames = [
+            'add pics to interactive story',
+            'interactive story (supplied yarn + image prompts)',
+            \core_text::strtolower($newname),
+        ];
+        $templates = $DB->get_records('minilesson_templates', ['uniqueid' => '69b032eb8af03']);
+        foreach ($templates as $template) {
+            if (in_array(\core_text::strtolower(trim($template->name)), $defaultnames)) {
+                $template->name = $newname;
+                $template->description = $newdescription;
+                $DB->update_record('minilesson_templates', $template);
+            }
+        }
+        // Update default templates - the config now makes the poster from the supplied poster image prompt.
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026091112, 'minilesson');
+    }
+
+    if ($oldversion < 2026091113) {
+        // Update default templates - five template items carried a field their item type does not have
+        // (typinggapfill promptvoice/promptvoiceopt in the three grammar lessons, wordshuffle confirmchoice in
+        // word practice v2, freespeaking enablevkeyboard in the YouTube finale). Import now rejects such items.
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026091113, 'minilesson');
+    }
+
+    if ($oldversion < 2026091200) {
+        // Update default templates - the twelve templates that ask for a native language now declare
+        // "defaultfrom": "nativelang" on that input, so an empty one falls back to the lesson's own
+        // native language setting instead of failing the run or having to be asked for.
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026091200, 'minilesson');
+    }
+
+    if ($oldversion < 2026091700) {
+        // Update default templates
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026091700, 'minilesson');
+    }
+
+    if ($oldversion < 2026101900) {
+        // Audio chat feedback prompts now ask for feedback in {feedback language}, which is the native
+        // language, or easy target language when the native language is the target language. Rewrite
+        // the shipped feedback sentences in the admin prompts and in existing audio chat items. Only
+        // these exact sentences change, so any other use of {native language} is left alone.
+        $replacements = [
+            'in the student native language: {native language}' => 'in {feedback language}',
+            "in the student's native language: {native language}" => 'in {feedback language}',
+            "in the student\\'s native language: {native language}" => 'in {feedback language}',
+            'Your comments should be in {native language}' => 'Your comments should be in {feedback language}',
+        ];
+        $search = array_keys($replacements);
+        $replace = array_values($replacements);
+
+        for ($i = 1; $i <= constants::MAX_AI_PROMPTS; $i++) {
+            $name = 'audiochat_feedbackprompt_' . $i;
+            $prompt = get_config(constants::M_COMPONENT, $name);
+            if (!empty($prompt)) {
+                $newprompt = str_replace($search, $replace, $prompt);
+                if ($newprompt !== $prompt) {
+                    set_config($name, $newprompt, constants::M_COMPONENT);
+                }
+            }
+        }
+
+        // The audio chat feedback instructions are stored in customdata3.
+        $select = 'type = :type AND ' . $DB->sql_like('customdata3', ':placeholder');
+        $params = ['type' => 'audiochat', 'placeholder' => '%{native language}%'];
+        $items = $DB->get_recordset_select('minilesson_rsquestions', $select, $params, '', 'id, customdata3');
+        foreach ($items as $item) {
+            $newinstructions = str_replace($search, $replace, $item->customdata3);
+            if ($newinstructions !== $item->customdata3) {
+                $DB->set_field('minilesson_rsquestions', 'customdata3', $newinstructions, ['id' => $item->id]);
+            }
+        }
+        $items->close();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026101900, 'minilesson');
+    }
+
+    if ($oldversion < 2026101901) {
+        // Audio chat instructions no longer tell the AI the student's native language, which did not help
+        // it, and was often the target language. Rewrite that sentence in the admin prompts and in existing
+        // audio chat items. Only this exact sentence changes.
+        $search = 'The student is a native speaker of {native language}.';
+        $replace = 'The student is learning to speak {target language}.';
+
+        for ($i = 1; $i <= constants::MAX_AI_PROMPTS; $i++) {
+            $name = 'audiochat_instructionsprompt_' . $i;
+            $prompt = get_config(constants::M_COMPONENT, $name);
+            if (!empty($prompt) && strpos($prompt, $search) !== false) {
+                set_config($name, str_replace($search, $replace, $prompt), constants::M_COMPONENT);
+            }
+        }
+
+        // The audio chat instructions are stored in customtext6.
+        $select = 'type = :type AND ' . $DB->sql_like('customtext6', ':sentence');
+        $params = ['type' => 'audiochat', 'sentence' => '%' . $DB->sql_like_escape($search) . '%'];
+        $items = $DB->get_recordset_select('minilesson_rsquestions', $select, $params, '', 'id, customtext6');
+        foreach ($items as $item) {
+            $newinstructions = str_replace($search, $replace, $item->customtext6);
+            $DB->set_field('minilesson_rsquestions', 'customtext6', $newinstructions, ['id' => $item->id]);
+        }
+        $items->close();
+
+        // Update default templates - the templates that asked for a native language now take it from the
+        // lesson, and their audio chat and AI grade items no longer name a fixed language.
+        \mod_minilesson\aigen::create_default_templates();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026101901, 'minilesson');
+    }
+
+    if ($oldversion < 2026101902) {
+        // Default template names and descriptions in the DB were only set at install, so the template
+        // editor showed old text. Copy them from the lang strings.
+        \mod_minilesson\aigen::sync_default_template_texts();
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026101902, 'minilesson');
+    }
+
+    if ($oldversion < 2026102601) {
+        // Define field nextbuttonalign to be added to minilesson.
+        $table = new xmldb_table(constants::M_TABLE);
+        $field = new xmldb_field(
+            'nextbuttonalign',
+            XMLDB_TYPE_CHAR,
+            '20',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            'default',
+            'nativetranslation'
+        );
+
+        // Conditionally launch add field nextbuttonalign.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Minilesson savepoint reached.
+        upgrade_mod_savepoint(true, 2026102601, 'minilesson');
+    }
+
     return true;
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/minilesson/db" VERSION="2026022100" COMMENT="XMLDB file for Moodle mod/minilesson"
+<XMLDB PATH="mod/minilesson/db" VERSION="2026090600" COMMENT="XMLDB file for Moodle mod/minilesson"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -37,6 +37,8 @@
         <FIELD NAME="viewend" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="nativelang" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="allowcontinueattempts" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="nativetranslation" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="1" SEQUENCE="false" COMMENT="Whether learners may translate item text into their native language"/>
+        <FIELD NAME="nextbuttonalign" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="default" SEQUENCE="false" COMMENT="Where the next page button sits: default (end of the line) or center"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -106,6 +108,11 @@
             <FIELD NAME="customtext6format" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
             <FIELD NAME="customtext7" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
             <FIELD NAME="customtext7format" TYPE="int" LENGTH="2" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+            <FIELD NAME="customtext8" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+            <FIELD NAME="customtext9" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+            <FIELD NAME="customtext10" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+            <FIELD NAME="customtext11" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+            <FIELD NAME="customtext12" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
             <FIELD NAME="customdata1" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
             <FIELD NAME="customdata2" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
             <FIELD NAME="customdata3" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
@@ -121,6 +128,11 @@
             <FIELD NAME="customint8" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
             <FIELD NAME="customint9" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
             <FIELD NAME="customint10" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+            <FIELD NAME="customint11" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+            <FIELD NAME="customint12" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+            <FIELD NAME="customint13" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+            <FIELD NAME="customint14" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+            <FIELD NAME="customint15" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
             <FIELD NAME="layout" TYPE="int" LENGTH="4" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
             <FIELD NAME="correctanswer" TYPE="int" LENGTH="4" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
             <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
@@ -232,5 +244,105 @@
               <INDEX NAME="idx_minilesson" UNIQUE="false" FIELDS="minilesson"/>
           </INDEXES>
       </TABLE>
+      <TABLE NAME="minilesson_cpagesubmissions" COMMENT="Community page sharing consent and like counts, one row per item + user">
+          <FIELDS>
+              <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+              <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="id of the minilesson_rsquestions row (lesson item)"/>
+              <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="id of the submitting user"/>
+              <FIELD NAME="consent" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 if the user consented to sharing their submission"/>
+              <FIELD NAME="likes" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="denormalized count of likes for this submission"/>
+              <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+              <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+          </FIELDS>
+          <KEYS>
+              <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+          </KEYS>
+          <INDEXES>
+              <INDEX NAME="idx_itemid_userid" UNIQUE="true" FIELDS="itemid, userid"/>
+          </INDEXES>
+      </TABLE>
+      <TABLE NAME="minilesson_cpagelikes" COMMENT="Which user liked which community page submission">
+          <FIELDS>
+              <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+              <FIELD NAME="submissionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="id of the minilesson_cpagesubmissions row"/>
+              <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="id of the user who liked the submission"/>
+              <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+          </FIELDS>
+          <KEYS>
+              <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+              <KEY NAME="fksubmissionid" TYPE="foreign" FIELDS="submissionid" REFTABLE="minilesson_cpagesubmissions" REFFIELDS="id"/>
+          </KEYS>
+          <INDEXES>
+              <INDEX NAME="idx_submission_userid" UNIQUE="true" FIELDS="submissionid, userid"/>
+          </INDEXES>
+      </TABLE>
+    <TABLE NAME="minilesson_chatagent_conv" COMMENT="Chat agent: one teacher's conversation about one lesson">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The teacher who owns the conversation"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Course module the conversation is about; all writes are pinned to it"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="For cleanup and course deletion"/>
+        <FIELD NAME="provider" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="Which driver issued interactionid; a handle does not survive a provider change"/>
+        <FIELD NAME="interactionid" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Provider handle on the history; empty means the transcript is replayed instead"/>
+        <FIELD NAME="pendingcallid" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Call id of a tool awaiting approval or execution"/>
+        <FIELD NAME="pendingtool" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Function name of that pending call"/>
+        <FIELD NAME="pendingargs" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON arguments of the pending call, held server side so approval cannot be tampered with"/>
+        <FIELD NAME="state" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="idle" SEQUENCE="false" COMMENT="idle, awaiting_tool, awaiting_approval or error"/>
+        <FIELD NAME="toolcalls" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Tools run in the current turn, against agentmaxtoolcalls"/>
+        <FIELD NAME="turncount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Turns taken, for rate limiting"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="useridcmid" UNIQUE="false" FIELDS="userid, cmid"/>
+        <INDEX NAME="cmid" UNIQUE="false" FIELDS="cmid"/>
+        <INDEX NAME="courseid" UNIQUE="false" FIELDS="courseid"/>
+        <INDEX NAME="timemodified" UNIQUE="false" FIELDS="timemodified"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="minilesson_chatagent_msg" COMMENT="Chat agent: the messages making up one conversation">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="conversationid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="role" TYPE="char" LENGTH="16" NOTNULL="true" DEFAULT="user" SEQUENCE="false" COMMENT="user, assistant or tool"/>
+        <FIELD NAME="content" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Message text, or the tool result given back to the model"/>
+        <FIELD NAME="toolname" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Set on tool messages only"/>
+        <FIELD NAME="toolargs" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON arguments the tool was called with"/>
+        <FIELD NAME="attachments" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON descriptors of files sent with a user message"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="conversationid" TYPE="foreign" FIELDS="conversationid" REFTABLE="minilesson_chatagent_conv" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="minilesson_chatagent_metric" COMMENT="Chat agent: one row per model call, for measuring how the agent behaves">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="conversationid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="turn" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Which turn of the conversation this call belonged to"/>
+        <FIELD NAME="toolname" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="The tool executed before this model call, if any"/>
+        <FIELD NAME="toolrejected" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Whether that tool call was refused rather than run"/>
+        <FIELD NAME="rejectreason" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="Why it was refused: notallowed, nocapability, wronglesson or failed"/>
+        <FIELD NAME="requestbytes" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Size of the input sent for this call, after trimming"/>
+        <FIELD NAME="attachmentbytes" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="How much of that was attachments"/>
+        <FIELD NAME="inputtokens" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="outputtokens" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="replayed" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Whether the transcript had to be replayed because the provider no longer held it"/>
+        <FIELD NAME="errorcode" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="The provider error, when the call failed"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="conversationid" TYPE="foreign" FIELDS="conversationid" REFTABLE="minilesson_chatagent_conv" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

@@ -33,11 +33,24 @@ class itemtype extends item {
     /** @var array Language skills (or "content") this item type focuses on. */
     public static $skills = [constants::SKILL_LISTENING, constants::SKILL_SPEAKING];
 
+    /**
+     * A short answer item stays stacked vertically however much content it carries.
+     *
+     * @return bool
+     */
+    public function autolayout_prefers_vertical() {
+        return true;
+    }
 
     public const PARTIALLYRESPONSE = 'customtext3';
     public const TOTALMARKS = 'customint1';
     public const PARTIALLYMARKS = 'customint2';
     public const RESPONSETYPE = 'customint3';
+
+    /** @var int Marks for a correct answer, when the item does not specify. */
+    public const DEFAULT_TOTALMARKS = 2;
+    /** @var int Marks for a partially correct answer, when the item does not specify. */
+    public const DEFAULT_PARTIALLYMARKS = 1;
 
     // the item type
     /**
@@ -61,11 +74,22 @@ class itemtype extends item {
         $testitem = $this->get_polly_options($testitem);
         $testitem = $this->set_layout($testitem);
         $testitem->alternates = $this->itemrecord->{constants::ALTERNATES};
-        $responsetype = $this->itemrecord->{self::RESPONSETYPE};
-        $testitem->audiorecorder = $responsetype == constants::RESPONSE_TYPE['audiorecorder'];
-        $testitem->textinput = $responsetype == constants::RESPONSE_TYPE['text'];
-        $testitem->correctmarks = $this->itemrecord->{self::TOTALMARKS};
-        $testitem->partialmarks = $this->itemrecord->{self::PARTIALLYMARKS};
+        // The response type and marks settings were added after this item type shipped, so items
+        // authored before then hold 0 in those columns. 0 is not a response type, and 0 total marks
+        // grades every answer as wrong, so fall back to how those items used to behave: speak the
+        // answer, with the default marks. See db/upgrade.php, which corrects the stored values.
+        $responsetype = (int) $this->itemrecord->{self::RESPONSETYPE};
+        $testitem->textinput = $responsetype === constants::RESPONSE_TYPE['text'];
+        $testitem->audiorecorder = !$testitem->textinput;
+        $correctmarks = (int) $this->itemrecord->{self::TOTALMARKS};
+        $partialmarks = (int) $this->itemrecord->{self::PARTIALLYMARKS};
+        $islegacyitem = !in_array($responsetype, constants::RESPONSE_TYPE, true);
+        if ($islegacyitem && $correctmarks < 1) {
+            $correctmarks = self::DEFAULT_TOTALMARKS;
+            $partialmarks = self::DEFAULT_PARTIALLYMARKS;
+        }
+        $testitem->correctmarks = $correctmarks;
+        $testitem->partialmarks = $partialmarks;
 
         // sentences
         $sentences = [];
@@ -115,19 +139,133 @@ class itemtype extends item {
         return $testitem;
     }
 
+    /**
+     * Validates an import record for this item type.
+     *
+     * @param \stdClass $newrecord the db-ready import record
+     * @param \stdClass $cm the course module
+     * @return false|\stdClass false when valid, or an error object with col and message
+     */
     public static function validate_import($newrecord, $cm) {
         $error = new \stdClass();
         $error->col = '';
         $error->message = '';
 
-        if ($newrecord->customtext1 == '') {
+        $answers = array_filter(array_map('trim', explode(PHP_EOL, (string) $newrecord->customtext1)), function ($answer) {
+            return $answer !== '';
+        });
+        if (count($answers) == 0) {
             $error->col = 'customtext1';
             $error->message = get_string('error:emptyfield', constants::M_COMPONENT);
             return $error;
         }
 
+        // Option value checks: reject impossible values. Absent fields arrive here as their column defaults.
+        $allowedresponsetypes = array_values(constants::RESPONSE_TYPE);
+        if (isset($newrecord->{self::RESPONSETYPE}) && !in_array((int) $newrecord->{self::RESPONSETYPE}, $allowedresponsetypes)) {
+            $error->col = self::RESPONSETYPE;
+            $error->message = get_string(
+                'error:invalidoptionvalue',
+                constants::M_COMPONENT,
+                ['value' => $newrecord->{self::RESPONSETYPE}, 'allowed' => implode(',', $allowedresponsetypes)]
+            );
+            return $error;
+        }
+
         // return false to indicate no error
         return false;
+    }
+
+    /**
+     * When and why to choose this item type (agent-facing, used by the aigen web services).
+     *
+     * @return string
+     */
+    public static function aigen_fetch_usage() {
+        return 'A single open question with a list of acceptable short answers. The learner answers by speaking '
+            . '(graded by speech recognition) or typing, and the response is matched against the answer list. '
+            . 'Use it for closed comprehension or knowledge questions whose answer is a word, phrase or short '
+            . 'sentence with predictable wording. For open questions with unpredictable answers use freespeaking '
+            . 'or freewriting instead.';
+    }
+
+    /**
+     * The agent-facing import field spec for shortanswer. Option meanings mirror the authoring form
+     * (see custom_definition in itemform.php); keep the two in sync when changing form options.
+     *
+     * @return array the import spec (usage, fields, fileareas, example)
+     */
+    public static function aigen_fetch_import_spec() {
+        $fields = static::aigen_common_import_field_specs(['type', 'name', 'visible', 'instructions', 'text',
+            'tts', 'ttsvoice', 'ttsoption', 'ttsautoplay', 'layout']);
+        $fields['type']['example'] = 'shortanswer';
+        $fields['text']['description'] = 'The question text. Add the same text to "tts" to have the question '
+            . 'read aloud as well.';
+
+        $ownfields = [
+            'sentences' => [
+                'required' => true,
+                'description' => 'The acceptable correct answers, as an array of strings, one answer per entry. '
+                    . 'The learner\'s response is matched against this list, so include the likely variants, '
+                    . 'e.g. ["yellow", "It is yellow."].',
+                'example' => '["yellow", "It is yellow."]',
+            ],
+            'partiallycorrectanswer' => [
+                'description' => 'Optional partially correct answers, as an array of strings. A response matching '
+                    . 'one of these earns partiallymarks instead of totalmarks.',
+                'example' => '["yellowish"]',
+            ],
+            'alternates' => [
+                'description' => 'Optional tuning for the speech recognition: acceptable alternative transcriptions '
+                    . 'for specific words. An array of strings, one word set per line in the format '
+                    . 'word|alternate1|alternate2, e.g. "their|there|they\'re". Only relevant when responsetype=1.',
+                'example' => '["their|there|they\'re"]',
+            ],
+            'totalmarks' => [
+                'description' => 'Marks awarded for a correct answer.',
+                'example' => '2',
+            ],
+            'partiallymarks' => [
+                'description' => 'Marks awarded for a partially correct answer. Should be less than totalmarks.',
+                'example' => '1',
+            ],
+            'responsetype' => [
+                'description' => 'How the learner answers the question.',
+                'options' => [
+                    ['value' => (string) constants::RESPONSE_TYPE['audiorecorder'],
+                        'meaning' => 'Speak the answer into the microphone (speech recognition, default)'],
+                    ['value' => (string) constants::RESPONSE_TYPE['text'],
+                        'meaning' => 'Type the answer into a text box'],
+                ],
+            ],
+        ];
+        foreach ($ownfields as $jsonname => $overlay) {
+            $fields[$jsonname] = static::aigen_seed_field_spec($jsonname, $overlay);
+        }
+
+        return [
+            'usage' => 'Compose one item object per question. Put the question in "text" and every acceptable '
+                . 'answer wording in "sentences". Choose responsetype 1 (speak) for speaking practice or 2 (type) '
+                . 'for writing practice. Answers are short, so keep them to a word, phrase or short sentence.',
+            'fields' => array_values($fields),
+            'fileareas' => [],
+            'example' => [
+                'items' => [
+                    [
+                        'type' => 'shortanswer',
+                        'name' => 'Short answer check',
+                        'instructions' => 'Answer the question by using the mic.',
+                        'text' => 'What color is the middle part of an egg?',
+                        'tts' => 'What color is the middle part of an egg?',
+                        'ttsvoice' => 'auto',
+                        'sentences' => ['yellow', 'It is yellow.'],
+                        'totalmarks' => 2,
+                        'partiallymarks' => 1,
+                        'responsetype' => constants::RESPONSE_TYPE['audiorecorder'],
+                    ],
+                ],
+            ],
+        ];
     }
 
     /*
@@ -139,8 +277,8 @@ class itemtype extends item {
         $keycols['text1'] = ['jsonname' => 'sentences', 'type' => 'stringarray', 'optional' => true, 'default' => [], 'dbname' => 'customtext1'];
         $keycols['text2'] = ['jsonname' => 'alternates', 'type' => 'stringarray', 'optional' => true, 'default' => [], 'dbname' => constants::ALTERNATES];
         $keycols['text3'] = ['jsonname' => 'partiallycorrectanswer', 'type' => 'stringarray', 'optional' => true, 'default' => [], 'dbname' => self::PARTIALLYRESPONSE];
-        $keycols['int1'] = ['jsonname' => 'totalmarks', 'type' => 'int', 'optional' => false, 'default' => 2, 'dbname' => self::TOTALMARKS];
-        $keycols['int2'] = ['jsonname' => 'partiallymarks', 'type' => 'int', 'optional' => false, 'default' => 1, 'dbname' => self::PARTIALLYMARKS];
+        $keycols['int1'] = ['jsonname' => 'totalmarks', 'type' => 'int', 'optional' => false, 'default' => self::DEFAULT_TOTALMARKS, 'dbname' => self::TOTALMARKS];
+        $keycols['int2'] = ['jsonname' => 'partiallymarks', 'type' => 'int', 'optional' => false, 'default' => self::DEFAULT_PARTIALLYMARKS, 'dbname' => self::PARTIALLYMARKS];
         $keycols['int3'] = ['jsonname' => 'responsetype', 'type' => 'int', 'optional' => false, 'default' => constants::RESPONSE_TYPE['audiorecorder'], 'dbname' => self::RESPONSETYPE];
         return $keycols;
     }

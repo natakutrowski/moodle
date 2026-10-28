@@ -5,12 +5,13 @@ define([
     'core/notification',
     'mod_minilesson/definitions',
     'mod_minilesson/translate',
+    'mod_minilesson/pollyhelper',
     'mod_minilesson/external/yarn-bound',
     'core/modal_cancel',
     'core/fragment',
     'core/templates',
     'mod_minilesson/progresstimer',
-], function ($, log, str, notification, def, translate, YarnBound, ModalCancel, Fragment, Templates, progresstimer) {
+], function($, log, str, notification, def, translate, polly, YarnBound, ModalCancel, Fragment, Templates) {
     "use strict"; // jshint ;_;
 
     /**
@@ -32,9 +33,14 @@ define([
         quizhelper: null,
         storydata: null,
         visitednodes: [],
+        readaloud: false,
+        readaloudaria: '',
+        usevoice: '',
+        voiceoption: 0,
+        currentReadAloud: null,
 
         // For making multiple instances
-        clone: function () {
+        clone: function() {
             return $.extend(true, {}, this);
         },
 
@@ -45,20 +51,33 @@ define([
          * @param {object} itemdata
          * @param {object} quizhelper
          */
-        init: function (index, itemdata, quizhelper) {
+        init: function(index, itemdata, quizhelper) {
             var that = this;
             this.index = index;
             this.itemdata = itemdata;
             this.quizhelper = quizhelper;
-            this.init_strings();
-            this.prepare_html(itemdata);
-            this.register_events(this.index, itemdata);
-            this.presentationmode = itemdata.presention_mobilechat ? 'mobilechat'
-                : (itemdata.presention_storymode ? 'storymode' : 'plain');
+            this.presentationmode = itemdata.presention_immersivepaper ? 'immersivepaper'
+                : itemdata.presention_immersivebright ? 'immersivebright'
+                : itemdata.presention_immersivedark ? 'immersivedark'
+                : (itemdata.presention_mobilechat ? 'mobilechat'
+                : (itemdata.presention_storymode ? 'storymode' : 'plain'));
+            this.isImmersive = (this.presentationmode === 'immersivedark'
+                || this.presentationmode === 'immersivebright'
+                || this.presentationmode === 'immersivepaper');
             this.flowthroughmode = itemdata.flowthroughmode;
             this.taptotranslate = itemdata.taptotranslate;
             this.taptotranslatearia = itemdata.taptotranslatearia;
+            this.readaloud = itemdata.readaloud;
+            this.readaloudaria = itemdata.readaloudaria;
+            this.usevoice = itemdata.usevoice;
+            this.voiceoption = itemdata.voiceoption;
             this.filenamesmap = itemdata.filenamesmap;
+            if (this.isImmersive) {
+                this.im_init_state();
+            }
+            this.init_strings();
+            this.prepare_html(itemdata);
+            this.register_events(this.index, itemdata);
             this.preload_images();
             // Initial user and other data
             this.storydata = new Map();
@@ -67,14 +86,20 @@ define([
             this.storydata.set('userfullname', itemdata.userfullname);
             this.storydata.set('cantranslate', false);
 
-            // Set a flag to indicate that translation is possible
-            // set lang code to 2 char equivalent, eg en for en-us
-            this.sourceLang = this.itemdata.language.substring(0, 2);
-            this.destLang = this.itemdata.nativelanguage.substring(0, 2);
+            // Full locale tags (e.g. en-US -> pt-BR). nativelanguage is already resolved
+            // server side from the activity setting and the user's native language
+            // preference. The translate module degrades to base languages (pt) itself
+            // when the browser has no model for the regional variant.
+            this.sourceLang = this.itemdata.language;
+            this.destLang = this.itemdata.nativelanguage;
+            // Give the translate module what it needs for the web service fallback,
+            // used when the browser has no native translation API.
+            translate.init(quizhelper.cmid, itemdata.id);
             // We need to wait for the availability check before we start the story,
             // otherwise $cantranslate will be false in the first render's conditions.
             translate.check_availability(this.sourceLang, this.destLang).then(function (availability) {
-                that.storydata.set('cantranslate', availability !== 'unavailable');
+                // Translation also has to be enabled on the activity (taptotranslate).
+                that.storydata.set('cantranslate', that.taptotranslate && availability !== 'unavailable');
 
                 // Auto-declare variables from Yarn script
                 // This makes sure indialogue variables are initialized as well as out of dialogue ones
@@ -91,17 +116,32 @@ define([
                             return Math.floor(Math.random() * sides) + 1;
                         },
                         translate: (text) => {
+                            if (that.isImmersive) {
+                                // Immersive cards strip inline HTML before the typewriter runs,
+                                // so an inline span can never be filled in. Instead offer the
+                                // text through the card's translation panel for this beat.
+                                if (that.storydata.get('cantranslate')) {
+                                    that.im_pendingInlineTranslate = text;
+                                }
+                                return "";
+                            }
+                            if (!that.storydata.get('cantranslate')) {
+                                // Translation is off for this activity, or unavailable. Show the source text.
+                                return text;
+                            }
                             var randomId = Math.random().toString(36).substring(2, 9);
-                            var updateStory = function (themessage) {
+                            var updateStory = function (themessage, attemptsleft) {
                                 var el = $("#ml-f-" + randomId);
                                 if (el.length) {
                                     el.html(themessage);
-                                } else {
-                                    setTimeout(updateStory, 100, themessage);
+                                } else if (attemptsleft > 0) {
+                                    setTimeout(updateStory, 100, themessage, attemptsleft - 1);
                                 }
                             };
-                            that.call_translate(that.sourceLang, that.destLang, text, updateStory);
-                            return "<span id='ml-f-" + randomId + "' class='ml-f-inline-translated-text'></span>";
+                            that.call_translate(that.sourceLang, that.destLang, text, function (themessage) {
+                                updateStory(themessage, 100);
+                            });
+                            return "<span id='ml-f-" + randomId + "' class='ml-f-inline-translated-text' dir='auto'></span>";
                         }
                     }
                 };
@@ -110,7 +150,10 @@ define([
                 log.debug(yarnopts);
                 try {
                     that.runner = new YarnBound(yarnopts);
-                    that.do_render();
+                    if (!that.isImmersive) {
+                        that.do_render();
+                    }
+                    // For immersive modes, initial render is triggered by the Start card click.
                 } catch (e) {
                     var userFriendlyError = "Yarn Parse Error: ";
                     // Format the error nicely
@@ -171,6 +214,10 @@ define([
                     "key": "downloadingtranslator",
                     "component": 'mod_minilesson'
                 },
+                {
+                    "key": "fiction:translating",
+                    "component": 'mod_minilesson'
+                },
             ]).done(function (s) {
                 var i = 0;
                 self.strings.nextlessonitem = s[i++];
@@ -182,6 +229,7 @@ define([
                 self.strings.download = s[i++];
                 self.strings.skip = s[i++];
                 self.strings.downloadingtranslator = s[i++];
+                self.strings.translating = s[i++];
             });
         },
 
@@ -196,10 +244,21 @@ define([
             this.controls.yarnmedia = this.controls.yarncontainer.find('.minilesson_fiction_yarnmedia');
             this.controls.yarnoptions = this.controls.yarncontainer.find('.minilesson_fiction_yarnoptions');
             this.controls.yarncontinuebutton = $("#" + itemdata.uniqueid + "_container .minilesson_fiction_continuebutton");
-            if (this.presentationmode === 'storymode') {
-                this.controls.chatwrapper = $("#" + itemdata.uniqueid + "_container .story-wrapper");
-            } else {
-                this.controls.chatwrapper = $("#" + itemdata.uniqueid + "_container .chat-wrapper");
+            this.controls.chatwrapper = $("#" + itemdata.uniqueid + "_container .chat-wrapper");
+            if (this.isImmersive) {
+                var $c = this.controls.yarncontainer;
+                this.controls.im_text = $c.find('.card__text');
+                this.controls.im_translation = $c.find('.card__translation');
+                this.controls.im_translate = $c.find('.card__translate');
+                this.controls.im_readaloud = $c.find('.card__readaloud');
+                this.controls.im_media = $c.find('.card__media');
+                this.controls.im_mute = $c.find('.card__mute');
+                this.controls.im_start = $c.find('.card__start');
+                this.controls.im_actions = $c.find('.card__actions');
+                this.controls.im_history = $c.find('.card__history');
+                this.controls.im_historyOverlay = $c.find('.card__history-overlay');
+                this.controls.im_historyLog = $c.find('.card__history-log');
+                this.controls.im_historyClose = $c.find('.card__history-close');
             }
             // To speed up rendering later prefetch some templates
             Templates.prefetchTemplates(['minilessonitem_fiction/fiction_playermessage']);
@@ -231,6 +290,7 @@ define([
                 this.chatdata.charactername = yarncontent.yarntext.md?.character?.name;
                 this.chatdata.charactertext = yarncontent.yarntext.text;
                 this.set_translate_data(this.chatdata, yarncontent.yarntext.text);
+                this.set_readaloud_data(this.chatdata, yarncontent.yarntext.text);
 
                 this.post_message_to_story(this.chatdata, currentResult);
 
@@ -250,22 +310,30 @@ define([
                     'presention_mobilechat': that.itemdata.presention_mobilechat,
                     'presention_storymode': that.itemdata.presention_storymode,
                     'presention_plain': that.itemdata.presention_plain,
+                    'presention_immersivedark': that.itemdata.presention_immersivedark,
+                    'presention_immersivebright': that.itemdata.presention_immersivebright,
+                    'presention_immersivepaper': that.itemdata.presention_immersivepaper,
                     'shownonoptions': that.itemdata.shownonoptions,
                 };
-                var waittime = 1000;
-                if (that.itemdata.presention_mobilechat) {
-                    waittime = 1500;
-                } else if (that.itemdata.presention_storymode) {
-                    waittime = 50;
-                }
-                Templates.render('minilessonitem_fiction/fictionyarnoptions', chatdata).then(
-                    function (html, js) {
-                        setTimeout(() => {
-                            that.controls.yarnoptions.html(html);
-                            Templates.runTemplateJS(js);
-                        }, waittime);
+                if (that.isImmersive) {
+                    // Defer options render until the typewriter finishes.
+                    that.im_pendingOptions = chatdata;
+                } else {
+                    var waittime = 1000;
+                    if (that.itemdata.presention_mobilechat) {
+                        waittime = 1500;
+                    } else if (that.itemdata.presention_storymode) {
+                        waittime = 50;
                     }
-                );
+                    Templates.render('minilessonitem_fiction/fictionyarnoptions', chatdata).then(
+                        function (html, js) {
+                            setTimeout(() => {
+                                that.controls.yarnoptions.html(html);
+                                Templates.runTemplateJS(js);
+                            }, waittime);
+                        }
+                    );
+                }
 
 
                 if ('text' in yarncontent.yarnoptions) {
@@ -273,9 +341,14 @@ define([
                     that.chatdata.charactername = yarncontent.yarnoptions.md?.character?.name;
                     that.chatdata.charactertext = yarncontent.yarnoptions.text;
                     this.set_translate_data(this.chatdata, yarncontent.yarnoptions.text);
+                    this.set_readaloud_data(this.chatdata, yarncontent.yarnoptions.text);
                     this.post_message_to_story(this.chatdata, currentResult, false);
                 } else {
                     that.controls.yarntext.html('');
+                    if (that.isImmersive) {
+                        // No text — render options immediately.
+                        that.im_renderPendingOptions();
+                    }
                 }
             } else if (currentResult instanceof YarnBound.CommandResult) {
                 // Process the command string a little. so we have command name and args
@@ -296,6 +369,8 @@ define([
                             return file.fileurl === imageURL;
                         });
                         if (theimage) {
+                            that.chatdata.charactermedia_url = imageURL;
+                            that.chatdata.charactermedia_type = 'picture';
                             promise = Templates.render('minilessonitem_fiction/fictionyarnimage', {
                                 "imageurl": imageURL
                             }).then(
@@ -317,6 +392,8 @@ define([
                             return file.fileurl === audioURL;
                         });
                         if (theaudio) {
+                            that.chatdata.charactermedia_url = audioURL;
+                            that.chatdata.charactermedia_type = 'audio';
                             promise = Templates.render('minilessonitem_fiction/fictionyarnaudio', {
                                 "audiourl": audioURL
                             }).then(
@@ -338,6 +415,8 @@ define([
                             return file.fileurl === videoURL;
                         });
                         if (thevideo) {
+                            that.chatdata.charactermedia_url = videoURL;
+                            that.chatdata.charactermedia_type = 'video';
                             promise = Templates.render('minilessonitem_fiction/fictionyarnvideo', {
                                 "videourl": videoURL
                             }).then(
@@ -353,6 +432,11 @@ define([
                     }
                     case 'clearpicture': {
                         that.controls.yarnmedia.html('');
+                        that.chatdata.charactermedia_url = '';
+                        that.chatdata.charactermedia_type = '';
+                        if (that.isImmersive) {
+                            that.im_updateMedia('', '');
+                        }
                         break;
                     }
                     case 'translate': {
@@ -441,6 +525,9 @@ define([
 
         post_message_to_story: function (messagedata, currentResult, showContinue = true) {
             var that = this;
+            if (that.isImmersive) {
+                return that.im_post_message(messagedata, currentResult, showContinue);
+            }
             if (that.presentationmode === 'storymode') {
                 return Templates.render('minilessonitem_fiction/fiction_storymessage', {
                     charactermedia: '<div class="chat-loader"></div>'
@@ -573,9 +660,23 @@ define([
                             });
                         },
                         function () {
-                            // User clicked "Skip"
+                            // User clicked "Skip" - fall back to remote translation if we can.
                             log.debug('User skipped translation model download');
-                            messageCallback("translation model not downloaded");
+                            if (translate.force_remote()) {
+                                translate.create_session(sourceLang, destLang).then(() => {
+                                    return translate.translate(text);
+                                }).then((translation) => {
+                                    if (translation) {
+                                        messageCallback(translation);
+                                    } else {
+                                        log.debug('translation failed');
+                                    }
+                                }).catch((e) => {
+                                    log.error("Translation error: " + e);
+                                });
+                            } else {
+                                messageCallback("translation model not downloaded");
+                            }
                         }
                     );
                 } else if (status === 'ready') {
@@ -648,6 +749,7 @@ define([
          */
         next_question: function () {
             var self = this;
+            self.stop_readaloud();
             var stepdata = {};
             stepdata.index = self.index;
             stepdata.hasgrade = true;
@@ -727,9 +829,16 @@ define([
                 log.debug('MiniLesson Fiction: yarn continue button clicked');
                 e.preventDefault();
                 // No need to show the "continue" text
+                if (self.isImmersive) {
+                    self.im_playButtonClick();
+                }
                 self.do_runner_advance();
                 self.do_render();
             });
+
+            if (this.isImmersive) {
+                this.im_register_events();
+            }
 
             // Add an event listener for option buttons that handles option buttons added at runtime
             this.controls.yarncontainer.on('click', '.minilesson_fiction_optionbutton', function (e) {
@@ -737,7 +846,15 @@ define([
                 e.preventDefault();
 
                 var optionindex = $(this).data('optionindex');
-                const playertext = $(this).data('optiontext') ? $(this).data('optiontext').toString().trim() : $(this).text().trim();
+                const optiontext = $(this).data('optiontext');
+                const playertext = optiontext ? optiontext.toString().trim() : $(this).text().trim();
+                if (self.isImmersive) {
+                    self.im_playButtonClick();
+                    self.im_pushChoiceToHistory(playertext);
+                    self.do_runner_advance(optionindex);
+                    self.do_render();
+                    return;
+                }
                 if (self.presentationmode === 'storymode') {
                     Templates.render('minilessonitem_fiction/fiction_storyplayermessage', {
                         playertext: playertext
@@ -766,6 +883,13 @@ define([
                 e.preventDefault();
                 e.stopPropagation();
                 self.tap_translate($(this));
+            });
+
+            // Read aloud: delegate clicks on the per-message TTS buttons.
+            this.controls.chatwrapper.on('click', '.fiction-readaloud-icon', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                self.play_readaloud($(this));
             });
 
             let scrollbtn = $("#" + itemdata.uniqueid + "_container #scroll-bottom-btn");
@@ -930,6 +1054,9 @@ define([
                 taptotranslate: false,
                 taptotranslatearia: null,
                 translatesource: null,
+                readaloud: false,
+                readaloudaria: null,
+                readaloudtext: null,
             };
         },
 
@@ -956,6 +1083,103 @@ define([
             messagedata.taptotranslate = true;
             messagedata.taptotranslatearia = this.taptotranslatearia;
             messagedata.translatesource = plaintext;
+        },
+
+        /**
+         * Decorate message data with the read-aloud (TTS) button, if the item setting is on.
+         * The button speaks the message's plain text via pollyhelper at click time.
+         *
+         * @param {object} messagedata The message data passed to the message template.
+         * @param {string} text The displayed text node content (may contain HTML).
+         */
+        set_readaloud_data: function (messagedata, text) {
+            if (!this.readaloud || !text) {
+                messagedata.readaloud = false;
+                return;
+            }
+            var tmp = document.createElement('div');
+            tmp.innerHTML = text;
+            var plaintext = (tmp.textContent || tmp.innerText || '').trim();
+            if (!plaintext) {
+                messagedata.readaloud = false;
+                return;
+            }
+            messagedata.readaloud = true;
+            messagedata.readaloudaria = this.readaloudaria;
+            messagedata.readaloudtext = plaintext;
+        },
+
+        /**
+         * Play (or stop) TTS audio for a read-aloud button. Clicking the button that is
+         * already playing stops and resets it; clicking a different one stops the first.
+         * No caching: each play fetches a fresh Polly URL (see fiction-tts option C).
+         *
+         * @param {jQuery} btn The clicked read-aloud button.
+         * @param {string} [text] Explicit text to speak; defaults to the button's data-readaloudtext.
+         */
+        play_readaloud: function (btn, text) {
+            var that = this;
+            text = (text || btn.data('readaloudtext') || '').toString();
+
+            var cur = this.currentReadAloud;
+            if (cur && cur.btn && cur.btn.is(btn)) {
+                // Tapping the playing button again: stop.
+                this.stop_readaloud();
+                return;
+            }
+            // A different button, or nothing playing: clear any current playback first.
+            this.stop_readaloud();
+
+            if (!text) {
+                return;
+            }
+
+            var play = function (url) {
+                if (!url) {
+                    btn.removeClass('is-loading');
+                    return;
+                }
+                var audio = new Audio(url);
+                that.currentReadAloud = {btn: btn, audio: audio};
+                btn.removeClass('is-loading').addClass('is-playing');
+                var clear = function () {
+                    btn.removeClass('is-playing is-loading');
+                    if (that.currentReadAloud && that.currentReadAloud.audio === audio) {
+                        that.currentReadAloud = null;
+                    }
+                };
+                audio.addEventListener('ended', clear);
+                audio.addEventListener('error', clear);
+                audio.play().catch(function () {
+                    clear();
+                });
+            };
+
+            btn.addClass('is-loading');
+            polly.fetch_polly_url(text, this.voiceoption, this.usevoice).then(function (url) {
+                play(url);
+            }).catch(function (e) {
+                log.debug('MiniLesson Fiction: read-aloud fetch failed');
+                log.debug(e);
+                btn.removeClass('is-loading');
+            });
+        },
+
+        /**
+         * Stop and reset any currently playing read-aloud audio.
+         */
+        stop_readaloud: function () {
+            var cur = this.currentReadAloud;
+            if (cur) {
+                if (cur.audio) {
+                    cur.audio.pause();
+                    cur.audio.currentTime = 0;
+                }
+                if (cur.btn) {
+                    cur.btn.removeClass('is-playing is-loading');
+                }
+            }
+            this.currentReadAloud = null;
         },
 
         /**
@@ -1101,6 +1325,518 @@ define([
                 var yarntext = $('#' + yarneditorid).val();
                 that.syntaxcheck(yarntext, resultscontainerid);
             });
+        },
+
+        // ======================================================================
+        // Immersive Dark presentation mode
+        // ======================================================================
+
+        im_init_state: function () {
+            this.im_audioCtx = null;
+            this.im_keyBuffers = null;
+            this.im_buttonBuffer = null;
+            this.im_isMuted = false;
+            this.im_typingTimer = null;
+            this.im_finishTyping = null;
+            this.im_soundLoopTimer = null;
+            this.im_translateSource = '';
+            this.im_translationResult = '';
+            this.im_readaloudSource = '';
+            this.im_currentHistoryEntry = null;
+            this.im_pendingInlineTranslate = null;
+            this.im_currentMediaUrl = '';
+            this.im_historylog = [];
+            this.im_pendingOptions = null;
+            this.im_soundsLoaded = false;
+            this.im_fontsLoaded = false;
+        },
+
+        im_loadFonts: function () {
+            var self = this;
+            if (self.im_fontsLoaded || !('FontFace' in window)) {
+                return;
+            }
+            self.im_fontsLoaded = true;
+            var $c = self.controls.yarncontainer;
+            var family = $c.data('font-family') || 'Jost';
+            var regular = $c.data('font-regular');
+            var italic = $c.data('font-italic');
+            if (regular) {
+                var f1 = new FontFace(family, 'url("' + regular + '")', {
+                    style: 'normal',
+                    weight: '100 900',
+                    display: 'swap'
+                });
+                f1.load().then(function (f) {
+                    document.fonts.add(f);
+                }).catch(function () {});
+            }
+            if (italic) {
+                var f2 = new FontFace(family, 'url("' + italic + '")', {
+                    style: 'italic',
+                    weight: '100 900',
+                    display: 'swap'
+                });
+                f2.load().then(function (f) {
+                    document.fonts.add(f);
+                }).catch(function () {});
+            }
+            var titleFamily = $c.data('title-font-family');
+            var titleRegular = $c.data('title-font-regular');
+            if (titleFamily && titleRegular) {
+                var f3 = new FontFace(titleFamily, 'url("' + titleRegular + '")', {
+                    style: 'normal',
+                    weight: '100 900',
+                    display: 'swap'
+                });
+                f3.load().then(function (f) {
+                    document.fonts.add(f);
+                }).catch(function () {});
+            }
+        },
+
+        im_register_events: function () {
+            var self = this;
+            var $c = this.controls.yarncontainer;
+
+            self.im_loadFonts();
+
+            $c.on('click', '.card__start', async function () {
+                $(this).addClass('is-hidden');
+                await self.im_setupAudio();
+                self.im_playButtonClick();
+                self.do_render();
+            });
+
+            $c.on('click', '.card__mute', async function (e) {
+                e.stopPropagation();
+                await self.im_setupAudio();
+                self.im_isMuted = !self.im_isMuted;
+                $(this).toggleClass('is-muted', self.im_isMuted);
+            });
+
+            $c.on('click', '.card__translate', function (e) {
+                e.stopPropagation();
+                self.im_playButtonClick();
+                if (!self.im_translateSource) {
+                    return;
+                }
+                var $panel = self.controls.im_translation;
+                var $btn = $(this);
+                if ($panel.hasClass('is-visible')) {
+                    $panel.removeClass('is-visible');
+                    $btn.removeClass('is-active');
+                    return;
+                }
+                $panel.addClass('is-visible');
+                $btn.addClass('is-active');
+                if (self.im_translationResult) {
+                    $panel.text(self.im_translationResult);
+                    return;
+                }
+                // First open for this beat: fetch the translation.
+                $panel.text(self.strings.translating);
+                var source = self.im_translateSource;
+                var historyentry = self.im_currentHistoryEntry;
+                self.call_translate(self.sourceLang, self.destLang, source, function (message) {
+                    // Ignore late results if the story has moved on to another beat.
+                    if (self.im_translateSource !== source) {
+                        return;
+                    }
+                    // Model download progress updates arrive as HTML snippets.
+                    if (message.toString().indexOf('translation-download-progress') !== -1) {
+                        $panel.html(message);
+                        return;
+                    }
+                    self.im_translationResult = message;
+                    $panel.text(message);
+                    if (historyentry) {
+                        historyentry.translation = message;
+                    }
+                });
+            });
+
+            $c.on('click', '.card__readaloud', function (e) {
+                e.stopPropagation();
+                self.im_playButtonClick();
+                if (!self.im_readaloudSource) {
+                    return;
+                }
+                self.play_readaloud($(this), self.im_readaloudSource);
+            });
+
+            $c.on('click', '.card__text', function () {
+                if (self.im_finishTyping) {
+                    self.im_finishTyping();
+                }
+            });
+
+            $c.on('click', '.card__history', function (e) {
+                e.stopPropagation();
+                self.im_playButtonClick();
+                self.im_showHistory();
+                $('body').addClass('minilesson-fiction-im-noscroll');
+            });
+
+            $c.on('click', '.card__history-close', function (e) {
+                e.stopPropagation();
+                self.im_playButtonClick();
+                self.controls.im_historyOverlay.attr('hidden', true);
+                $('body').removeClass('minilesson-fiction-im-noscroll');
+            });
+        },
+
+        im_setupAudio: async function () {
+            if (this.im_audioCtx) {
+                if (this.im_audioCtx.state === 'suspended') {
+                    await this.im_audioCtx.resume();
+                }
+                return;
+            }
+            var Ctor = window.AudioContext || window.webkitAudioContext;
+            if (!Ctor) {
+                return;
+            }
+            this.im_audioCtx = new Ctor();
+            if (this.im_audioCtx.state === 'suspended') {
+                await this.im_audioCtx.resume();
+            }
+            await this.im_loadSounds();
+        },
+
+        im_loadSounds: async function () {
+            if (this.im_soundsLoaded) {
+                return;
+            }
+            var ctx = this.im_audioCtx;
+            var $c = this.controls.yarncontainer;
+            var soft = $c.data('sound-key-soft');
+            var hard = $c.data('sound-key-hard');
+            var btn = $c.data('sound-button');
+            try {
+                var keyUrls = [soft, hard].filter(Boolean);
+                var keyBufs = await Promise.all(
+                    keyUrls.map((u) => fetch(u).then((r) => r.arrayBuffer()))
+                );
+                this.im_keyBuffers = await Promise.all(
+                    keyBufs.map((ab) => ctx.decodeAudioData(ab.slice(0)))
+                );
+                if (btn) {
+                    var btnBuf = await fetch(btn).then((r) => r.arrayBuffer());
+                    this.im_buttonBuffer = await ctx.decodeAudioData(btnBuf.slice(0));
+                }
+                this.im_soundsLoaded = true;
+            } catch (e) {
+                log.debug('MiniLesson Fiction: sound load failed');
+                log.debug(e);
+            }
+        },
+
+        im_playKeyClick: function () {
+            if (this.im_isMuted) {
+                return;
+            }
+            var ctx = this.im_audioCtx;
+            if (!ctx || ctx.state !== 'running' || !this.im_keyBuffers) {
+                return;
+            }
+            var buf = this.im_keyBuffers[Math.floor(Math.random() * this.im_keyBuffers.length)];
+            var src = ctx.createBufferSource();
+            src.buffer = buf;
+            src.playbackRate.value = 0.94 + Math.random() * 0.12;
+            var gain = ctx.createGain();
+            gain.gain.value = 0.18 + Math.random() * 0.12;
+            src.connect(gain);
+            gain.connect(ctx.destination);
+            src.start(0);
+        },
+
+        im_playButtonClick: function () {
+            if (this.im_isMuted) {
+                return;
+            }
+            var ctx = this.im_audioCtx;
+            if (!ctx || ctx.state !== 'running' || !this.im_buttonBuffer) {
+                return;
+            }
+            var src = ctx.createBufferSource();
+            src.buffer = this.im_buttonBuffer;
+            src.playbackRate.value = 0.97 + Math.random() * 0.06;
+            var gain = ctx.createGain();
+            gain.gain.value = 0.4;
+            src.connect(gain);
+            gain.connect(ctx.destination);
+            src.start(0);
+        },
+
+        im_startKeyboardSound: function () {
+            var self = this;
+            this.im_stopKeyboardSound();
+            var tick = function () {
+                self.im_playKeyClick();
+                var r = Math.random();
+                var next;
+                if (r < 0.12) {
+                    // Occasional thinking pause (12%).
+                    next = 260 + Math.random() * 280;
+                } else if (r < 0.35) {
+                    // Fast burst pair (23%).
+                    next = 55 + Math.random() * 45;
+                } else {
+                    // Regular typing with wide jitter (65%).
+                    next = 110 + Math.random() * 130;
+                }
+                self.im_soundLoopTimer = setTimeout(tick, next);
+            };
+            tick();
+        },
+
+        im_stopKeyboardSound: function () {
+            if (this.im_soundLoopTimer) {
+                clearTimeout(this.im_soundLoopTimer);
+                this.im_soundLoopTimer = null;
+            }
+        },
+
+        im_clearTyping: function () {
+            if (this.im_typingTimer) {
+                clearTimeout(this.im_typingTimer);
+                this.im_typingTimer = null;
+            }
+            this.im_stopKeyboardSound();
+            this.im_finishTyping = null;
+            this.controls.im_text.removeClass('is-typing');
+        },
+
+        im_typeText: function (text, onDone) {
+            var self = this;
+            var TYPING_SPEED_MS = 12;
+            var TYPING_JITTER = 0.45;
+            var PUNCT_PAUSE_MS = 160;
+            var SPACE_PAUSE_MS = 30;
+
+            self.im_clearTyping();
+            var $t = self.controls.im_text;
+            $t.text('');
+            $t.addClass('is-typing');
+            self.im_startKeyboardSound();
+
+            var i = 0;
+            var reveal = function () {
+                var ch = text.charAt(i);
+                $t.text(text.slice(0, ++i));
+
+                if (i < text.length) {
+                    var delay = TYPING_SPEED_MS * (1 + (Math.random() - 0.5) * TYPING_JITTER);
+                    if ('.,!?;:'.indexOf(ch) !== -1) {
+                        delay += PUNCT_PAUSE_MS;
+                    } else if (ch === ' ') {
+                        delay += SPACE_PAUSE_MS;
+                    }
+                    self.im_typingTimer = setTimeout(reveal, delay);
+                } else {
+                    self.im_typingTimer = null;
+                    self.im_finishTyping = null;
+                    self.im_stopKeyboardSound();
+                    $t.removeClass('is-typing');
+                    if (onDone) {
+                        onDone();
+                    }
+                }
+            };
+
+            self.im_finishTyping = function () {
+                if (self.im_typingTimer) {
+                    clearTimeout(self.im_typingTimer);
+                }
+                self.im_typingTimer = null;
+                self.im_finishTyping = null;
+                self.im_stopKeyboardSound();
+                $t.text(text);
+                $t.removeClass('is-typing');
+                if (onDone) {
+                    onDone();
+                }
+            };
+
+            reveal();
+        },
+
+        im_updateMedia: function (url, type) {
+            var $m = this.controls.im_media;
+            if (!$m || !$m.length) {
+                return;
+            }
+            if (this.im_currentMediaUrl === url) {
+                return;
+            }
+            this.im_currentMediaUrl = url;
+            $m.find('video, audio').remove();
+            if (!url) {
+                $m.css('background-image', '');
+                return;
+            }
+            if (type === 'video') {
+                $m.css('background-image', '');
+                $m.append(
+                    $('<video>').attr({
+                        src: url,
+                        autoplay: true,
+                        controls: true,
+                        playsinline: true
+                    })
+                );
+            } else if (type === 'audio') {
+                $m.append(
+                    $('<audio>').attr({
+                        src: url,
+                        autoplay: true,
+                        controls: true
+                    })
+                );
+            } else {
+                $m.css('background-image', 'url("' + url + '")');
+            }
+        },
+
+        im_post_message: function (messagedata, currentResult, showContinue) {
+            var self = this;
+            // Cross-fade media if URL provided by preceding <<picture/audio/video>> command.
+            if (messagedata.charactermedia_url) {
+                self.im_updateMedia(messagedata.charactermedia_url, messagedata.charactermedia_type);
+            }
+            // Prefer charactertext but fall back to charactermedia (used by <<translate>>
+            // command handler which delivers its output via charactermedia).
+            var text = (messagedata.charactertext || messagedata.charactermedia || '').toString();
+            // Strip any HTML that yarn may have injected (eg inline translate spans).
+            var tmp = document.createElement('div');
+            tmp.innerHTML = text;
+            var plaintext = (tmp.textContent || tmp.innerText || '').trim();
+
+            // Read-aloud speaks the line itself, without the "Character: " prefix the card shows.
+            self.im_readaloudSource = self.readaloud ? plaintext : '';
+
+            // Prefix the speaking character's name, as the other presentation modes do.
+            // Yarn character labels cannot contain spaces, so underscores stand in for them.
+            if (messagedata.charactername && plaintext) {
+                plaintext = messagedata.charactername.replace(/_/g, ' ') + ': ' + plaintext;
+            }
+
+            // Seed translation panel data. Keep the translate button hidden
+            // until the typewriter has finished revealing the text.
+            self.im_translateSource = messagedata.translatesource || '';
+            // An inline {translate("...")} in this line delivers its text through
+            // the translation panel, even when tap-to-translate is off.
+            if (self.im_pendingInlineTranslate) {
+                self.im_translateSource = self.im_pendingInlineTranslate;
+                self.im_pendingInlineTranslate = null;
+            }
+            self.im_translationResult = '';
+            self.im_currentHistoryEntry = null;
+            self.controls.im_translation.text('').removeClass('is-visible');
+            self.controls.im_translate.removeClass('is-active').removeClass('is-ready');
+
+            // Reset the read-aloud button for the new beat.
+            self.stop_readaloud();
+            self.controls.im_readaloud.removeClass('is-playing is-loading is-ready');
+
+            // Clear old actions while typing.
+            self.controls.yarnoptions.html('');
+            self.can_continuebutton(false);
+
+            return new Promise(function (resolve) {
+                self.im_typeText(plaintext, function () {
+                    // Reveal translate button once the text has finished appearing.
+                    if (self.im_translateSource) {
+                        self.controls.im_translate.addClass('is-ready');
+                    }
+                    // Reveal read-aloud button once the text has finished appearing.
+                    if (self.im_readaloudSource) {
+                        self.controls.im_readaloud.addClass('is-ready');
+                    }
+                    // Push beat to history log. The translation field is filled in
+                    // later if the user requests a translation of this beat.
+                    var historyentry = {
+                        type: 'beat',
+                        text: plaintext,
+                        translation: '',
+                        mediaUrl: self.im_currentMediaUrl,
+                        mediaType: messagedata.charactermedia_type || ''
+                    };
+                    self.im_historylog.push(historyentry);
+                    self.im_currentHistoryEntry = historyentry;
+                    self.reset_chat_data();
+
+                    // Render pending options (if this was an OptionsResult with text).
+                    if (self.im_pendingOptions) {
+                        self.im_renderPendingOptions().then(resolve);
+                        return;
+                    }
+
+                    if (showContinue && currentResult && !currentResult.isDialogueEnd) {
+                        if (self.flowthroughmode) {
+                            self.do_runner_advance();
+                            self.do_render();
+                        } else {
+                            self.can_continuebutton(true);
+                        }
+                    }
+                    resolve();
+                });
+            });
+        },
+
+        im_renderPendingOptions: function () {
+            var self = this;
+            if (!self.im_pendingOptions) {
+                return Promise.resolve();
+            }
+            var chatdata = self.im_pendingOptions;
+            self.im_pendingOptions = null;
+            return Templates.render('minilessonitem_fiction/fictionyarnoptions', chatdata).then(
+                function (html, js) {
+                    self.controls.yarnoptions.html(html);
+                    Templates.runTemplateJS(js);
+                }
+            );
+        },
+
+        im_pushChoiceToHistory: function (playertext) {
+            this.im_historylog.push({
+                type: 'choice',
+                text: playertext
+            });
+        },
+
+        im_escape: function (s) {
+            return $('<div>').text(s === null || s === undefined ? '' : s.toString()).html();
+        },
+
+        im_showHistory: function () {
+            var self = this;
+            var lastShownMediaUrl = null;
+            var html = self.im_historylog.map(function (entry) {
+                if (entry.type === 'beat') {
+                    var isImage = entry.mediaUrl
+                        && entry.mediaType !== 'audio'
+                        && entry.mediaType !== 'video';
+                    var mediaHTML = '';
+                    if (isImage && entry.mediaUrl !== lastShownMediaUrl) {
+                        mediaHTML = '<div class="history-log__media" style="background-image:url(\''
+                            + entry.mediaUrl + '\')"></div>';
+                        lastShownMediaUrl = entry.mediaUrl;
+                    }
+                    var translationHTML = entry.translation
+                        ? '<p class="history-log__translation" dir="auto">' + self.im_escape(entry.translation) + '</p>'
+                        : '';
+                    return '<div class="history-log__beat">' + mediaHTML
+                        + '<p class="history-log__text">' + self.im_escape(entry.text) + '</p>'
+                        + translationHTML + '</div>';
+                }
+                return '<div class="history-log__choice">&rsaquo; ' + self.im_escape(entry.text) + '</div>';
+            }).join('');
+            self.controls.im_historyLog.html(html || '<p class="history-log__empty">&mdash;</p>');
+            self.controls.im_historyOverlay.removeAttr('hidden');
         }
     }; // End module
 });

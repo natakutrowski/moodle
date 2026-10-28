@@ -4,7 +4,7 @@
             "type": "scatter",
             "name": "Item: Scatter",
             "instructions": "Choose the word pairs",
-            "ttsvoice": "Joey",
+            "ttsvoice": "auto",
             "audiofname": "00:00:00",
             "ttsdialog": [
                 ""
@@ -19,7 +19,7 @@
             "type": "wordshuffle",
             "name": "Item: WordShuffle",
             "instructions": "Put the words in the correct order to form a sentence.",
-            "ttsvoice": "Joey",
+            "ttsvoice": "auto",
             "audiofname": "00:00:00",
             "ttsdialog": [
                 ""
@@ -32,8 +32,7 @@
                 "She has [many] pencils.|\u5f7c\u5973\u306f\u305f\u304f\u3055\u3093\u925b\u7b46\u3092\u3082\u3063\u3066\u3044\u308b\u3002| much lot\r",
                 "There is [much] milk in the fridge.|\u51b7\u8535\u5eab\u306b\u725b\u4e73\u306f\u3044\u3063\u3071\u3044\u3042\u308a\u307e\u3059\u3002|many lot"
             ],
-            "promptvoice": "Joey",
-            "confirmchoice": "yes",
+            "promptvoice": "auto",
             "promptvoiceopt": "normal",
             "filesid": 2
         },
@@ -41,7 +40,7 @@
             "type": "typinggapfill",
             "name": "Item: Typing GapFill",
             "instructions": "Fill in the missing words or letters",
-            "ttsvoice": "Joey",
+            "ttsvoice": "auto",
             "audiofname": "00:00:00",
             "ttsdialog": [
                 ""
@@ -62,13 +61,13 @@
             "name": "Item: Free Writing (1)",
             "instructions": "Type your answer to the question in the text area below.",
             "text": "Write one original example sentence that contains following word(s): <br \/>\r\n<b>{ai data1}<\/b>\r\n",
-            "ttsvoice": "Joey",
+            "ttsvoice": "auto",
             "audiofname": "00:00:00",
             "ttsdialog": [
                 ""
             ],
             "aigradefeedback": "Explain each mistake simply.",
-            "aigradefeedbacklanguage": "ar-AE",
+            "aigradefeedbacklanguage": "native",
             "freewritingtopic": "",
             "aigradeinstructions": "The student should write one original example sentence in the target language ({target language}) for each of the target words\/phrases. Each correct sentence is worth three marks.  Remove 1 mark for each spelling, or grammatical error. And give no marks for a sentence that does not contain one of the target words\/phrases . \r\nTarget word\/phrases: \r\n{ai data1}\r\n\r\nPreviously studied sentences:\r\n{ai data2}",
             "freewritingaidata1": "much",
@@ -80,13 +79,13 @@
             "name": "Item: Free Writing (2)",
             "instructions": "Type your answer to the question in the text area below.",
             "text": "Write one original example sentence that contains following phrase: <br \/>\n<b>{ai data1}<\/b>",
-            "ttsvoice": "Joey",
+            "ttsvoice": "auto",
             "audiofname": "00:00:00",
             "ttsdialog": [
                 ""
             ],
             "aigradefeedback": "Explain each mistake simply.",
-            "aigradefeedbacklanguage": "ja-JP",
+            "aigradefeedbacklanguage": "native",
             "freewritingtopic": "",
             "aigradeinstructions": "The student should write one original example sentence in the target language ({target language}) for each of the target words\/phrases. Each correct sentence is worth three marks. Remove 1 mark for each spelling, or grammatical error. And give no marks for a sentence that does not contain one of the target words\/phrases . \nTarget word\/phrases: \n{ai data1}\n\nPreviously studied sentences:\n{ai data2}",
             "freewritingaidata1": "a lot of",
@@ -98,13 +97,13 @@
             "name": "Item: Free Writing (3)",
             "instructions": "Type your answer to the question in the text area below.",
             "text": "Write one original example sentence that contains following word(s): <br \/>\n<b>{ai data1}<\/b>",
-            "ttsvoice": "Joey",
+            "ttsvoice": "auto",
             "audiofname": "00:00:00",
             "ttsdialog": [
                 ""
             ],
             "aigradefeedback": "Explain each mistake simply.",
-            "aigradefeedbacklanguage": "ja-JP",
+            "aigradefeedbacklanguage": "native",
             "freewritingtopic": "",
             "aigradeinstructions": "The student should write one original example sentence in the target language ({target language}) for each of the target words\/phrases. Each correct sentence is worth three marks.  Remove 1 mark for each spelling, or grammatical error. And give no marks for a sentence that does not contain one of the target words\/phrases . \nTarget word\/phrases: \n{ai data1}\n\nPreviously studied sentences:\n{ai data2}",
             "freewritingaidata1": "many",

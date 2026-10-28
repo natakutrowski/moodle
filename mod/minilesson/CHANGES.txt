@@ -1,3 +1,141 @@
+Version 1.1.60 (Build 2026102601)
+- added Azure TTS voices for 41 languages that had three or fewer voices (not counting Whisper
+  voices). Most get one female and one male voice, some get up to four. Their names end in "_a"
+- English (Ireland), German (Switzerland) and Basque now have their own TTS voices. Before, they
+  used the US English voices
+- added Arabic, Ukrainian, Vietnamese, Korean, French and German translations of the interface (#92)
+- added the strings that were missing from the Norwegian, Danish, Finnish, Japanese, Chinese and Spanish translations
+- AI prompts, AI generation template text and privacy text stay in English in all languages
+- Added auto forward setting to Video shadowing
+- Added play audio after completion setting to Word Shuffle.
+- Added setting to center next button and to relabel it to "Finish" on final item
+- Made the default for self check audio review to model->self (was model->self->model)
+- Fixes to better support RTL
+- Hide footer navigation on Moodle 5.3
+
+Version 1.1.59 (Build 2026101902)
+- increased padding on passage reading
+- added no-autoforward setting to listen-and-speak
+- fixed grade calc in audiochat that did not round long decimals
+- added support for Gemini Live 3.8 model in audiochat
+- made feedback on multichoice and multichoice quiz a bit more attractive
+- added a dropdown list feature in place of textboxes on passage gapfill
+- added a cards list display (as opposed to a cards cards display)
+- added a speed control to the TTS dialog
+- AI feedback in audio chat, free writing and free speaking is now in "easy [target language]" when the
+  native language is the same as the target language (#86)
+- added a {feedback language} placeholder to AI feedback prompts. Existing audio chat feedback prompts
+  are updated to use it
+- AI generation templates no longer ask for a native language. They use the native language set
+  in the MiniLesson settings. If it is not set, or is the same as the target language, definitions
+  and translations are in easy target language
+- AI graded items made by AI generation templates now give feedback in the lesson's native language
+  (some had a fixed language, such as Japanese)
+- audio chat prompts now say "The student is learning to speak [target language]" instead of naming
+  the student's native language. Existing admin prompts and audio chat items are updated
+- if a lesson has no native language set, AI feedback is now in easy target language. Before, audio
+  chat gave feedback in English, and free writing and free speaking did not set a language
+- AI generation template names and descriptions are now the same in the template chooser, the
+  generation form, the template editor and the web services
+- the AI generation form now shows the template name, and the lesson's target and native languages,
+  at the top
+
+Version 1.1.58 (Build 2026101300)
+- Added list view to cards item type
+- Added drop down option for passage gap fill
+- Added feedback LTR / LTR support in MC and MC Quiz items. And improved translation
+
+Version 1.1.57 (Build 2026092900)
+- Added new item type Self Check.
+- Some UI updates
+
+Version 1.1.56 (Build 2026092202)
+- Renamed "Chat Agent" to "AI Assistant".
+- Free speaking and passage reading now work properly on Android Chrome. 
+- Streaming speech recognition no longer loses words when its token is refreshed.
+- Streaming speech recognition keeps the last words spoken when the student stops recording.
+- Cached speech tokens are only reused if they have at least 2 minutes left.
+- AI grading now adds punctuation to speech transcripts that have none.
+- Fiction item added some syntax features and bug fixes
+
+Version 1.1.55 (Build 2026091700)
+- Fixed AudioChat hallucinations on silent messages
+- Improved some AIGen templates
+- Improved formatting of AudioChat feedback
+- Added export item button on items page (so you don't need to export the whole lesson)
+- Some changes to feedback language options in audiochat/freespeaking/freewriting
+
+Version 1.1.54 (Build 2026091200)
+- Added a chat agent. On the new Assistant tab, teachers build a lesson by chatting with an AI.
+  They can attach a PDF, an image, or an exported lesson (.json). The agent shows a plan and asks
+  before it creates or imports items. There is a daily limit, but if you blow over it you can supply your own Gemini token
+- AI generation now tries once more if Cloud Poodll returns a reply that can not be read. Failed
+  calls are logged when developer debugging is on.
+- Added an image style option to the Word Practice v1, v3 and v4, Vocab Cards, and Vocab Cards
+  (upload with markup) templates.
+- The Fluency (upload sentences with markup) template now uses the sentences exactly as typed.
+- Added Tigrinya as an option in native languages list.
+
+Version 1.1.53 (Build 2026090700)
+- Added several language files
+- improved formatting of tts dialog
+- added tts voice to fiction item 
+- added narrative-style/spatial-map distinction to AI generate for fiction
+- added feedback to multichoice quiz item
+- added "native language translation" admin/instance setting that enables it on: fiction messages, multichoice feedback, TTS Dialog
+
+Version 1.1.52 (Build 2026083103)
+- Fixes for poor prompt following AI on MCP
+- Fixes for lesson bank endless scroll
+
+Version 1.1.49 (Build 2026082801)
+- Refactored MCP API to use the shared local_oauthmcp plugin for authentication
+- Added support for OAuth2 clients
+- Minor UI improvements
+
+Version 1.1.48 (Build 2026081600)
+- Added in-app free trial provisioning workflow
+
+Version 1.1.47 (Build 2026081500)
+- Added ai image generation style to templates that had none 
+- Removed unneccessary mywords js files
+- Added numbered badges to wordcards mc choices so they can be answered easily from keyboard
+
+Version 1.1.45 (Build 2026072600)
+- Added support for Camp-Registry and CI
+
+Version 1.1.44 (Build 2026072500)
+- Item types are now enabled unless explicitly disabled, so a newly installed item type works
+  immediately and is no longer switched off by a MiniLesson update
+- Item types are discovered from the installed subplugins rather than a list in the parent plugin,
+  and each item type now supplies its own display name
+- Added the missing admin capability and sesskey checks to the enable/disable item type action
+- Item types now declare their own behaviour (experimental, layout, AI grading, translation, page
+  requirements, splash screen styling) instead of the parent plugin special-casing them by name
+- Authoring form previews are now generic: an item type renders its own preview, so the slides
+  preview no longer lives in the parent plugin's lib.php
+- An item type can now be uninstalled if no lesson uses it (previously never)
+
+Version 1.1.43 (Build 2026071800)
+- Added new APIs for agents so they can create import files directly
+- Fixed issue with word counter in free speaking item when using AssemblyAI
+- Added support for MCP and Custom GPT by refactoring openapi.php (see https://support.poodll.com/en/support/solutions/articles/19000175579-using-ai-agents-to-generate-minilessons)
+- various AIGEN template tweaks
+
+Version 1.1.42 (Build 2026071600)
+- Added new item type multichoice quiz
+- Altered textblock rendering so as not to double up new lines
+- Added extra int fields
+- Added ABCD display option to multichoicequiz and multichoice item
+
+Version 1.1.41 (Build 2026071201)
+- Added new item type "wordcards"
+- Added 3 new (and better) fiction item skins
+- improved fiction item translate feature
+- Added community page to free speaking / free writing
+- Restricted access to aigen_dev page to site managers
+- Improved the "continue attempt" dialog
+
 Version 1.1.40 (Build 2026062200)
 - Added many new AI Generate templates
 - Added random feature to wordshuffle, gapfills, and cards

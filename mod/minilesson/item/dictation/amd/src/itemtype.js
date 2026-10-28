@@ -64,6 +64,8 @@ define(['jquery',
 
         show_item_review:function () {
             var self = this;
+            // On the lesson's last item, the results page is where the next button finishes the lesson.
+            self.quizhelper.set_finish_label(self.index, true);
           //build review data
             var review_data = {};
             review_data.correctitems = $('#' + self.itemdata.uniqueid + '_container .dictate-feedback.fa-check').length;
@@ -79,7 +81,10 @@ define(['jquery',
           //display results
             var gamebox = $("#" + self.itemdata.uniqueid + "_container .ml_dictation_rows");
             var resultsbox = $("#" + self.itemdata.uniqueid + "_container .ml_dictation_resultscontainer");
-            templates.render('mod_minilesson/listitemresults',review_data).then(
+            // The results list the lesson text, so they take its direction.
+            review_data.contentdir = self.itemdata.contentdir;
+            review_data.contentlang = self.itemdata.contentlang;
+            templates.render('mod_minilesson/listitemresults', review_data).then(
                 function (html,js) {
                     resultsbox.html(html);
                     //show and hide
@@ -121,17 +126,11 @@ define(['jquery',
 
               //update char count
                 $("#" + itemdata.uniqueid + "_container .dictationplayer_" + index + "_chars").html(typed.length);
-
-
-                // Edit NK
-                correct = normalizeForComparison(correct);      
-                typed = normalizeForComparison(typed); 
-
               //trim punctuation before comparing, if ignore punctuation is set
-                //if (itemdata.ignorepunctuation) {
+                if (itemdata.ignorepunctuation) {
                     correct = quizhelper.cleanText(correct);
                     typed = quizhelper.cleanText(typed);
-                //}
+                }
 
                 if (correct == typed) {
                     $("#" + itemdata.uniqueid + "_container .dictate-feedback[data-index='" + index + "']").removeClass("fa-times").addClass("fa-check").css("color","green").show();
@@ -178,31 +177,4 @@ define(['jquery',
             });
         }
         }; //end of return value
-
-    // Improvment NK
-    function normalizeForComparison(text) {
-        return text
-            // Apostrophes → '
-            .replace(/[’‘ʼʹ′´‛]/g, "'")
-            // Tirets → -
-            .replace(/[–—‐-‒﹘﹣－ー]/g, "-")
-            // Guillemets doubles → "
-            .replace(/[“”„‟«»]/g, '"')
-            // Guillemets simples → '
-            .replace(/[‚‘’]/g, "'")
-            // Espaces insécables → espace normal
-            .replace(/[\u00A0\u202F\u2007]/g, " ")
-            // Supprimer caractères invisibles
-            .replace(/[\u200B-\u200D\uFEFF]/g, "")
-            // Points de suspension typographiques
-            .replace(/…/g, "...")
-            // Supprimer les espaces autour de la ponctuation
-            .replace(/\s*([,.;:!?])\s*/g, "$1")
-            // Réduction des espaces multiples
-            .replace(/\s+/g, " ")
-            // Trim
-            .trim()
-            // Minuscule
-            .toLowerCase();
-    }
   });

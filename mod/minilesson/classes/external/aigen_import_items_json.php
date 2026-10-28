@@ -19,6 +19,7 @@ namespace mod_minilesson\external;
 use context_module;
 use core_external\external_api;
 use core_external\external_function_parameters;
+use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 use mod_minilesson\constants;
@@ -36,7 +37,10 @@ use mod_minilesson\utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class aigen_import_items_json extends external_api {
-
+    /**
+     * parameters for import items json
+     * @return external_function_parameters
+     */
     public static function execute_parameters() {
         return new external_function_parameters([
             'cmid' => new external_value(PARAM_INT, 'Course Module ID'),
@@ -44,6 +48,12 @@ class aigen_import_items_json extends external_api {
         ]);
     }
 
+    /**
+     * Import a JSON items payload into a minilesson.
+     * @param int $cmid the course module id of the target minilesson
+     * @param string $itemsjson the JSON-encoded items and files payload
+     * @return array
+     */
     public static function execute($cmid, $itemsjson) {
         global $DB;
 
@@ -80,28 +90,74 @@ class aigen_import_items_json extends external_api {
         raise_memory_limit(MEMORY_HUGE);
 
         $theimport = new import($moduleinstance, $modulecontext, $course, $cm);
+        $imagefailures = $theimport->generate_images_from_prompts($importdata);
         $theimport->set_reader($importdata, true);
+        $results = $theimport->import_process();
 
-        // import_process() writes a results table to output; swallow it so the
-        // web service response stays valid JSON.
-        ob_start();
-        try {
-            $theimport->import_process();
-        } finally {
-            ob_end_clean();
-        }
-
-        return [
+        $ret = [
             'success' => true,
-            'itemcount' => count($importdata->items),
+            'itemcount' => $results->imported,
+            'total' => $results->total,
+            'failed' => $results->failed,
+            'errors' => array_map(function ($error) {
+                return [
+                    'itemnum' => $error->itemnum,
+                    'type' => $error->type,
+                    'name' => $error->name,
+                    'message' => $error->message,
+                ];
+            }, $results->errors),
         ];
+        if (!empty($imagefailures)) {
+            $ret['imagefailures'] = $imagefailures;
+        }
+        if ($results->failed > 0) {
+            $ret['errormsg'] = get_string(
+                'importpartial',
+                constants::M_COMPONENT,
+                ['imported' => $results->imported, 'total' => $results->total]
+            );
+        }
+        return $ret;
     }
 
+    /**
+     * return structure of the import results
+     * @return external_single_structure
+     */
     public static function execute_returns() {
+        $errorstructure = new external_single_structure([
+            'itemnum' => new external_value(PARAM_INT, '1-based position of the rejected item in the submitted items array'),
+            'type' => new external_value(PARAM_RAW, 'The item type of the rejected item'),
+            'name' => new external_value(PARAM_RAW, 'The name of the rejected item'),
+            'message' => new external_value(
+                PARAM_RAW,
+                'Why the item was rejected, prefixed with the offending import field name where known. '
+                . 'Fix the item and resubmit it (already imported items should not be resubmitted)'
+            ),
+        ]);
+        $imagefailurestructure = new external_single_structure([
+            'filesid' => new external_value(PARAM_RAW, 'The filesid the prompt was given under'),
+            'filearea' => new external_value(PARAM_RAW, 'The file area the prompt was given under'),
+            'filename' => new external_value(PARAM_RAW, 'The file name the prompt was given under'),
+            'message' => new external_value(PARAM_RAW, 'Why no image was produced'),
+        ]);
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'True if the import ran without a fatal error'),
-            'itemcount' => new external_value(PARAM_INT, 'Number of items in the supplied payload'),
-            'errormsg' => new external_value(PARAM_RAW, 'Error message when success is false', VALUE_OPTIONAL),
+            'itemcount' => new external_value(PARAM_INT, 'Number of items successfully imported'),
+            'total' => new external_value(PARAM_INT, 'Number of items in the supplied payload', VALUE_OPTIONAL),
+            'failed' => new external_value(PARAM_INT, 'Number of items that were rejected', VALUE_OPTIONAL),
+            'errors' => new external_multiple_structure($errorstructure, 'Per-item import failures', VALUE_OPTIONAL),
+            'imagefailures' => new external_multiple_structure(
+                $imagefailurestructure,
+                'Entries of "fileprompts" that produced no image. The items were still imported, without that image',
+                VALUE_OPTIONAL
+            ),
+            'errormsg' => new external_value(
+                PARAM_RAW,
+                'Error message when success is false or some items failed',
+                VALUE_OPTIONAL
+            ),
         ]);
     }
 }

@@ -148,10 +148,63 @@ $functions = [
             'type' => 'read',
             'ajax' => true,
         ],
+        // The chat agent's own endpoints. Unlike the aigen functions below, these are ajax
+        // callable: they are what the chat panel talks to. They are deliberately not part of
+        // the aigenservice web service - a remote MCP client has no business driving somebody's
+        // in-page conversation.
+        'mod_minilesson_chatagent_start' => [
+            'classname' => 'mod_minilesson\external\chatagent_start',
+            'methodname' => 'execute',
+            'description' => 'Open the current user\'s chat agent conversation about a lesson',
+            'type' => 'write',
+            'capabilities' => 'mod/minilesson:canuseaigen',
+            'ajax' => true,
+            'loginrequired' => true,
+        ],
+        'mod_minilesson_chatagent_send' => [
+            'classname' => 'mod_minilesson\external\chatagent_send',
+            'methodname' => 'execute',
+            'description' => 'Send a message to the chat agent and take the first step of the turn',
+            'type' => 'write',
+            'capabilities' => 'mod/minilesson:canuseaigen',
+            'ajax' => true,
+            'loginrequired' => true,
+        ],
+        'mod_minilesson_chatagent_step' => [
+            'classname' => 'mod_minilesson\external\chatagent_step',
+            'methodname' => 'execute',
+            'description' => 'Run the pending tool and take the next step of the turn',
+            'type' => 'write',
+            'capabilities' => 'mod/minilesson:canuseaigen',
+            'ajax' => true,
+            'loginrequired' => true,
+        ],
+        'mod_minilesson_chatagent_approve' => [
+            'classname' => 'mod_minilesson\external\chatagent_approve',
+            'methodname' => 'execute',
+            'description' => 'Approve or decline the action the chat agent has proposed',
+            'type' => 'write',
+            'capabilities' => 'mod/minilesson:canuseaigen',
+            'ajax' => true,
+            'loginrequired' => true,
+        ],
+        'mod_minilesson_chatagent_reset' => [
+            'classname' => 'mod_minilesson\external\chatagent_reset',
+            'methodname' => 'execute',
+            'description' => 'Discard the chat agent conversation and start a new one',
+            'type' => 'write',
+            'capabilities' => 'mod/minilesson:canuseaigen',
+            'ajax' => true,
+            'loginrequired' => true,
+        ],
         'mod_minilesson_aigen_list_templates' => [
             'classname' => 'mod_minilesson\external\aigen_list_templates',
             'methodname' => 'execute',
-            'description' => 'Get a list of aigen templates for creating activities',
+            'description' => 'Get a list of aigen templates for creating activities. Several templates usually '
+                . 'produce the same item type and differ in how much the caller decides: compare each one\'s '
+                . '"control" level and the siblings listed in its "variants", and pick the one whose inputs carry '
+                . 'the teaching points already decided rather than leaving them to the AI. Inputs marked '
+                . 'required must be sent with a non-empty value',
             'type' => 'read',
             'loginrequired' => true,
         ],
@@ -166,7 +219,10 @@ $functions = [
         'mod_minilesson_aigen_create_add_items_to_lesson' => [
             'classname' => 'mod_minilesson\external\aigen_create_add_items_to_lesson',
             'methodname' => 'execute',
-            'description' => 'Creates and adds items to minilesson',
+            'description' => 'Creates and adds items to minilesson, by running an aigen template. Show the user '
+                . 'every input you will send, including the ones you chose yourself and the ones you are leaving '
+                . 'blank, and get their approval before calling. Rejected if an input the template reports as '
+                . 'required is empty',
             'type' => 'write',
             'loginrequired' => true,
         ],
@@ -174,6 +230,14 @@ $functions = [
             'classname' => 'mod_minilesson\external\aigen_list_itemtypes',
             'methodname' => 'execute',
             'description' => 'Lists available minilesson item types and their descriptions',
+            'type' => 'read',
+            'loginrequired' => true,
+        ],
+        'mod_minilesson_aigen_fetch_item_type_details' => [
+            'classname' => 'mod_minilesson\external\aigen_fetch_item_type_details',
+            'methodname' => 'execute',
+            'description' => 'Returns the import field spec, file area info and an example payload for one item type, '
+                . 'so items of that type can be composed directly for mod_minilesson_aigen_import_items_json',
             'type' => 'read',
             'loginrequired' => true,
         ],
@@ -189,6 +253,9 @@ $functions = [
             'methodname' => 'execute',
             'description' => 'Checks the status of aigen_create_add_items_to_lesson task.',
             'type' => 'read',
+            // Ajax callable because the chat agent page follows its own generation jobs rather
+            // than making the assistant poll for them. It checks the capability per job itself.
+            'ajax' => true,
             'loginrequired' => true,
         ],
         'mod_minilesson_aigen_export_items_json' => [
@@ -222,6 +289,54 @@ $functions = [
             'type' => 'read',
             'ajax' => true,
         ],
+        'mod_minilesson_convert_transcript' => [
+            'classname' => 'mod_minilesson\external\convert_transcript',
+            'methodname' => 'execute',
+            'description' => 'Converts a transcript copied from YouTube into WebVTT subtitles',
+            'capabilities' => 'mod/minilesson:itemedit',
+            'type' => 'read',
+            'ajax' => true,
+        ],
+        'mod_minilesson_set_cpage_consent' => [
+            'classname' => 'mod_minilesson\external\set_cpage_consent',
+            'methodname' => 'execute',
+            'description' => 'Saves the current user\'s consent to share their submission on the community page',
+            'capabilities' => 'mod/minilesson:view',
+            'type' => 'write',
+            'ajax' => true,
+        ],
+        'mod_minilesson_get_cpage_submissions' => [
+            'classname' => 'mod_minilesson\external\get_cpage_submissions',
+            'methodname' => 'execute',
+            'description' => 'Returns the shared submissions for an item\'s community page',
+            'capabilities' => 'mod/minilesson:view',
+            'type' => 'read',
+            'ajax' => true,
+        ],
+        'mod_minilesson_toggle_cpage_like' => [
+            'classname' => 'mod_minilesson\external\toggle_cpage_like',
+            'methodname' => 'execute',
+            'description' => 'Toggles the current user\'s like on a community page submission',
+            'capabilities' => 'mod/minilesson:view',
+            'type' => 'write',
+            'ajax' => true,
+        ],
+        'mod_minilesson_translate_message' => [
+            'classname' => 'mod_minilesson\external\translate_message',
+            'methodname' => 'execute',
+            'description' => 'Translates a lesson item message into the student\'s native language',
+            'capabilities' => 'mod/minilesson:view',
+            'type' => 'read',
+            'ajax' => true,
+        ],
+        'mod_minilesson_fetch_polly_url' => [
+            'classname' => 'mod_minilesson\external\fetch_polly_url',
+            'methodname' => 'execute',
+            'description' => 'Resolves a cached TTS (Polly) audio URL for a piece of text',
+            'capabilities' => 'mod/minilesson:view',
+            'type' => 'read',
+            'ajax' => true,
+        ],
 ];
 
 $services = [
@@ -231,6 +346,7 @@ $services = [
         'functions' => [
             'mod_minilesson_aigen_list_templates',
             'mod_minilesson_aigen_list_itemtypes',
+            'mod_minilesson_aigen_fetch_item_type_details',
             'mod_minilesson_aigen_create_empty_lesson',
             'mod_minilesson_aigen_create_add_items_to_lesson',
             'mod_minilesson_aigen_list_minilessons',
@@ -240,7 +356,8 @@ $services = [
             'mod_minilesson_list_courses',
         ],
         'enabled' => 1,
-        'restrictedusers' => 1,
+        'requiredcapability' => 'mod/minilesson:usemcp',
+        'restrictedusers' => 0,
         'downloadfiles' => 1,
         'uploadfiles' => 0,
     ],

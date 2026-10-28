@@ -21,6 +21,7 @@ use core_external\external_single_structure;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_value;
+use mod_minilesson\aigen;
 use mod_minilesson\aigen_form;
 use mod_minilesson\constants;
 use mod_minilesson\task\process_aigen;
@@ -77,12 +78,22 @@ class aigen_create_add_items_to_lesson extends external_api {
         $cm = get_coursemodule_from_id('minilesson', $params['cmid'], 0, false, MUST_EXIST);
         $moduleinstance = $DB->get_record('minilesson', ['id' => $cm->instance], '*', MUST_EXIST);
 
-        $othercontextdata = utils::fetch_usercontext_fields($modulecontext->ttslanguage);
+        $othercontextdata = utils::fetch_usercontext_fields($moduleinstance->ttslanguage);
+        // The contextdata argument is optional, so a caller that sends none reaches the required-input
+        // check below with nothing set, and is told which inputs are missing rather than hitting a warning.
+        $submittedcontextdata = $params['contextdata'] ?? [];
         foreach (aigen_form::mappings() as $fieldname) {
-            if (array_key_exists($fieldname, $params['contextdata'])) {
-                $othercontextdata[$fieldname] = $params['contextdata'][$fieldname];
+            if (array_key_exists($fieldname, $submittedcontextdata)) {
+                $othercontextdata[$fieldname] = $submittedcontextdata[$fieldname];
             }
         }
+
+        // An input the caller left empty that the lesson can answer (the native language, say) is filled
+        // from the lesson before the required-input check, so it is answered rather than rejected.
+        $template = $DB->get_record('minilesson_templates', ['id' => $params['templateid']], '*', MUST_EXIST);
+        $othercontextdata = aigen::apply_input_defaults($othercontextdata, json_decode($template->config), $moduleinstance);
+
+        self::require_template_inputs($template, $othercontextdata);
 
         $usagesdata = new stdClass();
         $usagesdata->minilessonid = $moduleinstance->id;
@@ -97,6 +108,47 @@ class aigen_create_add_items_to_lesson extends external_api {
         $task->set_userid($USER->id);
         manager::queue_adhoc_task($task);
         return ['jobid' => $usagesdata->id];
+    }
+
+    /**
+     * Reject a generation run that leaves a required template input empty.
+     *
+     * An input the template actually consumes has no default to fall back on, so an empty value
+     * does not simply get skipped - it generates plausible looking content with a hole where the
+     * teaching point should be (a vocabulary card whose translation repeats the word, a gap-fill
+     * whose hint is missing). That is invisible in the finished lesson, so it is caught here
+     * rather than left for the user to discover.
+     *
+     * @param \stdClass $template The template record about to be run.
+     * @param array $contextdata The merged context data the template will be run with.
+     * @throws \moodle_exception If any required input is empty.
+     */
+    protected static function require_template_inputs($template, array $contextdata) {
+        $config = json_decode($template->config);
+        if (empty($config)) {
+            return;
+        }
+
+        $missing = [];
+        foreach (aigen::template_required_inputs($config) as $fieldname) {
+            $value = $contextdata[$fieldname] ?? '';
+            if (is_scalar($value) && trim((string) $value) !== '') {
+                continue;
+            }
+            $title = $config->fieldmappings->{$fieldname}->title ?? '';
+            $missing[] = $title === '' ? $fieldname : $fieldname . ' (' . $title . ')';
+        }
+
+        if ($missing) {
+            // A moodle_exception, not an invalid_parameter_exception: the latter carries its detail in
+            // debuginfo, which is stripped from the web service response unless the site is in developer
+            // debugging. The caller has to be told which inputs were empty for the error to be actionable.
+            $a = (object) [
+                'template' => $template->name,
+                'missing' => implode(', ', $missing),
+            ];
+            throw new \moodle_exception('aigenmissingrequiredinputs', constants::M_COMPONENT, '', $a);
+        }
     }
 
     public static function execute_returns() {

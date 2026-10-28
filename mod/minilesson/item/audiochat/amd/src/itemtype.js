@@ -93,9 +93,11 @@ define(
                 var self = this;
                 str.get_strings([
                     { "key": "gradebywordcount", "component": "mod_minilesson" },
+                    { "key": "gradingfailed", "component": "minilessonitem_audiochat" },
                 ]).done(function (s) {
                     var i = 0;
                     self.strings.gradebywordcount = s[i++];
+                    self.strings.gradingfailed = s[i++];
                 });
             },
 
@@ -115,6 +117,7 @@ define(
                         self.driver = driver.clone();
                         self.driver.init({
                             itemdata: self.itemdata,
+                            cmid: self.quizhelper.cmid,
                             audioElement: self.controls.hiddenaudio,
                             autoCreateResponseToggleWrapperElement: self.controls.autocreateresponseToggle,
                             callbacks: self._buildDriverCallbacks(),
@@ -234,12 +237,37 @@ define(
                 self.renderUI();
             },
 
+            /**
+             * The direction of AI feedback, from the letters in it, leaning towards the language it
+             * was asked for. See utils::detect_text_direction() in PHP, which this matches.
+             *
+             * @param {string} text
+             * @param {boolean} askedrtl Whether the feedback was asked for in a right to left language.
+             * @returns {string} 'rtl' or 'ltr'
+             */
+            detect_text_direction: function (text, askedrtl) {
+                var rtlletters = (text.match(/[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/g) || []).length;
+                var allletters = (text.match(/\p{L}/gu) || []).length;
+                if (allletters === 0) {
+                    return askedrtl ? 'rtl' : 'ltr';
+                }
+                return rtlletters / allletters > (askedrtl ? 0.2 : 0.5) ? 'rtl' : 'ltr';
+            },
+
             grade_activity: function (stepdata) {
                 var self = this;
                 var gradingData = self.driver.getGradingData();
                 var wordcount = self.count_words();
 
-                if (gradingData && gradingData.score !== undefined) {
+                if (gradingData && gradingData.failed) {
+                    // The AI could not grade the chat, even after a retry. There is no fair
+                    // score to give, so it is 0, and the transcript is still saved.
+                    log.debug("AI grading failed: scoring 0");
+                    stepdata.grade = 0;
+                    stepdata.resultsdata.gradingfailed = true;
+                    stepdata.resultsdata.aifeedback = "";
+                    stepdata.resultsdata.gradeexplanation = self.strings.gradingfailed;
+                } else if (gradingData && gradingData.score !== undefined) {
                     log.debug("Using grading data from AI:", gradingData);
                     stepdata.grade = gradingData.score;
 
@@ -252,6 +280,8 @@ define(
                     }
 
                     stepdata.resultsdata.aifeedback = gradingData.feedback || "";
+                    stepdata.resultsdata.feedbackdir = self.detect_text_direction(
+                        stepdata.resultsdata.aifeedback, !!self.itemdata.feedbackasksrtl);
                     stepdata.resultsdata.gradeexplanation = gradingData.gradeexplanation || "";
                 } else {
                     log.debug("No grading data from AI: counting words", gradingData);
@@ -262,6 +292,10 @@ define(
                         // Calculate grade based on word count
                         stepdata.grade = Math.min(wordcount / self.itemdata.targetwordcount, 1) * 100;
                     }
+                }
+
+                if (typeof stepdata.grade === 'number' && !isNaN(stepdata.grade)) {
+                    stepdata.grade = Math.round(stepdata.grade);
                 }
 
                 return stepdata;
@@ -532,6 +566,7 @@ define(
             resetSession: function () {
                 log.debug("reset session");
                 var self = this;
+                self.quizhelper.set_finish_label(self.index, false);
                 self.isLoading = false;
                 self.isSessionActive = false;
                 self.isSessionStopped = false;
@@ -568,6 +603,8 @@ define(
 
             showResults: function () {
                 var self = this;
+                // On the lesson's last item, the results page is where the next button finishes the lesson.
+                self.quizhelper.set_finish_label(self.index, true);
                 var tdata = {};
                 tdata.resultsdata = { 'items': Object.values(self.driver.getItems()) };
                 tdata = self.grade_activity(tdata);
