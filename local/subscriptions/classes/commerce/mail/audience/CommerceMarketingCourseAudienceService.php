@@ -39,6 +39,10 @@ final class CommerceMarketingCourseAudienceService {
         $context = \context_course::instance($courseid);
         $now ??= time();
         $supportskus = $this->support_skus($courseid, $additionalsupportskus);
+        // A Moodle student enrolment alone does not establish a legitimate purchase.
+        // Resolve course-specific commercial references once, then check each identity.
+        $purchaseproof = new CommerceMarketingCoursePurchaseProofService($this->db);
+        $purchasereferences = $purchaseproof->references_for_course($courseid);
 
         // Candidate acquisition includes Trial/Grammar users, so that their
         // exclusions appear in the report instead of vanishing silently.
@@ -100,6 +104,12 @@ final class CommerceMarketingCourseAudienceService {
             }
             if (!$this->has_current_enrolment($courseid, $userid, $now)) {
                 $reasons[] = 'no_active_enrolment';
+            }
+            if ($purchasereferences === []) {
+                // Fail closed on unmapped courses; never infer an A1 purchase from a role.
+                $reasons[] = 'course_purchase_mapping_missing';
+            } else if (!$purchaseproof->has_verified_purchase($userid, $email, $purchasereferences)) {
+                $reasons[] = 'no_verified_course_purchase';
             }
 
             $access = $this->db->get_record('local_subs_commerce_ped_access', [

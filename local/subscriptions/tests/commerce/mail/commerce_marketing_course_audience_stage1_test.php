@@ -10,6 +10,39 @@ use local_subscriptions\commerce\mail\audience\CommerceMarketingCourseAudienceSe
 
 #[\PHPUnit\Framework\Attributes\CoversClass(CommerceMarketingCourseAudienceService::class)]
 final class commerce_marketing_course_audience_stage1_test extends \advanced_testcase {
+    /** Creates a fulfilled plan-backed purchase for an enrolled test user. */
+    private function add_verified_purchase(int $courseid, \stdClass $user): void {
+        global $DB;
+        $now = time();
+        $planid = $DB->insert_record('subscription_plan', (object)[
+            'name' => 'Mail Studio proof fixture ' . random_string(5),
+            'duration_key' => '1month', 'is_active' => 1,
+            'creation_date' => $now, 'last_update' => $now,
+        ]);
+        $DB->insert_record('subscription_plan_entitlement', (object)[
+            'planid' => $planid, 'courseid' => $courseid, 'accesslevel' => 'full',
+            'roleshortname' => 'student', 'priority' => 100,
+            'timecreated' => $now, 'lastupdate' => $now,
+        ]);
+        $id = $DB->insert_record('local_subscriptions_commerce_purchase', (object)[
+            'purchaseuuid' => md5('mailstudio-fixture-' . random_string(12)),
+            'reference' => 'ms-proof-' . random_string(12),
+            'type' => 'subscription', 'userid' => (int)$user->id,
+            'customeremail' => (string)$user->email,
+            'status' => 'fulfilled', 'currency' => 'EUR',
+            'subtotalminor' => 100, 'discountminor' => 0, 'totalminor' => 100,
+            'customerjson' => '{}', 'snapshotjson' => '{}', 'metadatajson' => '{}',
+            'timecreated' => $now, 'timemodified' => $now,
+        ]);
+        $DB->insert_record('local_subscriptions_commerce_purchase_item', (object)[
+            'purchaseid' => $id, 'position' => 0, 'itemtype' => 'subscription',
+            'itemreference' => 'SUB.PLAN.' . $planid, 'label' => 'Verified course purchase',
+            'quantity' => 1, 'currency' => 'EUR', 'unitminor' => 100,
+            'grossminor' => 100, 'discountminor' => 0, 'netminor' => 100,
+            'pricingjson' => '{}', 'fulfillmentjson' => '{}', 'metadatajson' => '{}',
+        ]);
+    }
+
     private function preview(int $courseid, array $skus = []): array {
         global $DB;
         return (new CommerceMarketingCourseAudienceService($DB))->preview($courseid, $skus);
@@ -37,6 +70,7 @@ final class commerce_marketing_course_audience_stage1_test extends \advanced_tes
             }
         }
         $this->getDataGenerator()->enrol_user($full->id, $course->id, 'student');
+        $this->add_verified_purchase((int)$course->id, $full);
         $this->getDataGenerator()->enrol_user($trial->id, $course->id, 'trialstudent');
         $this->getDataGenerator()->enrol_user($grammar->id, $course->id, 'grammarstudent');
         $report = $this->preview((int)$course->id);
@@ -179,12 +213,28 @@ final class commerce_marketing_course_audience_stage1_test extends \advanced_tes
         self::assertContains('ambiguous_email', $this->find($report, (int)$owner->id)['reasons']);
     }
 
+    public function test_enrolled_student_without_fulfilled_purchase_is_excluded(): void {
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $buyer = $this->getDataGenerator()->create_user();
+        $unproven = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($buyer->id, $course->id, 'student');
+        $this->getDataGenerator()->enrol_user($unproven->id, $course->id, 'student');
+        $this->add_verified_purchase((int)$course->id, $buyer);
+        $report = $this->preview((int)$course->id);
+        self::assertSame(2, $report['summary']['candidates']);
+        self::assertSame(1, $report['summary']['eligible']);
+        self::assertTrue($this->find($report, (int)$buyer->id)['eligible']);
+        self::assertContains('no_verified_course_purchase', $this->find($report, (int)$unproven->id)['reasons']);
+    }
+
     public function test_promotion_offer_sku_is_discovered_automatically(): void {
         global $DB;
         $this->resetAfterTest(true);
         $course = $this->getDataGenerator()->create_course();
         $user = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($user->id, $course->id, 'student');
+        $this->add_verified_purchase((int)$course->id, $user);
         $now = time();
         $promotionid = $DB->insert_record('local_subs_commerce_ped_promo', (object)[
             'promotionkey' => 'aud-offer-' . random_string(7),
