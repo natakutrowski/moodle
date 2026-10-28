@@ -90,6 +90,11 @@ $window = static function(?int $start, ?int $end): string {
 };
 
 $actions = html_writer::link(
+    new moodle_url('/local/subscriptions/admin/commerce/promotions/usage.php', ['id' => $id]),
+    html_writer::tag('i', '', ['class' => 'fa fa-history me-1', 'aria-hidden' => 'true']) .
+        get_string('commerce_promo_usage_title', 'local_subscriptions'),
+    ['class' => 'btn btn-outline-primary me-2']
+) . html_writer::link(
     new moodle_url('/local/subscriptions/admin/commerce/promotions/edit.php', ['id' => $id]),
     html_writer::tag('i', '', ['class' => 'fa fa-pencil me-1', 'aria-hidden' => 'true']) . get_string('edit'),
     ['class' => 'btn btn-primary']

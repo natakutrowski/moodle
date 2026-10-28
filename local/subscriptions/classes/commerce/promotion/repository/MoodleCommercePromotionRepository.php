@@ -7,6 +7,7 @@ namespace local_subscriptions\commerce\promotion\repository;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\promotion\domain\CommercePromotion;
+use local_subscriptions\commerce\promotion\report\CommercePromotionUsageReport;
 
 /** Moodle DB implementation of the Native Commerce promotion repository. */
 final class MoodleCommercePromotionRepository implements CommercePromotionRepository {
@@ -75,11 +76,60 @@ final class MoodleCommercePromotionRepository implements CommercePromotionReposi
 
     public function count_redemptions(int $promotionid, ?int $userid = null): int {
         global $DB;
+        // Retain legacy redemption evidence, but also count actual successful
+        // Commerce purchases. Checkout has historically not inserted promouse rows.
         $conditions = ['promotionid' => $promotionid, 'status' => 'applied'];
         if ($userid !== null) {
             $conditions['userid'] = $userid;
         }
-        return $DB->count_records(self::REDEMPTION_TABLE, $conditions);
+        $legacy = $DB->get_records(self::REDEMPTION_TABLE, $conditions,
+            '', 'id,purchasereference');
+        $purchaserefs = [];
+        $unlinked = 0;
+        foreach ($legacy as $redemption) {
+            $reference = trim((string)($redemption->purchasereference ?? ''));
+            if ($reference !== '') {
+                $purchaserefs[$reference] = true;
+            } else {
+                $unlinked++;
+            }
+        }
+        $promotion = $this->get_by_id($promotionid);
+        if ($promotion === null) {
+            return count($purchaserefs) + $unlinked;
+        }
+        $code = strtoupper(trim((string)$promotion->get_code()));
+        $clauses = [];
+        $params = [];
+        if ($code !== '') {
+            $clauses[] = $DB->sql_like('p.metadatajson', ':pcode', false);
+            $params['pcode'] = '%' . $DB->sql_like_escape('"' . $code . '"') . '%';
+        }
+        $clauses[] = $DB->sql_like('p.metadatajson', ':pid', false);
+        $params['pid'] = '%' . $DB->sql_like_escape('"promotionid":' . $promotionid . ',') . '%';
+        $usersql = '';
+        if ($userid !== null) {
+            $usersql = ' AND p.userid = :userid';
+            $params['userid'] = $userid;
+        }
+        $sql = 'SELECT p.id, p.reference, p.metadatajson
+                  FROM {local_subscriptions_commerce_purchase} p
+                 WHERE (' . implode(' OR ', $clauses) . ')'
+                    . $usersql . '
+                   AND (
+                       EXISTS (SELECT 1 FROM {local_subscriptions_commerce_payment} py
+                               WHERE py.purchaseid = p.id
+                                 AND py.status IN (\'paid\', \'completed\', \'refunded\', \'partially_refunded\'))
+                       OR (p.totalminor = 0 AND p.status IN
+                           (\'completed\', \'payment_confirmed\', \'fulfillment_pending\'))
+                   )';
+        foreach ($DB->get_records_sql($sql, $params) as $purchase) {
+            $metadata = json_decode((string)$purchase->metadatajson, true);
+            if (is_array($metadata) && CommercePromotionUsageReport::matches($metadata, $code, $promotionid)) {
+                $purchaserefs[(string)$purchase->reference] = true;
+            }
+        }
+        return count($purchaserefs) + $unlinked;
     }
 
     private function to_record(CommercePromotion $promotion): \stdClass {

@@ -258,6 +258,41 @@ try {
     CommercePersonalOfferCheckoutService::create($DB)->assert_checkout_identity(
         $identity->userid, $currency, $identity->userid > 0 ? $identity->userid : null, $identity->email
     );
+    // A code that expired or became ineligible between checkout preview and
+    // payment submission must never result in a surprise full-price payment.
+    if (CommercePurchaseFlow::is_direct($flow)
+            && !empty($directpurchase['promotioncode'])) {
+        $rejection = \local_subscriptions\commerce\cart\service\CommerceCartRuntimeFactory::create()
+            ->validate_direct_promotion_code(
+                $identity->userid,
+                $directpurchase,
+                $checkoutlanguage,
+                (string)$directpurchase['promotioncode']
+            );
+        if ($rejection !== null) {
+            $message = get_string('commerce_checkout_promo_unavailable', 'local_subscriptions');
+            if ($ajax) {
+                header('Content-Type: application/json; charset=utf-8');
+                http_response_code(409);
+                echo json_encode([
+                    'ok' => false,
+                    'code' => 'promotion_unavailable',
+                    'error' => $message,
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            redirect(
+                new moodle_url('/local/subscriptions/commerce_checkout.php', array_merge(
+                    $checkoutparams,
+                    ['promonotice' => 'promotion_unavailable']
+                )),
+                $message,
+                null,
+                \core\output\notification::NOTIFY_WARNING
+            );
+        }
+    }
+
     $legalacceptedat = (new CommerceCheckoutExpressService())->record_legal_acceptance($identity->userid);
 
     $embeddedmethods = [];

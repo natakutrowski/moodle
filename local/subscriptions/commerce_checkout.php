@@ -962,7 +962,47 @@ $otheremailurl = new moodle_url('/local/subscriptions/commerce_checkout.php', ar
     'focus' => 'email',
 ]));
 
+// Cart and isolated Buy Now purchases expose the same promo-code form.
+// The purchase is repriced by the server; browser fields are never trusted as totals.
+$checkoutpromocode = CommercePurchaseFlow::is_direct($flow)
+    ? (string)($directpurchase['promotioncode'] ?? '')
+    : (string)($snapshot->get_summary()->get_cart_snapshot()->get_cart()->get_metadata()['promotion_code'] ?? '');
+$promonoticecode = optional_param('promonotice', '', PARAM_ALPHANUMEXT);
+$promonoticetext = '';
+$checkoutpromovalid = true;
+if ($checkoutpromocode !== '') {
+    $checkoutpromovalid = false;
+    foreach ($snapshot->get_summary()->get_cart_snapshot()->get_promotion_adjustments() as $adjustment) {
+        if ($adjustment->get_code() === $checkoutpromocode) {
+            $checkoutpromovalid = true;
+            break;
+        }
+    }
+}
+if (!$checkoutpromovalid) {
+    // Do not silently charge full price after a formerly valid coupon expired.
+    $launchdisabled = true;
+}
+if (str_starts_with($promonoticecode, 'promotion_')
+    && get_string_manager()->string_exists('commerce_cart_message_' . $promonoticecode, 'local_subscriptions')) {
+    $promonoticetext = get_string('commerce_cart_message_' . $promonoticecode, 'local_subscriptions');
+}
+if (!$checkoutpromovalid) {
+    $promonoticetext = get_string('commerce_checkout_promo_unavailable', 'local_subscriptions');
+    $promonoticecode = 'promotion_unavailable';
+}
+
 $data += [
+    'checkoutpromoactionurl' => (new moodle_url('/local/subscriptions/commerce_checkout_promotion.php'))->out(false),
+    'checkoutpromocode' => $checkoutpromocode,
+    'checkoutpromohascode' => $checkoutpromocode !== '',
+    'checkoutpromolabel' => get_string('commerce_cart_promo_code', 'local_subscriptions'),
+    'checkoutpromoplaceholder' => get_string('commerce_cart_promo_placeholder', 'local_subscriptions'),
+    'checkoutpromoapplylabel' => get_string('commerce_cart_promo_apply', 'local_subscriptions'),
+    'checkoutpromoremovelabel' => get_string('commerce_cart_promo_remove', 'local_subscriptions'),
+    'checkoutpromonotice' => $promonoticetext,
+    'checkoutpromonoticesuccess' => $checkoutpromovalid && in_array($promonoticecode, ['promotion_code_saved', 'promotion_removed', 'promotion_already_applied'], true),
+    'checkoutpromopaymentmethod' => $selectedmethod,
     'title' => get_string('commerce_checkout_title', 'local_subscriptions'),
     'stepslabel' => get_string('commerce_checkout_steps_label', 'local_subscriptions'),
     'steps' => CommercePurchaseFlow::checkout_steps($flow, $carturl),
@@ -1182,11 +1222,13 @@ $data += [
     'actionurl' => (new moodle_url('/local/subscriptions/commerce_checkout_action.php'))->out(false),
     'sesskey' => sesskey(),
     'launchdisabled' => $launchdisabled,
-    'launchhint' => $existingaccount
-        ? get_string('commerce_guest_checkout_existing_account', 'local_subscriptions')
-        : (!$hasavailablepaymentmethod
-            ? get_string('commerce_checkout_no_payment_method_for_currency', 'local_subscriptions', $currency)
-            : ''),
+    'launchhint' => !$checkoutpromovalid
+        ? get_string('commerce_checkout_promo_unavailable', 'local_subscriptions')
+        : ($existingaccount
+            ? get_string('commerce_guest_checkout_existing_account', 'local_subscriptions')
+            : (!$hasavailablepaymentmethod
+                ? get_string('commerce_checkout_no_payment_method_for_currency', 'local_subscriptions', $currency)
+                : '')),
     'paymentsecurelabel' => get_string('commerce_cart_payment_secure', 'local_subscriptions'),
     'instantaccesslabel' => get_string('commerce_m62_checkout_access_truth', 'local_subscriptions'),
     'checkoutsecureencrypted' => get_string(

@@ -158,6 +158,18 @@ final class CommerceCheckoutPurchaseBuilder {
                     static fn($adjustment): ?string => $adjustment->get_code(),
                     $summary->get_cart_snapshot()->get_promotion_adjustments()
                 ))),
+                // Precise per-code evidence for promotion reporting and commission audits.
+                // This is frozen before provider redirection, including direct checkout.
+                'promotion_adjustments' => array_values(array_map(
+                    static fn($adjustment): array => [
+                        'promotionid' => $adjustment->get_promotion_id(),
+                        'code' => $adjustment->get_code(),
+                        'name' => $adjustment->get_name(),
+                        'discountminor' => $adjustment->get_amount()->get_amount_minor(),
+                        'automatic' => $adjustment->is_automatic(),
+                    ],
+                    $summary->get_cart_snapshot()->get_promotion_adjustments()
+                )),
             ]),
             time()
         );

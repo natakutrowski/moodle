@@ -55,7 +55,8 @@ final class CommerceCheckoutRuntime {
                     isset($directpurchase['cartuuid'])
                         ? (string)$directpurchase['cartuuid']
                         : null,
-                    \local_subscriptions\commerce\education\reservation\CommercePedagogicalSeatReservationService::DEFAULT_TTL
+                    \local_subscriptions\commerce\education\reservation\CommercePedagogicalSeatReservationService::DEFAULT_TTL,
+                    promotioncode: (string)($directpurchase['promotioncode'] ?? '')
                 );
         } else {
             $cartsnapshot = $this->cart->snapshot(

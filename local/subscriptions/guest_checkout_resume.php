@@ -107,6 +107,13 @@ if ($isdirectpurchase) {
         $directcartuuid !== '' ? strtolower($directcartuuid) : null
     );
 
+    if (!empty($directpurchase['promotioncode'])) {
+        CommerceDirectPurchaseSession::set_promotion_code(
+            $currency,
+            (string)$directpurchase['promotioncode']
+        );
+    }
+
     if (CommerceDirectPurchaseSession::current($currency) === null) {
         throw new \coding_exception(
             'Direct Purchase could not be restored after Guest authentication.'

@@ -509,6 +509,34 @@ try {
             );
         }
 
+        // Re-validate the Direct Purchase promotion in the new currency.
+        // A compatible code survives the switch; an incompatible one is
+        // explicitly removed rather than silently producing a wrong total.
+        $directpromoremoved = false;
+        $oldpromocode = (string)($directpurchase['promotioncode'] ?? '');
+        if ($oldpromocode !== '') {
+            try {
+                $rejection = $service->validate_direct_promotion_code(
+                    $customerid,
+                    $targetdirectpurchase,
+                    current_language(),
+                    $oldpromocode
+                );
+                if ($rejection === null) {
+                    CommerceDirectPurchaseSession::set_promotion_code(
+                        $targetcurrency,
+                        $oldpromocode
+                    );
+                    $targetdirectpurchase = CommerceDirectPurchaseSession::current($targetcurrency);
+                } else {
+                    $directpromoremoved = true;
+                }
+            } catch (Throwable $exception) {
+                $directpromoremoved = true;
+                error_log('[local_subscriptions][direct_currency_promo] ' . $exception);
+            }
+        }
+
         // Keep an in-progress Guest Checkout on the same identity/session. A
         // Direct Purchase is transient, so never route this through the normal
         // anonymous/provisional cart transfer path.
@@ -532,6 +560,9 @@ try {
             'currency' => $targetcurrency,
             'flow' => \local_subscriptions\commerce\checkout\flow\CommercePurchaseFlow::DIRECT,
         ];
+        if ($directpromoremoved) {
+            $checkoutparams['promonotice'] = 'promotion_currency_removed';
+        }
         if ($source !== '') {
             $checkoutparams['source'] = $source;
         }

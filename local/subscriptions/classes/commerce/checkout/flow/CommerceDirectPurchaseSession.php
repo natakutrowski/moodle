@@ -72,6 +72,7 @@ final class CommerceDirectPurchaseSession {
      *   priceid:int,
      *   quantity:int,
      *   metadata:array,
+     *   promotioncode:string,
      *   cartuuid:?string,
      *   storedat:int
      * }|null
@@ -105,6 +106,7 @@ final class CommerceDirectPurchaseSession {
      *   priceid:int,
      *   quantity:int,
      *   metadata:array,
+     *   promotioncode:string,
      *   cartuuid:?string,
      *   storedat:int
      * }|null
@@ -146,9 +148,32 @@ final class CommerceDirectPurchaseSession {
             'priceid' => $priceid,
             'quantity' => $quantity,
             'metadata' => (array)($data['metadata'] ?? []),
+            'promotioncode' => strtoupper(trim((string)($data['promotioncode'] ?? ''))),
             'cartuuid' => $cartuuid,
             'storedat' => (int)($data['storedat'] ?? 0),
         ];
+    }
+
+    /**
+     * Retains a validated promotional code on the isolated Buy Now purchase.
+     * Never mutates the customer's regular cart or the line-item metadata.
+     */
+    public static function set_promotion_code(string $currency, ?string $code): void {
+        global $SESSION;
+
+        if (self::current($currency) === null) {
+            throw new \coding_exception('No active Direct Purchase for this currency.');
+        }
+
+        $key = self::SESSION_KEY;
+        $data = (array)$SESSION->$key;
+        $value = $code === null ? '' : strtoupper(trim($code));
+        if ($value === '') {
+            unset($data['promotioncode']);
+        } else {
+            $data['promotioncode'] = $value;
+        }
+        $SESSION->$key = $data;
     }
 
     public static function cart_uuid_for_sku(string $sku): ?string {

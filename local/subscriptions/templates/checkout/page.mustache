@@ -107,6 +107,44 @@
                     {{/items}}
                 </div>
 
+                <div class="commerce-checkout__promo mb-4">
+                    <form method="post" action="{{checkoutpromoactionurl}}" class="mb-0">
+                        <input type="hidden" name="action" value="applypromo">
+                        <input type="hidden" name="currency" value="{{currency}}">
+                        <input type="hidden" name="flow" value="{{flow}}">
+                        <input type="hidden" name="source" value="{{source}}">
+                        <input type="hidden" name="showroom" value="{{showroom}}">
+                        <input type="hidden" name="showroomoffer" value="{{showroomoffer}}">
+                        <input type="hidden" name="originreturn" value="{{originreturn}}">
+                        <input type="hidden" name="paymentmethod" value="{{checkoutpromopaymentmethod}}">
+                        <input type="hidden" name="sesskey" value="{{sesskey}}">
+                        <label for="commerce-checkout-promotion-code" class="form-label fw-semibold">{{checkoutpromolabel}}</label>
+                        <div class="input-group">
+                            <input id="commerce-checkout-promotion-code" class="form-control" type="text" name="promotioncode"
+                                   value="{{checkoutpromocode}}" placeholder="{{checkoutpromoplaceholder}}" autocomplete="off" maxlength="64">
+                            <button class="btn btn-outline-primary" type="submit">{{checkoutpromoapplylabel}}</button>
+                        </div>
+                    </form>
+                    {{#checkoutpromohascode}}
+                        <form method="post" action="{{checkoutpromoactionurl}}" class="d-flex justify-content-between align-items-center gap-2 mt-2">
+                            <input type="hidden" name="action" value="removepromo">
+                            <input type="hidden" name="currency" value="{{currency}}">
+                            <input type="hidden" name="flow" value="{{flow}}">
+                            <input type="hidden" name="source" value="{{source}}">
+                            <input type="hidden" name="showroom" value="{{showroom}}">
+                            <input type="hidden" name="showroomoffer" value="{{showroomoffer}}">
+                            <input type="hidden" name="originreturn" value="{{originreturn}}">
+                            <input type="hidden" name="paymentmethod" value="{{checkoutpromopaymentmethod}}">
+                            <input type="hidden" name="sesskey" value="{{sesskey}}">
+                            <span class="small"><strong>{{checkoutpromocode}}</strong></span>
+                            <button class="btn btn-sm btn-link text-danger p-0" type="submit">{{checkoutpromoremovelabel}}</button>
+                        </form>
+                    {{/checkoutpromohascode}}
+                    {{#checkoutpromonotice}}
+                        <div class="alert {{#checkoutpromonoticesuccess}}alert-success{{/checkoutpromonoticesuccess}}{{^checkoutpromonoticesuccess}}alert-warning{{/checkoutpromonoticesuccess}} small mt-2 mb-0" role="status">{{checkoutpromonotice}}</div>
+                    {{/checkoutpromonotice}}
+                </div>
+
                 <dl class="commerce-checkout__totals commerce-checkout__totals--separated mb-0">
                     <div>
                         <dt>{{listtotallabel}}</dt>

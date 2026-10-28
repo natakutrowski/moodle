@@ -145,7 +145,8 @@ final class CommerceCartService {
         ?string $cartuuid = null,
         ?int $reservationttl = null,
         bool $reservepedagogicalseat = true,
-        ?string $promotionjoinexcludedcartuuid = null
+        ?string $promotionjoinexcludedcartuuid = null,
+        ?string $promotioncode = null
     ): CommerceCartSnapshot {
         $prepared = $this->prepare_direct_product(
             $customerid,
@@ -174,12 +175,67 @@ final class CommerceCartService {
             );
         }
 
+        $cart = $prepared->get_cart();
+        if ($promotioncode !== null && trim($promotioncode) !== '') {
+            // The promotion engine reads cart-level metadata, not item metadata.
+            $cart = $cart->with_metadata(array_replace(
+                $cart->get_metadata(),
+                ['promotion_code' => strtoupper(trim($promotioncode))]
+            ));
+        }
+
         return $this->calculator->calculate(
-            $prepared->get_cart(),
+            $cart,
             $language,
             $at,
             $promotionjoinexcludedcartuuid
         );
+    }
+
+    /**
+     * Validates a Buy Now code against the same promotion engine as the cart,
+     * without ever persisting an ordinary cart or reserving an extra seat.
+     * Returns null only when the manual adjustment really reduces the price.
+     */
+    public function validate_direct_promotion_code(
+        int $customerid,
+        array $purchase,
+        string $language,
+        string $code
+    ): ?CommerceCartMessage {
+        $normalised = strtoupper(trim($code));
+        if ($normalised === '') {
+            return new CommerceCartMessage('promotion_code_required', CommerceCartMessage::LEVEL_WARNING);
+        }
+
+        $snapshot = $this->direct_snapshot(
+            $customerid,
+            (string)$purchase['currency'],
+            $language,
+            (string)$purchase['sku'],
+            (int)$purchase['priceid'],
+            (int)$purchase['quantity'],
+            (array)($purchase['metadata'] ?? []),
+            null,
+            $purchase['cartuuid'] ?? null,
+            null,
+            false,
+            null,
+            $normalised
+        );
+
+        foreach ($snapshot->get_messages() as $message) {
+            if (str_starts_with($message->get_code(), 'promotion_')
+                && $message->get_level() !== CommerceCartMessage::LEVEL_NOTICE) {
+                return $message;
+            }
+        }
+        foreach ($snapshot->get_promotion_adjustments() as $adjustment) {
+            if ($adjustment->get_code() === $normalised) {
+                return null;
+            }
+        }
+        return new CommerceCartMessage('promotion_no_eligible_product', CommerceCartMessage::LEVEL_WARNING);
     }
 
     private function add_product_to_cart(
