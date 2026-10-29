@@ -13004,5 +13004,11 @@ $string['settings:course_marketing_header'] = 'Mail Studio — рассылки 
 $string['settings:course_marketing_header_desc'] = 'Отдельный переключатель безопасности для кампаний по участникам курса Moodle.';
 $string['settings:course_marketing_enabled'] = 'Разрешить планирование рассылок участникам курса';
 $string['settings:course_marketing_enabled_desc'] = 'По умолчанию выключено. Включайте только после проверки права на рекламную рассылку выбранным адресатам, включая пробный доступ Trial, и утверждения кампании. Сам по себе переключатель не запускает отправку: действуют отписки, подтверждение оператора и общие настройки маркетинговых писем.';
-
+$string['commerce_campaign_e11_deliverylanguage'] = 'Язык рассылки кампании';
+$string['commerce_campaign_e11_language_auto'] = 'Автоматически (по языку профиля Moodle)';
+$string['commerce_campaign_e11_language_ru'] = 'Русский (RU) — всем получателям';
+$string['commerce_campaign_e11_language_fr'] = 'Французский (FR) — всем получателям';
+$string['commerce_campaign_e11_language_en'] = 'Английский (EN) — всем получателям';
+$string['commerce_campaign_e11_language_help'] = 'Если шаблон есть только на русском, выберите RU. Все получатели этой кампании получат русский текст; язык профиля Moodle не изменится. Перевод должен присутствовать в шаблоне.';
+$string['commerce_campaign_e11_override_unavailable'] = 'Перевод {$a} отсутствует или не завершён в выбранном шаблоне. Выберите доступный язык или дополните шаблон.';
 $string['commerce_campaign_e9c_open_settings'] = 'Открыть настройки рассылок по курсам';

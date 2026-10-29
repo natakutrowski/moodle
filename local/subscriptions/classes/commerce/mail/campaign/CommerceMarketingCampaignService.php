@@ -59,6 +59,11 @@ final class CommerceMarketingCampaignService {
             throw new \invalid_parameter_exception('Campaign name is required.');
         }
 
+        $deliverylanguage = strtolower(trim((string)($data['deliverylanguage'] ?? 'auto')));
+        if (!in_array($deliverylanguage, ['auto', 'fr', 'ru', 'en'], true)) {
+            throw new \invalid_parameter_exception('Unsupported campaign delivery language.');
+        }
+
         $source = (string)($data['audiencesource'] ?? 'manual');
         if (!in_array($source, ['manual', 'course'], true)) {
             throw new \invalid_parameter_exception('Invalid marketing audience source.');
@@ -91,6 +96,7 @@ final class CommerceMarketingCampaignService {
             $audienceconfig = json_encode([
                 'courseid' => $courseid,
                 'audiencepolicy' => 'course_access_v2',
+                'deliverylanguage' => $deliverylanguage,
                 'supportskus' => $supportskus,
                 'excludedids' => $excludedids,
                 'filters' => $filters,
@@ -120,6 +126,21 @@ final class CommerceMarketingCampaignService {
         }
         if ($translations === []) {
             throw new \invalid_parameter_exception('Selected template has no usable translation.');
+        }
+        // Explicit operator choice for THIS campaign, independent of Moodle UI language.
+        // Refuse any override unless the selected template really has that translation.
+        if ($deliverylanguage !== 'auto') {
+            if (!isset($translations[$deliverylanguage])) {
+                throw new \moodle_exception('commerce_campaign_e11_override_unavailable',
+                    'local_subscriptions', '', strtoupper($deliverylanguage));
+            }
+            foreach ($recipients as &$recipient) {
+                $recipient['language'] = $deliverylanguage;
+            }
+            unset($recipient);
+        }
+        if ($source !== 'course') {
+            $audienceconfig = json_encode(['deliverylanguage' => $deliverylanguage], JSON_THROW_ON_ERROR);
         }
 
         $record = (object)[
@@ -185,10 +206,8 @@ final class CommerceMarketingCampaignService {
             $contents, $this->repository->recipients($campaignid)
         );
         if ($missing !== []) {
-            throw new \invalid_parameter_exception(get_string(
-                'commerce_marketing_campaign_languages_missing', 'local_subscriptions',
-                CommerceMarketingCampaignContentPolicy::format_missing($missing)
-            ));
+            throw new \moodle_exception('commerce_marketing_campaign_languages_missing',
+                'local_subscriptions', '', CommerceMarketingCampaignContentPolicy::format_missing($missing));
         }
 
         // Record the operator's explicit review, not a machine-issued consent claim.

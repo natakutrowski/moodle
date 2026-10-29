@@ -71,7 +71,7 @@ final class commerce_marketing_campaign_language_guard_test extends \advanced_te
         try {
             CommerceMarketingCampaignService::create($DB)->schedule($campaignid, time(), $operatorid);
             self::fail('Expected incompatible recipient language to be rejected.');
-        } catch (\invalid_parameter_exception $exception) {
+        } catch (\moodle_exception $exception) {
             self::assertStringContainsString('fr (1)', $exception->getMessage());
         }
         self::assertSame('draft', (new CommerceMarketingCampaignRepository($DB))->get($campaignid)->status);

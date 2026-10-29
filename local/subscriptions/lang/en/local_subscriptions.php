@@ -12929,5 +12929,11 @@ $string['settings:course_marketing_header'] = 'Mail Studio — course-targeted c
 $string['settings:course_marketing_header_desc'] = 'Independent release control for campaigns selecting participants of a Moodle course.';
 $string['settings:course_marketing_enabled'] = 'Allow scheduling course-targeted campaigns';
 $string['settings:course_marketing_enabled_desc'] = 'Disabled by default. Enable only after reviewing the marketing rules applicable to the selected recipients (including Trial users) and approving the campaign. This does not automatically allow sending: suppression checks, operator confirmation and global marketing worker settings remain in force.';
-
+$string['commerce_campaign_e11_deliverylanguage'] = 'Campaign delivery language';
+$string['commerce_campaign_e11_language_auto'] = 'Automatic (Moodle profile language)';
+$string['commerce_campaign_e11_language_ru'] = 'Russian (RU) — for all recipients';
+$string['commerce_campaign_e11_language_fr'] = 'French (FR) — for all recipients';
+$string['commerce_campaign_e11_language_en'] = 'English (EN) — for all recipients';
+$string['commerce_campaign_e11_language_help'] = 'If the template is Russian-only, select RU: everyone in this campaign will receive Russian without changing their Moodle profile language. The translation must exist in the template.';
+$string['commerce_campaign_e11_override_unavailable'] = 'The {$a} translation is missing or incomplete in the chosen template. Choose an available language or complete the template.';
 $string['commerce_campaign_e9c_open_settings'] = 'Open course campaign settings';

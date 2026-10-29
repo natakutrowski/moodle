@@ -74,6 +74,7 @@ $skus = implode(',', $config['supportskus'] ?? []);
 $excludedids = implode(',', $config['excludedids'] ?? []);
 $selectedexcludedids = array_map('intval', $config['excludedids'] ?? []);
 $filters = CommerceMarketingCourseAudienceService::normalise_filters((array)($config['filters'] ?? []));
+$deliverylanguage = (string)($config['deliverylanguage'] ?? 'auto');
 // Historic saved drafts used buyer-only semantics. Keep those checkboxes
 // conservative on first opening; E9 requires an explicit resave of the draft.
 if ($campaign && $source === 'course' && empty($config['audiencepolicy'])) {
@@ -100,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $namevalue = optional_param('name', '', PARAM_TEXT);
         $templatevalue = optional_param('templateid', 0, PARAM_INT);
         $ctavalue = optional_param('ctaurl', '', PARAM_URL);
+        $deliverylanguage = optional_param('deliverylanguage', 'auto', PARAM_ALPHA);
         $audience = optional_param('audience', '', PARAM_RAW);
         $courseid = optional_param('audiencecourseid', 0, PARAM_INT);
         $skus = optional_param('audienceskus', '', PARAM_RAW_TRIMMED);
@@ -193,6 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'audienceskus' => $skus,
                 'audienceexcludedids' => $excludedids,
                 'audiencefilters' => $filters,
+                'deliverylanguage' => $deliverylanguage,
             ], (int)$USER->id, $id > 0 ? $id : null);
 
             if ($mode === 'schedule') {
@@ -227,6 +230,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $origin = get_class($exception) . ' @ ' . basename($exception->getFile()) . ':' . $exception->getLine();
             error_log('[CampusFR Mail Studio test] campaign=' . $id . ' language=' . $testlanguage
                 . ' origin=' . $origin);
+            \core\notification::error($exception->getMessage() . ' [' . $origin . ']');
+        } else if ($mode === 'schedule') {
+            // Moodle's invalid_parameter_exception suppresses constructor messages.
+            // Show an actionable diagnostic without including email addresses or content.
+            $origin = get_class($exception) . ' @ ' . basename($exception->getFile()) . ':' . $exception->getLine();
+            error_log('[CampusFR Mail Studio schedule] campaign=' . $id . ' origin=' . $origin);
             \core\notification::error($exception->getMessage() . ' [' . $origin . ']');
         } else {
             \core\notification::error($exception->getMessage());
@@ -460,6 +469,26 @@ echo html_writer::div(
             'disabled' => !$editable ? 'disabled' : null,
         ]
     ),
+    'commerce-mail-campaign-field'
+);
+// A deliberate campaign-level language override, not a change to Moodle profiles.
+// In particular, RU-only marketing content cannot silently be sent to FR/EN profiles.
+echo html_writer::div(
+    html_writer::tag('label', get_string('commerce_campaign_e11_deliverylanguage', 'local_subscriptions'), [
+        'for' => 'marketing-campaign-deliverylanguage', 'class' => 'form-label',
+    ])
+    . html_writer::select([
+        'auto' => get_string('commerce_campaign_e11_language_auto', 'local_subscriptions'),
+        'ru' => get_string('commerce_campaign_e11_language_ru', 'local_subscriptions'),
+        'fr' => get_string('commerce_campaign_e11_language_fr', 'local_subscriptions'),
+        'en' => get_string('commerce_campaign_e11_language_en', 'local_subscriptions'),
+    ], 'deliverylanguage', $deliverylanguage, false, [
+        'id' => 'marketing-campaign-deliverylanguage',
+        'class' => 'form-select',
+        'disabled' => !$editable ? 'disabled' : null,
+    ])
+    . html_writer::div(get_string('commerce_campaign_e11_language_help', 'local_subscriptions'),
+        'form-text'),
     'commerce-mail-campaign-field'
 );
 echo html_writer::div(

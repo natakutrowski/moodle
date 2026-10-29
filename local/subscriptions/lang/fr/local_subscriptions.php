@@ -12764,5 +12764,11 @@ $string['settings:course_marketing_header'] = 'Mail Studio — campagnes ciblée
 $string['settings:course_marketing_header_desc'] = 'Contrôle de sécurité indépendant pour les campagnes utilisant les participants d’un cours Moodle.';
 $string['settings:course_marketing_enabled'] = 'Autoriser la programmation des campagnes par cours';
 $string['settings:course_marketing_enabled_desc'] = 'Désactivé par défaut. À activer uniquement après vérification des règles de prospection applicables aux destinataires (y compris Trial), puis validation de la campagne. N’autorise pas automatiquement les envois : les protections d’opposition, les confirmations et le réglage global du moteur marketing restent applicables.';
-
+$string['commerce_campaign_e11_deliverylanguage'] = 'Langue d’envoi de la campagne';
+$string['commerce_campaign_e11_language_auto'] = 'Automatique (selon le profil Moodle)';
+$string['commerce_campaign_e11_language_ru'] = 'Russe (RU) — pour tous les destinataires';
+$string['commerce_campaign_e11_language_fr'] = 'Français (FR) — pour tous les destinataires';
+$string['commerce_campaign_e11_language_en'] = 'Anglais (EN) — pour tous les destinataires';
+$string['commerce_campaign_e11_language_help'] = 'Si ton modèle n’existe qu’en russe, choisis RU : tous les destinataires de cette campagne recevront la version russe, sans changer leur langue Moodle. La traduction doit exister dans le modèle.';
+$string['commerce_campaign_e11_override_unavailable'] = 'La traduction {$a} n’existe pas ou est incomplète dans le modèle choisi. Choisis une langue disponible ou complète le modèle.';
 $string['commerce_campaign_e9c_open_settings'] = 'Ouvrir le réglage des campagnes par cours';

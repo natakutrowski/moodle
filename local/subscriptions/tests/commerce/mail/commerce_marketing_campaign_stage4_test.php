@@ -94,6 +94,63 @@ final class commerce_marketing_campaign_stage4_test extends \advanced_testcase {
         self::assertSame(0, $DB->count_records('local_subs_commerce_mail'));
     }
 
+    public function test_russian_only_campaign_requires_explicit_delivery_override(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $operator = $this->getDataGenerator()->create_user();
+        $library = new CommerceMailLibraryRepository($DB);
+        $template = $library->save([
+            'name' => 'E11 Russian only',
+            'category' => CommerceMailLibrary::CATEGORY_MARKETING,
+            'status' => CommerceMailLibrary::STATUS_ACTIVE,
+        ], ['ru' => [
+            'subject' => 'Привет', 'preheader' => '', 'bodyhtml' => '<p>Привет!</p>',
+        ]], (int)$operator->id);
+        $service = CommerceMarketingCampaignService::create($DB);
+        $repo = new CommerceMarketingCampaignRepository($DB);
+        $data = [
+            'name' => 'RU for FR profile',
+            'templateid' => (int)$template->id,
+            'audiencesource' => 'manual',
+            'audience' => 'e11-profile-fr@example.test;Client;Test;fr',
+        ];
+        $id = $service->save($data, (int)$operator->id);
+        self::assertSame('fr', $repo->recipients($id)[0]->language);
+        try {
+            $service->schedule($id, time() + 3600, (int)$operator->id);
+            self::fail('A RU-only campaign must not silently send to an FR profile.');
+        } catch (\moodle_exception $exception) {
+            self::assertSame('draft', $repo->get($id)->status);
+        }
+
+        $data['deliverylanguage'] = 'ru';
+        $service->save($data, (int)$operator->id, $id);
+        self::assertSame('ru', $repo->recipients($id)[0]->language);
+        $config = json_decode((string)$repo->get($id)->audienceconfig, true);
+        self::assertSame('ru', $config['deliverylanguage']);
+        $service->schedule($id, time() + 3600, (int)$operator->id);
+        self::assertSame('scheduled', $repo->get($id)->status);
+    }
+
+    public function test_delivery_override_rejects_missing_translation(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $operator = $this->getDataGenerator()->create_user();
+        $library = new CommerceMailLibraryRepository($DB);
+        $template = $library->save([
+            'name' => 'E11 RU template', 'category' => CommerceMailLibrary::CATEGORY_MARKETING,
+            'status' => CommerceMailLibrary::STATUS_ACTIVE,
+        ], ['ru' => ['subject' => 'Привет', 'preheader' => '', 'bodyhtml' => '<p>Привет!</p>']],
+            (int)$operator->id);
+        $this->expectException(\moodle_exception::class);
+        CommerceMarketingCampaignService::create($DB)->save([
+            'name' => 'Invalid override', 'templateid' => (int)$template->id,
+            'audiencesource' => 'manual',
+            'audience' => 'e11-fr@example.test;F;R;fr',
+            'deliverylanguage' => 'fr',
+        ], (int)$operator->id);
+    }
+
     public function test_pause_resume_and_cancel_keep_delivery_history_intact(): void {
         global $DB;
         $this->resetAfterTest(true);
