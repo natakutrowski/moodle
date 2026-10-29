@@ -61,6 +61,39 @@ final class commerce_marketing_campaign_stage4_test extends \advanced_testcase {
         self::assertSame(0, $DB->count_records('local_subs_commerce_mail'));
     }
 
+    public function test_russian_only_draft_sends_one_real_test_via_moodle_email_sink(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $operator = $this->getDataGenerator()->create_user([
+            'email' => 'mailstudio-test-operator@example.test',
+            'firstname' => 'Test', 'lastname' => 'Operator',
+        ]);
+        $library = new CommerceMailLibraryRepository($DB);
+        $template = $library->save([
+            'name' => 'Russian only marketing template',
+            'category' => CommerceMailLibrary::CATEGORY_MARKETING,
+            'status' => CommerceMailLibrary::STATUS_ACTIVE,
+        ], ['ru' => [
+            'subject' => 'Здравствуйте {{firstname}}', 'preheader' => 'Предпросмотр',
+            'bodyhtml' => '<p>Тестовое сообщение для {{fullname}}</p>',
+        ]], (int)$operator->id);
+        $campaignid = CommerceMarketingCampaignService::create($DB)->save([
+            'name' => 'RU-only test campaign',
+            'templateid' => (int)$template->id,
+            'audiencesource' => 'manual',
+            'audience' => 'mailstudio-customer@example.test;Client;Test;ru',
+        ], (int)$operator->id);
+
+        $sink = $this->redirectEmails();
+        CommerceMarketingCampaignService::create($DB)->send_test($campaignid, (int)$operator->id, 'ru');
+        $messages = $sink->get_messages();
+        self::assertCount(1, $messages);
+        self::assertSame('mailstudio-test-operator@example.test', $messages[0]->to);
+        self::assertStringContainsString('[TEST CampusFR]', $messages[0]->subject);
+        self::assertSame(1, (new CommerceMarketingCampaignRepository($DB))->recipient_count($campaignid));
+        self::assertSame(0, $DB->count_records('local_subs_commerce_mail'));
+    }
+
     public function test_pause_resume_and_cancel_keep_delivery_history_intact(): void {
         global $DB;
         $this->resetAfterTest(true);

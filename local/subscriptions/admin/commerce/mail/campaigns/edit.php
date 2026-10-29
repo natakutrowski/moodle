@@ -11,6 +11,7 @@ use local_subscriptions\commerce\mail\admin\CommerceMailSectionNavigationRendere
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignRepository;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignService;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingCourseCampaignGate;
+use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignTestLanguageOptions;
 use local_subscriptions\commerce\mail\audience\CommerceMarketingCampaignAudienceResolver;
 use local_subscriptions\commerce\mail\audience\CommerceMarketingCourseAudienceService;
 use local_subscriptions\commerce\mail\certification\CommerceMailEngineCertificationService;
@@ -83,34 +84,42 @@ $namevalue = $campaign ? (string)$campaign->name : '';
 $templatevalue = $campaign ? (int)$campaign->templateid : 0;
 $ctavalue = $campaign ? (string)$campaign->ctaurl : '';
 $previewreport = null;
-$testlanguage = 'fr';
+// Only actual, complete frozen translations can be used for a test.
+$testlanguages = $campaign
+    ? CommerceMarketingCampaignTestLanguageOptions::available($repository->contents((int)$campaign->id))
+    : [];
+$testlanguage = CommerceMarketingCampaignTestLanguageOptions::default_language($testlanguages);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_sesskey();
     $mode = optional_param('mode', 'preview', PARAM_ALPHA);
-    $source = optional_param('audiencesource', 'manual', PARAM_ALPHA);
-    $namevalue = optional_param('name', '', PARAM_TEXT);
-    $templatevalue = optional_param('templateid', 0, PARAM_INT);
-    $ctavalue = optional_param('ctaurl', '', PARAM_URL);
-    $audience = optional_param('audience', '', PARAM_RAW);
-    $courseid = optional_param('audiencecourseid', 0, PARAM_INT);
-    $skus = optional_param('audienceskus', '', PARAM_RAW_TRIMMED);
-    $selectedexcludedids = array_values(array_unique(array_map('intval',
-        optional_param_array('audienceexcludedusers', [], PARAM_INT)
-    )));
-    $selectedexcludedids = array_values(array_filter($selectedexcludedids,
-        static fn(int $userid): bool => $userid > 0
-    ));
-    $excludedids = implode(',', $selectedexcludedids);
-    $filters = CommerceMarketingCourseAudienceService::normalise_filters([
-        'exclude_student_role' => optional_param('exclude_student_role', 0, PARAM_BOOL),
-        'exclude_trial_role' => optional_param('exclude_trial_role', 0, PARAM_BOOL),
-        'exclude_grammar_role' => optional_param('exclude_grammar_role', 0, PARAM_BOOL),
-        'exclude_promotion_access' => optional_param('exclude_promotion_access', 1, PARAM_BOOL),
-        'exclude_accompaniment' => optional_param('exclude_accompaniment', 0, PARAM_BOOL),
-        'exclude_inactive_enrolment' => optional_param('exclude_inactive_enrolment', 0, PARAM_BOOL),
-        'require_verified_purchase' => optional_param('require_verified_purchase', 0, PARAM_BOOL),
-    ]);
+    // The separate test/pause/resume/cancel form contains none of the editor fields.
+    // Never parse or validate unrelated audience data for an operational action.
+    if (!in_array($mode, ['pause', 'resume', 'cancel', 'test'], true)) {
+        $source = optional_param('audiencesource', 'manual', PARAM_ALPHA);
+        $namevalue = optional_param('name', '', PARAM_TEXT);
+        $templatevalue = optional_param('templateid', 0, PARAM_INT);
+        $ctavalue = optional_param('ctaurl', '', PARAM_URL);
+        $audience = optional_param('audience', '', PARAM_RAW);
+        $courseid = optional_param('audiencecourseid', 0, PARAM_INT);
+        $skus = optional_param('audienceskus', '', PARAM_RAW_TRIMMED);
+        $selectedexcludedids = array_values(array_unique(array_map('intval',
+            optional_param_array('audienceexcludedusers', [], PARAM_INT)
+        )));
+        $selectedexcludedids = array_values(array_filter($selectedexcludedids,
+            static fn(int $userid): bool => $userid > 0
+        ));
+        $excludedids = implode(',', $selectedexcludedids);
+        $filters = CommerceMarketingCourseAudienceService::normalise_filters([
+            'exclude_student_role' => optional_param('exclude_student_role', 0, PARAM_BOOL),
+            'exclude_trial_role' => optional_param('exclude_trial_role', 0, PARAM_BOOL),
+            'exclude_grammar_role' => optional_param('exclude_grammar_role', 0, PARAM_BOOL),
+            'exclude_promotion_access' => optional_param('exclude_promotion_access', 1, PARAM_BOOL),
+            'exclude_accompaniment' => optional_param('exclude_accompaniment', 0, PARAM_BOOL),
+            'exclude_inactive_enrolment' => optional_param('exclude_inactive_enrolment', 0, PARAM_BOOL),
+            'require_verified_purchase' => optional_param('require_verified_purchase', 0, PARAM_BOOL),
+        ]);
+    }
     try {
         if (count($selectedexcludedids) > 500) {
             throw new \invalid_parameter_exception('Too many manually excluded accounts.');
@@ -120,7 +129,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new \invalid_parameter_exception('A saved campaign is required.');
             }
             if ($mode === 'test') {
-                $testlanguage = optional_param('testlanguage', 'fr', PARAM_ALPHA);
+                $testlanguage = optional_param('testlanguage', $testlanguage, PARAM_ALPHA);
+                if (!isset($testlanguages[$testlanguage])) {
+                    throw new \invalid_parameter_exception(get_string(
+                        'commerce_marketing_campaign_languages_missing', 'local_subscriptions', $testlanguage . ' (1)'
+                    ));
+                }
                 $service->send_test($id, (int)$USER->id, $testlanguage);
                 $message = get_string('commerce_campaign_stage4_test_success', 'local_subscriptions', $USER->email);
             } else if ($mode === 'pause') {
@@ -207,7 +221,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new \invalid_parameter_exception('Unsupported campaign action.');
         }
     } catch (\Throwable $exception) {
-        \core\notification::error($exception->getMessage());
+        if ($mode === 'test') {
+            // Generic Moodle invalid_parameter_exception messages hide the real source.
+            // Log the origin without dumping email content, tokens or recipient details.
+            $origin = get_class($exception) . ' @ ' . basename($exception->getFile()) . ':' . $exception->getLine();
+            error_log('[CampusFR Mail Studio test] campaign=' . $id . ' language=' . $testlanguage
+                . ' origin=' . $origin);
+            \core\notification::error($exception->getMessage() . ' [' . $origin . ']');
+        } else {
+            \core\notification::error($exception->getMessage());
+        }
     }
 }
 
@@ -741,15 +764,20 @@ if ($campaign) {
                 get_string('commerce_campaign_stage4_test_info', 'local_subscriptions', s($USER->email)),
                 'form-text mb-2'
             );
-            echo html_writer::select([
-                'fr' => 'FR', 'ru' => 'RU', 'en' => 'EN',
-            ], 'testlanguage', 'fr', false, ['class' => 'form-select mb-2', 'style' => 'max-width:150px']);
+            if ($testlanguages !== []) {
+                echo html_writer::select($testlanguages, 'testlanguage', $testlanguage, false,
+                    ['class' => 'form-select mb-2', 'style' => 'max-width:150px']);
+            } else {
+                echo html_writer::div(get_string('commerce_marketing_campaign_languages_missing',
+                    'local_subscriptions', 'fr/ru/en'), 'alert alert-warning');
+            }
         }
         foreach ($actions as $action => $label) {
             $danger = $action === 'cancel';
             echo html_writer::tag('button', s($label), [
                 'type' => 'submit', 'name' => 'mode', 'value' => $action,
                 'class' => 'btn btn-sm me-2 mb-2 ' . ($danger ? 'btn-outline-danger' : 'btn-outline-primary'),
+                'disabled' => $action === 'test' && $testlanguages === [] ? 'disabled' : null,
                 'onclick' => $danger
                     ? 'return confirm(' . json_encode(get_string('commerce_campaign_stage4_cancel_confirm',
                         'local_subscriptions')) . ');' : null,
