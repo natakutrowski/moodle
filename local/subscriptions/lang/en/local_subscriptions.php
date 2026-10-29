@@ -12834,7 +12834,7 @@ $string['commerce_promo_usage_cancelled'] = 'Cancelled';
 $string['commerce_campaign_stage3_audience_title'] = 'Campaign recipients';
 $string['commerce_campaign_stage3_source'] = 'Audience source';
 $string['commerce_campaign_stage3_manual'] = 'Manual email list (existing mode)';
-$string['commerce_campaign_stage3_course'] = 'Course buyers — configurable filters';
+$string['commerce_campaign_stage3_course'] = 'Course participants — roles and pedagogical access';
 $string['commerce_campaign_stage3_courseid'] = 'Course';
 $string['commerce_campaign_stage3_skus'] = 'Support product SKUs to exclude';
 $string['commerce_campaign_stage3_skus_help'] = 'Comma-separated SKUs. Linked support offers are discovered automatically; add historical SKUs such as A1-FR-SUPPORT,A1-RU-SUPPORT.';
@@ -12894,12 +12894,12 @@ $string['commerce_marketing_campaign_preview_no_subject'] = 'Preview unavailable
 
 // E7: guided course audience filters.
 $string['commerce_campaign_e7_optional_title'] = 'Refine the audience';
-$string['commerce_campaign_e7_required_help'] = 'Always enforced: verified purchase, active full enrolment, valid account, marketing opt-outs, site administrators and duplicate email exclusions.';
-$string['commerce_campaign_e7_exclude_trial'] = 'Exclude accounts that also have the Trial role';
-$string['commerce_campaign_e7_exclude_grammar'] = 'Exclude accounts that also have the Grammar role';
-$string['commerce_campaign_e7_exclude_promotion'] = 'Exclude access linked to a pedagogical promotion';
+$string['commerce_campaign_e7_required_help'] = 'The candidate list includes student, trialstudent, grammarstudent roles and pedagogical-promotion access. Always enforced: valid account, Moodle email status, marketing opt-out, site administrators and duplicate emails. Verified purchase and active enrolment are optional filters, not proof of marketing permission.';
+$string['commerce_campaign_e7_exclude_trial'] = 'Exclude anyone with the Trial (trialstudent) role';
+$string['commerce_campaign_e7_exclude_grammar'] = 'Exclude anyone with the Grammar (grammarstudent) role';
+$string['commerce_campaign_e7_exclude_promotion'] = 'Exclude users with pedagogical-promotion access';
 $string['commerce_campaign_e7_exclude_accompaniment'] = 'Exclude all tutoring history (participation, grants and detected purchases)';
-$string['commerce_campaign_e7_trial_help'] = 'Trial-only and Grammar-only accounts are always excluded because they lack full course access. These checkboxes apply to accounts holding multiple roles.';
+$string['commerce_campaign_e7_trial_help'] = 'Trial-only and Grammar-only users are now selectable. For multiple roles, matching one checked exclusion removes the user.';
 $string['commerce_campaign_e7_internals'] = 'Exclude internal or test accounts';
 $string['commerce_campaign_e7_internals_help'] = 'Select users by name. No name or email-domain based auto-exclusion. Selections are saved in the draft.';
 $string['commerce_campaign_e7_search'] = 'Search by name or email…';
@@ -12908,10 +12908,26 @@ $string['commerce_campaign_e7_selected'] = 'Selected excluded accounts:';
 $string['commerce_campaign_stage3_reason_conflicting_grammar_role'] = 'Conflicting full and Grammar roles';
 $string['commerce_campaign_stage3_reason_no_verified_course_purchase'] = 'No verified course purchase';
 $string['commerce_campaign_stage3_reason_course_purchase_mapping_missing'] = 'Course has no supported purchase references';
-$string['commerce_campaign_e7_uncheck_help'] = 'Warning: disabling the tutoring filter may include supported customers. Course campaigns remain locked for sending.';
-$string['commerce_campaign_e8_disabled'] = 'Course audience scheduling is disabled by default. Enable it only after marketing authorisation review and DEV acceptance.';
+$string['commerce_campaign_e7_uncheck_help'] = 'Audience preview is technical eligibility, not permission to market. Trial recipients without purchases may require prior consent. Opt-outs and account protections remain mandatory.';
+$string['commerce_campaign_e8_disabled'] = 'Course scheduling is disabled in the Mail Studio settings.';
 $string['commerce_campaign_e8_legal_required'] = 'Confirm marketing compliance for this audience before scheduling.';
 $string['commerce_campaign_e8_legal_confirmation'] = 'I confirm that I verified the legal basis for this audience, notice and opt-out at collection, offer similarity and message content. This checkbox does not replace supporting records.';
 $string['commerce_campaign_e8_stale_audience'] = 'The audience has changed since saving. Preview and save the recipients again before scheduling.';
-$string['commerce_campaign_e8_disabled_warning'] = 'Purchases and exclusions are checked, but a purchase alone does not establish marketing permission. Course scheduling remains off until explicitly enabled after acceptance.';
-$string['commerce_campaign_e8_ready_warning'] = 'Course scheduling is technically enabled. Verify marketing permissions, translations and audience before scheduling. A purchase alone does not provide automatic permission.';
+$string['commerce_campaign_e8_disabled_warning'] = 'Participants are selected by course roles and pedagogical access. The course campaign scheduling switch is currently disabled.';
+$string['commerce_campaign_e8_ready_warning'] = 'Scheduling is technically enabled. Check marketing permissions for all categories (especially Trial), opt-outs, translations and the audience before sending.';
+
+$string['commerce_campaign_e9_exclude_student'] = 'Exclude users with the Student (student) role';
+$string['commerce_campaign_e9_exclude_inactive'] = 'Exclude participants without an active course enrolment';
+$string['commerce_campaign_e9_require_purchase'] = 'Restrict to users with a verified course purchase';
+$string['commerce_campaign_e9_sources'] = 'Access / roles';
+$string['commerce_campaign_e9_source_counts'] = 'Roles / access (categories may overlap): Student {$a->student} · Trial {$a->trial} · Grammar {$a->grammar} · Promotion {$a->promotion}';
+$string['commerce_campaign_stage3_reason_excluded_student_role'] = 'Student role excluded';
+$string['commerce_campaign_stage3_reason_excluded_trial_role'] = 'Trial role excluded';
+$string['commerce_campaign_stage3_reason_excluded_grammar_role'] = 'Grammar role excluded';
+// Mail Studio course campaigns: controlled release switch (E9b).
+$string['settings:course_marketing_header'] = 'Mail Studio — course-targeted campaigns';
+$string['settings:course_marketing_header_desc'] = 'Independent release control for campaigns selecting participants of a Moodle course.';
+$string['settings:course_marketing_enabled'] = 'Allow scheduling course-targeted campaigns';
+$string['settings:course_marketing_enabled_desc'] = 'Disabled by default. Enable only after reviewing the marketing rules applicable to the selected recipients (including Trial users) and approving the campaign. This does not automatically allow sending: suppression checks, operator confirmation and global marketing worker settings remain in force.';
+
+$string['commerce_campaign_e9c_open_settings'] = 'Open course campaign settings';

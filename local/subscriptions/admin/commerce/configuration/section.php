@@ -196,6 +196,7 @@ $definitions = [
                 $field('personal_offer_mail_batch_size', 'commerce_configuration_personal_offer_batch_label', 'commerce_mail_configuration_personal_batch_help', 'number', 20, [], PARAM_INT),
                 $field('personal_offer_mail_hourly_limit', 'commerce_configuration_personal_offer_hourly_label', 'commerce_mail_configuration_personal_hourly_help', 'number', 100, [], PARAM_INT),
                 $field('commerce_mail_marketing_enabled', 'commerce_mail_configuration_marketing_title', 'commerce_configuration_marketing_enabled_desc', 'checkbox', 1),
+                $field('commerce_mail_course_campaigns_enabled', 'settings:course_marketing_enabled', 'settings:course_marketing_enabled_desc', 'checkbox', 0),
                 $field('commerce_mail_marketing_batch_size', 'commerce_configuration_marketing_batch_label', 'commerce_mail_configuration_marketing_batch_help', 'number', 50, [], PARAM_INT),
                 $field('commerce_mail_marketing_hourly_limit', 'commerce_configuration_marketing_hourly_label', 'commerce_mail_configuration_marketing_hourly_help', 'number', 250, [], PARAM_INT),
             ],

@@ -90,6 +90,7 @@ final class CommerceMarketingCampaignService {
             $recipients = $preview['recipients'];
             $audienceconfig = json_encode([
                 'courseid' => $courseid,
+                'audiencepolicy' => 'course_access_v2',
                 'supportskus' => $supportskus,
                 'excludedids' => $excludedids,
                 'filters' => $filters,

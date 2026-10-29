@@ -12909,7 +12909,7 @@ $string['commerce_promo_usage_cancelled'] = 'Отменён';
 $string['commerce_campaign_stage3_audience_title'] = 'Получатели кампании';
 $string['commerce_campaign_stage3_source'] = 'Источник аудитории';
 $string['commerce_campaign_stage3_manual'] = 'Список адресов вручную (существующий режим)';
-$string['commerce_campaign_stage3_course'] = 'Покупатели курса — настраиваемые фильтры';
+$string['commerce_campaign_stage3_course'] = 'Участники курса — роли и педагогические доступы';
 $string['commerce_campaign_stage3_courseid'] = 'Курс';
 $string['commerce_campaign_stage3_skus'] = 'SKU продуктов с сопровождением для исключения';
 $string['commerce_campaign_stage3_skus_help'] = 'SKU через запятую. Привязанные предложения определяются автоматически; добавь исторические SKU, например A1-FR-SUPPORT,A1-RU-SUPPORT.';
@@ -12969,12 +12969,12 @@ $string['commerce_marketing_campaign_preview_no_subject'] = 'Предпросм�
 
 // E7: guided course audience filters.
 $string['commerce_campaign_e7_optional_title'] = 'Настроить аудиторию';
-$string['commerce_campaign_e7_required_help'] = 'Обязательные проверки: подтверждённая покупка, полноценная активная запись на курс, действующий аккаунт, отписка от рекламы, администраторы и дубли email.';
-$string['commerce_campaign_e7_exclude_trial'] = 'Исключить аккаунты с дополнительной ролью Trial';
-$string['commerce_campaign_e7_exclude_grammar'] = 'Исключить аккаунты с дополнительной ролью Grammaire';
-$string['commerce_campaign_e7_exclude_promotion'] = 'Исключить доступ через учебную акцию';
+$string['commerce_campaign_e7_required_help'] = 'Список включает роли student, trialstudent, grammarstudent и доступы по педагогическим промоакциям. Обязательные проверки: действующая учётная запись, разрешённая почта Moodle, отсутствие отказа от маркетинга, исключение администраторов и дубликатов адресов. Проверка покупки и активной записи на курс — дополнительные фильтры, а не согласие на рекламу.';
+$string['commerce_campaign_e7_exclude_trial'] = 'Исключить пользователей с ролью Trial (trialstudent)';
+$string['commerce_campaign_e7_exclude_grammar'] = 'Исключить пользователей с ролью Грамматика (grammarstudent)';
+$string['commerce_campaign_e7_exclude_promotion'] = 'Исключить доступы по педагогическим промоакциям';
 $string['commerce_campaign_e7_exclude_accompaniment'] = 'Исключить любую историю сопровождения (участие, доступы и покупки)';
-$string['commerce_campaign_e7_trial_help'] = 'Аккаунты только с Trial или Grammaire исключаются всегда: у них нет полного доступа. Галочки относятся к пользователям с несколькими ролями.';
+$string['commerce_campaign_e7_trial_help'] = 'Теперь можно выбирать участников только с ролью Trial или Грамматика. Если у человека несколько ролей, достаточно одного включённого исключения.';
 $string['commerce_campaign_e7_internals'] = 'Исключить внутренние и тестовые аккаунты';
 $string['commerce_campaign_e7_internals_help'] = 'Выбирай по имени. Автоматического исключения по имени или домену email нет. Выбор сохраняется в черновике.';
 $string['commerce_campaign_e7_search'] = 'Поиск по имени или email…';
@@ -12983,10 +12983,26 @@ $string['commerce_campaign_e7_selected'] = 'Выбрано исключений:
 $string['commerce_campaign_stage3_reason_conflicting_grammar_role'] = 'Одновременно роли Grammaire и полного доступа';
 $string['commerce_campaign_stage3_reason_no_verified_course_purchase'] = 'Нет подтверждённой покупки курса';
 $string['commerce_campaign_stage3_reason_course_purchase_mapping_missing'] = 'Для курса не найдены подтверждаемые виды покупок';
-$string['commerce_campaign_e7_uncheck_help'] = 'Внимание: если отключить фильтр сопровождения, в выборку могут попасть клиенты с преподавателем. Отправка кампаний по курсам всё ещё заблокирована.';
-$string['commerce_campaign_e8_disabled'] = 'Планирование рассылок по курсам отключено по умолчанию. Включайте его только после проверки правомерности маркетинговой рассылки и тестирования DEV.';
+$string['commerce_campaign_e7_uncheck_help'] = 'Предпросмотр показывает техническую выборку, но не разрешение на рассылку. Для Trial без покупки может потребоваться предварительное согласие. Запреты на маркетинг продолжают действовать.';
+$string['commerce_campaign_e8_disabled'] = 'Планирование рассылок по курсам выключено в настройках Mail Studio.';
 $string['commerce_campaign_e8_legal_required'] = 'Подтвердите правомерность маркетинговой рассылки для этой аудитории перед планированием.';
 $string['commerce_campaign_e8_legal_confirmation'] = 'Подтверждаю, что проверил(а) правовое основание, информирование и возможность отказа при сборе данных, сходство предложения и содержание письма. Этот флажок не заменяет подтверждающие документы.';
 $string['commerce_campaign_e8_stale_audience'] = 'Аудитория изменилась после сохранения. Выполните предварительный просмотр и повторно сохраните получателей.';
-$string['commerce_campaign_e8_disabled_warning'] = 'Покупки и исключения проверены, но сама покупка не подтверждает право на рекламу. Планирование для курса отключено до явного включения после тестирования.';
-$string['commerce_campaign_e8_ready_warning'] = 'Планирование рассылок по курсу технически разрешено. Перед отправкой проверьте правомерность рассылки, переводы и аудиторию.';
+$string['commerce_campaign_e8_disabled_warning'] = 'Участники выбираются по ролям курса и педагогическим доступам. Переключатель планирования рассылок по курсам сейчас выключен.';
+$string['commerce_campaign_e8_ready_warning'] = 'Рассылку технически можно запланировать. Проверьте правовые основания для всех категорий (особенно Trial), отказы, переводы и получателей.';
+
+$string['commerce_campaign_e9_exclude_student'] = 'Исключить пользователей с ролью Student (student)';
+$string['commerce_campaign_e9_exclude_inactive'] = 'Исключить участников без активной записи на курс';
+$string['commerce_campaign_e9_require_purchase'] = 'Только пользователи с подтверждённой покупкой курса';
+$string['commerce_campaign_e9_sources'] = 'Доступ / роли';
+$string['commerce_campaign_e9_source_counts'] = 'Роли / доступ (категории могут пересекаться): Student {$a->student} · Trial {$a->trial} · Грамматика {$a->grammar} · Промо {$a->promotion}';
+$string['commerce_campaign_stage3_reason_excluded_student_role'] = 'Роль Student исключена';
+$string['commerce_campaign_stage3_reason_excluded_trial_role'] = 'Роль Trial исключена';
+$string['commerce_campaign_stage3_reason_excluded_grammar_role'] = 'Роль Грамматика исключена';
+// Mail Studio course campaigns: controlled release switch (E9b).
+$string['settings:course_marketing_header'] = 'Mail Studio — рассылки участникам курса';
+$string['settings:course_marketing_header_desc'] = 'Отдельный переключатель безопасности для кампаний по участникам курса Moodle.';
+$string['settings:course_marketing_enabled'] = 'Разрешить планирование рассылок участникам курса';
+$string['settings:course_marketing_enabled_desc'] = 'По умолчанию выключено. Включайте только после проверки права на рекламную рассылку выбранным адресатам, включая пробный доступ Trial, и утверждения кампании. Сам по себе переключатель не запускает отправку: действуют отписки, подтверждение оператора и общие настройки маркетинговых писем.';
+
+$string['commerce_campaign_e9c_open_settings'] = 'Открыть настройки рассылок по курсам';

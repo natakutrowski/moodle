@@ -110,6 +110,26 @@ final class commerce_marketing_course_schedule_release_test extends \advanced_te
         self::assertGreaterThan(0, $config['marketingreview']['at']);
     }
 
+    public function test_legacy_course_draft_without_audience_policy_must_be_resaved(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        set_config('commerce_mail_course_campaigns_enabled', '1', 'local_subscriptions');
+        [$id, $author] = $this->fixture();
+        $repo = new CommerceMarketingCampaignRepository($DB);
+        $campaign = $repo->get($id);
+        $config = json_decode((string)$campaign->audienceconfig, true);
+        unset($config['audiencepolicy']);
+        $DB->set_field('local_subs_mail_campaign', 'audienceconfig',
+            json_encode($config, JSON_THROW_ON_ERROR), ['id' => $id]);
+        self::assertFalse(CommerceMarketingCourseCampaignGate::snapshot_is_current($DB, $repo, $repo->get($id)));
+        try {
+            CommerceMarketingCampaignService::create($DB)->schedule($id, time() + 3600, $author, true);
+            self::fail('Historic course drafts must be reviewed and saved again under the new policy.');
+        } catch (\invalid_parameter_exception $e) {
+            self::assertSame('draft', (string)$repo->get($id)->status);
+        }
+    }
+
     public function test_suppressed_recipient_after_save_makes_snapshot_stale(): void {
         global $DB;
         $this->resetAfterTest(true);

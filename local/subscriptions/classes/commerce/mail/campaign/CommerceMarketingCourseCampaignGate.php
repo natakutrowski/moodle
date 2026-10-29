@@ -22,7 +22,8 @@ final class CommerceMarketingCourseCampaignGate {
     public static function snapshot_is_current(\moodle_database $db,
             CommerceMarketingCampaignRepository $repo, \stdClass $campaign): bool {
         $config = json_decode((string)($campaign->audienceconfig ?? ''), true);
-        if (!is_array($config) || empty($config['courseid']) ||
+        if (!is_array($config) || ($config['audiencepolicy'] ?? '') !== 'course_access_v2' ||
+                empty($config['courseid']) ||
                 !isset($config['supportskus'], $config['excludedids'], $config['filters']) ||
                 !is_array($config['supportskus']) || !is_array($config['excludedids']) ||
                 !is_array($config['filters'])) {

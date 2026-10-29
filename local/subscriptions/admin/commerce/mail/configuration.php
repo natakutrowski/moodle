@@ -84,6 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             0,
             PARAM_BOOL
         ) ? 1 : 0,
+        'commerce_mail_course_campaigns_enabled' => optional_param(
+            'course_campaigns_enabled',
+            0,
+            PARAM_BOOL
+        ) ? 1 : 0,
         'commerce_mail_marketing_batch_size' => max(
             1,
             min(500, optional_param('marketing_batch', 50, PARAM_INT))
@@ -171,6 +176,7 @@ $values = [
         5000
     ),
     'marketing_enabled' => $configbool('commerce_mail_marketing_enabled'),
+    'course_campaigns_enabled' => $configbool('commerce_mail_course_campaigns_enabled', false),
     'marketing_batch' => $configint(
         'commerce_mail_marketing_batch_size',
         50,
@@ -418,7 +424,13 @@ $personalfields =
     );
 
 $marketingfields =
-    $numberfield(
+    $toggle(
+        'course_campaigns_enabled',
+        $values['course_campaigns_enabled'],
+        get_string('settings:course_marketing_enabled', 'local_subscriptions'),
+        get_string('settings:course_marketing_enabled_desc', 'local_subscriptions')
+    )
+    . $numberfield(
         'marketing_batch',
         $values['marketing_batch'],
         1,

@@ -95,6 +95,10 @@ final class CommerceMarketingCampaignAudienceResolver {
             $row['eligible'] = $reasons === [];
             $summary['candidates']++;
             $summary[$row['eligible'] ? 'eligible' : 'excluded']++;
+            foreach ((array)($row['sources'] ?? []) as $source) {
+                $key = 'source_' . $source;
+                $summary[$key] = ($summary[$key] ?? 0) + 1;
+            }
             foreach ($reasons as $reason) {
                 $key = 'reason_' . $reason;
                 $summary[$key] = ($summary[$key] ?? 0) + 1;

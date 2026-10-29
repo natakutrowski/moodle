@@ -29,6 +29,14 @@ $repository = new CommerceMarketingCampaignRepository($DB);
 $campaign = $id > 0 ? $repository->get($id) : null;
 $editable = $campaign === null || (string)$campaign->status === 'draft';
 $courseenabled = CommerceMarketingCourseCampaignGate::enabled();
+// A direct link to the actual release switch, in the same CRM permission scope.
+$courseconfigurl = new moodle_url('/local/subscriptions/admin/commerce/mail/configuration.php');
+$courseconfigurl->set_anchor('mail-config-course_campaigns_enabled');
+$courseconfiglink = html_writer::link(
+    $courseconfigurl,
+    get_string('commerce_campaign_e9c_open_settings', 'local_subscriptions'),
+    ['class' => 'alert-link']
+);
 
 $pageurl = new moodle_url(
     '/local/subscriptions/admin/commerce/mail/campaigns/edit.php',
@@ -65,6 +73,12 @@ $skus = implode(',', $config['supportskus'] ?? []);
 $excludedids = implode(',', $config['excludedids'] ?? []);
 $selectedexcludedids = array_map('intval', $config['excludedids'] ?? []);
 $filters = CommerceMarketingCourseAudienceService::normalise_filters((array)($config['filters'] ?? []));
+// Historic saved drafts used buyer-only semantics. Keep those checkboxes
+// conservative on first opening; E9 requires an explicit resave of the draft.
+if ($campaign && $source === 'course' && empty($config['audiencepolicy'])) {
+    $filters['require_verified_purchase'] = true;
+    $filters['exclude_inactive_enrolment'] = true;
+}
 $namevalue = $campaign ? (string)$campaign->name : '';
 $templatevalue = $campaign ? (int)$campaign->templateid : 0;
 $ctavalue = $campaign ? (string)$campaign->ctaurl : '';
@@ -89,10 +103,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ));
     $excludedids = implode(',', $selectedexcludedids);
     $filters = CommerceMarketingCourseAudienceService::normalise_filters([
-        'exclude_trial_role' => optional_param('exclude_trial_role', 1, PARAM_BOOL),
+        'exclude_student_role' => optional_param('exclude_student_role', 0, PARAM_BOOL),
+        'exclude_trial_role' => optional_param('exclude_trial_role', 0, PARAM_BOOL),
         'exclude_grammar_role' => optional_param('exclude_grammar_role', 0, PARAM_BOOL),
         'exclude_promotion_access' => optional_param('exclude_promotion_access', 1, PARAM_BOOL),
-        'exclude_accompaniment' => optional_param('exclude_accompaniment', 1, PARAM_BOOL),
+        'exclude_accompaniment' => optional_param('exclude_accompaniment', 0, PARAM_BOOL),
+        'exclude_inactive_enrolment' => optional_param('exclude_inactive_enrolment', 0, PARAM_BOOL),
+        'require_verified_purchase' => optional_param('require_verified_purchase', 0, PARAM_BOOL),
     ]);
     try {
         if (count($selectedexcludedids) > 500) {
@@ -205,14 +222,22 @@ $internalcandidates = [];
 if ($courseid > SITEID && $DB->record_exists('course', ['id' => $courseid])) {
     $coursecontext = \context_course::instance($courseid);
     $candidateusers = $DB->get_records_sql(
-        "SELECT DISTINCT u.id, u.firstname, u.lastname, u.email
-           FROM {role_assignments} ra
-           JOIN {user} u ON u.id = ra.userid
-           JOIN {role} r ON r.id = ra.roleid
-          WHERE ra.contextid = :contextid
-            AND r.shortname IN ('student', 'trialstudent', 'grammarstudent')
+        "SELECT u.id, u.firstname, u.lastname, u.email
+           FROM {user} u
+          WHERE EXISTS (
+                    SELECT 1 FROM {role_assignments} ra
+                    JOIN {role} r ON r.id = ra.roleid
+                    WHERE ra.contextid = :contextid AND ra.userid = u.id
+                      AND r.shortname IN ('student', 'trialstudent', 'grammarstudent')
+                )
+             OR EXISTS (
+                    SELECT 1 FROM {local_subs_commerce_ped_access} a
+                     WHERE a.userid = u.id AND a.courseid = :courseid
+                       AND (a.promotionid IS NOT NULL OR a.profile = :profile)
+                )
           ORDER BY u.lastname ASC, u.firstname ASC, u.id ASC",
-        ['contextid' => $coursecontext->id], 0, 500
+        ['contextid' => $coursecontext->id, 'courseid' => $courseid,
+         'profile' => 'promotion_progressive']
     );
     foreach ($candidateusers as $candidateuser) {
         $internalcandidates[(int)$candidateuser->id] = $candidateuser;
@@ -486,10 +511,13 @@ echo html_writer::tag('h4', get_string('commerce_campaign_e7_optional_title', 'l
 echo html_writer::div(get_string('commerce_campaign_e7_required_help', 'local_subscriptions'),
     'alert alert-light border mb-3');
 foreach ([
+    'exclude_student_role' => 'commerce_campaign_e9_exclude_student',
     'exclude_trial_role' => 'commerce_campaign_e7_exclude_trial',
     'exclude_grammar_role' => 'commerce_campaign_e7_exclude_grammar',
     'exclude_promotion_access' => 'commerce_campaign_e7_exclude_promotion',
     'exclude_accompaniment' => 'commerce_campaign_e7_exclude_accompaniment',
+    'exclude_inactive_enrolment' => 'commerce_campaign_e9_exclude_inactive',
+    'require_verified_purchase' => 'commerce_campaign_e9_require_purchase',
 ] as $key => $labelkey) {
     echo html_writer::div(
         html_writer::empty_tag('input', [
@@ -540,9 +568,13 @@ echo html_writer::div(
             ['id' => 'marketing-campaign-internal-count']),
     'form-text mb-2'
 );
-echo html_writer::div(get_string($courseenabled
-    ? 'commerce_campaign_e8_ready_warning' : 'commerce_campaign_e8_disabled_warning', 'local_subscriptions'),
-    'alert alert-warning mt-3 mb-0');
+$courseaudiencenotice = get_string($courseenabled
+    ? 'commerce_campaign_e8_ready_warning' : 'commerce_campaign_e8_disabled_warning', 'local_subscriptions');
+if (!$courseenabled) {
+    $courseaudiencenotice .= ' ' . $courseconfiglink;
+}
+echo html_writer::div($courseaudiencenotice,
+    'alert ' . ($courseenabled ? 'alert-info' : 'alert-warning') . ' mt-3 mb-0');
 echo html_writer::end_div();
 
 echo html_writer::start_div('', ['id' => 'marketing-campaign-manual-fields']);
@@ -587,16 +619,26 @@ if ($previewreport !== null) {
             'eligible' => $summary['eligible'],
             'excluded' => $summary['excluded'],
         ]), 'alert alert-info');
+    echo html_writer::div(get_string('commerce_campaign_e9_source_counts', 'local_subscriptions', (object)[
+        'student' => $summary['source_student'] ?? 0,
+        'trial' => $summary['source_trialstudent'] ?? 0,
+        'grammar' => $summary['source_grammarstudent'] ?? 0,
+        'promotion' => $summary['source_promotion'] ?? 0,
+    ]), 'form-text mb-3');
     echo html_writer::start_tag('div', ['class' => 'table-responsive']);
     echo html_writer::start_tag('table', ['class' => 'table table-striped table-sm']);
     echo html_writer::tag('thead', html_writer::tag('tr',
         html_writer::tag('th', 'ID')
         . html_writer::tag('th', get_string('email'))
         . html_writer::tag('th', get_string('fullname'))
+        . html_writer::tag('th', get_string('commerce_campaign_e9_sources', 'local_subscriptions'))
         . html_writer::tag('th', get_string('status'))
     ));
     echo html_writer::start_tag('tbody');
-    foreach (array_slice($previewreport['rows'], 0, 50) as $row) {
+    $previewrows = $previewreport['rows'];
+    usort($previewrows, static fn(array $a, array $b): int =>
+        ((int)!$a['eligible'] <=> (int)!$b['eligible']) ?: ((int)$a['userid'] <=> (int)$b['userid']));
+    foreach (array_slice($previewrows, 0, 50) as $row) {
         $id = (int)($row['userid'] ?? 0);
         $fullname = trim((string)($row['firstname'] ?? '') . ' ' . (string)($row['lastname'] ?? ''));
         $reasons = (array)($row['reasons'] ?? []);
@@ -611,6 +653,7 @@ if ($previewreport !== null) {
             html_writer::tag('td', $id ? (string)$id : '—')
             . html_writer::tag('td', s((string)$row['email']))
             . html_writer::tag('td', s($fullname))
+            . html_writer::tag('td', s(implode(', ', (array)($row['sources'] ?? []))))
             . html_writer::tag('td', s($status))
         );
     }
@@ -655,7 +698,7 @@ if ($editable) {
         ['id' => 'marketing-course-legal-wrap']
     );
     echo html_writer::div(
-        get_string('commerce_campaign_e8_disabled', 'local_subscriptions'),
+        get_string('commerce_campaign_e8_disabled', 'local_subscriptions') . ' ' . $courseconfiglink,
         'form-text text-warning mt-2' . ($source === 'course' && !$courseenabled ? '' : ' d-none'),
         ['id' => 'marketing-campaign-course-lock-hint']
     );

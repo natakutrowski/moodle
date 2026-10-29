@@ -7,20 +7,20 @@ namespace local_subscriptions\commerce\mail\audience;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Read-only audience preview for owners of a Moodle course who have not
- * purchased/joined its pedagogical accompaniment.
- *
- * IMPORTANT: This is a commercial eligibility preview, NOT a permission to
- * send marketing email. Consent/opt-out checks are a separate Mail Studio V1
- * stage. Do not pass these results directly to the mail queue.
+ * Read-only course audience: assigned Student, Trial, Grammar roles, plus
+ * pedagogical-promotion access. Filters are exclusions, not proof of marketing consent.
+ * The verified-purchase check is available as an optional filter only.
  */
 final class CommerceMarketingCourseAudienceService {
-    /** Optional filters only. Validated purchase, active enrolment, opt-out and admin checks are mandatory. */
+    /** Defaults: all three course roles included, promotion-only participants excluded. */
     public const DEFAULT_FILTERS = [
-        'exclude_trial_role' => true,
+        'exclude_student_role' => false,
+        'exclude_trial_role' => false,
         'exclude_grammar_role' => false,
         'exclude_promotion_access' => true,
-        'exclude_accompaniment' => true,
+        'exclude_accompaniment' => false,
+        'exclude_inactive_enrolment' => false,
+        'require_verified_purchase' => false,
     ];
 
     /** @param array<string, mixed> $filters @return array<string, bool> */
@@ -59,13 +59,18 @@ final class CommerceMarketingCourseAudienceService {
         $context = \context_course::instance($courseid);
         $now ??= time();
         $supportskus = $this->support_skus($courseid, $additionalsupportskus);
-        // A Moodle student enrolment alone does not establish a legitimate purchase.
-        // Resolve course-specific commercial references once, then check each identity.
-        $purchaseproof = new CommerceMarketingCoursePurchaseProofService($this->db);
-        $purchasereferences = $purchaseproof->references_for_course($courseid);
+        // The course audience is NOT limited to buyers. Purchase proof is an
+        // optional filter; resolving it only when requested avoids unnecessary
+        // database work across large Trial/Grammar cohorts.
+        $purchaseproof = null;
+        $purchasereferences = [];
+        if ($filters['require_verified_purchase']) {
+            $purchaseproof = new CommerceMarketingCoursePurchaseProofService($this->db);
+            $purchasereferences = $purchaseproof->references_for_course($courseid);
+        }
 
-        // Candidate acquisition includes Trial/Grammar users, so that their
-        // exclusions appear in the report instead of vanishing silently.
+        // Include every relevant course role, even for accounts which have not
+        // paid for a full enrolment. Multiple role assignments are deduplicated.
         $sql = "SELECT u.id, u.firstname, u.lastname, u.email, u.lang,
                        u.deleted, u.suspended, u.confirmed, u.emailstop,
                        MAX(CASE WHEN r.shortname = 'student' THEN 1 ELSE 0 END) AS fullrole,
@@ -80,6 +85,28 @@ final class CommerceMarketingCourseAudienceService {
                        u.deleted, u.suspended, u.confirmed, u.emailstop
               ORDER BY u.id ASC";
         $users = $this->db->get_records_sql($sql, ['contextid' => (int)$context->id]);
+
+        // A pedagogical promotion can exist without any of the three roles.
+        // It must therefore be an independent source, not a filter applied to
+        // role holders alone. Read all access rows once to avoid N+1 queries.
+        $promotions = [];
+        $sql = "SELECT u.id, u.firstname, u.lastname, u.email, u.lang,
+                       u.deleted, u.suspended, u.confirmed, u.emailstop,
+                       0 AS fullrole, 0 AS trialrole, 0 AS grammarrole
+                  FROM {local_subs_commerce_ped_access} a
+                  JOIN {user} u ON u.id = a.userid
+                 WHERE a.courseid = :courseid
+                   AND (a.promotionid IS NOT NULL OR a.profile = :profile)";
+        $promotionusers = $this->db->get_records_sql($sql, [
+            'courseid' => $courseid, 'profile' => 'promotion_progressive',
+        ]);
+        foreach ($promotionusers as $promotionuser) {
+            $promotions[(int)$promotionuser->id] = true;
+            if (!isset($users[(int)$promotionuser->id])) {
+                $users[(int)$promotionuser->id] = $promotionuser;
+            }
+        }
+        ksort($users, SORT_NUMERIC);
 
         // Never address two Moodle accounts sharing the same email as if they
         // were one confirmed commercial identity.
@@ -116,33 +143,34 @@ final class CommerceMarketingCourseAudienceService {
                     || $this->email_belongs_to_other_account($email, $userid)) {
                 $reasons[] = 'ambiguous_email';
             }
-            if ((int)$user->fullrole !== 1) {
-                $reasons[] = (int)$user->trialrole === 1 ? 'trial_only' : 'not_full_student';
+            $fullrole = (int)$user->fullrole === 1;
+            $trialrole = (int)$user->trialrole === 1;
+            $grammarrole = (int)$user->grammarrole === 1;
+            $promotionaccess = isset($promotions[$userid]);
+            // Exclusions apply to every matching source, including accounts
+            // with multiple roles. A Trial-only account is now selectable.
+            if ($filters['exclude_student_role'] && $fullrole) {
+                $reasons[] = 'excluded_student_role';
             }
-            if ($filters['exclude_trial_role'] && (int)$user->fullrole === 1
-                    && (int)$user->trialrole === 1) {
-                $reasons[] = 'conflicting_trial_role';
+            if ($filters['exclude_trial_role'] && $trialrole) {
+                $reasons[] = 'excluded_trial_role';
             }
-            if ($filters['exclude_grammar_role'] && (int)$user->fullrole === 1
-                    && (int)$user->grammarrole === 1) {
-                $reasons[] = 'conflicting_grammar_role';
+            if ($filters['exclude_grammar_role'] && $grammarrole) {
+                $reasons[] = 'excluded_grammar_role';
             }
-            if (!$this->has_current_enrolment($courseid, $userid, $now)) {
+            if ($filters['exclude_promotion_access'] && $promotionaccess) {
+                $reasons[] = 'promotion_course_access';
+            }
+            if ($filters['exclude_inactive_enrolment'] &&
+                    !$this->has_current_enrolment($courseid, $userid, $now)) {
                 $reasons[] = 'no_active_enrolment';
             }
-            if ($purchasereferences === []) {
-                // Fail closed on unmapped courses; never infer an A1 purchase from a role.
-                $reasons[] = 'course_purchase_mapping_missing';
-            } else if (!$purchaseproof->has_verified_purchase($userid, $email, $purchasereferences)) {
-                $reasons[] = 'no_verified_course_purchase';
-            }
-
-            $access = $this->db->get_record('local_subs_commerce_ped_access', [
-                'courseid' => $courseid, 'userid' => $userid,
-            ], 'promotionid,profile', IGNORE_MISSING);
-            if ($filters['exclude_promotion_access'] && $access && ($access->promotionid !== null
-                    || (string)$access->profile === 'promotion_progressive')) {
-                $reasons[] = 'promotion_course_access';
+            if ($filters['require_verified_purchase']) {
+                if ($purchasereferences === []) {
+                    $reasons[] = 'course_purchase_mapping_missing';
+                } else if (!$purchaseproof->has_verified_purchase($userid, $email, $purchasereferences)) {
+                    $reasons[] = 'no_verified_course_purchase';
+                }
             }
             // Any historical participation (including refunded/cancelled) is
             // excluded conservatively until the commercial policy is approved.
@@ -166,7 +194,17 @@ final class CommerceMarketingCourseAudienceService {
                 $key = 'reason_' . $reason;
                 $summary[$key] = ($summary[$key] ?? 0) + 1;
             }
+            $sources = [];
+            if ($fullrole) { $sources[] = 'student'; }
+            if ($trialrole) { $sources[] = 'trialstudent'; }
+            if ($grammarrole) { $sources[] = 'grammarstudent'; }
+            if ($promotionaccess) { $sources[] = 'promotion'; }
+            foreach ($sources as $source) {
+                $key = 'source_' . $source;
+                $summary[$key] = ($summary[$key] ?? 0) + 1;
+            }
             $rows[] = [
+                'sources' => $sources,
                 'userid' => $userid,
                 'email' => $email,
                 'firstname' => (string)$user->firstname,

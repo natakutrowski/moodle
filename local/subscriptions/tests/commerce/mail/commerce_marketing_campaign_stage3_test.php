@@ -71,6 +71,7 @@ final class commerce_marketing_campaign_stage3_test extends \advanced_testcase {
         $report = CommerceMarketingCampaignAudienceResolver::create($DB)
             ->preview_course((int)$course->id, [], [(int)$internal->id]);
         self::assertSame(3, $report['summary']['candidates']);
+        self::assertSame(3, $report['summary']['source_student']);
         self::assertSame(1, $report['summary']['eligible']);
         self::assertSame(2, $report['summary']['excluded']);
         self::assertSame('e3-customer@example.test', $report['recipients'][0]['email']);
@@ -115,8 +116,12 @@ final class commerce_marketing_campaign_stage3_test extends \advanced_testcase {
         self::assertSame('course', (string)$record->audiencesource);
         $config = json_decode((string)$record->audienceconfig, true);
         self::assertSame((int)$course->id, $config['courseid']);
+        self::assertSame('course_access_v2', $config['audiencepolicy']);
         self::assertFalse($config['filters']['exclude_trial_role']);
-        self::assertTrue($config['filters']['exclude_accompaniment']);
+        self::assertFalse($config['filters']['exclude_accompaniment']);
+        self::assertFalse($config['filters']['require_verified_purchase']);
+        self::assertFalse($config['filters']['exclude_inactive_enrolment']);
+        self::assertTrue($config['filters']['exclude_promotion_access']);
         try {
             $service->schedule($campaignid, time(), (int)$author->id);
             self::fail('Stage 3 course campaigns must remain draft-only.');

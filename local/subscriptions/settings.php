@@ -847,6 +847,20 @@ if ($hassiteconfig) {
             'admin@campusfr.fr', PARAM_RAW_TRIMMED
         ));
 
+        // Course audience scheduling: an independent, fail-closed release switch.
+        // The campaign editor, dispatcher and sender all consult this same config.
+        $settings->add(new admin_setting_heading(
+            'local_subscriptions_course_marketing_header',
+            get_string('settings:course_marketing_header', 'local_subscriptions'),
+            get_string('settings:course_marketing_header_desc', 'local_subscriptions')
+        ));
+        $settings->add(new admin_setting_configcheckbox(
+            'local_subscriptions/commerce_mail_course_campaigns_enabled',
+            get_string('settings:course_marketing_enabled', 'local_subscriptions'),
+            get_string('settings:course_marketing_enabled_desc', 'local_subscriptions'),
+            0
+        ));
+
         $settings->add(new admin_setting_heading(
             'local_subscriptions_commerce_mail_audit_heading',
             get_string('settings:commerce_mail_audit_heading', 'local_subscriptions'),

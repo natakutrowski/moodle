@@ -19,7 +19,7 @@ use local_subscriptions\commerce\mail\audience\CommerceMarketingCourseAudienceSe
 ], ['h' => 'help']);
 
 if ($unrecognized || $options['help']) {
-    echo "CampusFR Mail Studio / course owners without pedagogy support (READ-ONLY)\n\n"
+    echo "CampusFR Mail Studio / course participants (READ-ONLY)\n\n"
         . "--list-courses                      List likely A1 courses (no emails)\n"
         . "--courseid=ID                       Moodle course to inspect (required)\n"
         . "--exclude-skus=A1-FR-SUPPORT,A1-RU-SUPPORT\n"
@@ -55,7 +55,7 @@ $additionalskus = array_filter(array_map('trim', explode(',', (string)$options['
 $report = CommerceMarketingCourseAudienceService::create($DB)->preview($courseid, $additionalskus);
 
 $summary = $report['summary'];
-echo "MAIL STUDIO · COURSE AUDIENCE · READ-ONLY\n";
+echo "MAIL STUDIO · COURSE PARTICIPANTS · READ-ONLY\n";
 echo 'Course: ' . $report['courseid'] . ' (' . $report['course'] . ")\n";
 echo 'Checked: ' . date('c', $report['checkedat']) . "\n";
 echo 'Support SKUs: ' . ($report['supportskus'] ? implode(', ', $report['supportskus']) : 'NONE DETECTED') . "\n\n";
