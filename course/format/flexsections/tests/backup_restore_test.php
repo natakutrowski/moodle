@@ -19,7 +19,9 @@ namespace format_flexsections;
 use backup;
 use backup_controller;
 use restore_controller;
+use restore_dbops;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\format_flexsections::class)]
 /**
  * Backup and restore tests for flexible sections course format.
  *
@@ -289,5 +291,142 @@ final class backup_restore_test extends \advanced_testcase {
                 "Section {$s->section} has no name — likely an orphan placeholder"
             );
         }
+    }
+
+    /**
+     * Test that restoring a course of another format into a new course keeps its empty sections.
+     *
+     * Regression test for https://github.com/marinaglancy/moodle-format_flexsections/issues/121
+     * Restore executes the after_restore hooks of every installed course format plugin, so the
+     * flexsections cleanup must do nothing when the restored course uses a different format.
+     */
+    public function test_restore_other_format_into_new_course(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Course template with several empty sections in the topics format.
+        $course1 = $this->getDataGenerator()->create_course(
+            ['numsections' => 5, 'format' => 'topics', 'shortname' => 'template'],
+            ['createsections' => true]
+        );
+        $this->assertCount(6, $DB->get_records('course_sections', ['course' => $course1->id]));
+
+        $course2id = $this->backup_and_restore($course1);
+
+        $this->assertEquals('topics', $DB->get_field('course', 'format', ['id' => $course2id]));
+        $sections = $DB->get_records('course_sections', ['course' => $course2id], 'section ASC');
+        $this->assertCount(6, $sections, 'Empty sections of a non-flexsections course must not be removed');
+        $this->assertEquals(range(0, 5), array_map('intval', array_values(array_column($sections, 'section'))));
+    }
+
+    /**
+     * Test that restoring into an existing course of another format keeps its empty sections.
+     *
+     * Regression test for https://github.com/marinaglancy/moodle-format_flexsections/issues/121
+     */
+    public function test_restore_other_format_into_existing_course(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $generator = $this->getDataGenerator();
+        $course1 = $generator->create_course(
+            ['numsections' => 3, 'format' => 'topics', 'shortname' => 'template'],
+            ['createsections' => true]
+        );
+        $course2 = $generator->create_course(
+            ['numsections' => 1, 'format' => 'topics', 'shortname' => 'target'],
+            ['createsections' => true]
+        );
+
+        $this->backup_and_restore($course1, $course2, backup::TARGET_CURRENT_ADDING);
+
+        $sections = $DB->get_records('course_sections', ['course' => $course2->id], 'section ASC');
+        $this->assertCount(4, $sections, 'Empty sections of a non-flexsections course must not be removed');
+        $this->assertEquals(range(0, 3), array_map('intval', array_values(array_column($sections, 'section'))));
+    }
+
+    /**
+     * Test that restoring or importing a whole flexsections course keeps the empty sections.
+     */
+    public function test_full_restore_keeps_empty_sections(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $generator = $this->getDataGenerator();
+        $course1 = $generator->create_course(
+            ['numsections' => 3, 'format' => 'flexsections', 'shortname' => 'source'],
+            ['createsections' => true]
+        );
+        /** @var \format_flexsections $format */
+        $format = course_get_format($course1);
+        $this->assertEquals(2, $format->create_new_section(1));
+
+        // Restore into a new course.
+        $course2id = $this->backup_and_restore($course1);
+        $sections = get_fast_modinfo($course2id)->get_section_info_all();
+        $this->assertEquals(range(0, 4), array_keys($sections));
+        $this->assertEquals(1, $sections[2]->parent);
+
+        // Import into an existing course that has its own empty sections.
+        $course3 = $generator->create_course(
+            ['numsections' => 6, 'format' => 'flexsections', 'shortname' => 'target'],
+            ['createsections' => true]
+        );
+        $this->backup_and_restore($course1, $course3, backup::TARGET_CURRENT_ADDING);
+        $sections = get_fast_modinfo($course3->id)->get_section_info_all();
+        $this->assertEquals(range(0, 6), array_keys($sections));
+        $this->assertEquals(1, $sections[2]->parent);
+    }
+
+    /**
+     * Back a course up and restore it into a new or an existing course.
+     *
+     * @param \stdClass $srccourse course to back up
+     * @param \stdClass|null $dstcourse course to restore into, null to restore into a new course
+     * @param int $target one of the backup::TARGET_xxx constants
+     * @return int id of the course that was restored into
+     */
+    protected function backup_and_restore(
+        \stdClass $srccourse,
+        ?\stdClass $dstcourse = null,
+        int $target = backup::TARGET_NEW_COURSE
+    ): int {
+        global $CFG, $USER;
+
+        $CFG->backup_file_logger_level = backup::LOG_NONE;
+
+        // MODE_IMPORT only creates the backup directory and does not zip it.
+        $bc = new backup_controller(
+            backup::TYPE_1COURSE,
+            $srccourse->id,
+            backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $USER->id
+        );
+        $backupid = $bc->get_backupid();
+        $bc->execute_plan();
+        $bc->destroy();
+
+        $newcourseid = $dstcourse ? $dstcourse->id : restore_dbops::create_new_course(
+            $srccourse->fullname,
+            $srccourse->shortname . '_copy',
+            $srccourse->category
+        );
+        $rc = new restore_controller(
+            $backupid,
+            $newcourseid,
+            backup::INTERACTIVE_NO,
+            backup::MODE_GENERAL,
+            $USER->id,
+            $target
+        );
+        $this->assertTrue($rc->execute_precheck());
+        $rc->execute_plan();
+        $rc->destroy();
+
+        return $newcourseid;
     }
 }
