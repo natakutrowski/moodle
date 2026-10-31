@@ -1,6 +1,21 @@
 Changelog
 =========
 
+v1.2.0
+------
+
+- Improved shortcode processing in HTML content
+
+v1.1.4
+------
+
+- Compatibility with Moodle 5.3
+
+v1.1.3
+------
+
+- Compatibility with Moodle 5.2
+
 v1.1.2
 ------
 
