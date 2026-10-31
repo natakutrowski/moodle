@@ -12,7 +12,7 @@ export const ZeroStateBlock = ({
     children?: React.ReactNode;
 }) => {
     return (
-        <div className="gu-grow gu-flex gu-flex-col gu-items-center gu-justify-center gu-border-dashed gu-border-gray-200 gu-border-2 gu-rounded-lg gu-p-4 gu-py-8">
+        <div className="gu-grow gu-flex gu-flex-col gu-items-center gu-justify-center gu-border-dashed gu-border-gray-200 dark:gu-border-gray-700 gu-border-2 gu-rounded-lg gu-p-4 gu-py-8">
             <div className="gu-text-center">
                 {icon ? (
                     <div className="gu-w-20 gu-mx-auto">

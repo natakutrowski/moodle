@@ -22,7 +22,7 @@
         <div>
             <a href="#" onclick="return false" data-element="trigger" data-id="{{ id }}"
                 {{# needsattention }}data-announce{{/ needsattention }}
-                class="[.no-overflow_&]:gu-mx-0 gu--m-1 gu-p-1 gu-no-underline gu-text-current gu-relative gu-flex gu-gap-2 gu-z-10 gu-group gu-cursor-pointer gu-bg-gray-100 gu-bg-opacity-0 hover:gu-bg-opacity-100 gu-transition-colors gu-rounded  focus:gu-ring-inset focus:gu-ring focus:gu-ring-blue-500">
+                class="[.no-overflow_&]:gu-mx-0 gu--m-1 gu-p-1 !gu-no-underline gu-text-current gu-relative gu-flex gu-gap-2 gu-z-10 gu-group gu-cursor-pointer hover:gu-bg-gray-100 dark:hover:gu-bg-gray-800 gu-transition-colors gu-rounded  focus:gu-ring-inset focus:gu-ring focus:gu-ring-blue-500">
                 <div class="gu-h-16 gu-w-16 gu-shrink-0">
                     {{#hascompleted}}
                         {{#mission}}{{> block_gearup/achievements/badge_thumbnail}}{{/mission}}
@@ -42,10 +42,10 @@
                         </div>
                     </div>
                     {{#hascompleted}}
-                    <!-- <div class="gu-text-gray-500 gu-text-2xs">{{{ timecompletedhtml }}}</div> -->
+                    <!-- <div class="gu-text-gray-500 dark:gu-text-gray-400 gu-text-2xs">{{{ timecompletedhtml }}}</div> -->
                     {{/hascompleted}}
                     {{^hascompleted}}
-                    <div class="gu-bg-gray-100 gu-h-px gu-w-full gu-relative gu-mt-1" style="height: 4px;">
+                    <div class="gu-bg-gray-100 dark:gu-bg-gray-800 gu-h-px gu-w-full gu-relative gu-mt-1" style="height: 4px;">
                         <div class="gu-bg-blue-600 gu-absolute gu-left-0 gu-inset-y-0 {{# iscompletionrationonzero }}gu-min-w-1{{/ iscompletionrationonzero }}"
                             style="width: {{ completionratiopc }}%"></div>
                     </div>
@@ -63,7 +63,7 @@
         <div>
             <a href="#" onclick="return false" data-element="trigger" data-id="{{ id }}"
                     {{# needsattention }}data-announce{{/ needsattention }}
-                    class="gu-block gu-no-underline gu-text-current">
+                    class="gu-block !gu-no-underline gu-text-current">
                 <div class="gu-h-16 gu-w-16">
                     {{#hascompleted}}
                         {{#mission}}{{> block_gearup/achievements/badge_thumbnail}}{{/mission}}

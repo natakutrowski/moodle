@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Shortcodes.
@@ -41,7 +41,6 @@ use context_system;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class shortcodes {
-
     /**
      * Shortcodes.
      *
@@ -73,7 +72,7 @@ class shortcodes {
             return '';
         }
 
-        // TODO We could save a query by returning the instance, or the mission.
+        // Future work: We could save a query by returning the instance, or the mission.
         try {
             $missioninst = $mr->get_instance_by_subject_id($missionid, $USER->id);
         } catch (\moodle_exception $e) {
@@ -119,7 +118,6 @@ class shortcodes {
 
         // Managers don't need an instance.
         if (!$canmanage) {
-
             // Remove from the mobile app for non-managers.
             if (defined('WS_SERVER') && WS_SERVER) {
                 return '';
@@ -150,7 +148,7 @@ class shortcodes {
         $ef = di::get('exporter_factory');
         $exporter = $ef->get_mission_instance_exporter($missioninst);
 
-        // TODO Move this to the renderer.
+        // Future work: Move this to the renderer.
         return $output->render_from_template('block_gearup/shortcode_quest_discovery', [
             'missioninst' => $exporter->export($output),
         ]);
@@ -235,5 +233,4 @@ class shortcodes {
         // Make unique per context.
         return substr(sha1($trackersecret . '|' . $context->id), 0, 10);
     }
-
 }

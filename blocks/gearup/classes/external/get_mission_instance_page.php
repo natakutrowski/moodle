@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\external;
 
@@ -33,7 +33,6 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class get_mission_instance_page extends external_api {
-
     /**
      * Parameters.
      *
@@ -104,5 +103,4 @@ class get_mission_instance_page extends external_api {
     public static function execute_returns() {
         return mission_instance_page::get_read_structure();
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup;
 
@@ -30,7 +30,6 @@ use Generator;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class php_test extends base_testcase {
-
     /**
      * PHP files provider.
      *
@@ -78,5 +77,4 @@ final class php_test extends base_testcase {
             $this->fail("Failed to include file: $relpath");
         }
     }
-
 }

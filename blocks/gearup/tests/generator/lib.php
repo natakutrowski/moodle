@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Level Up Quest generator.
@@ -66,7 +66,6 @@ require_once(__DIR__ . '/../mocks/mission/mission_instance_mock.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_gearup_generator extends \testing_block_generator {
-
     /** @var int The assigner counter. */
     protected $assignercounter = 0;
     /** @var int The mission counter. */
@@ -568,7 +567,8 @@ class block_gearup_generator extends \testing_block_generator {
      * @param array|object|null $data The data.
      */
     public function mock_objective(type $type, $config, $data = null) {
-        return new objective_mock($type,
+        return new objective_mock(
+            $type,
             (object) array_merge(
                 (array) $data ?? [],
                 [
@@ -587,5 +587,4 @@ class block_gearup_generator extends \testing_block_generator {
     public function mock_objective_instance(objective $obj, $data = null) {
         return new objective_instance_mock($obj, (object) ($data ?? []));
     }
-
 }

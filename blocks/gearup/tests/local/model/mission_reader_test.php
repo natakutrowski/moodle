@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\model;
 
@@ -35,7 +35,6 @@ use context_system;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class mission_reader_test extends base_testcase {
-
     /**
      * Test filtering active.
      *
@@ -110,5 +109,4 @@ final class mission_reader_test extends base_testcase {
         $this->assertEquals(1, $reader->count());
         $this->assertEquals($m1->get_id(), iterator_to_array($reader->list())[0][mission_model::class]->get('id'));
     }
-
 }

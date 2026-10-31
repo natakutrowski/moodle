@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\hooks;
 
@@ -27,7 +27,6 @@ namespace block_gearup\local\hooks;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class before_footer_html_generation {
-
     /**
      * Before footer hook.
      *
@@ -47,5 +46,4 @@ class before_footer_html_generation {
         $content = \block_gearup\di::get('html_injector')->inject($PAGE);
         $hook->add_html($content ?? '');
     }
-
 }

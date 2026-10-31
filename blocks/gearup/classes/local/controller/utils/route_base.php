@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Route controller.
@@ -50,7 +50,6 @@ use renderer_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class route_base implements controller {
-
     /** @var \block_gearup\local\permission\access_permissions The permissions. */
     protected $accessperms;
     /** @var \block_gearup\local\routing\routed_request The request. */
@@ -197,7 +196,8 @@ abstract class route_base implements controller {
         // can view all participants in a course without any group restriction applied. When they cannot, we redirect them.
         if ($this->is_page_supporting_groups() && course_utils::uses_group_mode($this->context)) {
             if (!user_utils::can_view_all_participants($this->context, $USER->id)) {
-                $this->redirect($this->urlresolver->reverse('missions'),
+                $this->redirect(
+                    $this->urlresolver->reverse('missions'),
                     get_string('accessnotpermittedcannotviewallparticipants', 'block_gearup'),
                     notification::NOTIFY_ERROR
                 );
@@ -477,9 +477,11 @@ abstract class route_base implements controller {
         echo html_writer::start_tag('div', ['class' => 'block_gearup']);
 
         if ($this->lm->is_evaluating() && $this->accessperms->can_manage()) {
-            echo html_writer::div(strip_tags(markdown_to_html(get_string('evaluationnotice', 'block_gearup')),
+            echo html_writer::div(strip_tags(
+                markdown_to_html(get_string('evaluationnotice', 'block_gearup')),
                 '<a><em><strong>'
-            ), 'gu-bg-yellow-100 gu-border-2 gu-border-black gu-my-4 gu-rounded gu-px-2 gu-py-1 gu-font-bold');
+            ), 'gu-bg-yellow-100 dark:gu-bg-yellow-950 gu-border-2 gu-border-black dark:gu-border-yellow-700 '
+                . 'gu-my-4 gu-rounded gu-px-2 gu-py-1 gu-font-bold');
         }
     }
 

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * API exception.
@@ -36,7 +36,6 @@ namespace block_gearup\local\http;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class api_exception extends client_exception {
-
     /** @var mixed The response decoded. */
     protected $responsedecoded;
 
@@ -68,5 +67,4 @@ class api_exception extends client_exception {
     public function get_error_message() {
         return is_object($this->responsedecoded) ? $this->responsedecoded->message ?? 'Unknown error' : 'Unknown error';
     }
-
 }

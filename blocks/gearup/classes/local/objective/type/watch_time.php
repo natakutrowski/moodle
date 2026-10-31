@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Watch time.
@@ -53,7 +53,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class watch_time implements has_availability_info, type {
-
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof time_watched) {
             return;
@@ -90,26 +92,44 @@ class watch_time implements has_availability_info, type {
         $instance->set_type_state($state);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         return new plugin_required_info('media_videojs', 'VideoJS');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new watch_time_config_form_extender();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typewatchtime', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typewatchtimedesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof time_watched;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -128,7 +148,6 @@ class watch_time implements has_availability_info, type {
         $state = $instance->get_type_state();
         return $state ?? (object) ['buffer' => 0];
     }
-
 }
 
 /**
@@ -140,13 +159,16 @@ class watch_time implements has_availability_info, type {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class watch_time_config_form_extender implements extender, extender_with_default_data {
-
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
         $mform->removeElement('countneeded');
 
-        $els[] = $mform->addElement('duration',
+        $els[] = $mform->addElement(
+            'duration',
             'countneeded',
             get_string('howmuchtime', 'block_gearup'),
             ['defaultunit' => HOURSECS, 'units' => [MINSECS, HOURSECS]]
@@ -155,17 +177,26 @@ class watch_time_config_form_extender implements extender, extender_with_default
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         // Save in minutes.
         $data->countneeded = floor($data->countneeded / 60);
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_default_data($data) {
         $data->countneeded = $data->countneeded * 60;
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if ($data->countneeded < 60) {
@@ -173,5 +204,4 @@ class watch_time_config_form_extender implements extender, extender_with_default
         }
         return $errors;
     }
-
 }

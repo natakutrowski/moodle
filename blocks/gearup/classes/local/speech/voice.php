@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\speech;
 
@@ -27,7 +27,6 @@ namespace block_gearup\local\speech;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface voice {
-
     /** Female voice. */
     const GENDER_FEMALE = 'f';
     /** Male voice. */
@@ -67,5 +66,4 @@ interface voice {
      * @return \moodle_url|null
      */
     public function get_sample_url(): ?\moodle_url;
-
 }

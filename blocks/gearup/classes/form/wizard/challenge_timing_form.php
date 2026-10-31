@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -42,13 +42,17 @@ use core\form\persistent;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class challenge_timing_form extends persistent {
-
+    /** @var mixed Persistentclass. */
     protected static $persistentclass = mission_model::class;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         $mform = $this->_form;
 
-        $mform->addElement('select',
+        $mform->addElement(
+            'select',
             'timelimit',
             get_string('timetocomplete', 'block_gearup'),
             challenge_timing_dynamic_form::get_time_options()
@@ -71,6 +75,9 @@ class challenge_timing_form extends persistent {
         $this->add_action_buttons(false, get_string('continue'));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_default_data() {
         $data = parent::get_default_data();
 
@@ -80,6 +87,9 @@ class challenge_timing_form extends persistent {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data() {
         $data = parent::get_data();
         if (is_object($data)) {
@@ -91,5 +101,4 @@ class challenge_timing_form extends persistent {
         }
         return $data;
     }
-
 }

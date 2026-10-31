@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Testcase.
@@ -44,7 +44,6 @@ use block_gearup\tests\base_testcase;
  * @covers     \block_gearup\local\objective\type\type
  */
 final class compliance_test extends base_testcase {
-
     public function test_objective_compliance(): void {
         foreach ($this->get_instantiable_reflection_classes('local\\objective\\type') as $class) {
             if ($class->hasMethod('get_supporting_url')) {
@@ -70,5 +69,4 @@ final class compliance_test extends base_testcase {
             $this->assert_availability_info_compliance($class);
         }
     }
-
 }

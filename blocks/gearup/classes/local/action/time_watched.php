@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Action.
@@ -38,12 +38,14 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class time_watched extends static_action {
-
     /** @var int The time watched in seconds. */
     protected $duration;
     /** @var string The source unique identifier. */
     protected $sourceid;
 
+    /**
+     * {@inheritDoc}
+     */
     public function __construct($userid, context $context, int $duration, string $sourceid) {
         $this->duration = (int) $duration;
         $this->sourceid = $sourceid;
@@ -67,5 +69,4 @@ class time_watched extends static_action {
     public function get_source_id(): string {
         return $this->sourceid;
     }
-
 }

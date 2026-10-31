@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
-
+// See <https://levelup.plus>.
 
 namespace block_gearup\output;
 
@@ -38,7 +37,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_instance_page implements named_templatable, renderable {
-
     /** @var mission_instance The instance. */
     protected $missioninst;
     /** @var string */
@@ -71,6 +69,9 @@ class mission_instance_page implements named_templatable, renderable {
         return $this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function export_for_template(renderer_base $output) {
         $missioninst = $this->missioninst;
         $urlresolver = $this->urlresolver;
@@ -144,6 +145,9 @@ class mission_instance_page implements named_templatable, renderable {
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_template_name(renderer_base $renderer): string {
         if ($this->mh->is_a_streak($this->missioninst)) {
             return 'block_gearup/streak/instance';
@@ -151,6 +155,11 @@ class mission_instance_page implements named_templatable, renderable {
         return 'block_gearup/mission_instance';
     }
 
+    /**
+     * Get read structure.
+     *
+     * @return external_single_structure
+     */
     public static function get_read_structure() {
         $exporterclass = di::get('exporter_factory')->get_mission_instance_exporter_class();
         return new external_single_structure([
@@ -164,5 +173,4 @@ class mission_instance_page implements named_templatable, renderable {
             'missioninst' => $exporterclass::get_read_structure(),
         ]);
     }
-
 }

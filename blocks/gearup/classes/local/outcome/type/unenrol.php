@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome.
@@ -52,7 +52,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class unenrol implements has_availability_info, type, type_with_update_after_restore {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         $config = $outcome->get_type_config();
         $userid = $missioninst->get_subject_id();
@@ -71,6 +73,9 @@ class unenrol implements has_availability_info, type, type_with_update_after_res
         $enrol->unenrol_user($instance, $userid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         global $CFG;
         require_once($CFG->libdir . '/enrollib.php');
@@ -82,18 +87,30 @@ class unenrol implements has_availability_info, type, type_with_update_after_res
         ])]);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new unenrol_config_form_extender($mission);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('outcomeunenrol', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('outcomeunenroldesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, outcome $outcome, mission $mission) {
         if (!$outcome instanceof persisted_outcome) {
             $restore->get_logger()->process("Cannot process after_restore of outcome " . $outcome->get_id(), backup::LOG_WARNING);
@@ -147,16 +164,26 @@ class unenrol implements has_availability_info, type, type_with_update_after_res
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class unenrol_config_form_extender implements extender {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Repository. */
     protected $repository;
 
+    /**
+     * Constructor.
+     *
+     * @param mission $mission Mission.
+     */
     public function __construct(mission $mission) {
         $this->mission = $mission;
         $this->context = $mission->get_context();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els[] = $mform->addElement('course', 'cd_courseid', get_string('course', 'core'), [
             'requiredcapabilities' => ['enrol/manual:enrol'],
@@ -167,10 +194,16 @@ class unenrol_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -182,5 +215,4 @@ class unenrol_config_form_extender implements extender {
 
         return $errors;
     }
-
 }

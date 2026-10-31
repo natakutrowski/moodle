@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mission persistent.
@@ -43,12 +43,16 @@ use core\persistent;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission extends persistent {
-
+    /** Table. */
     const TABLE = 'block_gearup_mission';
 
+    /** Type achievement. */
     const TYPE_ACHIEVEMENT = 0;
+    /** Type quest. */
     const TYPE_QUEST = 1;
+    /** Type challenge. */
     const TYPE_CHALLENGE = 2;
+    /** Type streak. */
     const TYPE_STREAK = 4;
 
     /**
@@ -108,14 +112,14 @@ class mission extends persistent {
                     return substr(bin2hex(random_bytes(5)), 0, 10);
                 },
             ],
-            // TODO We could use secrecy as a bitwise operator to set whether name, outcomes, objectives are shown.
+            // Future work: We could use secrecy as a bitwise operator to set whether name, outcomes, objectives are shown.
             // 'secrecy' => [
             // 'type' => PARAM_INT,
             // 'choices' => [
             // 0,  // None, this is visible.
             // 1,  // Secret. For achievements, this means that it is visible but details unknown.
             // ]
-            // ],
+            // ],.
             'startmode' => [
                 'type' => PARAM_INT,
                 'choices' => [
@@ -192,7 +196,8 @@ class mission extends persistent {
      * @return bool|\lang_string
      */
     protected function validate_repeatcount($value) {
-        if ($this->is_streak()
+        if (
+            $this->is_streak()
                 && $this->get('state') == mission_interface::STATE_ACTIVE
                 && $value != mission_interface::REPEAT_ALWAYS
         ) {
@@ -221,7 +226,8 @@ class mission extends persistent {
      * @return bool|\lang_string
      */
     protected function validate_timelimit($value) {
-        if ($this->is_streak()
+        if (
+            $this->is_streak()
                 && $this->get('state') == mission_interface::STATE_ACTIVE
                 && !$value
         ) {
@@ -287,5 +293,4 @@ class mission extends persistent {
                 throw new \coding_exception('Unknown type class');
         }
     }
-
 }

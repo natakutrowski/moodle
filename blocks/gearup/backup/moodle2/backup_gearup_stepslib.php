@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 use block_gearup\di;
 use block_gearup\local\backup\backup_facade;
@@ -38,7 +38,6 @@ use block_gearup\local\backup\backup_processor;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_gearup_block_structure_step extends backup_block_structure_step {
-
     /**
      * Define structure.
      */
@@ -56,7 +55,8 @@ class backup_gearup_block_structure_step extends backup_block_structure_step {
             'timelimit', 'visibility', 'visual', 'voiceid', 'usermodified', 'timecreated', 'timemodified']);
         $objectives = new backup_nested_element('objectives');
         $objective = new backup_nested_element('objective', ['id'], [
-            'type', 'label', 'countneeded', 'configdata', 'supportingurl', 'usermodified', 'timecreated', 'timemodified']);
+            'type', 'label', 'countneeded', 'configdata', 'supportingurl', 'sortorder', 'usermodified',
+            'timecreated', 'timemodified']);
         $outcomes = new backup_nested_element('outcomes');
         $outcome = new backup_nested_element('outcome', ['id'], [
             'type', 'label', 'visibility', 'configdata', 'usermodified', 'timecreated', 'timemodified']);
@@ -128,6 +128,11 @@ class backup_gearup_block_structure_step extends backup_block_structure_step {
         return $gearup;
     }
 
+    /**
+     * Internal backup process.
+     *
+     * @return void
+     */
     protected function internal_backup_process() {
         $backup = backup_facade::from_structure_step($this);
 

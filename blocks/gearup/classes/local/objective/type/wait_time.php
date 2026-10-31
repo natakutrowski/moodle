@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective.
@@ -49,7 +49,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class wait_time implements type, type_with_state_initialisation, type_with_state_reevaluation {
-
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
     }
 
@@ -87,10 +89,16 @@ class wait_time implements type, type_with_state_initialisation, type_with_state
         $instance->set_stale_from($targettime);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
         $this->evaluate($instance, $missioninst);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function reevaluate_state(objective_instance $instance) {
         $repository = di::get('repository');
         try {
@@ -101,22 +109,37 @@ class wait_time implements type, type_with_state_initialisation, type_with_state
         $this->evaluate($instance, $missioninst);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new wait_time_config_form_extender();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typewaittime', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typewaittimedesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -124,7 +147,6 @@ class wait_time implements type, type_with_state_initialisation, type_with_state
     ): bool {
         return false;
     }
-
 }
 
 /**
@@ -136,7 +158,9 @@ class wait_time implements type, type_with_state_initialisation, type_with_state
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class wait_time_config_form_extender implements extender {
-
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
@@ -145,7 +169,8 @@ class wait_time_config_form_extender implements extender {
         $mform->setType('countneeded', PARAM_INT);
         $mform->setConstant('countneeded', 1);
 
-        $mform->addElement('duration',
+        $mform->addElement(
+            'duration',
             'cd_time',
             get_string('howmuchtime', 'block_gearup'),
             ['units' => [MINSECS, HOURSECS, DAYSECS, WEEKSECS]]
@@ -155,10 +180,16 @@ class wait_time_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if ($data->cd_time < 1) {
@@ -166,5 +197,4 @@ class wait_time_config_form_extender implements extender {
         }
         return $errors;
     }
-
 }

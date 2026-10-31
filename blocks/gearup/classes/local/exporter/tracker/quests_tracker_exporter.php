@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\exporter\tracker;
 
@@ -22,6 +22,7 @@ use block_gearup\di;
 use block_gearup\local\exporter\context_exporter;
 use block_gearup\local\exporter\mission_instance_exporter;
 use block_gearup\local\mission\mission_instance;
+use block_gearup\output\tracker;
 use renderer_base;
 
 /**
@@ -33,7 +34,6 @@ use renderer_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quests_tracker_exporter extends missions_tracker_exporter_base {
-
     /**
      * Return the list of properties.
      *
@@ -85,6 +85,11 @@ class quests_tracker_exporter extends missions_tracker_exporter_base {
         $userid = $this->userid;
         $context = $this->related['context'];
         $urlresolver = $this->related['url_resolver'] ?? di::get('url_resolver');
+        $ongoinglimit = max(0, (int) get_config('block_gearup', 'trackermaxongoingquests'));
+        $ongoingorder = match ((int) get_config('block_gearup', 'trackersortongoingquests')) {
+            tracker::SORT_ALPHABETICAL => ['m.title ASC'],
+            default => ['mi.timecompleted DESC', 'mi.timestarted DESC'],
+        };
 
         $nquests = $mr->count_quest_instances_by_subject_id($userid, null, $context);
         $nstartedquests = 0;
@@ -93,18 +98,19 @@ class quests_tracker_exporter extends missions_tracker_exporter_base {
         $availablequests = [];
         $nendedquests = 0;
         if ($nquests) {
-
             // Fetch some of the ongoing quests.
-            $nstartedquests = $mr->count_quest_instances_by_subject_id($userid,
+            $nstartedquests = $mr->count_quest_instances_by_subject_id(
+                $userid,
                 [mission_instance::STATE_STARTED, mission_instance::STATE_COMPLETED],
                 $context
             );
-            $startedquests = $mr->get_quest_instances_by_subject_id($userid,
+            $startedquests = $mr->get_quest_instances_by_subject_id(
+                $userid,
                 [mission_instance::STATE_STARTED, mission_instance::STATE_COMPLETED],
                 $context,
-                ['mi.timecompleted DESC', 'mi.timestarted DESC'],
+                $ongoingorder,
                 0,
-                3
+                $ongoinglimit
             );
 
             // Fetch the available quests.

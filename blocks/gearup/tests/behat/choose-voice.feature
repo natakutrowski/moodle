@@ -45,7 +45,8 @@ Feature: Testing choosing a voice for the quest
     And I press "Continue"
     And I should see "You're done!"
     And I follow "View quest"
-    When I click on "Edit" "button" in the definition "Identity"
+    When I click on "Actions" "button" in the definition "Identity"
+    And I click on "Edit" "button" in the definition "Identity"
     Then the field "Language" in the "Edit quest" "dialogue" matches value "French (France)"
     And the field "Voice" in the "Edit quest" "dialogue" matches value "Fred 👨 (fr-FR)"
 
@@ -72,6 +73,7 @@ Feature: Testing choosing a voice for the quest
     And I press "Continue"
     And I should see "You're done!"
     And I follow "View quest"
+    And I click on "Actions" "button" in the definition "Identity"
     And I click on "Edit" "button" in the definition "Identity"
     Then the field "Language" in the "Edit quest" "dialogue" matches value "Italian (Italy)"
     And the field "Voice" in the "Edit quest" "dialogue" matches value "Maria 👩 (it-IT)"
@@ -83,18 +85,21 @@ Feature: Testing choosing a voice for the quest
       | First Quest | c1     | The instructions are here | 1         |
     And I am on the "First Quest" "block_gearup > quest" page logged in as "t1"
 
+    And I click on "Actions" "button" in the definition "Identity"
     And I click on "Edit" "button" in the definition "Identity"
     And the field "Language" in the "Edit quest" "dialogue" matches value "--"
     And I set the field "Language" in the "Edit quest" "dialogue" to "French (France)"
     And I set the field "Voice" in the "Edit quest" "dialogue" to "Fred 👨 (fr-FR)"
     When I click on "Save changes" "button" in the "Edit quest" "dialogue"
 
+    And I click on "Actions" "button" in the definition "Identity"
     And I click on "Edit" "button" in the definition "Identity"
     Then the field "Language" in the "Edit quest" "dialogue" matches value "French (France)"
     And the field "Voice" in the "Edit quest" "dialogue" matches value "Fred 👨 (fr-FR)"
     And I set the field "Voice" in the "Edit quest" "dialogue" to "Maria 👩 (fr-FR)"
     And I click on "Save changes" "button" in the "Edit quest" "dialogue"
 
+    And I click on "Actions" "button" in the definition "Identity"
     And I click on "Edit" "button" in the definition "Identity"
     Then the field "Language" in the "Edit quest" "dialogue" matches value "French (France)"
     And the field "Voice" in the "Edit quest" "dialogue" matches value "Maria 👩 (fr-FR)"
@@ -102,11 +107,13 @@ Feature: Testing choosing a voice for the quest
     And I set the field "Voice" in the "Edit quest" "dialogue" to "Hans 👨 (de-DE)"
     And I click on "Save changes" "button" in the "Edit quest" "dialogue"
 
+    And I click on "Actions" "button" in the definition "Identity"
     And I click on "Edit" "button" in the definition "Identity"
     And the field "Language" in the "Edit quest" "dialogue" matches value "German (Germany)"
     And the field "Voice" in the "Edit quest" "dialogue" matches value "Hans 👨 (de-DE)"
     And I set the field "Language" in the "Edit quest" "dialogue" to "--"
     And I click on "Save changes" "button" in the "Edit quest" "dialogue"
 
+    And I click on "Actions" "button" in the definition "Identity"
     And I click on "Edit" "button" in the definition "Identity"
     And the field "Language" in the "Edit quest" "dialogue" matches value "--"

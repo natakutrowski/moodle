@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Access course.
@@ -58,7 +58,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class access_course implements type, type_with_state_reevaluation, type_with_supporting_url, type_with_update_after_restore {
-
     /** Any course. */
     const WHICH_ANY = 0;
     /** One specific course. */
@@ -67,6 +66,9 @@ class access_course implements type, type_with_state_reevaluation, type_with_sup
     /** The URL mode. */
     const URLMODE_COURSE = 1;
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof course_accessed) {
             return;
@@ -92,18 +94,30 @@ class access_course implements type, type_with_state_reevaluation, type_with_sup
         $instance->set_stale_from($evaluator->get_stale_from());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new access_course_config_form_extender($mission->get_context());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typeaccesscourse', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new \lang_string('typeaccesscoursedesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url(objective $objective, $urltype): ?moodle_url {
         if ($urltype === static::URLMODE_COURSE) {
             $config = $objective->get_type_config();
@@ -116,10 +130,16 @@ class access_course implements type, type_with_state_reevaluation, type_with_sup
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof course_accessed;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -161,6 +181,9 @@ class access_course implements type, type_with_state_reevaluation, type_with_sup
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function reevaluate_state(objective_instance $instance) {
         $evaluator = $this->get_evaluator(new DateTimeImmutable(), $instance);
         if ($evaluator->is_late()) {
@@ -210,9 +233,13 @@ class access_course implements type, type_with_state_reevaluation, type_with_sup
         return $state ?? (object) ['lastaccess' => 0, 'courseids' => []];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, objective $objective, mission $mission) {
         if (!$objective instanceof persisted_objective) {
-            $restore->get_logger()->process("Cannot process after_restore of objective " . $objective->get_id(),
+            $restore->get_logger()->process(
+                "Cannot process after_restore of objective " . $objective->get_id(),
                 backup::LOG_WARNING
             );
             return;
@@ -238,7 +265,6 @@ class access_course implements type, type_with_state_reevaluation, type_with_sup
             $restore->get_logger()->process("Error while updating objective " . $objective->get_id(), backup::LOG_WARNING);
         }
     }
-
 }
 
 /**
@@ -250,10 +276,13 @@ class access_course implements type, type_with_state_reevaluation, type_with_sup
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class access_course_config_form_extender implements extender, extender_with_supporting_url_modes {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Coursecontext. */
     protected $coursecontext;
+    /** @var mixed Courseid. */
     protected $courseid;
+    /** @var mixed Incourse. */
     protected $incourse;
 
     /**
@@ -271,6 +300,9 @@ class access_course_config_form_extender implements extender, extender_with_supp
         $this->courseid = $this->incourse ? $this->coursecontext->instanceid : null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
@@ -285,12 +317,12 @@ class access_course_config_form_extender implements extender, extender_with_supp
             $mform->setType('cd_courseid', PARAM_INT);
             $mform->setConstant('cd_courseid', $this->courseid);
 
-            $els[] = $mform->addElement('static',
+            $els[] = $mform->addElement(
+                'static',
                 'cd_courseidhint',
                 get_string('course', 'core'),
                 get_string('thiscoursen', 'block_gearup', $this->coursecontext->get_context_name(false, true))
             );
-
         } else {
             $els[] = $mform->addElement('select', 'cd_which', get_string('elligiblecourse', 'block_gearup'), [
                 access_course::WHICH_ANY => get_string('anycourse', 'block_gearup'),
@@ -312,7 +344,8 @@ class access_course_config_form_extender implements extender, extender_with_supp
             $mform->hideIf('cd_unique', 'cd_which', 'neq', access_course::WHICH_ANY);
         }
 
-        $els[] = $mform->addElement('select',
+        $els[] = $mform->addElement(
+            'select',
             'cd_mode',
             get_string('accesscounts', 'block_gearup'),
             frequency_evaluator::get_form_options()
@@ -329,6 +362,9 @@ class access_course_config_form_extender implements extender, extender_with_supp
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         if ($data->cd_which == access_course::WHICH_SPECIFIC) {
             $data->cd_courseid = (int) $data->cd_courseid;
@@ -343,6 +379,9 @@ class access_course_config_form_extender implements extender, extender_with_supp
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url_modes(): array {
         if ($this->incourse) {
             return [];
@@ -352,6 +391,9 @@ class access_course_config_form_extender implements extender, extender_with_supp
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if (!isset($data->cd_which)) {
@@ -362,5 +404,4 @@ class access_course_config_form_extender implements extender, extender_with_supp
         }
         return $errors;
     }
-
 }

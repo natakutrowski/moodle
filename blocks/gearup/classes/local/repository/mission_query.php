@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\repository;
 
@@ -29,7 +29,6 @@ use block_gearup\local\model\mission as mission_model;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_query extends query_base {
-
     /**
      * Add order.
      *
@@ -426,5 +425,4 @@ class mission_query extends query_base {
         $this->set_condition('type', $type);
         return $this;
     }
-
 }

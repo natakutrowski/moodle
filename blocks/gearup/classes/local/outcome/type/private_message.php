@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome.
@@ -63,7 +63,9 @@ class private_message implements
     type,
     type_with_backup_handling,
     type_with_update_after_restore {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         $config = $outcome->get_type_config();
         $userid = $missioninst->get_subject_id();
@@ -76,22 +78,37 @@ class private_message implements
         $this->send_message($userid, $config->userfromid, $config->message);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         return new admin_setting_info('messaging', new lang_string('messaging', 'core_admin'));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_user(int $userid, \context $context): info {
         return new permission_required_info('moodle/site:sendmessage', $context, $userid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new message_config_form_extender();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('outcomeprivatemessage', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('outcomeprivatemessagedesc', 'block_gearup');
     }
@@ -137,12 +154,18 @@ class private_message implements
         message_send($message);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function extend_backup(backup_facade $backup, outcome $outcome, mission $mission) {
         $config = $outcome->get_type_config();
         $userfromid = $config->userfromid;
         $backup->set_mapping_id('user', $userfromid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, outcome $outcome, mission $mission) {
         if (!$outcome instanceof persisted_outcome) {
             $restore->get_logger()->process("Cannot process after_restore of outcome " . $outcome->get_id(), backup::LOG_WARNING);
@@ -179,8 +202,9 @@ class private_message implements
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class message_config_form_extender implements extender {
-
-
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         global $USER;
 
@@ -218,10 +242,16 @@ class message_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -237,5 +267,4 @@ class message_config_form_extender implements extender {
 
         return $errors;
     }
-
 }

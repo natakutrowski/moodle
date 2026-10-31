@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -42,19 +42,28 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class inactive extends route_base {
-
+    /** @var bool Requiremanage. */
     protected $requiremanage = false;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function define_optional_params() {
         return [
             ['action', null, PARAM_ALPHANUMEXT, false],
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_html_head_title() {
         return get_string('licenceexpired', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function pre_content() {
         parent::pre_content();
         $lm = di::get('lm');
@@ -73,7 +82,6 @@ class inactive extends route_base {
             $fs->delete_area_files(context_system::instance()->id, 'block_gearup', 'metadata');
 
             return $this->redirect(null, get_string('cachepurged', 'block_gearup'));
-
         } else if ($this->get_param('action') === 'deactivate' && confirm_sesskey()) {
             unset_config('activationid', 'block_gearup');
             unset_config('activationtoken', 'block_gearup');
@@ -87,6 +95,9 @@ class inactive extends route_base {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         $output = $this->get_renderer();
         $purgeurl = new moodle_url($this->pageurl, ['action' => 'purge', 'sesskey' => sesskey()]);
@@ -99,5 +110,4 @@ class inactive extends route_base {
             'deactivateurl' => $deactivateurl->out(false),
         ]);
     }
-
 }

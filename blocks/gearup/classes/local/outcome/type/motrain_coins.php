@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome.
@@ -53,7 +53,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class motrain_coins implements has_availability_info, has_availability_info_for_user, user_facing_type {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         $config = $outcome->get_type_config();
         if (!class_exists('block_motrain\manager')) {
@@ -73,10 +75,16 @@ class motrain_coins implements has_availability_info, has_availability_info_for_
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         return new plugin_required_info('block_motrain', 'Motrain', 2023052200, 'v1.8');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_user(int $userid, \context $context): info {
         global $USER;
         if (!class_exists('block_motrain\manager')) {
@@ -85,18 +93,26 @@ class motrain_coins implements has_availability_info, has_availability_info_for_
         return new permission_required_info('block/motrain:manage', $context, $USER->id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new motrain_coins_config_form_extender();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('outcomemotraincoins', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('outcomemotraincoinsdesc', 'block_gearup');
     }
-
 }
 
 /**
@@ -108,7 +124,9 @@ class motrain_coins implements has_availability_info, has_availability_info_for_
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class motrain_coins_config_form_extender implements extender {
-
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
         $els[] = $mform->addElement('text', 'cd_coins', get_string('coins', 'block_motrain'));
@@ -116,10 +134,16 @@ class motrain_coins_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if ($data->cd_coins <= 0) {
@@ -127,5 +151,4 @@ class motrain_coins_config_form_extender implements extender {
         }
         return $errors;
     }
-
 }

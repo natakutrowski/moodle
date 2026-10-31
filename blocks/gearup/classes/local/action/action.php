@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Action.
@@ -36,9 +36,34 @@ namespace block_gearup\local\action;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface action {
+    /**
+     * Get user id.
+     *
+     * @return int
+     */
     public function get_user_id(): int;
+    /**
+     * Get context.
+     *
+     * @return \context
+     */
     public function get_context(): \context;
+    /**
+     * Get object id.
+     *
+     * @return int|null
+     */
     public function get_object_id(): ?int;
+    /**
+     * Get target user id.
+     *
+     * @return int|null
+     */
     public function get_target_user_id(): ?int;
+    /**
+     * Get time.
+     *
+     * @return \DateTimeImmutable
+     */
     public function get_time(): \DateTimeImmutable;
 }

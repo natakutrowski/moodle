@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Operator.
@@ -69,17 +69,25 @@ use DateTimeImmutable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_operator {
-
     /** @var \block_gearup\local\repository\repository */
     protected $repository;
     /** @var \block_gearup\local\mission\helper */
     protected $missionhelper;
     /** @var \core\clock */
     protected $clock;
+    /** @var mixed Completionratiocalculator. */
     protected $completionratiocalculator;
     /** @var objective_operator */
     protected $objectiveoperator;
 
+    /**
+     * Constructor.
+     *
+     * @param mixed $repository Repository.
+     * @param mixed $missionhelper Missionhelper.
+     * @param mixed $completionratiocalculator Completionratiocalculator.
+     * @param objective_operator $objectiveoperator Objectiveoperator.
+     */
     public function __construct(
         $repository,
         $missionhelper,
@@ -107,6 +115,13 @@ class mission_operator {
         $persistent->save();
     }
 
+    /**
+     * Assign mission.
+     *
+     * @param mission $mission Mission.
+     * @param mixed $userid Userid.
+     * @return mission_instance
+     */
     public function assign_mission(mission $mission, $userid): mission_instance {
         if (!$this->missionhelper->is_active($mission)) {
             throw new \coding_exception('The mission is not active.');
@@ -114,7 +129,7 @@ class mission_operator {
         if ($this->repository->is_assigned_mission($userid, $mission->get_id())) {
             // We cannot assign the mission more than once using this method. If a mission needs to
             // be assigned multiple times, see calls to self::create_iterated_instance for info.
-            // TODO Perhaps if there all instances are ended we can automatically created an iteration.
+            // Future work: Perhaps if there all instances are ended we can automatically created an iteration.
             // Although this might be worse for performance, and thus maybe another "assign_or_iterate"
             // should be created for cases we want to handle iterations automatically.
             return $this->repository->get_instance_by_subject_id($mission->get_id(), $userid);
@@ -125,6 +140,12 @@ class mission_operator {
         return $missioninst;
     }
 
+    /**
+     * Apply instance outcomes.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @return void
+     */
     protected function apply_instance_outcomes(mission_instance $missioninst) {
         $outcomes = $this->repository->get_outcomes($missioninst->get_mission()->get_id());
         foreach ($outcomes as $outcome) {
@@ -142,7 +163,7 @@ class mission_operator {
      * @param action $action The action,
      */
     protected function broadcast_action(action $action) {
-        // TODO Perhaps we should not process this right here. We should also not use the
+        // Future work: Perhaps we should not process this right here. We should also not use the
         // di object right here but the action processor require the mission operator.
         // In the future we can inject the action processor after instantiating the
         // mission operator and only broadcast the actions when we validate that we
@@ -156,6 +177,12 @@ class mission_operator {
         }
     }
 
+    /**
+     * Complete instance.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @return void
+     */
     public function complete_instance(mission_instance $missioninst) {
         if (!$this->missionhelper->is_active($missioninst)) {
             throw new \coding_exception('The mission is not active.');
@@ -212,10 +239,17 @@ class mission_operator {
         }
     }
 
+    /**
+     * Create instance.
+     *
+     * @param mission $mission Mission.
+     * @param mixed $userid Userid.
+     * @return mission_instance
+     */
     protected function create_instance(mission $mission, $userid): mission_instance {
-        // TODO Prevent multiple instances of the same mission.
-        // TODO Wrap in a transaction.
-        // TODO Should the operator know about the database? It seems that the resolver would instead.
+        // Future work: Prevent multiple instances of the same mission.
+        // Future work: Wrap in a transaction.
+        // Future work: Should the operator know about the database? It seems that the resolver would instead.
         $persistent = new mission_inst(0, (object) [
             'subjectid' => $userid,
             'missionid' => $mission->get_id(),
@@ -224,6 +258,12 @@ class mission_operator {
         return new persisted_mission_instance($persistent, $mission, []);
     }
 
+    /**
+     * Create iterated instance.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @return mission_instance
+     */
     protected function create_iterated_instance(mission_instance $missioninst): mission_instance {
         $mission = $this->missionhelper->get_mission($missioninst);
         $hasnotended = mission_inst::record_exists_select('subjectid = ? AND missionid = ? AND state != ?', [
@@ -243,8 +283,15 @@ class mission_operator {
         return new persisted_mission_instance($persistent, $mission, []);
     }
 
+    /**
+     * Create objective instance.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @param objective $objective Objective.
+     * @return mixed
+     */
     protected function create_objective_instance(mission_instance $missioninst, objective $objective) {
-        // TODO Should the operator know about the database? I think not.
+        // Future work: Should the operator know about the database? I think not.
         $objinstmodel = new objective_inst(0, (object) [
             'missioninstid' => $missioninst->get_id(),
             'subjectid' => $missioninst->get_subject_id(),
@@ -254,7 +301,8 @@ class mission_operator {
         $oi = new persisted_objective_instance($objinstmodel, $objective);
 
         // Challenges and streaks do not resume from previous states.
-        if (!$this->missionhelper->is_a_challenge($missioninst)
+        if (
+            !$this->missionhelper->is_a_challenge($missioninst)
                 && !$this->missionhelper->is_a_streak($missioninst)
         ) {
             $this->objectiveoperator->initialise_state_on_instance($missioninst, $oi);
@@ -263,13 +311,19 @@ class mission_operator {
         return $oi;
     }
 
+    /**
+     * Delete instance.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @return void
+     */
     public function delete_instance(mission_instance $missioninst) {
         // No archive/active check here. For now we will trust the calling code
         // because there are instances where we want to be able to delete stuff even
         // when something has been archived.
 
-        // TODO Wrap in transaction.
-        // TODO Should the operator know about the database, I think not!
+        // Future work: Wrap in transaction.
+        // Future work: Should the operator know about the database, I think not!
         $id = $missioninst->get_id();
         if ($missioninst instanceof persisted_mission_instance) {
             $mi = $missioninst->get_persistent();
@@ -283,10 +337,16 @@ class mission_operator {
         $mi->delete();
     }
 
+    /**
+     * Delete mission.
+     *
+     * @param mission $mission Mission.
+     * @return void
+     */
     public function delete_mission(mission $mission) {
         global $DB;
-        // TODO Wrap in transaction.
-        // TODO Should the operator know about the database, I think not!
+        // Future work: Wrap in transaction.
+        // Future work: Should the operator know about the database, I think not!
         $missionid = $mission->get_id();
         $objids = $DB->get_fieldset_select(objective_model::TABLE, 'id', 'missionid = ?', [$missionid]);
         if (!empty($objids)) {
@@ -408,8 +468,8 @@ class mission_operator {
             if ($deadlinepassed) {
                 // Missions with deadline that has expired as ended.
                 $this->end_instance($missioninst);
-
-            } else if ($ischallenge && !$deadline && $this->missionhelper->is_completed($missioninst)
+            } else if (
+                $ischallenge && !$deadline && $this->missionhelper->is_completed($missioninst)
                     && $missioninst->get_time_completed()->getTimestamp() < $time - DAYSECS
             ) {
                 // Missions without deadline that have been completed more than a day ago are to be finished.
@@ -418,6 +478,12 @@ class mission_operator {
         }
     }
 
+    /**
+     * End instance.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @return mixed
+     */
     public function end_instance(mission_instance $missioninst) {
         global $DB;
 
@@ -432,7 +498,6 @@ class mission_operator {
 
         // Special edge-case for ending streaks.
         if ($isstreak) {
-
             // We restart the streaks that were completed on time, so long as they're not being re-evaluated too late.
             // We also restart the streaks that never were completed a single time.
             $nextdeadline = $this->calculate_deadline($missioninst, $missioninst->get_deadline()->add(new DateInterval('PT1S')));
@@ -451,7 +516,7 @@ class mission_operator {
                 $objinsts = [];
                 foreach ($missioninst->get_objective_instances() as $objinst) {
                     if (!in_array($objinst->get_objective()->get_id(), $objids)) {
-                        // TODO This is not how we should be deleting an objective instance.
+                        // Future work: This is not how we should be deleting an objective instance.
                         if ($objinst instanceof persisted_objective_instance) {
                             $objinst->get_persistent()->delete();
                         } else {
@@ -493,7 +558,7 @@ class mission_operator {
             }
         }
 
-        // TODO Wrap all in a transaction?
+        // Future work: Wrap all in a transaction?
         if (!$this->missionhelper->is_completed($missioninst)) {
             $this->complete_instance($missioninst);
         }
@@ -523,6 +588,12 @@ class mission_operator {
         }
     }
 
+    /**
+     * Finish instance.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @return void
+     */
     public function finish_instance(mission_instance $missioninst) {
         // Less permissive mission for public use.
         if (!$this->missionhelper->is_active($missioninst)) {
@@ -533,6 +604,13 @@ class mission_operator {
         $this->end_instance($missioninst);
     }
 
+    /**
+     * Increment counter.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @param int $by By.
+     * @return void
+     */
     public function increment_counter(mission_instance $missioninst, $by = 1) {
         if (!$this->missionhelper->is_active($missioninst)) {
             throw new \coding_exception('The mission is not active.');
@@ -558,27 +636,76 @@ class mission_operator {
         }
     }
 
+    /**
+     * Move an objective down within its mission.
+     *
+     * @param mission $mission The mission.
+     * @param int $objectiveid The objective ID.
+     * @return void
+     */
+    public function move_objective_down(mission $mission, int $objectiveid): void {
+        if ($this->missionhelper->is_archived($mission)) {
+            throw new \moodle_exception('cannoteditarchivedmission', 'block_gearup');
+        }
+
+        $objective = $mission->get_objective($objectiveid);
+        if ($objective instanceof persisted_objective) {
+            $objective->get_persistent()->move_down();
+        }
+    }
+
+    /**
+     * Move an objective up within its mission.
+     *
+     * @param mission $mission The mission.
+     * @param int $objectiveid The objective ID.
+     * @return void
+     */
+    public function move_objective_up(mission $mission, int $objectiveid): void {
+        if ($this->missionhelper->is_archived($mission)) {
+            throw new \moodle_exception('cannoteditarchivedmission', 'block_gearup');
+        }
+
+        $objective = $mission->get_objective($objectiveid);
+        if ($objective instanceof persisted_objective) {
+            $objective->get_persistent()->move_up();
+        }
+    }
+
+    /**
+     * Post create.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @return void
+     */
     protected function post_create(mission_instance $missioninst) {
         $mission = $missioninst->get_mission();
 
         // Optional, and discoverable quests should catch the recruit's attention.
-        if ($this->missionhelper->is_a_quest($mission) &&
+        if (
+            $this->missionhelper->is_a_quest($mission) &&
                 ($this->missionhelper->is_optional($mission) || $this->missionhelper->is_discoverable($mission))
         ) {
             $missioninst->set_needs_attention(true);
         }
 
         // Automatically starts instances.
-        if ($this->missionhelper->is_an_achievement($mission)
+        if (
+            $this->missionhelper->is_an_achievement($mission)
                 || $this->missionhelper->is_a_challenge($mission)
                 || $this->missionhelper->is_a_streak($mission)
                 || $mission->get_start_mode() === $mission::START_ALWAYS
         ) {
-
             $this->start_instance($missioninst);
         }
     }
 
+    /**
+     * Reset instance.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @return void
+     */
     public function reset_instance(mission_instance $missioninst) {
         global $DB;
 
@@ -619,6 +746,12 @@ class mission_operator {
         $tx->allow_commit();
     }
 
+    /**
+     * Start instance.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @return void
+     */
     public function start_instance(mission_instance $missioninst) {
         if (!$this->missionhelper->is_active($missioninst)) {
             throw new \coding_exception('The mission is not active.');
@@ -664,6 +797,13 @@ class mission_operator {
         }
     }
 
+    /**
+     * Sync assigner.
+     *
+     * @param mission $mission Mission.
+     * @param assigner $assigner Assigner.
+     * @return void
+     */
     public function sync_assigner(mission $mission, assigner $assigner) {
         if (!$this->missionhelper->is_active($mission)) {
             throw new \coding_exception('The mission is not active.');
@@ -674,6 +814,14 @@ class mission_operator {
         $this->sync_assigner_with_users_sql($mission, $assigner, $userssql, $usersparams);
     }
 
+    /**
+     * Sync assigner from action.
+     *
+     * @param mission $mission Mission.
+     * @param assigner $assigner Assigner.
+     * @param action $action Action.
+     * @return void
+     */
     public function sync_assigner_from_action(mission $mission, assigner $assigner, action $action) {
         if (!$this->missionhelper->is_active($mission)) {
             throw new \coding_exception('The mission is not active.');
@@ -682,6 +830,14 @@ class mission_operator {
         $this->sync_assigner_with_users_sql($mission, $assigner, $sql, []);
     }
 
+    /**
+     * Sync assigner from event.
+     *
+     * @param mission $mission Mission.
+     * @param assigner $assigner Assigner.
+     * @param \core\event\base $event Event.
+     * @return void
+     */
     public function sync_assigner_from_event(mission $mission, assigner $assigner, \core\event\base $event) {
         if (!$this->missionhelper->is_active($mission)) {
             throw new \coding_exception('The mission is not active.');
@@ -695,6 +851,15 @@ class mission_operator {
         $this->sync_assigner_with_users_sql($mission, $assigner, $userssql, $usersparams);
     }
 
+    /**
+     * Sync assigner with users sql.
+     *
+     * @param mission $mission Mission.
+     * @param assigner $assigner Assigner.
+     * @param mixed $userssql Userssql.
+     * @param mixed $usersparams Usersparams.
+     * @return void
+     */
     protected function sync_assigner_with_users_sql(
         mission $mission,
         assigner $assigner,
@@ -713,7 +878,7 @@ class mission_operator {
         // if ($this->missionhelper->is_repeating($mission)) {
         // $stateendedsql = 'mi.state != :stateended';
         // $stateparams['stateended'] = mission_instance::STATE_ENDED;
-        // }
+        // }.
 
         // Now, find the users that do not have an instance.
         $sql = "SELECT DISTINCT u.id AS userid
@@ -734,8 +899,8 @@ class mission_operator {
             'guestid' => $CFG->siteguest,
         ]);
 
-        // TODO The performance of this is terrible, we should bulk assign.
-        // TODO Should the operator know about the database?
+        // Future work: The performance of this is terrible, we should bulk assign.
+        // Future work: Should the operator know about the database?
         $recordset = $DB->get_recordset_sql($sql, $params);
         foreach ($recordset as $record) {
             $this->assign_mission($mission, $record->userid);
@@ -743,6 +908,12 @@ class mission_operator {
         $recordset->close();
     }
 
+    /**
+     * Update instance objectives.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @return mixed
+     */
     public function update_instance_objectives(mission_instance $missioninst) {
         if (!$this->missionhelper->is_active($missioninst)) {
             throw new \coding_exception('The mission is not active.');
@@ -756,7 +927,7 @@ class mission_operator {
             return $obj->get_id();
         }, $missioninst->get_mission()->get_objectives());
 
-        /** @var int[] */
+        /** @var int[] $hasids */
         $hasids = array_map(function ($objinst) {
             return $objinst->get_objective()->get_id();
         }, $missioninst->get_objective_instances());
@@ -777,7 +948,7 @@ class mission_operator {
             if ($objinst->is_completed()) {
                 continue;
             }
-            // TODO This is not how we should be deleting an objective instance.
+            // Future work: This is not how we should be deleting an objective instance.
             if ($objinst instanceof persisted_objective_instance) {
                 $objinst->get_persistent()->delete();
             }
@@ -797,6 +968,12 @@ class mission_operator {
         $this->evaluate_instance($missioninst);
     }
 
+    /**
+     * Update instance state.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @return void
+     */
     protected function update_instance_state(mission_instance $missioninst) {
         if ($this->missionhelper->has_completed($missioninst)) {
             return;
@@ -820,6 +997,13 @@ class mission_operator {
         }
     }
 
+    /**
+     * Calculate deadline.
+     *
+     * @param mixed $missionorinst Missionorinst.
+     * @param DateTimeImmutable|null $reftime Reftime.
+     * @return mixed
+     */
     protected function calculate_deadline($missionorinst, ?DateTimeImmutable $reftime = null) {
         $mission = $this->missionhelper->get_mission($missionorinst);
         $timelimit = $mission->get_time_limit();
@@ -862,5 +1046,4 @@ class mission_operator {
 
         return $deadline;
     }
-
 }

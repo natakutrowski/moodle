@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * External.
@@ -39,7 +39,6 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class time_watched extends external_api {
-
     /**
      * Parameters.
      *
@@ -96,5 +95,4 @@ class time_watched extends external_api {
     public static function execute_returns() {
         return new external_value(PARAM_BOOL, '');
     }
-
 }

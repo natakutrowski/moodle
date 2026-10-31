@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Watch video.
@@ -61,10 +61,12 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class watch_video implements has_availability_info, type, type_with_supporting_url, type_with_update_after_restore {
-
     /** URL mode to course module. */
     const URLMODE_CM = 1;
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof video_watched) {
             return;
@@ -75,10 +77,14 @@ class watch_video implements has_availability_info, type, type_with_supporting_u
         $instance->set_type_state($state);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         $stack = [new plugin_required_info('media_videojs', 'VieoJS')];
         if (get_config('media_videojs', 'useflash')) {
-            $stack[] = new static_info(false, [new lang_string('infoincompatiblewithsetting',
+            $stack[] = new static_info(false, [new lang_string(
+                'infoincompatiblewithsetting',
                 'block_gearup',
                 'media_videojs/useflash'
             )]);
@@ -86,18 +92,30 @@ class watch_video implements has_availability_info, type, type_with_supporting_u
         return new info_stack($stack);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new watch_video_config_form_extender($mission);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typewatchvideo', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typewatchvideodesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url(objective $objective, $urltype): ?\moodle_url {
         if ($urltype === static::URLMODE_CM) {
             $config = $objective->get_type_config();
@@ -113,10 +131,16 @@ class watch_video implements has_availability_info, type, type_with_supporting_u
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof video_watched;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -134,7 +158,8 @@ class watch_video implements has_availability_info, type, type_with_supporting_u
         }
 
         // Filter out if context is not matching the activity.
-        if (!empty($config->cmid) && ($action->get_context()->contextlevel != CONTEXT_MODULE
+        if (
+            !empty($config->cmid) && ($action->get_context()->contextlevel != CONTEXT_MODULE
                 || $config->cmid != $action->get_context()->instanceid)
         ) {
             return false;
@@ -159,9 +184,13 @@ class watch_video implements has_availability_info, type, type_with_supporting_u
         return $state ?? (object) ['vids' => []];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, objective $objective, mission $mission) {
         if (!$objective instanceof persisted_objective) {
-            $restore->get_logger()->process("Cannot process after_restore of objective " . $objective->get_id(),
+            $restore->get_logger()->process(
+                "Cannot process after_restore of objective " . $objective->get_id(),
                 backup::LOG_WARNING
             );
             return;
@@ -204,12 +233,17 @@ class watch_video implements has_availability_info, type, type_with_supporting_u
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class watch_video_config_form_extender implements extender, extender_with_supporting_url_modes {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Coursecontext. */
     protected $coursecontext;
+    /** @var mixed Courseid. */
     protected $courseid;
+    /** @var mixed Incourse. */
     protected $incourse;
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Whichoptions. */
     protected $whichoptions;
 
     /**
@@ -228,6 +262,9 @@ class watch_video_config_form_extender implements extender, extender_with_suppor
         $this->courseid = $this->incourse ? $this->coursecontext->instanceid : null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
@@ -262,10 +299,16 @@ class watch_video_config_form_extender implements extender, extender_with_suppor
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url_modes(): array {
         if (!$this->incourse) {
             return [];
@@ -275,7 +318,9 @@ class watch_video_config_form_extender implements extender, extender_with_suppor
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
     }
-
 }

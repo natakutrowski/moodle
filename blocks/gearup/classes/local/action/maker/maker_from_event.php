@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Action maker from event.
@@ -39,7 +39,6 @@ use core\event\base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface maker_from_event extends maker {
-
     /**
      * Make actions from a Moodle event.
      *
@@ -47,5 +46,4 @@ interface maker_from_event extends maker {
      * @return action[]
      */
     public function make_from_event(base $event): array;
-
 }

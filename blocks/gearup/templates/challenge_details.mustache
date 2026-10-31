@@ -38,10 +38,10 @@
         {{/ description }}
     {{/ block_gearup/page_intro }}
 
-    <div class="gu-border-t gu-border-gray-200 gu-py-5 sm:gu-p-0">
-        <dl class="gu-divide-y gu-divide-gray-200">
+    <div class="gu-border-t gu-border-gray-200 dark:gu-border-gray-700 gu-py-5 sm:gu-p-0">
+        <dl class="gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700">
             <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
-                <dt class="gu-font-medium gu-text-gray-500">
+                <dt class="gu-font-medium gu-text-gray-500 dark:gu-text-gray-400">
                     {{#str}} missiontitle, block_gearup {{/str}}
                 </dt>
                 <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
@@ -53,20 +53,23 @@
                     </div>
                     <div class="gu-ml-2 gu-shrink-0">
                         {{#iseditable}}
-                        <button class="btn btn-secondary btn-sm"
-                            data-gu-action="open-form"
-                            data-form-class="block_gearup\form\challenge_identity_dynamic_form"
-                            data-form-args__id="{{ id }}"
-                            data-modal-title="{{#str}}editchallenge, block_gearup{{/str}}">
-                            <span class="gu-sr-only">{{#str}} edit {{/str}}</span>
-                            {{#pix}} i/edit {{/pix}}
-                        </button>
+                        {{< block_gearup/widgets/dropdown-vdots }}
+                        {{$ items }}
+                            <button class="dropdown-item" type="button"
+                                data-gu-action="open-form"
+                                data-form-class="block_gearup\form\challenge_identity_dynamic_form"
+                                data-form-args__id="{{ id }}"
+                                data-modal-title="{{#str}}editchallenge, block_gearup{{/str}}">
+                                {{#str}} edit, core {{/str}}
+                            </button>
+                        {{/ items }}
+                        {{/ block_gearup/widgets/dropdown-vdots }}
                         {{/iseditable}}
                     </div>
                 </dd>
             </div>
             <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
-                <dt class="gu-font-medium gu-text-gray-500">
+                <dt class="gu-font-medium gu-text-gray-500 dark:gu-text-gray-400">
                     {{#str}} timing, block_gearup {{/str}}
                 </dt>
                 <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
@@ -83,14 +86,17 @@
                     </div>
                     <div class="gu-ml-2 gu-shrink-0">
                         {{#iseditable}}
-                        <button class="btn btn-secondary btn-sm"
-                            data-gu-action="open-form"
-                            data-form-class="block_gearup\form\challenge_timing_dynamic_form"
-                            data-form-args__id="{{ id }}"
-                            data-modal-title="{{#str}}editchallenge, block_gearup{{/str}}">
-                            <span class="gu-sr-only">{{#str}} edit {{/str}}</span>
-                            {{#pix}} i/edit {{/pix}}
-                        </button>
+                        {{< block_gearup/widgets/dropdown-vdots }}
+                        {{$ items }}
+                            <button class="dropdown-item" type="button"
+                                data-gu-action="open-form"
+                                data-form-class="block_gearup\form\challenge_timing_dynamic_form"
+                                data-form-args__id="{{ id }}"
+                                data-modal-title="{{#str}}editchallenge, block_gearup{{/str}}">
+                                {{#str}} edit, core {{/str}}
+                            </button>
+                        {{/ items }}
+                        {{/ block_gearup/widgets/dropdown-vdots }}
                         {{/iseditable}}
                     </div>
                 </dd>
@@ -105,10 +111,10 @@
         {{/ description }}
     {{/ block_gearup/section_intro }}
 
-    <div class="gu-border-t gu-border-gray-200 gu-py-5 sm:gu-p-0">
-        <dl class="gu-divide-y gu-divide-gray-200">
+    <div class="gu-border-t gu-border-gray-200 dark:gu-border-gray-700 gu-py-5 sm:gu-p-0">
+        <dl class="gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700">
             <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
-                <dt class="gu-font-medium gu-text-gray-500">
+                <dt class="gu-font-medium gu-text-gray-500 dark:gu-text-gray-400">
                     {{#str}} listofobjectives, block_gearup {{/str}}
                 </dt>
                 <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2">
@@ -125,10 +131,10 @@
         {{/ description }}
     {{/ block_gearup/section_intro }}
 
-    <div class="gu-border-t gu-border-gray-200 gu-py-5 sm:gu-p-0">
-        <dl class="gu-divide-y gu-divide-gray-200">
+    <div class="gu-border-t gu-border-gray-200 dark:gu-border-gray-700 gu-py-5 sm:gu-p-0">
+        <dl class="gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700">
             <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
-                <dt class="gu-font-medium gu-text-gray-500">
+                <dt class="gu-font-medium gu-text-gray-500 dark:gu-text-gray-400">
                     {{#str}} listofoutcomes, block_gearup {{/str}}
                 </dt>
                 <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2">

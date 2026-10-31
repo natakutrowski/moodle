@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Services.
@@ -121,6 +121,14 @@ $functions = [
         'classname' => 'block_gearup\external\mark_mission_seen',
         'methodname' => 'execute',
         'description' => 'Mark a mission as seen',
+        'type' => 'write',
+        'ajax' => true,
+        'services' => [],
+    ],
+    'block_gearup_reorder_objective' => [
+        'classname' => \block_gearup\external\reorder_objective::class,
+        'methodname' => 'execute',
+        'description' => 'Reorder an objective within its mission',
         'type' => 'write',
         'ajax' => true,
         'services' => [],

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Frequency evaluator.
@@ -40,7 +40,6 @@ use DateTimeImmutable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class frequency_evaluator {
-
     /** No evaluation. */
     const MODE_NONE = 0;
     /** Different day. */
@@ -166,12 +165,10 @@ class frequency_evaluator {
         if ($mode == static::MODE_NONE || $lasttime->getTimestamp() === 0) {
             // We accept all times, or there was never a previous time.
             $validfrom = $now;
-
         } else if ($lasttime > $now->setTime(0, 0)) {
             // The previous time was today, we know that we require at least 1 day interval
             // we can set an impossible date that will never be matched.
             $validfrom = $now->add(new DateInterval('P1Y'));
-
         } else {
             [$validfrom, $validbefore] = $this->get_time_gate($mode, $lasttime);
         }
@@ -217,13 +214,11 @@ class frequency_evaluator {
             if ($mode == static::MODE_CONSEC_DAY) {
                 $validbefore = $validfrom->add(new DateInterval('P1D'));
             }
-
         } else if ($mode == static::MODE_WEEK || $mode == static::MODE_CONSEC_WEEK) {
             $validfrom = $now->modify('monday next week')->setTime(0, 0);
             if ($mode == static::MODE_CONSEC_WEEK) {
                 $validbefore = $validfrom->add(new DateInterval('P1W'));
             }
-
         } else if ($mode == static::MODE_CONSEC_WEEKDAY) {
             $validfrom = $now->modify('next weekday')->setTime(0, 0);
             $validbefore = $validfrom->add(new DateInterval('P1D'));
@@ -247,5 +242,4 @@ class frequency_evaluator {
             static::MODE_CONSEC_WEEK => get_string('forconsecweeks', 'block_gearup'),
         ];
     }
-
 }

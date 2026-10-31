@@ -31,6 +31,7 @@ Feature: Testing tracking of profile field values
       | title          | course | instructions       |
       | Achievement 1  | c1     | This is what to do |
     And I am on the "Achievement 1" "block_gearup > achievement" page logged in as "t1"
+    And I click on "Actions" "button" in the definition "List of objectives"
     And I click on "Edit" "button" in the definition "List of objectives"
     And I click on "Delete" "button" in the "Edit objective" "dialogue"
     And I click on "Yes" "button" in the "Confirm" "dialogue"

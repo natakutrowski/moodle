@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Course participants assigner.
@@ -65,11 +65,16 @@ class course_participants implements
     type_with_backup_handling,
     type_with_event_consumption,
     type_with_update_after_restore {
-
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_context(context $context): info {
         return new course_context_required_info($context);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_user(int $userid, context $context): info {
         // The participants page requires both permissions to view everyone in the course.
         return new permission_required_info([
@@ -78,19 +83,31 @@ class course_participants implements
         ], $context, $userid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
-        // TODO What happens when someone else edits the instance and can't see the roles.
+        // Future work: What happens when someone else edits the instance and can't see the roles.
         return new course_participants_config_type_form($mission->get_context());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('assignercourseparticipants', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('assignercourseparticipantsdesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_elligible_users_sql(assigner $assigner, mission $mission): array {
         global $DB;
 
@@ -122,6 +139,9 @@ class course_participants implements
         return [$sql, $params];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_elligile_users_sql_from_event(\core\event\base $event, assigner $assigner, mission $mission): array {
 
         // When the user was enrolled, we have already validated the constraints on role IDs.
@@ -145,11 +165,17 @@ class course_participants implements
         return [$sql, $params];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_event_compatible(\core\event\base $event): bool {
         return $event instanceof \core\event\user_enrolment_created
             || $event instanceof \core\event\role_assigned;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_event_passing_constraints(\core\event\base $event, assigner $assigner): bool {
         $config = $assigner->get_type_config();
         $roleids = $config->roleids ?? [];
@@ -175,7 +201,6 @@ class course_participants implements
             // is a role, it is unlikely to be assigned yet, and we'll pick it with
             // the role assigned event.
             return true;
-
         } else if ($isroleassigned && in_array($event->objectid, $roleids)) {
             // Role assigned only matters when the role is in the list of roles. Note
             // that still does not guarantee that the user is enrolled.
@@ -185,6 +210,9 @@ class course_participants implements
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function extend_backup(backup_facade $backup, assigner $assigner, mission $mission) {
         $config = $assigner->get_type_config();
         $roleids = $config->roleids ?? [];
@@ -193,6 +221,9 @@ class course_participants implements
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, assigner $assigner, mission $mission) {
         if (!$assigner instanceof persisted_assigner) {
             $restore->get_logger()->process("Cannot process after_restore of assigner " . $assigner->get_id(), backup::LOG_WARNING);
@@ -226,7 +257,6 @@ class course_participants implements
             $restore->get_logger()->process("Error while updating assigner " . $assigner->get_id(), backup::LOG_WARNING);
         }
     }
-
 }
 
 /**
@@ -238,14 +268,21 @@ class course_participants implements
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_participants_config_type_form implements extender {
-
     /** @var context The context. */
     protected $context;
 
+    /**
+     * Constructor.
+     *
+     * @param context $context Context.
+     */
     public function __construct(context $context) {
         $this->context = $context;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         global $USER;
 
@@ -274,10 +311,16 @@ class course_participants_config_type_form implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -288,5 +331,4 @@ class course_participants_config_type_form implements extender {
 
         return $errors;
     }
-
 }

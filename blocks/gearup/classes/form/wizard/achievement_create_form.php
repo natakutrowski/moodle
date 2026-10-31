@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -40,9 +40,12 @@ use block_gearup\local\utils\form_utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class achievement_create_form extends mission_title_form {
-
+    /** @var mixed Persistentclass. */
     protected static $persistentclass = mission::class;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         parent::definition();
 
@@ -63,5 +66,4 @@ class achievement_create_form extends mission_title_form {
         $mform->removeElement('submitbutton');
         $this->add_action_buttons(true, get_string('continue'));
     }
-
 }

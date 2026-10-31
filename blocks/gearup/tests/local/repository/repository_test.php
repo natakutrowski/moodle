@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Testcase.
@@ -60,7 +60,6 @@ use DateTimeImmutable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class repository_test extends base_testcase {
-
     /**
      * Test.
      *
@@ -122,7 +121,8 @@ final class repository_test extends base_testcase {
         // Check that we retrieve any objective for user 1.
         $ois = $mr->get_incomplete_objective_instances_of_types([new manual()], $u1->id, $m1->get_context());
         $this->assertCount(2, $ois);
-        $ois = $mr->get_incomplete_objective_instances_of_types([new manual(), new access_platform()],
+        $ois = $mr->get_incomplete_objective_instances_of_types(
+            [new manual(), new access_platform()],
             $u1->id,
             $m1->get_context()
         );
@@ -149,7 +149,8 @@ final class repository_test extends base_testcase {
         $mo->evaluate_instance($mi1u1);
         $ois = $mr->get_incomplete_objective_instances_of_types([new manual()], $u1->id, $m1->get_context());
         $this->assertCount(1, $ois);
-        $ois = $mr->get_incomplete_objective_instances_of_types([new manual(), new access_platform()],
+        $ois = $mr->get_incomplete_objective_instances_of_types(
+            [new manual(), new access_platform()],
             $u1->id,
             $m1->get_context()
         );
@@ -409,14 +410,12 @@ final class repository_test extends base_testcase {
             $ois = $mi1->get_objective_instances();
             $oo->increment_instance_counter($ois[0], $ois[0]->get_objective()->get_count_needed());
             $oo->increment_instance_counter($ois[1], $ois[1]->get_objective()->get_count_needed());
-
         } else if ($objmode === 'somedormant') {
             $ois = $mi1->get_objective_instances();
             $ois[0]->set_dormant_until($clock->now()->modify('+1 hour'));
             $ois[1]->set_dormant_until($clock->now()->modify('-1 hour'));
             $ois[2]->set_dormant_until(null);
             $ois[3]->set_dormant_until($clock->now());
-
         } else if ($objmode !== null) {
             throw new \coding_exception('Incorreect test.');
         }
@@ -1067,5 +1066,4 @@ final class repository_test extends base_testcase {
             $this->assertCount(0, $vistypes, "Failed for $debug");
         }
     }
-
 }

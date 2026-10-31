@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Access activity.
@@ -59,7 +59,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class access_activity implements type, type_with_state_reevaluation, type_with_supporting_url, type_with_update_after_restore {
-
     /** Not unique. */
     const UNIQUENESS_DISABLED = 0;
     /** Unique per course. */
@@ -77,6 +76,9 @@ class access_activity implements type, type_with_state_reevaluation, type_with_s
     /** URL mode to course module. */
     const URLMODE_CM = 1;
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof activity_accessed) {
             return;
@@ -110,18 +112,30 @@ class access_activity implements type, type_with_state_reevaluation, type_with_s
         $instance->set_type_state($state);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new access_activity_config_form_extender($mission->get_context());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typeaccessactivity', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new \lang_string('typeaccessactivitydesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url(objective $objective, $urltype): ?moodle_url {
         if ($urltype === static::URLMODE_CM) {
             $config = $objective->get_type_config();
@@ -164,10 +178,16 @@ class access_activity implements type, type_with_state_reevaluation, type_with_s
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof activity_accessed;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -239,6 +259,9 @@ class access_activity implements type, type_with_state_reevaluation, type_with_s
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function reevaluate_state(objective_instance $instance) {
         $evaluator = $this->get_evaluator(new DateTimeImmutable(), $instance);
         if ($evaluator->is_late()) {
@@ -278,9 +301,13 @@ class access_activity implements type, type_with_state_reevaluation, type_with_s
         return new frequency_evaluator($mode, time_utils::make_datetime($state->lastaccess, $tz), $now);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, objective $objective, mission $mission) {
         if (!$objective instanceof persisted_objective) {
-            $restore->get_logger()->process("Cannot process after_restore of objective " . $objective->get_id(),
+            $restore->get_logger()->process(
+                "Cannot process after_restore of objective " . $objective->get_id(),
                 backup::LOG_WARNING
             );
             return;
@@ -319,7 +346,6 @@ class access_activity implements type, type_with_state_reevaluation, type_with_s
             $restore->get_logger()->process("Error while updating objective " . $objective->get_id(), backup::LOG_WARNING);
         }
     }
-
 }
 
 /**
@@ -331,11 +357,15 @@ class access_activity implements type, type_with_state_reevaluation, type_with_s
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class access_activity_config_form_extender implements extender, extender_with_supporting_url_modes {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Coursecontext. */
     protected $coursecontext;
+    /** @var mixed Courseid. */
     protected $courseid;
+    /** @var mixed Incourse. */
     protected $incourse;
+    /** @var mixed Whichoptions. */
     protected $whichoptions;
 
     /**
@@ -362,13 +392,17 @@ class access_activity_config_form_extender implements extender, extender_with_su
         $this->whichoptions = $options;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
         $incourse = $this->incourse;
 
         $whichoptions = $this->get_which_options();
-        $els[] = $mform->addElement('select',
+        $els[] = $mform->addElement(
+            'select',
             'cd_which',
             get_string('elligibleactivity', 'block_gearup'),
             $whichoptions
@@ -434,6 +468,9 @@ class access_activity_config_form_extender implements extender, extender_with_su
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         if ($data->cd_which == access_activity::WHICH_SPECIFIC_IN_COURSE) {
             $data->cd_uniqueness = access_activity::UNIQUENESS_DISABLED;
@@ -441,6 +478,9 @@ class access_activity_config_form_extender implements extender, extender_with_su
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url_modes(): array {
         if (!in_array(access_activity::WHICH_SPECIFIC_IN_COURSE, $this->whichoptions)) {
             return [];
@@ -471,7 +511,6 @@ class access_activity_config_form_extender implements extender, extender_with_su
                 case access_activity::WHICH_SPECIFIC_IN_COURSE:
                     $label = get_string('specificone', 'block_gearup');
                     break;
-
             }
 
             if ($label) {
@@ -482,6 +521,9 @@ class access_activity_config_form_extender implements extender, extender_with_su
         }, []);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if (!isset($data->cd_which)) {
@@ -489,5 +531,4 @@ class access_activity_config_form_extender implements extender, extender_with_su
         }
         return $errors;
     }
-
 }

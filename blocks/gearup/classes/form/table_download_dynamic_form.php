@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -41,7 +41,9 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class table_download_dynamic_form extends improved_dynamic_form {
-
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         $mform = $this->_form;
 
@@ -64,6 +66,9 @@ class table_download_dynamic_form extends improved_dynamic_form {
         $mform->setType('pageurl', PARAM_LOCALURL);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_default_data() {
         $pageurl = new moodle_url($this->optional_param('pageurl', '', PARAM_LOCALURL));
         return (object) [
@@ -74,6 +79,9 @@ class table_download_dynamic_form extends improved_dynamic_form {
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function initialise_for_dynamic_submission(): void {
         $contextid = $this->optional_param('guctxid', 0, PARAM_INT);
 
@@ -84,6 +92,9 @@ class table_download_dynamic_form extends improved_dynamic_form {
         $this->_dynamicdata['context'] = $context;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function process_dynamic_save() {
         if ($data = $this->get_data()) {
             set_user_preference('block_gearup_dataformat', $data->dataformat);
@@ -96,15 +107,24 @@ class table_download_dynamic_form extends improved_dynamic_form {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function check_access_for_dynamic_submission(): void {
         $accessperms = di::get('access_permissions_factory')->get_permissions_for_context($this->_dynamicdata['context']);
         $accessperms->require_manage();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_url_for_dynamic_submission(): moodle_url {
         return $this->get_url_resolver()->reverse('missions');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function extra_validation($data, $files, array &$errors) {
         if (empty($data->dataformat)) {
             $errors['dataformat'] = get_string('required');

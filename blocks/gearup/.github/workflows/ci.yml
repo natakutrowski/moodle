@@ -6,17 +6,20 @@ on:
       - ci
       - ci-no-behat
 
+permissions:
+  contents: read
+
 env:
-  AVAILABILITY_GEARUP_TAG: 'v1.2.4'
+  AVAILABILITY_GEARUP_TAG: 'v1.2.5'
   FILTER_SHORTCODES_TAG: 'v1.1.3'
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
-        image: postgres:16
+        image: ${{ matrix.database == 'pgsql' && 'postgres:17' || '' }}
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_HOST_AUTH_METHOD: 'trust'
@@ -25,21 +28,20 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
 
       mariadb:
-        image: mariadb:10
+        image: ${{ matrix.database == 'mariadb' && 'mariadb:11' || '' }}
         env:
-          MYSQL_USER: 'root'
-          MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: '1'
           MYSQL_CHARACTER_SET_SERVER: 'utf8mb4'
           MYSQL_COLLATION_SERVER: 'utf8mb4_unicode_ci'
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval 10s --health-timeout 5s --health-retries 3
 
     strategy:
       fail-fast: false
       matrix:
         php: ['8.2', '8.3', '8.4']
-        moodle-branch: ['MOODLE_405_STABLE', 'MOODLE_500_STABLE', 'MOODLE_501_STABLE', 'MOODLE_502_STABLE']
+        moodle-branch: ['MOODLE_405_STABLE', 'MOODLE_501_STABLE', 'MOODLE_502_STABLE', 'MOODLE_503_STABLE']
         database: [pgsql]
         include:
           # PHP 8.1, with Moodle 4.5.
@@ -48,7 +50,10 @@ jobs:
             php: 8.1
 
           # MariaDB, test oldest and most recent configurations.
-          - moodle-branch: MOODLE_502_STABLE
+          - moodle-branch: MOODLE_405_STABLE
+            database: mariadb
+            php: 8.1
+          - moodle-branch: MOODLE_503_STABLE
             database: mariadb
             php: 8.4
 
@@ -57,18 +62,22 @@ jobs:
             php: 8.4
           - moodle-branch: MOODLE_502_STABLE
             php: 8.2
+          - moodle-branch: MOODLE_503_STABLE
+            php: 8.2
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: plugin
+          persist-credentials: false
 
       - name: Check out Level Up test server
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: branchup/levelup-test-server
           path: levelup-test-server
+          persist-credentials: false
           ref: master
           token: '-'
           ssh-key: ${{ secrets.LEVELUP_TEST_SERVER_SSHKEY }}
@@ -88,7 +97,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: ${{ matrix.extensions }}
-          ini-values: max_input_vars=5000
+          ini-values: max_input_vars=5000, opcache.enable_cli=1
           # If you are not using code coverage, keep "none". Otherwise, use "pcov" (Moodle 3.10 and up) or "xdebug".
           # If you try to use code coverage with "none", it will fallback to phpdbg (which has known problems).
           coverage: none
@@ -136,12 +145,7 @@ jobs:
 
       - name: Moodle Code Checker
         if: ${{ !cancelled() }}
-        run: |
-          WWWROOT=$(cd moodle; pwd)
-          if [ -d "$WWWROOT/public" ]; then
-            WWWROOT="$WWWROOT/public"
-          fi
-          moodle-plugin-ci phpcs --max-warnings 0 --standard $WWWROOT/blocks/gearup/phpcs.xml
+        run: moodle-plugin-ci phpcs --max-warnings 0
 
       # - name: Moodle PHPDoc Checker
       #   if: ${{ !cancelled() }}
@@ -170,11 +174,11 @@ jobs:
       - name: Behat tests
         id: behat
         if: ${{ !cancelled() && github.ref_name != 'ci-no-behat' }}
-        run: moodle-plugin-ci behat --profile chrome
+        run: moodle-plugin-ci behat --profile chrome --auto-rerun 1
 
       - name: Plugin availability_gearup behat tests
         if: ${{ !cancelled() && github.ref_name != 'ci-no-behat' }}
-        run: moodle-plugin-ci behat --profile chrome --tags @availability_gearup
+        run: moodle-plugin-ci behat --profile chrome --tags @availability_gearup --auto-rerun 1
 
       # - name: Upload Behat Faildump
       #   if: ${{ failure() && steps.behat.outcome == 'failure' }}

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form extender.
@@ -36,7 +36,6 @@ namespace block_gearup\local\form;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface extender {
-
     /**
      * Definition of the form.
      *
@@ -61,5 +60,4 @@ interface extender {
      * @return array Where keys are fields names, and values are error messages.
      */
     public function validation($data, $files);
-
 }

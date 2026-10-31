@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\setting;
 
@@ -38,7 +38,6 @@ require_once($CFG->libdir . '/adminlib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tracker_missions_order extends \admin_setting {
-
     /**
      * Constructor.
      */
@@ -81,7 +80,8 @@ class tracker_missions_order extends \admin_setting {
             return $carry;
         }, []);
 
-        parent::__construct('block_gearup/trackermissionsorder',
+        parent::__construct(
+            'block_gearup/trackermissionsorder',
             get_string('trackermissionsorder', 'block_gearup'),
             get_string('trackermissionsorder_desc', 'block_gearup'),
             '',
@@ -185,5 +185,4 @@ class tracker_missions_order extends \admin_setting {
         }
         return '?';
     }
-
 }

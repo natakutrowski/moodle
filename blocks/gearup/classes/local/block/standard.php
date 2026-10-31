@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Block.
@@ -46,7 +46,6 @@ require_once($CFG->dirroot . '/blocks/moodleblock.class.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class standard extends \block_base {
-
     /** @var object */
     protected $lm;
 
@@ -122,7 +121,8 @@ class standard extends \block_base {
         if (empty($this->config->hidetracker)) {
             $this->content->text .= $output->render(new tracker($context, $USER->id, $urlresolver, $this->page->url));
         } else if ($canedit) {
-            $notification = new notification(get_string('trackerhiddenbyblocksetting', 'block_gearup'),
+            $notification = new notification(
+                get_string('trackerhiddenbyblocksetting', 'block_gearup'),
                 notification::NOTIFY_WARNING
             );
             $notification->set_announce(false);
@@ -144,9 +144,11 @@ class standard extends \block_base {
         if (!$accessperms->can_manage() || !$this->lm->is_evaluating()) {
             return '';
         }
-        return html_writer::div(strip_tags(markdown_to_html(get_string('evaluationnoticeshort', 'block_gearup')),
+        return html_writer::div(strip_tags(
+            markdown_to_html(get_string('evaluationnoticeshort', 'block_gearup')),
             '<a><em><strong>'
-        ), 'gu-bg-yellow-100 gu-border-1 gu-border-black gu-my-4 gu-rounded gu-px-2 gu-py-1 gu-text-xs');
+        ), 'gu-bg-yellow-100 dark:gu-bg-yellow-950 gu-border-1 gu-border-black dark:gu-border-yellow-700 '
+            . 'gu-my-4 gu-rounded gu-px-2 gu-py-1 gu-text-xs');
     }
 
     /**
@@ -162,5 +164,4 @@ class standard extends \block_base {
             $this->title = format_string($this->config->title, true, ['context' => $this->page->context]);
         }
     }
-
 }

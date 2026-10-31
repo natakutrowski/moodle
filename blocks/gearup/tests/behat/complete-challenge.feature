@@ -38,7 +38,8 @@ Feature: Testing completing a challenge
 
     And I am on the "First Challenge" "block_gearup > challenge recruits" page logged in as "t1"
     And I follow "Student One"
-    And I choose the "View" item in the "Menu" action menu
+    And I open the action menu in ".flexible" "css_element"
+    And I click on "View" "link" in the ".flexible" "css_element"
     And I press "Increment"
     When I press "Confirm"
 

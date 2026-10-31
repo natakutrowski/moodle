@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -39,9 +39,12 @@ use core\form\persistent;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_storyline_form extends persistent {
-
+    /** @var mixed Persistentclass. */
     protected static $persistentclass = mission::class;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         $mform = $this->_form;
         $mh = $this->_customdata['missionhelper'];
@@ -51,7 +54,8 @@ class mission_storyline_form extends persistent {
         $isstreak = $mh->is_a_streak($mission);
 
         if ($isquest && !$mh->is_compulsory($mission)) {
-            $mform->addElement('textarea',
+            $mform->addElement(
+                'textarea',
                 'description',
                 get_string('narrativebeforetheyacceptquest', 'block_gearup'),
                 ['rows' => 5]
@@ -80,7 +84,8 @@ class mission_storyline_form extends persistent {
         $mform->addRule('instructions', null, 'required', null, 'client');
 
         if ($isquest) {
-            $mform->addElement('textarea',
+            $mform->addElement(
+                'textarea',
                 'feedback',
                 get_string('narrativeduringaftercompletequest', 'block_gearup'),
                 ['rows' => 5]
@@ -92,6 +97,9 @@ class mission_storyline_form extends persistent {
         $this->add_action_buttons(false, get_string('continue', 'core'));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_default_data() {
         $data = parent::get_default_data();
         $data->feedback = get_string('defaultfeedbackquest', 'block_gearup');

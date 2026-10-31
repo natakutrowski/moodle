@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective.
@@ -55,7 +55,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class complete_challenge implements type, type_with_state_initialisation, type_with_update_after_restore {
-
     /** Any. */
     const WHICH_ANY = 0;
     /** Any in context. */
@@ -63,6 +62,9 @@ class complete_challenge implements type, type_with_state_initialisation, type_w
     /** One specific. */
     const WHICH_SPECIFIC = 2;
 
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
         $objective = $instance->get_objective();
         $config = $objective->get_type_config();
@@ -99,6 +101,9 @@ class complete_challenge implements type, type_with_state_initialisation, type_w
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof challenge_completed) {
             return false;
@@ -106,22 +111,37 @@ class complete_challenge implements type, type_with_state_initialisation, type_w
         $instance->increment_counter(1);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new complete_challenge_config_form($mission, di::get('repository'));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typecompletechallenge', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typecompletechallengedesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof challenge_completed;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -148,9 +168,13 @@ class complete_challenge implements type, type_with_state_initialisation, type_w
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, objective $objective, mission $mission) {
         if (!$objective instanceof persisted_objective) {
-            $restore->get_logger()->process("Cannot process after_restore of objective " . $objective->get_id(),
+            $restore->get_logger()->process(
+                "Cannot process after_restore of objective " . $objective->get_id(),
                 backup::LOG_WARNING
             );
             return;
@@ -180,7 +204,6 @@ class complete_challenge implements type, type_with_state_initialisation, type_w
             $restore->get_logger()->process("Error while updating objective " . $objective->get_id(), backup::LOG_WARNING);
         }
     }
-
 }
 
 
@@ -193,9 +216,11 @@ class complete_challenge implements type, type_with_state_initialisation, type_w
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class complete_challenge_config_form implements extender {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Repository. */
     protected $repository;
 
     /**
@@ -210,6 +235,9 @@ class complete_challenge_config_form implements extender {
         $this->repository = $repository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
@@ -245,6 +273,9 @@ class complete_challenge_config_form implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         if ($data->cd_which == complete_challenge::WHICH_SPECIFIC) {
             $data->cd_missionid = (int) $data->cd_missionid;
@@ -257,6 +288,9 @@ class complete_challenge_config_form implements extender {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -268,5 +302,4 @@ class complete_challenge_config_form implements extender {
         }
         return $errors;
     }
-
 }

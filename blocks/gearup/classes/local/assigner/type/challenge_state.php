@@ -14,7 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
+
+/**
+ * Assigner.
+ *
+ * @package    block_gearup
+ * @copyright  2025 Frédéric Massart
+ * @author     Frédéric Massart <fred@branchup.tech>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace block_gearup\local\assigner\type;
 
@@ -47,7 +56,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class challenge_state implements type, type_with_action_consumption, type_with_update_after_restore {
-
     /** Has finished. */
     const STATE_FINISHED = 1;
     /** Has succeeded. */
@@ -55,18 +63,30 @@ class challenge_state implements type, type_with_action_consumption, type_with_u
     /** Has failed. */
     const STATE_FAILED = 3;
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new challenge_state_config_type_form($mission);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('assignerchallengestate', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('assignerchallengestatedesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_elligible_users_sql(assigner $assigner, mission $mission): array {
         $config = $assigner->get_type_config();
         $missionid = (int) ($config->missionid ?? null);
@@ -86,7 +106,6 @@ class challenge_state implements type, type_with_action_consumption, type_with_u
                 'completed' => mission_instance::STATE_COMPLETED,
                 'ended' => mission_instance::STATE_ENDED,
             ];
-
         } else if ($state === static::STATE_FAILED) {
             $sql = "SELECT DISTINCT subjectid
                       FROM {block_gearup_mission_inst}
@@ -98,7 +117,6 @@ class challenge_state implements type, type_with_action_consumption, type_with_u
                 'completed' => mission_instance::STATE_COMPLETED,
                 'ended' => mission_instance::STATE_ENDED,
             ];
-
         } else if ($state === static::STATE_FINISHED) {
             $sql = "SELECT DISTINCT subjectid
                       FROM {block_gearup_mission_inst}
@@ -114,11 +132,17 @@ class challenge_state implements type, type_with_action_consumption, type_with_u
         return [$sql, $params];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof challenge_completed
             || $action instanceof challenge_failed;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(action $action, assigner $assigner): bool {
         if (!$action instanceof mission_instance_action) {
             return false;
@@ -133,10 +157,8 @@ class challenge_state implements type, type_with_action_consumption, type_with_u
         $state = (int) ($config->state ?? null);
         if ($state === static::STATE_SUCCEEDED) {
             return $action instanceof challenge_completed;
-
         } else if ($state === static::STATE_FAILED) {
             return $action instanceof challenge_failed;
-
         } else if ($state === static::STATE_FINISHED) {
             return $action instanceof challenge_completed
                 || $action instanceof challenge_failed;
@@ -145,6 +167,9 @@ class challenge_state implements type, type_with_action_consumption, type_with_u
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, assigner $assigner, mission $mission) {
         if (!$assigner instanceof persisted_assigner) {
             $restore->get_logger()->process("Cannot process after_restore of assigner " . $assigner->get_id(), backup::LOG_WARNING);
@@ -184,7 +209,6 @@ class challenge_state implements type, type_with_action_consumption, type_with_u
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class challenge_state_config_type_form implements extender {
-
     /** @var mission The context. */
     protected $mission;
     /** @var context The context. */
@@ -192,12 +216,20 @@ class challenge_state_config_type_form implements extender {
     /** @var \block_gearup\local\repository The repository. */
     protected $repository;
 
+    /**
+     * Constructor.
+     *
+     * @param mission $mission Mission.
+     */
     public function __construct(mission $mission) {
         $this->mission = $mission;
         $this->context = $mission->get_context();
         $this->repository = di::get('repository');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         // An archived or deleted mission will no longer appear in the list.
         $options = ['' => get_string('choosedots', 'core')] + $this->get_mission_options();
@@ -217,16 +249,27 @@ class challenge_state_config_type_form implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         $data->cd_missionid = (int) ($data->cd_missionid);
         $data->cd_state = (int) ($data->cd_state);
         return $data;
     }
 
+    /**
+     * Get label.
+     *
+     * @return string
+     */
     protected function get_label(): string {
         return get_string('challenge', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -237,6 +280,11 @@ class challenge_state_config_type_form implements extender {
         return $errors;
     }
 
+    /**
+     * Get mission options.
+     *
+     * @return array
+     */
     protected function get_mission_options(): array {
         return array_reduce($this->repository->get_challenges($this->context), function ($carry, $quest) {
             if ($quest->get_id() == $this->mission->get_id()) {
@@ -246,5 +294,4 @@ class challenge_state_config_type_form implements extender {
             return $carry;
         }, []);
     }
-
 }

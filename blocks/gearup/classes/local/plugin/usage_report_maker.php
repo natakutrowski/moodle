@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Usage report maker.
@@ -41,7 +41,6 @@ use core_plugin_manager;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class usage_report_maker {
-
     /** @var string Hash. */
     protected $lkh = '0ed5df37d5bff33da1bac236df52ebcadddf23c3';
 

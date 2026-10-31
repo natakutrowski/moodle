@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -53,12 +53,15 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class objective_dynamic_form extends persistent_dynamic_form {
-
+    /** @var mixed Persistentclass. */
     protected static $persistentclass = objective::class;
 
     /** @var object|null|false A form extender, null, or false. */
     protected $typeconfigform = null;
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition() {
 
         $mh = di::get('mission_helper');
@@ -94,10 +97,10 @@ class objective_dynamic_form extends persistent_dynamic_form {
         }
 
         // We remove the supporting URL field on n+1 objectives for streaks and achievements.
-        if (!($mh->is_an_achievement($mission) || $mh->is_a_streak($mission))
+        if (
+            !($mh->is_an_achievement($mission) || $mh->is_a_streak($mission))
                 || $this->is_first_objective()
         ) {
-
             // Build the supporting URL modes.
             $urloptions = ['' => get_string('none')];
             if ($this->get_type() instanceof type_with_supporting_url && $extender instanceof extender_with_supporting_url_modes) {
@@ -114,7 +117,8 @@ class objective_dynamic_form extends persistent_dynamic_form {
             // Add the supporting URL field.
             $els = [
                 $mform->createElement('select', 'supportingurlmode', get_string('supportingurl', 'block_gearup'), $urloptions),
-                $mform->createElement('text',
+                $mform->createElement(
+                    'text',
                     'supportingurlcustom',
                     get_string('supportingurl', 'block_gearup'),
                     ['placeholder' => 'https://...' ]
@@ -185,7 +189,8 @@ class objective_dynamic_form extends persistent_dynamic_form {
 
             $this->set_display_vertical(true);
             $mform->setRequiredNote('');
-            $mform->addElement('static',
+            $mform->addElement(
+                'static',
                 'nofields',
                 '',
                 $output->notification(get_string('noconfigurationsettings', 'block_gearup'), notification::NOTIFY_INFO, false)
@@ -212,7 +217,6 @@ class objective_dynamic_form extends persistent_dynamic_form {
 
         $newerrors = [];
         if ($data) {
-
             // Require that the custom URL provided is prefixed as PARAM_URL is too permissive.
             if (in_array($data->supportingurlmode, ['0', 0]) && !empty($data->supportingurlcustom)) {
                 if (!preg_match('@^https?://@', $data->supportingurlcustom, $matches)) {
@@ -251,7 +255,6 @@ class objective_dynamic_form extends persistent_dynamic_form {
         $data = parent::get_data();
 
         if (is_object($data)) {
-
             // Normalise the supporting URL data.
             $supportingurlmode = $data->supportingurlmode ?? null;
             $data->supportingurl = null;
@@ -470,14 +473,13 @@ class objective_dynamic_form extends persistent_dynamic_form {
             $configdata = $data->configdata;
             unset($data->configdata);
 
-            // TODO Move all of this to an operator?
+            // Future work: Move all of this to an operator?
             $model = $this->get_persistent();
             $model->set('configdata', $configdata);
 
             if (!$model->get('id')) {
                 $model->from_record($data);
                 $model->create();
-
             } else {
                 $model->from_record((object) array_diff_key((array) $data, ['id' => true, 'missionid' => true, 'type' => true]));
                 $model->update();
@@ -486,7 +488,7 @@ class objective_dynamic_form extends persistent_dynamic_form {
             // Schedule a task to update all mission instances. In theory we only need to do this when
             // we have added a new objective, or modified an objective's config that can influence the
             // completion rate of the mission.
-            // TODO Should the stale from and dormant until values be refreshed, cleared or reevaluated?
+            // Future work: Should the stale from and dormant until values be refreshed, cleared or reevaluated?
             if ($mission->get_state() === mission::STATE_ACTIVE) {
                 $task = new mission_objectives_update_adhoc();
                 $task->set_custom_data(['missionid' => $this->get_mission()->get_id()]);
@@ -536,9 +538,9 @@ class objective_dynamic_form extends persistent_dynamic_form {
      * @return void
      */
     protected function process_dynamic_deletion() {
-        // TODO Move this to an operator?
-        // TODO Move to an API responsible for this.
-        // TODO Wrap in a transaction.
+        // Future work: Move this to an operator?
+        // Future work: Move to an API responsible for this.
+        // Future work: Wrap in a transaction.
 
         // Delete all the objective instances in bulk.
         $objective = $this->get_persistent();
@@ -553,5 +555,4 @@ class objective_dynamic_form extends persistent_dynamic_form {
             \core\task\manager::queue_adhoc_task($task, true);
         }
     }
-
 }

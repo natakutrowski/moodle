@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective.
@@ -56,7 +56,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class attain_level implements has_availability_info, has_availability_info_for_context, type, type_with_state_initialisation {
-
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof level_attained) {
             return;
@@ -68,10 +70,16 @@ class attain_level implements has_availability_info, has_availability_info_for_c
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         return new plugin_required_info('block_xp', 'Level Up XP', 2022112600, 'v3.13');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_context(\context $context): info {
         if (!class_exists('block_xp\di')) {
             return new static_info(false);
@@ -92,20 +100,32 @@ class attain_level implements has_availability_info, has_availability_info_for_c
         return new static_info(true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         $coursecontext = $mission->get_context()->get_course_context(false);
         $world = \block_xp\di::get('course_world_factory')->get_world($coursecontext ? $coursecontext->instanceid : SITEID);
         return new attain_level_config_form_extender($world);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typeattainlevel', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typeattainleveldesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
         $coursecontext = $missioninst->get_mission()->get_context()->get_course_context(false);
         $world = \block_xp\di::get('course_world_factory')->get_world($coursecontext ? $coursecontext->instanceid : SITEID);
@@ -120,10 +140,16 @@ class attain_level implements has_availability_info, has_availability_info_for_c
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof level_attained;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -160,11 +186,18 @@ class attain_level implements has_availability_info, has_availability_info_for_c
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class attain_level_config_form_extender implements extender {
-
+    /**
+     * Constructor.
+     *
+     * @param course_world $world World.
+     */
     public function __construct(course_world $world) {
         $this->world = $world;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
@@ -190,11 +223,16 @@ class attain_level_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
     }
-
 }

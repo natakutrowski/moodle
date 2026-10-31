@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome.
@@ -57,7 +57,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class enrol implements has_availability_info, type, type_with_update_after_restore {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         $config = $outcome->get_type_config();
         $userid = $missioninst->get_subject_id();
@@ -81,6 +83,9 @@ class enrol implements has_availability_info, type, type_with_update_after_resto
         $enrol->enrol_user($instance, $userid, $config->roleid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         global $CFG;
         require_once($CFG->libdir . '/enrollib.php');
@@ -92,18 +97,30 @@ class enrol implements has_availability_info, type, type_with_update_after_resto
         ])]);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new enrol_config_form_extender($mission);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('outcomeenrol', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('outcomeenroldesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, outcome $outcome, mission $mission) {
         if (!$outcome instanceof persisted_outcome) {
             $restore->get_logger()->process("Cannot process after_restore of outcome " . $outcome->get_id(), backup::LOG_WARNING);
@@ -160,16 +177,26 @@ class enrol implements has_availability_info, type, type_with_update_after_resto
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class enrol_config_form_extender implements extender {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Repository. */
     protected $repository;
 
+    /**
+     * Constructor.
+     *
+     * @param mission $mission Mission.
+     */
     public function __construct(mission $mission) {
         $this->mission = $mission;
         $this->context = $mission->get_context();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els[] = $mform->addElement('course', 'cd_courseid', get_string('course', 'core'), [
             'exclude' => $this->context->get_course_context(false)->instanceid ?? 0,
@@ -195,10 +222,16 @@ class enrol_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -212,7 +245,6 @@ class enrol_config_form_extender implements extender {
                 $label = get_capability_string($capability);
                 $errors['cd_courseid'] = get_string('nopermissionincourse', 'block_gearup', [
                     'name' => $capability, 'label' => $label]);
-
             } else if (!enrol::get_instance_in_course($data->cd_courseid)) {
                 // Validate that the manual instance is in course.
                 $errors['cd_courseid'] = get_string('manualenrolinstanceneeded', 'block_gearup');
@@ -227,5 +259,4 @@ class enrol_config_form_extender implements extender {
 
         return $errors;
     }
-
 }

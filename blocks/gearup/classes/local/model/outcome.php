@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome persistent.
@@ -40,7 +40,7 @@ use lang_string;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class outcome extends persistent {
-
+    /** Table. */
     const TABLE = 'block_gearup_outcome';
 
     /**
@@ -149,5 +149,4 @@ class outcome extends persistent {
         }
         return true;
     }
-
 }

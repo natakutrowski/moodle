@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\output;
 
@@ -30,7 +30,6 @@ use renderer_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class template implements named_templatable, renderable {
-
     /** @var string The template name. */
     protected $name;
     /** @var object The template context. */
@@ -47,10 +46,16 @@ class template implements named_templatable, renderable {
         $this->context = (object) ($context ?? []);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_template_name(renderer_base $renderer): string {
         return $this->name;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function export_for_template(\renderer_base $output) {
         return $this->context;
     }

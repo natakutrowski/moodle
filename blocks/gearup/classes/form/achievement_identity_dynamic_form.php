@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -40,7 +40,9 @@ use moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class achievement_identity_dynamic_form extends mission_dynamic_form_base {
-
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         parent::definition();
         $mform = $this->_form;
@@ -49,7 +51,8 @@ class achievement_identity_dynamic_form extends mission_dynamic_form_base {
         $mform->addRule('title', null, 'required', null, 'client');
 
         $visualsrepo = di::get('achievement_badges_repository');
-        form_utils::add_image_group_from_repository($mform,
+        form_utils::add_image_group_from_repository(
+            $mform,
             'visual',
             get_string('appearance', 'core'),
             $visualsrepo,
@@ -58,6 +61,9 @@ class achievement_identity_dynamic_form extends mission_dynamic_form_base {
         $mform->addRule('visual', null, 'required', null, 'client');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function check_access_for_mission(): void {
         $mission = $this->get_mission();
         if (!$mission->get_id()) {
@@ -65,11 +71,14 @@ class achievement_identity_dynamic_form extends mission_dynamic_form_base {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function process_dynamic_save() {
         if ($data = $this->get_data()) {
             unset($data->id);
 
-            // TODO Move all of this to an operator?
+            // Future work: Move all of this to an operator?
             $model = $this->get_persistent();
             $model->from_record($data);
             $model->update();

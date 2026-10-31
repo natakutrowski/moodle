@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -42,9 +42,12 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class delete_mission_recruits_dynamic_form extends mission_dynamic_form_base {
-
+    /** @var bool Supportsgroups. */
     protected $supportsgroups = true;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         parent::definition();
 
@@ -55,7 +58,8 @@ class delete_mission_recruits_dynamic_form extends mission_dynamic_form_base {
         $mform->setDisableShortforms(true);
 
         $nrecruits = $repo->count_users($this->get_mission()->get_id());
-        $mform->addElement('html', html_writer::div(markdown_to_html(get_string('deleterecruitsintro',
+        $mform->addElement('html', html_writer::div(markdown_to_html(get_string(
+            'deleterecruitsintro',
             'block_gearup',
             ['n' => $nrecruits]
         )), 'gu-mb-4 last-of-type:[&_p]:gu-mb-0'));
@@ -73,17 +77,20 @@ class delete_mission_recruits_dynamic_form extends mission_dynamic_form_base {
             }
 
             $els = [];
-            $els[] = $mform->createElement('select',
+            $els[] = $mform->createElement(
+                'select',
                 'deletecompleted',
                 get_string('deletecompletedmissions', 'block_gearup'),
                 [0 => get_string('no', 'core'), 1 => get_string('yes', 'core')]
             );
-            $els[] = $mform->createElement('static',
+            $els[] = $mform->createElement(
+                'static',
                 'deletecompleted_help',
                 '',
-                html_writer::div($helpstring, 'gu-mt-2 gu-text-gray-500')
+                html_writer::div($helpstring, 'gu-mt-2 gu-text-gray-500 dark:gu-text-gray-400')
             );
-            $mform->addElement('group',
+            $mform->addElement(
+                'group',
                 'deletecompletedgrp',
                 get_string('deletecompletedmissions', 'block_gearup'),
                 $els,
@@ -95,21 +102,24 @@ class delete_mission_recruits_dynamic_form extends mission_dynamic_form_base {
             $mform->setType('deletecompleted', PARAM_BOOL);
         }
 
-        // TODO When assigners can be enabled/disabled, we should add an option disable them.
+        // Future work: When assigners can be enabled/disabled, we should add an option disable them.
         $nassigners = $repo->count_assigners($this->get_mission()->get_id());
         if ($nassigners > 0) {
             $noptions++;
             $els = [];
-            $els[] = $mform->createElement('select',
+            $els[] = $mform->createElement(
+                'select',
                 'deleteassigners',
                 get_string('deleteassigners', 'block_gearup'),
                 [0 => get_string('no', 'core'), 1 => get_string('yes', 'core')]
             );
-            $els[] = $mform->createElement('static',
+            $els[] = $mform->createElement(
+                'static',
                 'deleteassigners_help',
                 '',
-                html_writer::div(get_string('deleterecruitsassignersexistsdesc', 'block_gearup', ['n' => $nassigners]),
-                    'gu-mt-2 gu-text-gray-500'
+                html_writer::div(
+                    get_string('deleterecruitsassignersexistsdesc', 'block_gearup', ['n' => $nassigners]),
+                    'gu-mt-2 gu-text-gray-500 dark:gu-text-gray-400'
                 )
             );
             $mform->addElement('group', 'deleteassignersgrp', get_string('deleteassigners', 'block_gearup'), $els, '', false);
@@ -124,6 +134,9 @@ class delete_mission_recruits_dynamic_form extends mission_dynamic_form_base {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_default_data() {
         return (object) [
             'deletecompleted' => 0,
@@ -131,9 +144,11 @@ class delete_mission_recruits_dynamic_form extends mission_dynamic_form_base {
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function process_dynamic_save() {
         if ($data = $this->get_data()) {
-
             // Deleting the assigners.
             if (!empty($data->deleteassigners)) {
                 // We should not be doing this like this.
@@ -155,7 +170,8 @@ class delete_mission_recruits_dynamic_form extends mission_dynamic_form_base {
             $nrecruits = $result->nrecruits ?? 0;
             $ninstances = $result->ninstances ?? 0;
             if ($nrecruits !== $ninstances) {
-                $message = get_string('successdeletedxrecruitsforymissions',
+                $message = get_string(
+                    'successdeletedxrecruitsforymissions',
                     'block_gearup',
                     ['recruits' => $nrecruits, 'missions' => $ninstances]
                 );

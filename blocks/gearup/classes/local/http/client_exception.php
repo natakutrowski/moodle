@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Client exception.
@@ -38,7 +38,6 @@ use moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class client_exception extends moodle_exception {
-
     /** @var curl|null The curl. */
     protected $curl;
     /** @var string|null The response, if any. */
@@ -71,5 +70,4 @@ class client_exception extends moodle_exception {
     public function get_http_code() {
         return ($this->curl && !empty($this->curl->info['http_code'])) ? $this->curl->info['http_code'] : 0;
     }
-
 }

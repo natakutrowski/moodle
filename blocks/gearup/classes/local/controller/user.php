@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -41,14 +41,17 @@ use core_user;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user extends route_base {
-
     /** @var object The repository. */
     protected $repository;
     /** @var object The user. */
     protected $user;
 
+    /** @var bool Supportsgroups. */
     protected $supportsgroups = true;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function post_login() {
         parent::post_login();
         $this->user = core_user::get_user($this->get_param('userid'), '*', MUST_EXIST);
@@ -58,6 +61,9 @@ class user extends route_base {
         $this->repository = di::get('repository');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function pre_content() {
         parent::pre_content();
 
@@ -68,17 +74,25 @@ class user extends route_base {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_html_head_title() {
         return fullname($this->user);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
-        $achievements = $this->repository->get_achievement_instances_by_subject_id($this->user->id,
+        $achievements = $this->repository->get_achievement_instances_by_subject_id(
+            $this->user->id,
             null,
             $this->context,
             ['m.title ASC']
         );
-        $quests = $this->repository->get_quest_instances_by_subject_id($this->user->id,
+        $quests = $this->repository->get_quest_instances_by_subject_id(
+            $this->user->id,
             null,
             $this->context,
             ['mi.timestarted ASC', 'mi.timecreated ASC']
@@ -118,7 +132,8 @@ class user extends route_base {
                 $exporter = $ef->get_mission_exporter($m);
                 $data = $exporter->export($output, ['url_resolver' => $this->urlresolver]);
                 return [
-                    'manageurl' => $this->urlresolver->reverse('mission_user',
+                    'manageurl' => $this->urlresolver->reverse(
+                        'mission_user',
                         ['missionid' => $m->get_id(), 'userid' => $this->user->id]
                     ),
                 ] + (array) $data;
@@ -131,5 +146,4 @@ class user extends route_base {
             }, $streaks)),
         ]);
     }
-
 }

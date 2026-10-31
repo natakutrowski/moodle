@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Utils.
@@ -39,7 +39,6 @@ use DateTimeZone;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class time_utils {
-
     /** Daily only week days. */
     const DAILY_WEEKDAY = 120960; // That is calculated from 86400 * 7/5.
 
@@ -77,5 +76,4 @@ class time_utils {
         $dt = new DateTimeImmutable();
         return $dt->setTimestamp($timestamp)->setTimezone($tz);
     }
-
 }

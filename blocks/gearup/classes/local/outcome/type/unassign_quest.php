@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome.
@@ -51,7 +51,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class unassign_quest implements type, type_with_update_after_restore {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         $config = $outcome->get_type_config();
         $userid = $missioninst->get_subject_id();
@@ -78,18 +80,30 @@ class unassign_quest implements type, type_with_update_after_restore {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new unassign_quest_config_form_extender($mission, di::get('repository'));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('outcomeunassignquest', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('outcomeunassignquestdesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, outcome $outcome, mission $mission) {
         if (!$outcome instanceof persisted_outcome) {
             $restore->get_logger()->process("Cannot process after_restore of outcome " . $outcome->get_id(), backup::LOG_WARNING);
@@ -129,17 +143,28 @@ class unassign_quest implements type, type_with_update_after_restore {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class unassign_quest_config_form_extender implements extender {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Repository. */
     protected $repository;
 
+    /**
+     * Constructor.
+     *
+     * @param mission $mission Mission.
+     * @param mixed $repository Repository.
+     */
     public function __construct(mission $mission, $repository) {
         $this->mission = $mission;
         $this->context = $mission->get_context();
         $this->repository = $repository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
 
         $options = array_reduce($this->repository->get_quests($this->context), function ($carry, $quest) {
@@ -154,10 +179,16 @@ class unassign_quest_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -167,5 +198,4 @@ class unassign_quest_config_form_extender implements extender {
 
         return $errors;
     }
-
 }

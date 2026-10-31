@@ -75,7 +75,7 @@ const App: React.FC<AppProps> = ({
                         </div>
                         <h3 className="gu-mt-1">{selected.label}</h3>
                         <div
-                            className="gu-my-4 gu-mt-2 gu-bg-gray-100 gu-p-2"
+                            className="gu-my-4 gu-mt-2 gu-bg-gray-100 dark:gu-bg-gray-800 gu-p-2"
                             dangerouslySetInnerHTML={{ __html: selected.description }}
                         />
                         {selected.isavailable ? (

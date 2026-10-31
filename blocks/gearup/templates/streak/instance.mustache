@@ -36,11 +36,11 @@
     {{> block_gearup/mission_instance_header }}
 
     {{#missioninst}}
-    <div class="gu-border-t gu-border-gray-200 gu-py-5 sm:gu-p-0">
-        <dl class="gu-divide-y gu-divide-gray-200">
+    <div class="gu-border-t gu-border-gray-200 dark:gu-border-gray-700 gu-py-5 sm:gu-p-0">
+        <dl class="gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700">
 
             <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
-                <dt class="gu-font-medium gu-text-gray-500">
+                <dt class="gu-font-medium gu-text-gray-500 dark:gu-text-gray-400">
                     {{#str}} started, block_gearup {{/str}}
                 </dt>
                 <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
@@ -51,7 +51,7 @@
             </div>
 
             <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
-                <dt class="gu-font-medium gu-text-gray-500">
+                <dt class="gu-font-medium gu-text-gray-500 dark:gu-text-gray-400">
                     {{#str}} streak, block_gearup {{/str}}
                 </dt>
                 <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
@@ -80,7 +80,7 @@
             {{^ hascompleted }}
             {{# hasdeadline }}
             <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
-                <dt class="gu-font-medium gu-text-gray-500">
+                <dt class="gu-font-medium gu-text-gray-500 dark:gu-text-gray-400">
                     {{#str}} deadline, block_gearup {{/str}}
                 </dt>
                 <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
@@ -99,7 +99,7 @@
 
             {{^ isended }}
             <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
-                <dt class="gu-font-medium gu-text-gray-500">
+                <dt class="gu-font-medium gu-text-gray-500 dark:gu-text-gray-400">
                     {{#str}} completed, block_gearup {{/str}}
                 </dt>
                 <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
@@ -157,7 +157,7 @@
 
             {{# isended }}
             <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
-                <dt class="gu-font-medium gu-text-gray-500">
+                <dt class="gu-font-medium gu-text-gray-500 dark:gu-text-gray-400">
                     {{#str}} lost, block_gearup {{/str}}
                 </dt>
                 <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
@@ -170,12 +170,12 @@
 
             {{# hasstarted }}
             <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
-                <dt class="gu-font-medium gu-text-gray-500">
+                <dt class="gu-font-medium gu-text-gray-500 dark:gu-text-gray-400">
                     {{#str}} objectives, block_gearup {{/str}}
                 </dt>
                 <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2 gu-flex">
 
-                    <div class="gu-grow gu-divide-y gu-divide-gray-200" id="objectives-list-{{ uniqid }}">
+                    <div class="gu-grow gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700" id="objectives-list-{{ uniqid }}">
                         {{#objinsts}}
                         <div class="gu-flex gu-py-4 sm:gu-py-4 first:gu-pt-0 last:gu-pb-0">
                             <div class="gu-grow">
@@ -191,7 +191,7 @@
                                 </div>
 
                                 {{^ objective.label }}
-                                <div class="gu-text-xs gu-text-gray-700">
+                                <div class="gu-text-xs gu-text-gray-700 dark:gu-text-gray-300">
                                     {{ objective.type }}
                                 </div>
                                 {{/ objective.label }}

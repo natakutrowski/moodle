@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mock.
@@ -39,10 +39,17 @@ use block_gearup\local\objective\objective_instance;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class objective_instance_mock implements objective_instance {
-
+    /** @var mixed Data. */
     protected $data;
+    /** @var mixed Objective. */
     protected $objective;
 
+    /**
+     * Constructor.
+     *
+     * @param objective $objective Objective.
+     * @param object $data Data.
+     */
     public function __construct(objective $objective, object $data) {
         $this->objective = $objective;
         $this->data = (object) array_merge([
@@ -56,47 +63,80 @@ class objective_instance_mock implements objective_instance {
         ], (array) $data);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_counter(): int {
         return $this->data->counter;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_dormant_until(): ?\DateTimeImmutable {
         return $this->data->dormantuntil === null ? null : $this->data->dormantuntil;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_mission_instance_id(): int {
         return $this->data->missioninstid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_objective(): objective {
         return $this->objective;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_stale_from(): ?\DateTimeImmutable {
         return $this->data->stalefrom === null ? null : $this->data->stalefrom;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_subject_id(): int {
         return $this->data->subjectid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_type_state() {
         return $this->data->typestate;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function increment_counter(int $amount) {
         $this->data->counter += $amount;
         $this->data->counter = min($this->data->counter, $this->objective->get_count_needed());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_completed(): bool {
         return $this->data->completed;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function mark_complete() {
         $this->data->completed = true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function reset() {
         $this->data->counter = 0;
         $this->data->completed = false;
@@ -105,18 +145,30 @@ class objective_instance_mock implements objective_instance {
         $this->data->stalefrom = null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function reset_counter() {
         $this->data->counter = 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function set_dormant_until(?\DateTimeImmutable $date = null) {
         $this->data->dormantuntil = $date;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function set_stale_from(?\DateTimeImmutable $date = null) {
         $this->data->stalefrom = $date;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function set_type_state($state) {
         $this->data->typestate = $state;
     }
@@ -125,12 +177,21 @@ class objective_instance_mock implements objective_instance {
      * Mock-specific methods.
      */
 
+    /**
+     * Access dormant until.
+     *
+     * @return mixed
+     */
     public function access_dormant_until() {
         return $this->data->dormantuntil;
     }
 
+    /**
+     * Access stale from.
+     *
+     * @return mixed
+     */
     public function access_stale_from() {
         return $this->data->stalefrom;
     }
-
 }

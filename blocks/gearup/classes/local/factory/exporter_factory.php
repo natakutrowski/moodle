@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Exporter factory.
@@ -43,17 +43,29 @@ use block_gearup\local\mission\mission_instance;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class exporter_factory {
-
     /** @var helper The mission helper. */
     protected $missionhelper;
     /** @var access_permissions_factory The perms factory. */
     protected $accesspermsfactory;
 
+    /**
+     * Constructor.
+     *
+     * @param access_permissions_factory $accesspermsfactory Accesspermsfactory.
+     * @param helper $missionhelper Missionhelper.
+     */
     public function __construct(access_permissions_factory $accesspermsfactory, helper $missionhelper) {
         $this->missionhelper = $missionhelper;
         $this->accesspermsfactory = $accesspermsfactory;
     }
 
+    /**
+     * Get mission instance exporter.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @param array $related Related.
+     * @return mission_instance_exporter
+     */
     public function get_mission_instance_exporter(mission_instance $missioninst, array $related = []) {
         return new mission_instance_exporter($missioninst, $related + [
             'access_permissions_factory' => $this->accesspermsfactory,
@@ -62,10 +74,22 @@ class exporter_factory {
         ]);
     }
 
+    /**
+     * Get mission instance exporter class.
+     *
+     * @return mixed
+     */
     public function get_mission_instance_exporter_class() {
         return mission_instance_exporter::class;
     }
 
+    /**
+     * Get mission exporter.
+     *
+     * @param mission $mission Mission.
+     * @param array $related Related.
+     * @return mission_exporter
+     */
     public function get_mission_exporter(mission $mission, array $related = []) {
         return new mission_exporter($mission, $related + [
             'access_permissions_factory' => $this->accesspermsfactory,
@@ -73,14 +97,31 @@ class exporter_factory {
         ]);
     }
 
+    /**
+     * Get mission exporter class.
+     *
+     * @return mixed
+     */
     public function get_mission_exporter_class() {
         return mission_exporter::class;
     }
 
+    /**
+     * Get tracker exporter.
+     *
+     * @param int $userid Userid.
+     * @param array $related Related.
+     * @return tracker_exporter
+     */
     public function get_tracker_exporter(int $userid, array $related = []) {
         return new tracker_exporter($userid, $related + []);
     }
 
+    /**
+     * Get tracker exporter class.
+     *
+     * @return mixed
+     */
     public function get_tracker_exporter_class() {
         return tracker_exporter::class;
     }

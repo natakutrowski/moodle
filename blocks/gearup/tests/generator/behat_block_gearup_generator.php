@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 use block_gearup\local\model\mission;
 
@@ -28,7 +28,11 @@ use block_gearup\local\model\mission;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class behat_block_gearup_generator extends behat_generator_base {
-
+    /**
+     * Get creatable entities.
+     *
+     * @return array
+     */
     protected function get_creatable_entities(): array {
         return [
             'achievements' => [
@@ -41,6 +45,16 @@ class behat_block_gearup_generator extends behat_generator_base {
                 'required' => ['title'],
                 'switchids' => ['course' => 'courseid'],
             ],
+            'missions' => [
+                'datagenerator' => 'mission_model',
+                'required' => ['title'],
+                'switchids' => ['course' => 'courseid'],
+            ],
+            'objectives' => [
+                'datagenerator' => 'objective_model',
+                'required' => ['mission', 'type', 'label'],
+                'switchids' => ['mission' => 'missionid'],
+            ],
             'quests' => [
                 'datagenerator' => 'quest',
                 'required' => ['title'],
@@ -48,6 +62,14 @@ class behat_block_gearup_generator extends behat_generator_base {
             ],
             'recruits' => [
                 'datagenerator' => 'recruit',
+                'required' => ['mission', 'user'],
+                'switchids' => [
+                    'mission' => 'missionid',
+                    'user' => 'subjectid',
+                ],
+            ],
+            'mission instances' => [
+                'datagenerator' => 'mission_instance_model',
                 'required' => ['mission', 'user'],
                 'switchids' => [
                     'mission' => 'missionid',
@@ -71,5 +93,4 @@ class behat_block_gearup_generator extends behat_generator_base {
     protected function get_mission_id(string $mission): int {
         return (int) mission::get_record(['title' => $mission], MUST_EXIST)->get('id');
     }
-
 }

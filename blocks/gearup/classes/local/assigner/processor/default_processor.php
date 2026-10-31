@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Assigner processor.
@@ -56,7 +56,6 @@ use block_gearup\local\model\mission as mission_model;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class default_processor implements action_processor, all_processor, backup_processor, event_processor, restore_processor {
-
     /** @var resolver The type resolver. */
     protected $assignertyperesolver;
     /** @var object The repository. */
@@ -77,8 +76,11 @@ class default_processor implements action_processor, all_processor, backup_proce
         $this->missionoperator = $missionoperator;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function process_all() {
-        // TODO Should we skip assigners that are event-compatible? Assigners
+        // Future work: Should we skip assigners that are event-compatible? Assigners
         // are always full synced once in the next cron run, so we probably don't
         // need to keep syncing them if they have other ways to keep in sync.
         foreach ($this->get_missions(['a.enabled = 1'], []) as [$assigner, $mission]) {
@@ -86,6 +88,9 @@ class default_processor implements action_processor, all_processor, backup_proce
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function process_action(action $action) {
         if (!$this->assignertyperesolver instanceof resolver_for_action) {
             return;
@@ -112,6 +117,9 @@ class default_processor implements action_processor, all_processor, backup_proce
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function process_backup(backup_facade $backup) {
         global $DB;
 
@@ -146,6 +154,9 @@ class default_processor implements action_processor, all_processor, backup_proce
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function process_event(\core\event\base $event) {
         global $DB;
         if ($event->is_restored()) {
@@ -163,7 +174,7 @@ class default_processor implements action_processor, all_processor, backup_proce
             return $this->assignertyperesolver->get_type_name($type);
         }, $types));
 
-        // TODO We're fetching more assigners than we need here, we could filter out
+        // Future work: We're fetching more assigners than we need here, we could filter out
         // out the assigners that are in another context, the type should implement
         // an early filter mechanism.
         [$typeinsql, $typeinparams] = $DB->get_in_or_equal($typenames, SQL_PARAMS_NAMED);
@@ -181,6 +192,9 @@ class default_processor implements action_processor, all_processor, backup_proce
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function process_restore(restore_context $restore) {
         global $DB;
 

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\assigner\type;
 
@@ -41,7 +41,6 @@ use restore_dbops;
  * @covers     \block_gearup\local\assigner\type\challenge_state
  */
 final class challenge_state_test extends base_testcase {
-
     /**
      * Provider.
      *
@@ -119,7 +118,7 @@ final class challenge_state_test extends base_testcase {
         $mo->evaluate_instance($mi);
         $mo->end_instance($mi);
 
-        // User 1 starts mission 3
+        // User 1 starts mission 3.
         $mi = $mo->assign_mission($m3, $u1->id);
 
         // User 2 fails mission 1.
@@ -303,7 +302,6 @@ final class challenge_state_test extends base_testcase {
                 di::get('objective_operator')->increment_instance_counter($oi, 1);
             }
             $mo->evaluate_instance($mi);
-
         } else if ($op === 'fail') {
             $mo->end_instance($mi);
         }
@@ -317,5 +315,4 @@ final class challenge_state_test extends base_testcase {
             [$targetmission->get_id(), $u2->id]
         ));
     }
-
 }

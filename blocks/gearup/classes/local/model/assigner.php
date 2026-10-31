@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Assigner persistent.
@@ -40,7 +40,7 @@ use lang_string;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assigner extends persistent {
-
+    /** Table. */
     const TABLE = 'block_gearup_assigner';
 
     /**
@@ -149,5 +149,4 @@ class assigner extends persistent {
         }
         return true;
     }
-
 }

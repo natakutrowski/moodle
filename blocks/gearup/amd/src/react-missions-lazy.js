@@ -852,7 +852,7 @@ const Str = ({ id, component = 'block_gearup', a }) => {
 ;// ./ts/src/components/ZeroStates.tsx
 
 const ZeroStateBlock = ({ icon, title, subtitle, children, }) => {
-    return (react.createElement("div", { className: "gu-grow gu-flex gu-flex-col gu-items-center gu-justify-center gu-border-dashed gu-border-gray-200 gu-border-2 gu-rounded-lg gu-p-4 gu-py-8" },
+    return (react.createElement("div", { className: "gu-grow gu-flex gu-flex-col gu-items-center gu-justify-center gu-border-dashed gu-border-gray-200 dark:gu-border-gray-700 gu-border-2 gu-rounded-lg gu-p-4 gu-py-8" },
         react.createElement("div", { className: "gu-text-center" },
             icon ? (react.createElement("div", { className: "gu-w-20 gu-mx-auto" },
                 react.createElement("div", { className: "gu-w-full gu-px-4" }, icon))) : null,
@@ -895,8 +895,8 @@ const InputCheckboxBs5 = ({ checked, onChange, disabled, children }) => {
 
 const Pill = ({ onClick, children, active }) => {
     const props = useAnchorButtonProps(onClick);
-    return (react.createElement("a", { className: classNames('gu-px-2 gu-py-1 gu-rounded gu-no-underline hover:gu-no-underline', !active
-            ? 'gu-bg-gray-200 gu-text-inherit hover:gu-text-inherit hover:gu-bg-gray-100'
+    return (react.createElement("a", { className: classNames('gu-px-2 gu-py-1 gu-rounded !gu-no-underline', !active
+            ? 'gu-bg-gray-200 dark:gu-bg-gray-700 gu-text-inherit hover:gu-text-inherit hover:gu-bg-gray-100 dark:hover:gu-bg-gray-800'
             : 'gu-bg-blue-600 gu-text-white hover:gu-text-white'), ...props }, children));
 };
 const App = ({ missions, usechallenges, createchallengeurl, createachievementurl, createquesturl }) => {
@@ -928,30 +928,30 @@ const App = ({ missions, usechallenges, createchallengeurl, createachievementurl
     const nArchivedInType = (0,react.useMemo)(() => missionsInType.filter((m) => m.isarchived).length, [missionsInType]);
     if (!missions.length) {
         return (react.createElement(ZeroStateBlock, { title: react.createElement(components_Str, { id: "nothinghereyet" }), subtitle: react.createElement(components_Str, { id: "getstartednewitem" }) },
-            react.createElement("div", { className: "gu-divide-y gu-divide-gray-200 gu-mt-4" },
-                react.createElement("a", { href: createquesturl, className: "gu-p-4 gu-flex gu-flex-row gu-text-current gu-no-underline hover:gu-bg-gray-100" },
+            react.createElement("div", { className: "gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700 gu-mt-4" },
+                react.createElement("a", { href: createquesturl, className: "gu-p-4 gu-flex gu-flex-row gu-text-current !gu-no-underline hover:gu-bg-gray-100 dark:hover:gu-bg-gray-800" },
                     react.createElement("div", { className: "gu-shrink-0 gu-w-12 gu-mr-4" },
                         react.createElement(QuestIcon, null)),
                     react.createElement("div", { className: "gu-grow" },
                         react.createElement("div", { className: "gu-text-xl gu-text-medium" },
                             react.createElement(components_Str, { id: "quest" })),
-                        react.createElement("div", { className: "gu-max-w-md gu-text-gray-500" },
+                        react.createElement("div", { className: "gu-max-w-md gu-text-gray-500 dark:gu-text-gray-400" },
                             react.createElement(components_Str, { id: "questexplaination" })))),
-                react.createElement("a", { href: createachievementurl, className: "gu-p-4 gu-flex gu-flex-row gu-text-current gu-no-underline hover:gu-bg-gray-100" },
+                react.createElement("a", { href: createachievementurl, className: "gu-p-4 gu-flex gu-flex-row gu-text-current !gu-no-underline hover:gu-bg-gray-100 dark:hover:gu-bg-gray-800" },
                     react.createElement("div", { className: "gu-shrink-0 gu-w-12 gu-mr-4" },
                         react.createElement(AchievementIcon, null)),
                     react.createElement("div", { className: "gu-grow" },
                         react.createElement("div", { className: "gu-text-xl gu-text-medium" },
                             react.createElement(components_Str, { id: "achievement" })),
-                        react.createElement("div", { className: "gu-max-w-md gu-text-gray-500" },
+                        react.createElement("div", { className: "gu-max-w-md gu-text-gray-500 dark:gu-text-gray-400" },
                             react.createElement(components_Str, { id: "achievementexplaination" })))),
-                usechallenges && createchallengeurl ? (react.createElement("a", { href: createchallengeurl, className: "gu-p-4 gu-flex gu-flex-row gu-text-current gu-no-underline hover:gu-bg-gray-100" },
+                usechallenges && createchallengeurl ? (react.createElement("a", { href: createchallengeurl, className: "gu-p-4 gu-flex gu-flex-row gu-text-current !gu-no-underline hover:gu-bg-gray-100 dark:hover:gu-bg-gray-800" },
                     react.createElement("div", { className: "gu-shrink-0 gu-w-12 gu-mr-4" },
                         react.createElement(ChallengeIcon, null)),
                     react.createElement("div", { className: "gu-grow" },
                         react.createElement("div", { className: "gu-text-xl gu-text-medium" },
                             react.createElement(components_Str, { id: "challenge" })),
-                        react.createElement("div", { className: "gu-max-w-md gu-text-gray-500" },
+                        react.createElement("div", { className: "gu-max-w-md gu-text-gray-500 dark:gu-text-gray-400" },
                             react.createElement(components_Str, { id: "challengeexplaination" }))))) : null)));
     }
     return (react.createElement(react.Fragment, null,
@@ -970,9 +970,9 @@ const App = ({ missions, usechallenges, createchallengeurl, createachievementurl
                         setShowArchived(!showArchived);
                     }, checked: showArchived },
                     react.createElement(components_Str, { id: "showarchivedn", a: nArchivedInType })))) : null),
-        filter && !finalMissions.length ? (react.createElement(ZeroStateBlock, { title: react.createElement(components_Str, { id: "nonehereyet" }), subtitle: react.createElement(components_Str, { id: "getstartednewone" }) })) : (react.createElement("div", { className: "gu-flex gu-flex-col gu-divide-y gu-divide-gray-200" }, finalMissions.map((mission) => {
+        filter && !finalMissions.length ? (react.createElement(ZeroStateBlock, { title: react.createElement(components_Str, { id: "nonehereyet" }), subtitle: react.createElement(components_Str, { id: "getstartednewone" }) })) : (react.createElement("div", { className: "gu-flex gu-flex-col gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700" }, finalMissions.map((mission) => {
             return (react.createElement("div", { key: mission.id },
-                react.createElement("a", { className: "gu-rounded gu-p-2 gu-flex gu-gap-2 hover:gu-bg-gray-200 gu-transition-colors gu-text-inherit gu-no-underline hover:gu-no-underline hover:gu-text-inherit", href: mission.manageurl },
+                react.createElement("a", { className: "gu-rounded gu-p-2 gu-flex gu-gap-2 hover:gu-bg-gray-200 dark:hover:gu-bg-gray-700 gu-transition-colors gu-text-inherit !gu-no-underline hover:gu-text-inherit", href: mission.manageurl },
                     react.createElement("div", { className: "gu-h-12 gu-w-12 gu-shrink-0" },
                         react.createElement(MissionVisual, { mission: mission })),
                     react.createElement("div", { className: "gu-grow gu-flex gu-flex-col" },
@@ -980,7 +980,7 @@ const App = ({ missions, usechallenges, createchallengeurl, createachievementurl
                             react.createElement("div", { className: "gu-font-medium gu-grow gu-text-lg gu-leading-tight" }, mission.title),
                             react.createElement("div", null, mission.isarchived ? (react.createElement("span", { className: "badge gu-badge-secondary" },
                                 react.createElement(components_Str, { id: "archived" }))) : null)),
-                        react.createElement("div", { className: "gu-text-xs gu-text-gray-500 gu-flex gu-items-center gu-leading-none" },
+                        react.createElement("div", { className: "gu-text-xs gu-text-gray-500 dark:gu-text-gray-400 gu-flex gu-items-center gu-leading-none" },
                             react.createElement("div", { className: "gu-flex gu-items-center gu-divide-x gu-grow" },
                                 react.createElement("div", { className: "gu-shrink-0 gu-flex gu-gap-1 gu-items-center gu-pr-1" },
                                     react.createElement("div", { className: "gu-w-4 gu-h-4 gu-shrink-0" },
@@ -1041,7 +1041,7 @@ const AchievementBadge = ({ visual }) => {
 };
 const QuestNarrator = ({ visual }) => {
     if (!visual) {
-        return (react.createElement("div", { className: "gu-flex gu-items-center gu-text-3xl gu-justify-center gu-h-full gu-w-full gu-bg-gray-200 gu-p-1 gu-rounded" },
+        return (react.createElement("div", { className: "gu-flex gu-items-center gu-text-3xl gu-justify-center gu-h-full gu-w-full gu-bg-gray-200 dark:gu-bg-gray-700 gu-p-1 gu-rounded" },
             react.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", fill: "none", viewBox: "0 0 24 24", strokeWidth: "1.5", stroke: "currentColor", className: "gu-w-full gu-max-h-full" },
                 react.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" }))));
     }

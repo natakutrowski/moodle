@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Table.
@@ -46,7 +46,6 @@ require_once($CFG->libdir . '/tablelib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class improved_table extends flexible_table {
-
     /** @var bool Whether has a dropdown. */
     private $hasdropdown = false;
     /** @var \block_gearup\output\renderer The renderer. */
@@ -117,7 +116,7 @@ abstract class improved_table extends flexible_table {
     /**
      * Format a dropdown.
      *
-     * @param action_menu_link[] The actions.
+     * @param array $actions The actions.
      * @return string
      */
     protected function format_dropdown(array $actions) {
@@ -318,7 +317,7 @@ abstract class improved_table extends flexible_table {
             'from' => $showingfrom,
             'to' => $showingto,
             'of' => $this->totalrows,
-        ]), 'gu-text-gray-500 gu-grow');
+        ]), 'gu-text-gray-500 dark:gu-text-gray-400 gu-grow');
         $o .= html_writer::div($this->render_reset_button());
         $o .= html_writer::end_div();
 
@@ -388,5 +387,4 @@ abstract class improved_table extends flexible_table {
         $this->out(0, false);   // Page size is irrelevant when downloading.
         die();
     }
-
 }

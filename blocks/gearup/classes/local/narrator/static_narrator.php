@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\narrator;
 
@@ -29,15 +29,20 @@ use block_gearup\local\visual\static_visual;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class static_narrator extends static_visual implements narrator_with_speaking_frames {
-
     /** @var moodle_url[] */
     protected $speakingframes = [];
 
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_speaking_frames(): array {
         return $this->speakingframes ?? [];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function has_speaking_frames(): bool {
         return !empty($this->speakingframes);
     }
@@ -50,5 +55,4 @@ class static_narrator extends static_visual implements narrator_with_speaking_fr
     public function set_speaking_frames(array $frames): void {
         $this->speakingframes = array_values($frames);
     }
-
 }

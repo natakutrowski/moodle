@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Repository.
@@ -50,9 +50,11 @@ use block_gearup\local\model\objective as objective_model;
 use block_gearup\local\model\objective_inst as objective_inst_model;
 use block_gearup\local\model\outcome as outcome_model;
 use block_gearup\local\model\user_reader;
+use block_gearup\local\objective\objective;
 use block_gearup\local\objective\persisted_objective;
 use block_gearup\local\objective\persisted_objective_instance;
 use block_gearup\local\objective\resolver\resolver as objective_resolver;
+use block_gearup\local\outcome\outcome;
 use block_gearup\local\outcome\persisted_outcome;
 use block_gearup\local\outcome\resolver\resolver as outcome_resolver;
 use context;
@@ -70,13 +72,22 @@ use context_system;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class repository {
-
+    /** @var mixed Objtyperesolver. */
     protected $objtyperesolver;
+    /** @var mixed Outcometyperesolver. */
     protected $outcometyperesolver;
+    /** @var mixed Assignertyperesolver. */
     protected $assignertyperesolver;
     /** @var \core\clock */
     protected $clock;
 
+    /**
+     * Constructor.
+     *
+     * @param objective_resolver $objtyperesolver Objtyperesolver.
+     * @param outcome_resolver $outcometyperesolver Outcometyperesolver.
+     * @param assigner_resolver $assignertyperesolver Assignertyperesolver.
+     */
     public function __construct(
         objective_resolver $objtyperesolver,
         outcome_resolver $outcometyperesolver,
@@ -129,6 +140,12 @@ class repository {
         return 0;
     }
 
+    /**
+     * Count instances from query.
+     *
+     * @param mission_instance_query $query Query.
+     * @return int
+     */
     public function count_instances_from_query(mission_instance_query $query): int {
         return (new mission_inst_reader())->use_query($query)->count();
     }
@@ -141,6 +158,12 @@ class repository {
         return 0;
     }
 
+    /**
+     * Count instances completed.
+     *
+     * @param int $missionid Missionid.
+     * @return mixed
+     */
     public function count_instances_completed(int $missionid) {
         global $DB;
         [$insql, $inparams] = $DB->get_in_or_equal([
@@ -155,6 +178,12 @@ class repository {
         );
     }
 
+    /**
+     * Count missions.
+     *
+     * @param context|null $context Context.
+     * @return mixed
+     */
     public function count_missions(?context $context = null) {
         $filters = [];
         if ($context) {
@@ -199,10 +228,22 @@ class repository {
         return (int) $DB->get_field_sql($sql, $params);
     }
 
+    /**
+     * Count users.
+     *
+     * @param int $missionid Missionid.
+     * @return mixed
+     */
     public function count_users(int $missionid) {
         return mission_inst_model::count_subjects_by_missionid($missionid);
     }
 
+    /**
+     * Count users from query.
+     *
+     * @param user_query $query Query.
+     * @return mixed
+     */
     public function count_users_from_query(user_query $query) {
         return (new user_reader())->use_query($query)->count();
     }
@@ -229,6 +270,14 @@ class repository {
         return $this->get_type_instances_by_subject_id(achievement::class, $subjectid, $state, $context, $order, $offset, $limit);
     }
 
+    /**
+     * Get achievements.
+     *
+     * @param mixed $context Context.
+     * @param int $offset Offset.
+     * @param int $limit Limit.
+     * @return mixed
+     */
     public function get_achievements($context = null, $offset = 0, $limit = 0) {
         $filters = ['type' => mission_model::TYPE_ACHIEVEMENT, 'state' => mission::STATE_ACTIVE];
         if ($context) {
@@ -261,6 +310,12 @@ class repository {
         }, iterator_to_array($reader->list()));
     }
 
+    /**
+     * Get assigners.
+     *
+     * @param int $missionid Missionid.
+     * @return mixed
+     */
     public function get_assigners(int $missionid) {
         $filters = ['missionid' => $missionid];
         return array_values(array_map(function ($model) {
@@ -330,8 +385,17 @@ class repository {
         $recordset->close();
     }
 
+    /**
+     * Get available quests.
+     *
+     * @param int $subjectid Subjectid.
+     * @param context|null $context Context.
+     * @param int $offset Offset.
+     * @param int $limit Limit.
+     * @return mixed
+     */
     public function get_available_quests(int $subjectid, ?context $context = null, $offset = 0, $limit = 0) {
-        /** Used 1x */
+        // Used 1x.
         $sql = "    m.type = ?
                 AND m.state = ?
                 AND mi.state = ?
@@ -351,6 +415,15 @@ class repository {
         return $this->fetch_instances_select($sql, $params, 'mi.timecreated DESC', $offset, $limit);
     }
 
+    /**
+     * Get challenges by subject id.
+     *
+     * @param int $subjectid Subjectid.
+     * @param context|null $context Context.
+     * @param int $offset Offset.
+     * @param int $limit Limit.
+     * @return mixed
+     */
     public function get_challenges_by_subject_id(int $subjectid, ?context $context = null, $offset = 0, $limit = 0) {
         global $DB;
 
@@ -397,6 +470,14 @@ class repository {
         return $this->get_type_instances_by_subject_id(challenge::class, $subjectid, $state, $context, $order, $offset, $limit);
     }
 
+    /**
+     * Get challenges.
+     *
+     * @param mixed $context Context.
+     * @param int $offset Offset.
+     * @param int $limit Limit.
+     * @return mixed
+     */
     public function get_challenges($context = null, $offset = 0, $limit = 0) {
         $filters = ['type' => mission_model::TYPE_CHALLENGE, 'state' => mission::STATE_ACTIVE];
         if ($context) {
@@ -613,7 +694,8 @@ class repository {
      * @return ?mission_instance
      */
     public function get_instance_by_subject_id(int $missionid, int $subjectid) {
-        $missioninsts = $this->fetch_instances_select("mi.missionid = ? AND mi.subjectid = ?",
+        $missioninsts = $this->fetch_instances_select(
+            "mi.missionid = ? AND mi.subjectid = ?",
             [$missionid, $subjectid],
             'mi.timestarted ASC, mi.id ASC'
         );
@@ -623,6 +705,14 @@ class repository {
         return reset($missioninsts);
     }
 
+    /**
+     * Get instances from query.
+     *
+     * @param mission_instance_query $query Query.
+     * @param int $offset Offset.
+     * @param int $limit Limit.
+     * @return mixed
+     */
     public function get_instances_from_query(mission_instance_query $query, int $offset = 0, int $limit = 0) {
         $reader = (new mission_inst_reader())
             ->use_query($query)
@@ -651,7 +741,7 @@ class repository {
     ) {
         global $DB;
 
-        // TODO We should not be creating SQL order like that, we should use a class.
+        // Future work: We should not be creating SQL order like that, we should use a class.
         // We expecte the format [['column', SORT_ASC], ['column', SORT_DESC]], but we also accept ['column' => SORT_ASC].
         $orderby = !empty($orderby) && !is_array($orderby[0]) ? [$orderby] : $orderby;
         $orderparts = array_map(function ($part) {
@@ -752,6 +842,12 @@ class repository {
         return $mission ? $this->make_mission_from_model($mission) : null;
     }
 
+    /**
+     * Get mission by instanceid.
+     *
+     * @param int $id Id.
+     * @return mixed
+     */
     public function get_mission_by_instanceid(int $id) {
         global $DB;
         $mfields = mission_model::get_sql_fields('m', '');
@@ -793,6 +889,12 @@ class repository {
         }, iterator_to_array($this->get_missions_from_query($query, $offset, $limit)));
     }
 
+    /**
+     * Count missions from query.
+     *
+     * @param mission_query $query Query.
+     * @return int
+     */
     public function count_missions_from_query(mission_query $query): int {
         return (new mission_reader())->use_query($query)->count();
     }
@@ -831,6 +933,14 @@ class repository {
         return $DB->count_records_sql($sql, $params);
     }
 
+    /**
+     * Get missions from query.
+     *
+     * @param mission_query $query Query.
+     * @param int $offset Offset.
+     * @param int $limit Limit.
+     * @return iterable
+     */
     public function get_missions_from_query(mission_query $query, $offset = 0, $limit = 0): iterable {
         // We can add an argument here to return the mission objects only. Or we can update the
         // reader so that it does not return an array of objects we only query the mission and
@@ -870,10 +980,9 @@ class repository {
      * @return objective[]
      */
     public function get_objectives(int $missionid) {
-        $filters = ['missionid' => $missionid];
         return array_values(array_map(function ($model) {
             return new persisted_objective($model, $this->objtyperesolver);
-        }, objective_model::get_records($filters, 'id', 'ASC')));
+        }, objective_model::get_all_by_missionid($missionid)));
     }
 
     /**
@@ -1039,6 +1148,14 @@ class repository {
         return $this->get_type_instances_by_subject_id(quest::class, $subjectid, $state, $context, $order, $offset, $limit);
     }
 
+    /**
+     * Get quests.
+     *
+     * @param mixed $context Context.
+     * @param int $offset Offset.
+     * @param int $limit Limit.
+     * @return mixed
+     */
     public function get_quests($context = null, $offset = 0, $limit = 0) {
         $filters = ['type' => mission_model::TYPE_QUEST, 'state' => mission::STATE_ACTIVE];
         if ($context) {
@@ -1058,7 +1175,7 @@ class repository {
      * Note that this method is not currently used, and should be tested first!
      */
     public function get_stale_mission_instances_for_subject_id(context $context, int $subjectid) {
-        // TODO This method should check that the mission is active.
+        // Future work: This method should check that the mission is active.
         debugging('The method get_stale_mission_instances_for_subject_id has not been tested!', DEBUG_DEVELOPER);
 
         $wheres = [
@@ -1117,7 +1234,7 @@ class repository {
      * @return persisted_objective_instance[]
      */
     public function get_stale_objective_instances() {
-        // TODO Make interface return an iterator, or traversable.
+        // Future work: Make interface return an iterator, or traversable.
         global $DB;
 
         $oifields = objective_inst_model::get_sql_fields('oi', 'oi_');
@@ -1173,7 +1290,8 @@ class repository {
         $offset = 0,
         $limit = 0
     ) {
-        return $this->fetch_instances_by_subject_id($subjectid,
+        return $this->fetch_instances_by_subject_id(
+            $subjectid,
             mission_model::get_internal_type($type),
             $state,
             $context,
@@ -1191,6 +1309,14 @@ class repository {
         return [];
     }
 
+    /**
+     * Get users from query.
+     *
+     * @param user_query $query Query.
+     * @param int $offset Offset.
+     * @param int $limit Limit.
+     * @return mixed
+     */
     public function get_users_from_query(user_query $query, int $offset = 0, int $limit = 0) {
         return iterator_to_array((new user_reader())->use_query($query)->list($offset, $limit));
     }
@@ -1262,14 +1388,32 @@ class repository {
         return $this->exists_instances_select($sql, $params);
     }
 
+    /**
+     * Has achievements in.
+     *
+     * @param context $context Context.
+     * @return mixed
+     */
     public function has_achievements_in(context $context) {
         return $this->has_missions_in(mission_model::TYPE_ACHIEVEMENT, $context);
     }
 
+    /**
+     * Has challenges in.
+     *
+     * @param context $context Context.
+     * @return mixed
+     */
     public function has_challenges_in(context $context) {
         return $this->has_missions_in(mission_model::TYPE_CHALLENGE, $context);
     }
 
+    /**
+     * Has quests in.
+     *
+     * @param context $context Context.
+     * @return mixed
+     */
     public function has_quests_in(context $context) {
         return $this->has_missions_in(mission_model::TYPE_QUEST, $context);
     }
@@ -1285,6 +1429,12 @@ class repository {
         return mission_model::record_exists_select('type = ? AND contextid = ?', [$type, $context->id]);
     }
 
+    /**
+     * Has any instances.
+     *
+     * @param mission_instance_query $query Query.
+     * @return mixed
+     */
     public function has_any_instances(mission_instance_query $query) {
         return (new mission_inst_reader())->use_query($query)->exists();
     }
@@ -1302,17 +1452,37 @@ class repository {
         return $this->exists_instances_select($sql, $params);
     }
 
+    /**
+     * Has any visible instances in.
+     *
+     * @param int $subjectid Subjectid.
+     * @param context $context Context.
+     * @return mixed
+     */
     public function has_any_visible_instances_in(int $subjectid, context $context) {
         [$sql, $params] = $this->get_visible_instances_in_sql($subjectid, $context);
         return $this->exists_instances_select($sql, $params);
     }
 
+    /**
+     * Has non started instances.
+     *
+     * @param int $missionid Missionid.
+     * @return mixed
+     */
     public function has_non_started_instances(int $missionid) {
         $sql = "mi.missionid = ? AND mi.state = ?";
         $params = [$missionid, mission_instance::STATE_ASSIGNED];
         return $this->exists_instances_select($sql, $params);
     }
 
+    /**
+     * Has outcomes.
+     *
+     * @param int $missionid Missionid.
+     * @param bool $visibleonly Visibleonly.
+     * @return mixed
+     */
     public function has_outcomes(int $missionid, bool $visibleonly = false) {
         global $DB;
         $filters = ['missionid' => $missionid];
@@ -1322,6 +1492,13 @@ class repository {
         return $DB->record_exists(outcome_model::TABLE, $filters);
     }
 
+    /**
+     * Is assigned mission.
+     *
+     * @param int $subjectid Subjectid.
+     * @param int $missionid Missionid.
+     * @return mixed
+     */
     public function is_assigned_mission(int $subjectid, int $missionid) {
         return mission_inst_model::record_exists_select('subjectid = ? AND missionid = ?', [$subjectid, $missionid]);
     }
@@ -1380,6 +1557,13 @@ class repository {
         return $this->count_instances_select($sql, $params);
     }
 
+    /**
+     * Count instances select.
+     *
+     * @param mixed $wheresql Wheresql.
+     * @param mixed $whereparams Whereparams.
+     * @return mixed
+     */
     protected function count_instances_select($wheresql, $whereparams) {
         global $DB;
         $sql = "SELECT COUNT(1) AS n
@@ -1391,6 +1575,13 @@ class repository {
         return $DB->count_records_sql($sql, $params);
     }
 
+    /**
+     * Exists instances select.
+     *
+     * @param mixed $wheresql Wheresql.
+     * @param mixed $whereparams Whereparams.
+     * @return mixed
+     */
     protected function exists_instances_select($wheresql, $whereparams) {
         global $DB;
 
@@ -1448,6 +1639,16 @@ class repository {
         return $this->fetch_instances_select($sql, $params, $ordersql, $offset, $limit);
     }
 
+    /**
+     * Fetch instances select.
+     *
+     * @param mixed $wheresql Wheresql.
+     * @param mixed $whereparams Whereparams.
+     * @param mixed $order Order.
+     * @param int $offset Offset.
+     * @param int $limit Limit.
+     * @return mixed
+     */
     protected function fetch_instances_select($wheresql, $whereparams, $order = null, $offset = 0, $limit = 0) {
         global $DB;
 
@@ -1460,7 +1661,7 @@ class repository {
         }
 
         // Just fetch the missions instances.
-        // TODO Can we assume that the subject is a user?
+        // Future work: Can we assume that the subject is a user?
         $sql = "SELECT $mifields, $mfields
                   FROM {block_gearup_mission_inst} mi
                   JOIN {block_gearup_mission} m
@@ -1533,7 +1734,8 @@ class repository {
              LEFT JOIN {block_gearup_objective_inst} oi
                     ON oi.objectiveid = o.id
                    AND oi.missioninstid $inmistidsql
-                 WHERE o.missionid $inidsql";
+                 WHERE o.missionid $inidsql
+              ORDER BY o.sortorder, o.id";
         $params = $inidparams + $inmistidparams;
 
         $objectivesbymissionid = [];

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Testcase.
@@ -44,7 +44,6 @@ use SplFileObject;
  * @covers     \block_gearup\local\controller\controller
  */
 final class compliance_test extends base_testcase {
-
     public function test_calls_parent_pre_content_method(): void {
         $classes = array_keys(core_component::get_component_classes_in_namespace('block_gearup', 'local\\controller'));
         foreach ($classes as $classname) {
@@ -62,7 +61,8 @@ final class compliance_test extends base_testcase {
 
             if ($parenthasmethod) {
                 $source = $this->get_method_code($method);
-                $this->assertMatchesRegularExpression('/^(\s)*parent::pre_content\(\)/',
+                $this->assertMatchesRegularExpression(
+                    '/^(\s)*parent::pre_content\(\)/',
                     $source[0],
                     "Class {$class->getName()} must call the parent method {$method->getName()}."
                 );
@@ -87,7 +87,8 @@ final class compliance_test extends base_testcase {
             // Validate that the controller does not define any of the trait methods.
             foreach ($finalmethods as $finalmethod) {
                 $method = $reflection->getMethod($finalmethod->getName());
-                $this->assertTrue($method->getFileName() === $finalmethod->getFileName(),
+                $this->assertTrue(
+                    $method->getFileName() === $finalmethod->getFileName(),
                     "Class {$reflection->getName()} must not redeclare the method {$method->getName()} " .
                     "declared final in the trait {$trait->getName()}."
                 );
@@ -95,6 +96,12 @@ final class compliance_test extends base_testcase {
         }
     }
 
+    /**
+     * Get method code.
+     *
+     * @param ReflectionMethod $method Method.
+     * @return array
+     */
     protected function get_method_code(ReflectionMethod $method): array {
         $filename = $method->getFileName();
         $endline = $method->getEndLine();
@@ -112,9 +119,15 @@ final class compliance_test extends base_testcase {
         return $source;
     }
 
+    /**
+     * Is method from class.
+     *
+     * @param ReflectionMethod $method Method.
+     * @param ReflectionClass $class Class.
+     * @return mixed
+     */
     protected function is_method_from_class(ReflectionMethod $method, ReflectionClass $class) {
         return $method->getFileName() === $class->getFileName()
             && $method->getDeclaringClass()->getName() === $class->getName();
     }
-
 }

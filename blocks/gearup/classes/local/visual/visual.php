@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Visual.
@@ -38,7 +38,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface visual {
-
     /**
      * Get an alternative text for the visual.
      *
@@ -59,5 +58,4 @@ interface visual {
      * @return moodle_url
      */
     public function get_url(): moodle_url;
-
 }

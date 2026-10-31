@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective.
@@ -38,7 +38,6 @@ use block_gearup\local\objective\type\type;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface objective {
-
     /**
      * Get the ID.
      *
@@ -81,23 +80,22 @@ interface objective {
      */
     public function get_type_config();
 
-    // /**
-    // * Check whether the action is acceptable.
-    // *
-    // * Based on the current configuration of the action, checks whether we
-    // * can accept the action. This is meant to check the overall configurable
-    // * aspects of acceptable, such as context ID, user ID, etc.
-    // *
-    // * The objective instance, belonging to a particular subject, will then
-    // * perform further checks based on information that is specific to
-    // * that instance of the objective.
-    // *
-    // * This should also validate that the action is compatible by deferring the
-    // * check to {@link type::is_action_compatible}.
-    // *
-    // * @param action $action The action.
-    // * @return boolean
-    // */
-    // public function is_action_acceptable(action $action): bool;
-
+    /*
+     * Check whether the action is acceptable.
+     *
+     * Based on the current configuration of the action, checks whether we
+     * can accept the action. This is meant to check the overall configurable
+     * aspects of acceptable, such as context ID, user ID, etc.
+     *
+     * The objective instance, belonging to a particular subject, will then
+     * perform further checks based on information that is specific to
+     * that instance of the objective.
+     *
+     * This should also validate that the action is compatible by deferring the
+     * check to {@link type::is_action_compatible}.
+     *
+     * @param action $action The action.
+     * @return boolean
+     * public function is_action_acceptable(action $action): bool;
+     */
 }

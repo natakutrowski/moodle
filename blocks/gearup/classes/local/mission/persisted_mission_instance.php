@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Persisted mission instance.
@@ -41,38 +41,65 @@ use DateTimeImmutable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class persisted_mission_instance implements mission_instance {
-
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Objectiveinsts. */
     protected $objectiveinsts;
+    /** @var mixed Persistent. */
     protected $persistent;
 
+    /**
+     * Constructor.
+     *
+     * @param mission_inst $persistent Persistent.
+     * @param mission $mission Mission.
+     * @param array $objectiveinsts Objectiveinsts.
+     */
     public function __construct(mission_inst $persistent, mission $mission, array $objectiveinsts) {
         $this->persistent = $persistent;
         $this->mission = $mission;
-        $this->objectiveinsts = $objectiveinsts;
+        $this->set_objective_instances($objectiveinsts);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_id(): int {
         return (int) $this->persistent->get('id');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_completion_ratio(): float {
         return (float) $this->persistent->get('completionratio');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_counter(): int {
         return (int) $this->persistent->get('counter');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_deadline(): ?\DateTimeImmutable {
         $deadline = $this->persistent->get('deadline');
         return $deadline ? new DateTimeImmutable('@' . $deadline) : null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_iteration_number(): int {
         return (int) $this->persistent->get('iteration');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_instance_of_objective(int $objectiveid): objective_instance {
         foreach ($this->get_objective_instances() as $oi) {
             if ($oi->get_objective()->get_id() == $objectiveid) {
@@ -82,30 +109,53 @@ class persisted_mission_instance implements mission_instance {
         throw new \moodle_exception('Objective instance not found.');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_mission(): mission {
         return $this->mission;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_objective_instances(): array {
         return $this->objectiveinsts;
     }
 
+    /**
+     * Get persistent.
+     *
+     * @return mission_inst
+     */
     public function get_persistent(): mission_inst {
         return $this->persistent;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_state(): int {
         return (int) $this->persistent->get('state');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_subject_id(): int {
         return (int) $this->persistent->get('subjectid');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_time_assigned(): \DateTimeImmutable {
         return new \DateTimeImmutable('@' . $this->persistent->get('timecreated'));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_time_completed(): \DateTimeImmutable {
         $ts = $this->persistent->get('timecompleted');
         if (!$ts) {
@@ -114,6 +164,9 @@ class persisted_mission_instance implements mission_instance {
         return new \DateTimeImmutable('@' . $ts);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_time_ended(): \DateTimeImmutable {
         $ts = $this->persistent->get('timeended');
         if (!$ts) {
@@ -122,6 +175,9 @@ class persisted_mission_instance implements mission_instance {
         return new \DateTimeImmutable('@' . $ts);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_time_started(): \DateTimeImmutable {
         $ts = $this->persistent->get('timestarted');
         if (!$ts) {
@@ -130,66 +186,114 @@ class persisted_mission_instance implements mission_instance {
         return new \DateTimeImmutable('@' . $ts);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function increment_counter(int $amount) {
         // Possible race conditions here, but unlikely to be an issue at the moment.
         $this->persistent->set('counter', $this->get_counter() + $amount);
         $this->persistent->update();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function needs_attention(): bool {
         return (bool) $this->persistent->get('needsattention');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function reset_counter() {
         $this->persistent->set('counter', 0);
         $this->persistent->update();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function set_completion_ratio(float $ratio) {
         $this->persistent->set('completionratio', $ratio);
         $this->persistent->update();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function set_deadline(?\DateTimeImmutable $date) {
         $this->persistent->set('deadline', $date ? $date->getTimestamp() : 0);
         $this->persistent->update();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function set_iteration_number(int $n) {
         $this->persistent->set('iteration', $n);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function set_needs_attention(bool $bool) {
         $this->persistent->set('needsattention', (int) (bool) $bool);
         $this->persistent->update();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function set_objective_instances(array $objinsts) {
+        if ($objinsts) {
+            $order = array_flip(array_map(function ($objective) {
+                return $objective->get_id();
+            }, array_values($this->mission->get_objectives())));
+            uasort($objinsts, function ($a, $b) use ($order) {
+                $aid = $a->get_objective()->get_id();
+                $bid = $b->get_objective()->get_id();
+                return [$order[$aid] ?? PHP_INT_MAX, $aid] <=> [$order[$bid] ?? PHP_INT_MAX, $bid];
+            });
+        }
         $this->objectiveinsts = $objinsts;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function set_state(int $state) {
         $this->persistent->set('state', $state);
         $this->persistent->update();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function set_time_assigned(\DateTimeImmutable $date) {
         // Nothing to do, this refers to the timecreated value.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function set_time_completed(\DateTimeImmutable $date) {
         $this->persistent->set('timecompleted', $date->getTimestamp());
         $this->persistent->update();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function set_time_ended(\DateTimeImmutable $date) {
         $this->persistent->set('timeended', $date->getTimestamp());
         $this->persistent->update();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function set_time_started(\DateTimeImmutable $date) {
         $this->persistent->set('timestarted', $date->getTimestamp());
         $this->persistent->update();
     }
-
 }

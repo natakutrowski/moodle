@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Persisted quest.
@@ -31,6 +31,7 @@ use block_gearup\di;
 use block_gearup\local\model\mission as mission_model;
 use block_gearup\local\mission\mission;
 use block_gearup\local\objective\objective;
+use block_gearup\local\objective\persisted_objective;
 use block_gearup\local\visual\repository_with_context;
 use block_gearup\local\visual\static_visual;
 use block_gearup\local\visual\visual;
@@ -46,18 +47,29 @@ use moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class persisted_mission implements mission {
-
+    /** @var mixed Objectivescallable. */
     protected $objectivescallable;
+    /** @var mixed Objectives. */
     protected $objectives;
+    /** @var mixed Persistent. */
     protected $persistent;
 
     /** @var \block_gearup\local\visual\repository */
     protected $visualrepo;
 
+    /**
+     * Constructor.
+     *
+     * @param mission_model $persistent Persistent.
+     * @param mixed $objectivesorcallable Objectivesorcallable.
+     * @param mixed $visualrepo Visualrepo.
+     */
     public function __construct(mission_model $persistent, $objectivesorcallable, $visualrepo = null) {
         $this->persistent = $persistent;
-        $this->objectives = is_callable($objectivesorcallable) ? null : $objectivesorcallable;
         $this->objectivescallable = is_callable($objectivesorcallable) ? $objectivesorcallable : null;
+        if ($this->objectivescallable === null) {
+            $this->set_objectives($objectivesorcallable);
+        }
 
         // We probably should not be doing this like this.
         $this->visualrepo = null;
@@ -68,34 +80,58 @@ class persisted_mission implements mission {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_context(): context {
         return context::instance_by_id($this->persistent->get('contextid'));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_id(): int {
         return (int) $this->persistent->get('id');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_state(): int {
         return (int) $this->persistent->get('state');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_title(): string {
         return $this->persistent->get('title');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_description(): string {
         return (string) $this->persistent->get('description');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_feedback(): string {
         return (string) $this->persistent->get('feedback');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_instructions(): string {
         return (string) $this->persistent->get('instructions');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_objective(int $id): objective {
         foreach ($this->get_objectives() as $objective) {
             if ($objective->get_id() == $id) {
@@ -105,47 +141,77 @@ class persisted_mission implements mission {
         throw new moodle_exception('Unknown objective');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_objectives(): array {
         if ($this->objectives === null) {
             $fn = $this->objectivescallable;
-            $this->objectives = $fn();
+            $this->set_objectives($fn());
         }
         return $this->objectives;
     }
 
+    /**
+     * Get persistent.
+     *
+     * @return mission_model
+     */
     public function get_persistent(): mission_model {
         return $this->persistent;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_repeat_count(): int {
         return (int) $this->persistent->get('repeatcount');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_secret(): string {
         return $this->persistent->get('secret');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_start_mode(): int {
         return (int) $this->persistent->get('startmode');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_time_limit(): int {
         return (int) $this->persistent->get('timelimit');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_time_modified(): int {
         return (int) $this->persistent->get('timemodified');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_visibility(): int {
         return (int) $this->persistent->get('visibility');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_visual(): ?visual {
         $visual = $this->persistent->get('visual');
         if ($this instanceof streak) {
             $output = di::get('renderer');
-            return new static_visual('streak',
+            return new static_visual(
+                'streak',
                 $output->image_url('streak', 'block_gearup'),
                 new \lang_string('streak', 'block_gearup')
             );
@@ -159,8 +225,25 @@ class persisted_mission implements mission {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_voice_id(): ?string {
         return $this->persistent->get('voiceid');
     }
 
+    /**
+     * Set objectives.
+     *
+     * @param objective[] $objectives The objectives.
+     * @return void
+     */
+    protected function set_objectives(array $objectives): void {
+        uasort($objectives, function (objective $a, objective $b) {
+            $aorder = $a instanceof persisted_objective ? $a->get_persistent()->get('sortorder') : $a->get_id();
+            $border = $b instanceof persisted_objective ? $b->get_persistent()->get('sortorder') : $b->get_id();
+            return [$aorder, $a->get_id()] <=> [$border, $b->get_id()];
+        });
+        $this->objectives = $objectives;
+    }
 }

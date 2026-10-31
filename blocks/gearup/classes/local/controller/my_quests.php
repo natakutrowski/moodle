@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -41,9 +41,12 @@ use block_gearup\local\routing\url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class my_quests extends route_base {
-
+    /** @var bool Requiremanage. */
     protected $requiremanage = false;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function define_optional_params() {
         return [
             ['returnurl', false, PARAM_LOCALURL],
@@ -51,10 +54,16 @@ class my_quests extends route_base {
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_html_head_title() {
         return get_string('quests', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         global $USER;
 
@@ -63,7 +72,8 @@ class my_quests extends route_base {
         $mode = $this->get_param('mode');
 
         $context = $this->context;
-        $ongoingquests = $mr->get_quest_instances_by_subject_id($USER->id,
+        $ongoingquests = $mr->get_quest_instances_by_subject_id(
+            $USER->id,
             [mission_instance::STATE_STARTED, mission_instance::STATE_COMPLETED],
             $context,
             ['mi.timecompleted DESC', 'mi.completionratio DESC']
@@ -107,6 +117,13 @@ class my_quests extends route_base {
         echo $output->render_from_template('block_gearup/my_quests', $tplcontext);
     }
 
+    /**
+     * Render nav.
+     *
+     * @param mixed $output Output.
+     * @param mixed $page Page.
+     * @return mixed
+     */
     protected function render_nav($output, $page) {
         $ongoingurl = new url($this->pageurl);
         $ongoingurl->param('mode', 0);
@@ -132,5 +149,4 @@ class my_quests extends route_base {
 
         return $output->tabtree($tabs, $page);
     }
-
 }

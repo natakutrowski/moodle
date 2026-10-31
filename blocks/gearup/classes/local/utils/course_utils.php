@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Utils.
@@ -40,7 +40,6 @@ use course_modinfo;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_utils {
-
     /**
      * Get a cm_info.
      *
@@ -239,5 +238,4 @@ class course_utils {
         global $CFG;
         require_once($CFG->dirroot . '/course/lib.php');
     }
-
 }

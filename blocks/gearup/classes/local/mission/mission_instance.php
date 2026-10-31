@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mission instance.
@@ -38,7 +38,6 @@ use block_gearup\local\objective\objective_instance;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface mission_instance {
-
     /** Assigned, but not yet started. */
     const STATE_ASSIGNED = 0;
     /** Started. */
@@ -131,7 +130,7 @@ interface mission_instance {
      * @throws \coding_exception When not assigned.
      */
     public function get_time_assigned(): \DateTimeImmutable;
-    // TODO Do we really need to throw the exception here? This makes it a bit more complex for no reason.
+    // Future work: Do we really need to throw the exception here? This makes it a bit more complex for no reason.
 
     /**
      * Get the time at which the mission was completed.
@@ -257,5 +256,4 @@ interface mission_instance {
      * @param \DateTimeImmutable $date The date.
      */
     public function set_time_ended(\DateTimeImmutable $date);
-
 }

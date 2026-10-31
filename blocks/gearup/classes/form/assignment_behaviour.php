@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\form;
 
@@ -33,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assignment_behaviour extends radiogroup {
-
+    /** Field name. */
     const FIELD_NAME = 'block_gearup_assignment_behaviour';
 
     /**
@@ -145,7 +145,6 @@ class assignment_behaviour extends radiogroup {
     public static function register(): string {
         return static::FIELD_NAME;
     }
-
 }
 
 // The class was namespaced and renamed, so we keep the old alias name.

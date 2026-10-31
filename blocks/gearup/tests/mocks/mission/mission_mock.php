@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mock.
@@ -42,41 +42,70 @@ use context_system;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_mock implements mission {
-
+    /** @var mixed Data. */
     protected $data;
 
+    /**
+     * Constructor.
+     *
+     * @param object $data Data.
+     */
     public function __construct(object $data) {
         $this->data = $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_id(): int {
         return $this->data->id ?? 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_context(): context {
         return $this->data->context ?? context_system::instance();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_state(): int {
         return $this->data->state ?? self::STATE_ACTIVE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_title(): string {
         return $this->data->title ?? 'Mission title';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_description(): string {
         return $this->data->description ?? 'Mission description';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_feedback(): string {
         return $this->data->feedback ?? 'Mission feedback';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_instructions(): string {
         return $this->data->instructions ?? 'Mission instructions';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_objective(int $id): objective {
         foreach ($this->get_objectives() as $obj) {
             if ($obj->get_id() === $id) {
@@ -86,40 +115,66 @@ class mission_mock implements mission {
         throw new \coding_exception('notfound');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_objectives(): array {
         return $this->data->objectives ?? [];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_repeat_count(): int {
         return $this->data->repeatcount ?? self::REPEAT_NEVER;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_start_mode(): int {
         return $this->data->start_mode ?? self::START_ALWAYS;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_secret(): string {
         return $this->data->secret ?? 'abcdefg';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_time_limit(): int {
         return $this->data->timelimit ?? 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_time_modified(): int {
         return $this->data->timemodified ?? 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_visibility(): int {
         return $this->data->visibility ?? self::VISIBLE_ALWAYS;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_visual(): ?visual {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_voice_id(): ?string {
         return $this->data->voiceid ?? null;
     }
-
 }

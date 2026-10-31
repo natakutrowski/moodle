@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\mission;
 
@@ -33,7 +33,6 @@ use block_gearup\tests\base_testcase;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class challenge_lifecycle_test extends base_testcase {
-
     /**
      * Test lifecycle.
      *
@@ -55,7 +54,7 @@ final class challenge_lifecycle_test extends base_testcase {
         $oo = di::get('objective_operator');
         $mi = $mo->assign_mission($mission, $u1->id);
 
-        // challenge starts automatically.
+        // Challenge starts automatically.
         $this->assertSame(mission_instance::STATE_STARTED, $mi->get_state());
         $this->assertSame($mission->get_id(), $mi->get_mission()->get_id());
         $this->assertSame((int) $u1->id, $mi->get_subject_id());
@@ -127,7 +126,7 @@ final class challenge_lifecycle_test extends base_testcase {
         $mi2 = $mo->assign_mission($mission, $u2->id);
         $expecteddeadline = $clock->now()->modify("+86400 seconds");
 
-        // challenge starts automatically.
+        // Challenge starts automatically.
         $this->assertSame(mission_instance::STATE_STARTED, $mi1->get_state());
         $this->assertSame(mission_instance::STATE_STARTED, $mi2->get_state());
         $this->assertEquals($expecteddeadline->getTimestamp(), $mi1->get_deadline()->getTimestamp());
@@ -194,7 +193,7 @@ final class challenge_lifecycle_test extends base_testcase {
         $mi2 = $mo->assign_mission($mission, $u2->id);
         $expecteddeadline = $clock->now()->setTime(23, 59, 59);
 
-        // challenge starts automatically.
+        // Challenge starts automatically.
         $this->assertSame(mission_instance::STATE_STARTED, $mi1->get_state());
         $this->assertSame(mission_instance::STATE_STARTED, $mi2->get_state());
         $this->assertSame($expecteddeadline->getTimestamp(), $mi1->get_deadline()->getTimestamp());
@@ -320,19 +319,23 @@ final class challenge_lifecycle_test extends base_testcase {
         $mo->evaluate_instance($mi2week);
         $mo->evaluate_instance($mimonth);
 
-        $miday = di::get('repository')->get_instance($DB->get_field(mission_inst::TABLE,
+        $miday = di::get('repository')->get_instance($DB->get_field(
+            mission_inst::TABLE,
             'id',
             ['iteration' => 1, 'missionid' => $mday->get_id()]
         ));
-        $miweek = di::get('repository')->get_instance($DB->get_field(mission_inst::TABLE,
+        $miweek = di::get('repository')->get_instance($DB->get_field(
+            mission_inst::TABLE,
             'id',
             ['iteration' => 1, 'missionid' => $mweek->get_id()]
         ));
-        $mi2week = di::get('repository')->get_instance($DB->get_field(mission_inst::TABLE,
+        $mi2week = di::get('repository')->get_instance($DB->get_field(
+            mission_inst::TABLE,
             'id',
             ['iteration' => 1, 'missionid' => $m2week->get_id()]
         ));
-        $mimonth = di::get('repository')->get_instance($DB->get_field(mission_inst::TABLE,
+        $mimonth = di::get('repository')->get_instance($DB->get_field(
+            mission_inst::TABLE,
             'id',
             ['iteration' => 1, 'missionid' => $mmonth->get_id()]
         ));
@@ -346,5 +349,4 @@ final class challenge_lifecycle_test extends base_testcase {
         $this->assertSame($expected2weekdeadline->getTimestamp(), $mi2week->get_deadline()->getTimestamp());
         $this->assertSame($expectedmonthdeadline->getTimestamp(), $mimonth->get_deadline()->getTimestamp());
     }
-
 }

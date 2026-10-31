@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Utils.
@@ -36,7 +36,6 @@ namespace block_gearup\local\utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class collection_utils {
-
     /**
      * Find an item in a collection.
      *
@@ -140,5 +139,4 @@ class collection_utils {
         }
         return (object) $data;
     }
-
 }

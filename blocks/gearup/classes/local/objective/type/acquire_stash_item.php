@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Acquire stash item.
@@ -67,12 +67,14 @@ class acquire_stash_item implements
     type,
     type_with_state_initialisation,
     type_with_update_after_restore {
-
     /** Any course. */
     const WHICH_ANY = 0;
     /** One specific. */
     const WHICH_SPECIFIC = 1;
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof stash_item_acquired) {
             return;
@@ -80,10 +82,16 @@ class acquire_stash_item implements
         $instance->increment_counter($action->get_quantity());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         return new plugin_required_info('block_stash', 'Stash', 2022042100, 'v1.3.4');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_context(\context $context): info {
         if (!class_exists('block_stash\manager')) {
             return new static_info(false);
@@ -103,22 +111,37 @@ class acquire_stash_item implements
         return new static_info(true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_user(int $userid, context $context): info {
         return new permission_required_info('block/stash:addinstance', $context, $userid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): extender {
         return new acquire_stash_item_config_form_extender($mission->get_context());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typeacquirestashitem', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typeacquirestashitemdesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
         global $DB;
         if (!class_exists('block_stash\user_item')) {
@@ -144,10 +167,16 @@ class acquire_stash_item implements
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof stash_item_acquired;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -169,9 +198,13 @@ class acquire_stash_item implements
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, objective $objective, mission $mission) {
         if (!$objective instanceof persisted_objective) {
-            $restore->get_logger()->process("Cannot process after_restore of objective " . $objective->get_id(),
+            $restore->get_logger()->process(
+                "Cannot process after_restore of objective " . $objective->get_id(),
                 backup::LOG_WARNING
             );
             return;
@@ -200,7 +233,6 @@ class acquire_stash_item implements
             $restore->get_logger()->process("Error while updating objective " . $objective->get_id(), backup::LOG_WARNING);
         }
     }
-
 }
 
 /**
@@ -212,7 +244,7 @@ class acquire_stash_item implements
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class acquire_stash_item_config_form_extender implements extender {
-
+    /** @var mixed Manager. */
     protected $manager;
 
     /**
@@ -228,6 +260,9 @@ class acquire_stash_item_config_form_extender implements extender {
         $this->manager = \block_stash\manager::get($coursecontext->instanceid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
@@ -250,6 +285,9 @@ class acquire_stash_item_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         if ($data->cd_which == acquire_stash_item::WHICH_SPECIFIC) {
             $data->cd_itemid = (int) $data->cd_itemid;
@@ -261,6 +299,9 @@ class acquire_stash_item_config_form_extender implements extender {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if (!isset($data->cd_which)) {
@@ -271,5 +312,4 @@ class acquire_stash_item_config_form_extender implements extender {
         }
         return $errors;
     }
-
 }

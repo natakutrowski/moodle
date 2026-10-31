@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -42,9 +42,12 @@ use core\form\persistent;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quest_identity_form extends persistent {
-
+    /** @var mixed Persistentclass. */
     protected static $persistentclass = mission::class;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         $mform = $this->_form;
         $context = context::instance_by_id($this->get_persistent()->get('contextid'));
@@ -55,7 +58,8 @@ class quest_identity_form extends persistent {
         $mform->addRule('title', null, 'required', null, 'client');
 
         $visualsrepo = di::get('quest_narrator_visuals_repository');
-        form_utils::add_image_group_from_repository($mform,
+        form_utils::add_image_group_from_repository(
+            $mform,
             'visual',
             get_string('narrator', 'block_gearup'),
             $visualsrepo,
@@ -69,5 +73,4 @@ class quest_identity_form extends persistent {
 
         $this->add_action_buttons(false, get_string('continue'));
     }
-
 }

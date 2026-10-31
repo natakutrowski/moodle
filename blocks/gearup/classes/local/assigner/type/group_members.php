@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Group members assigner.
@@ -60,24 +60,38 @@ class group_members implements
     type_with_backup_handling,
     type_with_event_consumption,
     type_with_update_after_restore {
-
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_context(context $context): info {
         return new course_context_required_info($context, true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
-        // TODO What happens when someone from another group edits this instance?
+        // Future work: What happens when someone from another group edits this instance?
         return new group_members_config_type_form($mission->get_context());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('assignergroupmembers', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('assignergroupmembersdesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_elligible_users_sql(assigner $assigner, mission $mission): array {
         $config = $assigner->get_type_config();
         $context = $mission->get_context()->get_course_context();
@@ -91,20 +105,36 @@ class group_members implements
         return [$sql, $params];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_elligile_users_sql_from_event(\core\event\base $event, assigner $assigner, mission $mission): array {
         return ["SELECT {$event->relateduserid} AS id", []];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_event_compatible(\core\event\base $event): bool {
         return $event instanceof \core\event\group_member_added;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_event_passing_constraints(\core\event\base $event, assigner $assigner): bool {
         $config = $assigner->get_type_config();
         $groupids = $config->groupids ?? [];
         return in_array($event->objectid, $groupids);
     }
 
+    /**
+     * Get user accessible groups.
+     *
+     * @param context_course $context Context.
+     * @param mixed $userid Userid.
+     * @return mixed
+     */
     public static function get_user_accessible_groups(context_course $context, $userid) {
         $course = get_fast_modinfo($context->instanceid, $userid)->get_course();
         $courseid = $course->id;
@@ -121,6 +151,9 @@ class group_members implements
         return $groups;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function extend_backup(backup_facade $backup, assigner $assigner, mission $mission) {
         $config = $assigner->get_type_config();
         $groupids = $config->groupids ?? [];
@@ -129,6 +162,9 @@ class group_members implements
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, assigner $assigner, mission $mission) {
         if (!$assigner instanceof persisted_assigner) {
             $restore->get_logger()->process("Cannot process after_restore of assigner " . $assigner->get_id(), backup::LOG_WARNING);
@@ -173,14 +209,21 @@ class group_members implements
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class group_members_config_type_form implements extender {
-
     /** @var context The context. */
     protected $context;
 
+    /**
+     * Constructor.
+     *
+     * @param context $context Context.
+     */
     public function __construct(context $context) {
         $this->context = $context;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         global $USER;
 
@@ -200,10 +243,16 @@ class group_members_config_type_form implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -214,5 +263,4 @@ class group_members_config_type_form implements extender {
 
         return $errors;
     }
-
 }

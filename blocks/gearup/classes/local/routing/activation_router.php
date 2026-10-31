@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Router.
@@ -38,7 +38,6 @@ use block_gearup\local\controller\admin\activation;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class activation_router {
-
     /**
      * Dispatch.
      *
@@ -53,5 +52,4 @@ class activation_router {
         $controller = new activation();
         $controller->handle($request);
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome.
@@ -56,7 +56,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class unassign_role implements has_availability_info_for_context, type, type_with_backup_handling, type_with_update_after_restore {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         $config = $outcome->get_type_config();
         $userid = $missioninst->get_subject_id();
@@ -73,23 +75,38 @@ class unassign_role implements has_availability_info_for_context, type, type_wit
         role_unassign($config->roleid, $missioninst->get_subject_id(), $missioninst->get_mission()->get_context()->id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_context(context $context): info {
         global $USER;
         return new permission_required_info('moodle/role:assign', $context, $USER->id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new unassign_role_config_form_extender($mission);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('outcomeunassignrole', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('outcomeunassignroledesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function extend_backup(backup_facade $backup, outcome $outcome, mission $mission) {
         $config = $outcome->get_type_config();
         $roleid = $config->roleid ?? 0;
@@ -98,6 +115,9 @@ class unassign_role implements has_availability_info_for_context, type, type_wit
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, outcome $outcome, mission $mission) {
         if (!$outcome instanceof persisted_outcome) {
             $restore->get_logger()->process("Cannot process after_restore of outcome " . $outcome->get_id(), backup::LOG_WARNING);
@@ -131,16 +151,26 @@ class unassign_role implements has_availability_info_for_context, type, type_wit
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class unassign_role_config_form_extender implements extender {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Repository. */
     protected $repository;
 
+    /**
+     * Constructor.
+     *
+     * @param mission $mission Mission.
+     */
     public function __construct(mission $mission) {
         $this->mission = $mission;
         $this->context = $mission->get_context();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         // At the moment we can only assign roles in the same context.
         $roles = get_assignable_roles($this->context, ROLENAME_BOTH);
@@ -149,10 +179,16 @@ class unassign_role_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -162,5 +198,4 @@ class unassign_role_config_form_extender implements extender {
 
         return $errors;
     }
-
 }

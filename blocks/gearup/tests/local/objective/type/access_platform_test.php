@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Testcase.
@@ -43,7 +43,6 @@ use DateInterval;
  * @covers     \block_gearup\local\objective\type\access_platform
  */
 final class access_platform_test extends base_testcase {
-
     /** @var \block_gearup\local\mission\mission */
     protected $mission;
     /** @var \block_gearup\local\mission\mission_instance */
@@ -112,7 +111,8 @@ final class access_platform_test extends base_testcase {
             $type->consume_action($action, $inst, $this->missioninst);
             if ($shouldincrement) {
                 $this->assertGreaterThan($counter, $inst->get_counter(), "Loop $key");
-                $this->assertEquals($action->get_time()->add(new DateInterval('P1D'))->setTime(0, 0),
+                $this->assertEquals(
+                    $action->get_time()->add(new DateInterval('P1D'))->setTime(0, 0),
                     $inst->access_dormant_until(),
                     "Loop $key"
                 );
@@ -167,7 +167,8 @@ final class access_platform_test extends base_testcase {
             $type->consume_action($action, $inst, $this->missioninst);
             if ($shouldincrement) {
                 $this->assertGreaterThan($counter, $inst->get_counter(), "Loop $key");
-                $this->assertEquals($action->get_time()->setTimezone($usertz)->add(new DateInterval('P1D'))->setTime(0, 0),
+                $this->assertEquals(
+                    $action->get_time()->setTimezone($usertz)->add(new DateInterval('P1D'))->setTime(0, 0),
                     $inst->access_dormant_until(),
                     "Loop $key"
                 );
@@ -225,7 +226,8 @@ final class access_platform_test extends base_testcase {
             $type->consume_action($action, $inst, $this->missioninst);
             if ($shouldincrement) {
                 $this->assertGreaterThan($counter, $inst->get_counter(), "Loop $key");
-                $this->assertEquals($action->get_time()->setTimezone($usertz)->modify('monday next week')->setTime(0, 0),
+                $this->assertEquals(
+                    $action->get_time()->setTimezone($usertz)->modify('monday next week')->setTime(0, 0),
                     $inst->access_dormant_until(),
                     "Loop $key"
                 );
@@ -279,11 +281,13 @@ final class access_platform_test extends base_testcase {
 
             $type->consume_action($action, $inst, $this->missioninst);
             $this->assertEquals($counter, $inst->get_counter(), "Loop $key");
-            $this->assertEquals($action->get_time()->setTimezone($usertz)->add(new DateInterval('P1D'))->setTime(0, 0),
+            $this->assertEquals(
+                $action->get_time()->setTimezone($usertz)->add(new DateInterval('P1D'))->setTime(0, 0),
                 $inst->access_dormant_until(),
                 "Loop $key"
             );
-            $this->assertEquals($action->get_time()->setTimezone($usertz)->add(new DateInterval('P2D'))->setTime(0, 0),
+            $this->assertEquals(
+                $action->get_time()->setTimezone($usertz)->add(new DateInterval('P2D'))->setTime(0, 0),
                 $inst->access_stale_from(),
                 "Loop $key"
             );
@@ -334,11 +338,13 @@ final class access_platform_test extends base_testcase {
 
             $type->consume_action($action, $inst, $this->missioninst);
             $this->assertEquals($counter, $inst->get_counter(), "Loop $key");
-            $this->assertEquals($action->get_time()->setTimezone($usertz)->modify('monday next week')->setTime(0, 0),
+            $this->assertEquals(
+                $action->get_time()->setTimezone($usertz)->modify('monday next week')->setTime(0, 0),
                 $inst->access_dormant_until(),
                 "Loop $key"
             );
-            $this->assertEquals($action->get_time()->setTimezone($usertz)->modify('monday next week')->add(new DateInterval('P1W')),
+            $this->assertEquals(
+                $action->get_time()->setTimezone($usertz)->modify('monday next week')->add(new DateInterval('P1W')),
                 $inst->access_stale_from(),
                 "Loop $key"
             );
@@ -390,11 +396,13 @@ final class access_platform_test extends base_testcase {
 
             $type->consume_action($action, $inst, $this->missioninst);
             $this->assertEquals($counter, $inst->get_counter(), "Loop $key");
-            $this->assertEquals($action->get_time()->setTimezone($usertz)->modify('next weekday')->setTime(0, 0),
+            $this->assertEquals(
+                $action->get_time()->setTimezone($usertz)->modify('next weekday')->setTime(0, 0),
                 $inst->access_dormant_until(),
                 "Loop $key"
             );
-            $this->assertEquals($action->get_time()->setTimezone($usertz)->modify('next weekday')->add(new DateInterval('P1D')),
+            $this->assertEquals(
+                $action->get_time()->setTimezone($usertz)->modify('next weekday')->add(new DateInterval('P1D')),
                 $inst->access_stale_from(),
                 "Loop $key"
             );
@@ -424,7 +432,8 @@ final class access_platform_test extends base_testcase {
         $this->assertTrue($type->is_action_passing_constraints($action, $inst, $this->missioninst));
         $type->consume_action($action, $inst, $this->missioninst);
         $this->assertEquals(1, $inst->get_counter());
-        $this->assertEquals($action->get_time()->setTimezone($usertz)->add(new DateInterval('P1D'))->setTime(0, 0),
+        $this->assertEquals(
+            $action->get_time()->setTimezone($usertz)->add(new DateInterval('P1D'))->setTime(0, 0),
             $inst->access_dormant_until()
         );
         $this->assertEquals(null, $inst->access_stale_from());
@@ -469,7 +478,8 @@ final class access_platform_test extends base_testcase {
         $this->assertTrue($type->is_action_passing_constraints($action, $inst, $this->missioninst));
         $type->consume_action($action, $inst, $this->missioninst);
         $this->assertEquals(1, $inst->get_counter());
-        $this->assertEquals($action->get_time()->setTimezone($usertz)->add(new DateInterval('P1D'))->setTime(0, 0),
+        $this->assertEquals(
+            $action->get_time()->setTimezone($usertz)->add(new DateInterval('P1D'))->setTime(0, 0),
             $inst->access_dormant_until()
         );
         $this->assertEquals(null, $inst->access_stale_from());
@@ -486,7 +496,8 @@ final class access_platform_test extends base_testcase {
         $this->assertFalse($type->is_action_passing_constraints($action, $inst, $this->missioninst));
         $type->consume_action($action, $inst, $this->missioninst);
         $this->assertEquals(1, $inst->get_counter());
-        $this->assertEquals($action->get_time()->setTimezone($usertz)->add(new DateInterval('P1D'))->setTime(0, 0),
+        $this->assertEquals(
+            $action->get_time()->setTimezone($usertz)->add(new DateInterval('P1D'))->setTime(0, 0),
             $inst->access_dormant_until()
         );
         $this->assertEquals(null, $inst->access_stale_from());

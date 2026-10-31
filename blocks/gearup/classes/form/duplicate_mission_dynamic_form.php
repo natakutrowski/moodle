@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -40,7 +40,9 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class duplicate_mission_dynamic_form extends mission_dynamic_form_base {
-
+    /**
+     * {@inheritDoc}
+     */
     public function definition() {
         parent::definition();
 
@@ -50,20 +52,23 @@ class duplicate_mission_dynamic_form extends mission_dynamic_form_base {
         $mform->addElement('text', 'title', get_string('missiontitle', 'block_gearup'));
         $mform->addRule('title', null, 'required', null, 'client');
 
-        // TODO When assigners can be enabled/disabled, we should add option 'Yes, disabled'.
+        // Future work: When assigners can be enabled/disabled, we should add option 'Yes, disabled'.
         $nassigners = $mr->count_assigners($this->get_mission()->get_id());
         if ($nassigners > 0) {
             $assignersel = [];
-            $assignersel[] = $mform->createElement('select',
+            $assignersel[] = $mform->createElement(
+                'select',
                 'includeassigners',
                 get_string('copyassigners', 'block_gearup'),
                 [0 => get_string('no', 'core'), 1 => get_string('yes', 'core')]
             );
-            $assignersel[] = $mform->createElement('static',
+            $assignersel[] = $mform->createElement(
+                'static',
                 'includeassigners_help',
                 '',
-                html_writer::div(get_string('copyassignersexistsdesc', 'block_gearup', ['n' => $nassigners]),
-                    'gu-mt-2 gu-text-gray-500'
+                html_writer::div(
+                    get_string('copyassignersexistsdesc', 'block_gearup', ['n' => $nassigners]),
+                    'gu-mt-2 gu-text-gray-500 dark:gu-text-gray-400'
                 )
             );
             $mform->addElement('group', 'assignersgrp', get_string('copyassigners', 'block_gearup'), $assignersel, '', false);
@@ -91,6 +96,9 @@ class duplicate_mission_dynamic_form extends mission_dynamic_form_base {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function is_available_when_archived(): bool {
         return true;
     }
@@ -102,7 +110,6 @@ class duplicate_mission_dynamic_form extends mission_dynamic_form_base {
      */
     protected function process_dynamic_save() {
         if ($data = $this->get_data()) {
-
             $options = ['includeassigners' => (bool) $data->includeassigners];
             $dupedmission = di::get('mission_operator')->duplicate_mission($this->get_mission(), $options);
             $dupedmission->get_persistent()->set('title', $data->title);
@@ -121,5 +128,4 @@ class duplicate_mission_dynamic_form extends mission_dynamic_form_base {
             \core\notification::add(strip_tags($htmlmessage, '<a>'), \core\notification::SUCCESS);
         }
     }
-
 }

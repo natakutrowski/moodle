@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Renderer.
@@ -27,7 +27,6 @@
 
 namespace block_gearup\output;
 
-use action_menu;
 use block_gearup\di;
 use block_gearup\local\availability\static_info;
 use block_gearup\local\exporter\tracker\achievements_tracker_exporter;
@@ -54,7 +53,6 @@ use user_picture;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class renderer extends plugin_renderer_base {
-
     /** @var object */
     protected $lm;
 
@@ -87,6 +85,14 @@ class renderer extends plugin_renderer_base {
         ] + $menu->export_for_template($this));
     }
 
+    /**
+     * Checkbox group.
+     *
+     * @param array $checkboxes Checkboxes.
+     * @param mixed $name Name.
+     * @param array $values Values.
+     * @return mixed
+     */
     public function checkbox_group(array $checkboxes, $name, array $values) {
         return $this->render_from_template('block_gearup/checkbox_group', [
             'checkboxes' => array_map(function ($checkbox) use ($values, $name) {
@@ -105,8 +111,14 @@ class renderer extends plugin_renderer_base {
         ]);
     }
 
+    /**
+     * Code instructions.
+     *
+     * @param mixed $html Html.
+     * @return mixed
+     */
     public function code_instructions($html) {
-        return html_writer::div($html, '[&_pre]:gu-p-2 [&_pre]:gu-bg-gray-100');
+        return html_writer::div($html, '[&_pre]:gu-p-2 [&_pre]:gu-bg-gray-100 dark:[&_pre]:gu-bg-gray-800');
     }
 
     /**
@@ -140,25 +152,11 @@ class renderer extends plugin_renderer_base {
     /**
      * Render a control menu.
      *
-     * @param action_menu_link $actions
+     * @param array $actions
      */
     public function control_menu($actions) {
-        $menu = new action_menu();
-
-        // Without this, the control menu can wrap on the next line when placed next to another item.
-        $menu->attributes['class'] .= ' gu-inline-block';
-
-        // Styles copied from core_courseformat\output\local\content\cm::get_action_menu() in 4.1dev.
-        // From Moodle 4.2 we should be using `set_kebab_trigger`.
-        $icon = $this->pix_icon('i/menu', get_string('menu', 'core'));
-        $menu->set_menu_trigger($icon, 'btn btn-icon d-flex align-items-center justify-content-center after:gu-hidden');
-
-        foreach ($actions as $action) {
-            $action->primary = false;
-            $menu->add_secondary_action($action);
-        }
-
-        return $this->render($menu);
+        $menu = new menu($actions);
+        return $this->render_from_template('block_gearup/menu', $menu->export_for_template($this));
     }
 
     /**
@@ -173,6 +171,14 @@ class renderer extends plugin_renderer_base {
         return $pic->get_url($this->page);
     }
 
+    /**
+     * Image group.
+     *
+     * @param mixed $sections Sections.
+     * @param mixed $name Name.
+     * @param mixed $value Value.
+     * @return mixed
+     */
     public function image_group($sections, $name, $value) {
 
         // Handle compatibility with previously accepted format of just options.
@@ -244,6 +250,13 @@ class renderer extends plugin_renderer_base {
         return html_writer::tag('script', $jsondata, ['id' => $id, 'type' => 'application/json']);
     }
 
+    /**
+     * Mission header.
+     *
+     * @param url_resolver $urlresolver Urlresolver.
+     * @param mission $mission Mission.
+     * @return mixed
+     */
     public function mission_header(url_resolver $urlresolver, mission $mission) {
         $mh = di::get('mission_helper');
         $visual = $mission->get_visual();
@@ -274,6 +287,13 @@ class renderer extends plugin_renderer_base {
         ]);
     }
 
+    /**
+     * Navigation for management.
+     *
+     * @param url_resolver $urlresolver Urlresolver.
+     * @param mixed $currentpage Currentpage.
+     * @return mixed
+     */
     public function navigation_for_management(url_resolver $urlresolver, $currentpage = null) {
         $tabs = array_map(
             function ($link) {
@@ -313,6 +333,14 @@ class renderer extends plugin_renderer_base {
         return html_writer::div($this->tabtree($tabs, $currentpage));
     }
 
+    /**
+     * Navigation for mission management.
+     *
+     * @param url_resolver $urlresolver Urlresolver.
+     * @param mission $mission Mission.
+     * @param mixed $currentpage Currentpage.
+     * @return mixed
+     */
     public function navigation_for_mission_management(url_resolver $urlresolver, mission $mission, $currentpage = null) {
         $tabs = array_map(
             function ($link) {
@@ -352,6 +380,13 @@ class renderer extends plugin_renderer_base {
         return html_writer::div($this->tabtree($tabs, $currentpage), 'gu-my-4');
     }
 
+    /**
+     * Navigation on block.
+     *
+     * @param url_resolver $urlresolver Urlresolver.
+     * @param access_permissions $perms Perms.
+     * @return mixed
+     */
     public function navigation_on_block(url_resolver $urlresolver, access_permissions $perms) {
         $achievementsurl = $urlresolver->reverse('my_achievements');
         $achievementsurl->param('returnurl', $this->page->url->out_as_local_url(false));
@@ -366,6 +401,14 @@ class renderer extends plugin_renderer_base {
         ]);
     }
 
+    /**
+     * Radio group.
+     *
+     * @param mixed $radios Radios.
+     * @param mixed $name Name.
+     * @param mixed $value Value.
+     * @return mixed
+     */
     public function radio_group($radios, $name, $value) {
         return $this->render_from_template('block_gearup/radio_group', [
             'name' => $name,
@@ -384,9 +427,17 @@ class renderer extends plugin_renderer_base {
         ]);
     }
 
+    /**
+     * Output achievement instances overview.
+     *
+     * @param url_resolver $urlresolver Urlresolver.
+     * @param \context $context Context.
+     * @return mixed
+     */
     public function output_achievement_instances_overview(url_resolver $urlresolver, \context $context) {
         global $USER;
-        return $this->render_from_template('block_gearup/achievement_instances_overview',
+        return $this->render_from_template(
+            'block_gearup/achievement_instances_overview',
             (new achievements_tracker_exporter($USER->id, [
                 'context' => $context,
                 'pageurl' => $this->page->url,
@@ -395,9 +446,17 @@ class renderer extends plugin_renderer_base {
         );
     }
 
+    /**
+     * Output challenge instances overview.
+     *
+     * @param url_resolver $urlresolver Urlresolver.
+     * @param \context $context Context.
+     * @return mixed
+     */
     public function output_challenge_instances_overview(url_resolver $urlresolver, \context $context) {
         global $USER;
-        return $this->render_from_template('block_gearup/challenge_instances_overview',
+        return $this->render_from_template(
+            'block_gearup/challenge_instances_overview',
             (new challenges_tracker_exporter($USER->id, [
                 'context' => $context,
                 'pageurl' => $this->page->url,
@@ -406,9 +465,17 @@ class renderer extends plugin_renderer_base {
         );
     }
 
+    /**
+     * Output quest instances overview.
+     *
+     * @param url_resolver $urlresolver Urlresolver.
+     * @param \context $context Context.
+     * @return mixed
+     */
     public function output_quest_instances_overview(url_resolver $urlresolver, \context $context) {
         global $USER;
-        return $this->render_from_template('block_gearup/quest_instances_overview',
+        return $this->render_from_template(
+            'block_gearup/quest_instances_overview',
             (new quests_tracker_exporter($USER->id, [
                 'context' => $context,
                 'pageurl' => $this->page->url,
@@ -417,6 +484,15 @@ class renderer extends plugin_renderer_base {
         );
     }
 
+    /**
+     * Output mission instance.
+     *
+     * @param mixed $missioninst Missioninst.
+     * @param \moodle_url $baseurl Baseurl.
+     * @param url_resolver $urlresolver Urlresolver.
+     * @param mixed $returnto Returnto.
+     * @return mixed
+     */
     public function output_mission_instance($missioninst, \moodle_url $baseurl, url_resolver $urlresolver, $returnto = null) {
         $exporter = di::get('exporter_factory')->get_mission_instance_exporter($missioninst);
         $starturl = new moodle_url($baseurl, ['action' => 'startmission', 'sesskey' => sesskey()]);
@@ -431,7 +507,7 @@ class renderer extends plugin_renderer_base {
                 'userid' => $missioninst->get_subject_id()]);
         }
 
-        /** @var array */
+        /** @var array $data */
         $data = array_merge(
             [
                 'listurl' => $listurl->out(false),
@@ -541,9 +617,9 @@ class renderer extends plugin_renderer_base {
         $o .= html_writer::start_div('block_gearup block_gearup-react', ['id' => $id, 'class' => $classname]);
         $o .= html_writer::start_div('block_gearup-react-loading');
         $o .= html_writer::start_div('gu-grid gu-grid-cols-2 gu-gap-4 gu-animate-pulse');
-        $o .= html_writeR::div('', 'gu-col-span-2 gu-bg-gray-100 gu-rounded gu-h-4');
-        $o .= html_writeR::div('', 'gu-bg-gray-100 gu-rounded gu-h-4');
-        $o .= html_writeR::div('', 'gu-bg-gray-100 gu-rounded gu-h-4');
+        $o .= html_writeR::div('', 'gu-col-span-2 gu-bg-gray-100 dark:gu-bg-gray-800 gu-rounded gu-h-4');
+        $o .= html_writeR::div('', 'gu-bg-gray-100 dark:gu-bg-gray-800 gu-rounded gu-h-4');
+        $o .= html_writeR::div('', 'gu-bg-gray-100 dark:gu-bg-gray-800 gu-rounded gu-h-4');
         $o .= html_writer::end_div();
         $o .= html_writer::end_div();
         $o .= html_writer::end_div();
@@ -588,6 +664,13 @@ class renderer extends plugin_renderer_base {
         return $o;
     }
 
+    /**
+     * Wizard steps.
+     *
+     * @param mixed $steps Steps.
+     * @param mixed $currentstep Currentstep.
+     * @return mixed
+     */
     public function wizard_steps($steps, $currentstep) {
         $currentidx = array_search($currentstep, array_map(function ($step) {
             return $step['id'];
@@ -604,6 +687,12 @@ class renderer extends plugin_renderer_base {
         ]);
     }
 
+    /**
+     * Serialize context.
+     *
+     * @param \context|null $context Context.
+     * @return array
+     */
     public function serialize_context(?\context $context = null) {
         return [
             'anywhere' => !$context,
@@ -612,9 +701,16 @@ class renderer extends plugin_renderer_base {
         ];
     }
 
+    /**
+     * Serialize mission instance.
+     *
+     * @param url_resolver $urlresolver Urlresolver.
+     * @param mixed $missioninst Missioninst.
+     * @return mixed
+     */
     public function serialize_mission_instance(url_resolver $urlresolver, $missioninst) {
-        $ef = di::get('exporter_factory'); // TODO Do not initialise here.
-        $missionhelper = di::get('mission_helper'); // TODO Do not initialise here.
+        $ef = di::get('exporter_factory'); // Future work: Do not initialise here.
+        $missionhelper = di::get('mission_helper'); // Future work: Do not initialise here.
         $ratio = $missioninst->get_completion_ratio();
         $ratiopc = human_utils::percentage($ratio);
         $hascompleted = $missionhelper->has_completed($missioninst);
@@ -653,5 +749,4 @@ class renderer extends plugin_renderer_base {
     public function set_lm($lm) {
         $this->lm = $lm;
     }
-
 }

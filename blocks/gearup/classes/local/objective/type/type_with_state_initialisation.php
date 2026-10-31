@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective type with state initialisation.
@@ -40,7 +40,6 @@ use lang_string;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface type_with_state_initialisation extends type {
-
     /**
      * Initialise state.
      *
@@ -53,5 +52,4 @@ interface type_with_state_initialisation extends type {
      * @param mission_instance missioinst The instance of the associated mission.
      */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst);
-
 }

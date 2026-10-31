@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Info stack.
@@ -36,7 +36,6 @@ namespace block_gearup\local\availability;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class info_stack implements info {
-
     /** @var info[] $stack The stack. */
     protected $stack;
 
@@ -50,6 +49,9 @@ class info_stack implements info {
         $this->stack = $stack;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_available(): bool {
         foreach ($this->stack as $info) {
             if (!$info->is_available()) {
@@ -59,6 +61,9 @@ class info_stack implements info {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_reasons(): array {
         $reasons = [];
         foreach ($this->stack as $info) {
@@ -69,5 +74,4 @@ class info_stack implements info {
         }
         return $reasons;
     }
-
 }

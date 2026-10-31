@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\course;
 
@@ -29,7 +29,6 @@ use block_gearup\local\utils\course_utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class section_completion_checker {
-
     /** @var int */
     protected $courseid;
     /** @var int */
@@ -181,5 +180,4 @@ class section_completion_checker {
     public function set_ignore_unavailable(bool $ignoreunavailable): void {
         $this->ignoreunavailable = $ignoreunavailable;
     }
-
 }

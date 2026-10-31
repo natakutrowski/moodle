@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Testcase.
@@ -39,10 +39,14 @@ use block_gearup\tests\base_testcase;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class not_access_platform_testcase extends base_testcase {
-
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Missioninst. */
     protected $missioninst;
 
+    /**
+     * {@inheritDoc}
+     */
     public function setUp(): void {
         parent::setUp();
         $pdg = $this->generator;
@@ -50,6 +54,11 @@ final class not_access_platform_testcase extends base_testcase {
         $this->missioninst = $pdg->mock_mission_instance($this->mission);
     }
 
+    /**
+     * Test.
+     *
+     * @return void
+     */
     public function test_basic() {
         $pdg = $this->generator;
         $action = $pdg->mock_action_loggedin(2);
@@ -62,6 +71,11 @@ final class not_access_platform_testcase extends base_testcase {
         $this->assertTrue($type->is_action_passing_constraints($action, $objinst, $this->missioninst));
     }
 
+    /**
+     * Test.
+     *
+     * @return void
+     */
     public function test_initialisation() {
         $dg = $this->getDataGenerator();
         $pdg = $this->generator;
@@ -107,6 +121,11 @@ final class not_access_platform_testcase extends base_testcase {
         $this->assertEquals($loginby->getTimestamp(), $objinst->get_stale_from()->getTimestamp());
     }
 
+    /**
+     * Test.
+     *
+     * @return void
+     */
     public function test_consume_action() {
         $dg = $this->getDataGenerator();
         $pdg = $this->generator;
@@ -183,6 +202,11 @@ final class not_access_platform_testcase extends base_testcase {
         $this->assertEquals(1, $objinst->get_counter());
     }
 
+    /**
+     * Test.
+     *
+     * @return void
+     */
     public function test_reevaluate_state() {
         $dg = $this->getDataGenerator();
         $pdg = $this->generator;
@@ -243,5 +267,4 @@ final class not_access_platform_testcase extends base_testcase {
         $this->assertEquals(0, $objinst->get_counter());
         $this->assertEquals($loginby, $objinst->get_stale_from());
     }
-
 }

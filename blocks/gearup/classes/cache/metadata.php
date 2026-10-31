@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\cache;
 
@@ -33,7 +33,6 @@ use context_system;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class metadata implements \cache_data_source {
-
     /** @var static Cached instance. */
     protected static $instance = null;
 
@@ -119,7 +118,7 @@ class metadata implements \cache_data_source {
      * @return self
      */
     public static function get_instance_for_cache(\cache_definition $definition) {
-        if (!self::$instance || PHPUNIT_TEST) {
+        if (!self::$instance || PHPUNIT_TEST || defined('BEHAT_TEST')) {
             self::$instance = new static(di::get('api_client'));
         }
         return self::$instance;
@@ -251,5 +250,4 @@ class metadata implements \cache_data_source {
         }
         $this->cdcache[$key] = null;
     }
-
 }

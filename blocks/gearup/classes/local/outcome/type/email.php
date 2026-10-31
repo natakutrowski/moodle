@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome.
@@ -56,7 +56,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class email implements has_availability_info_for_user, type, type_with_backup_handling, type_with_update_after_restore {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         $config = $outcome->get_type_config();
         $userid = $missioninst->get_subject_id();
@@ -77,18 +79,30 @@ class email implements has_availability_info_for_user, type, type_with_backup_ha
         $this->send_email($user, $userfromid, $subject, $htmlcontent);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_user(int $userid, \context $context): info {
         return new permission_required_info('block/gearup:sendemail', $context, $userid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new email_config_form_extender($mission->get_context());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('outcomeemail', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('outcomeemaildesc', 'block_gearup');
     }
@@ -125,6 +139,9 @@ class email implements has_availability_info_for_user, type, type_with_backup_ha
         email_to_user($user, $userfrom, $finalsubject, html_to_text($finalcontent), $finalcontent);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function extend_backup(backup_facade $backup, outcome $outcome, mission $mission) {
         $config = $outcome->get_type_config();
         $userfromid = $config->userfromid;
@@ -133,6 +150,9 @@ class email implements has_availability_info_for_user, type, type_with_backup_ha
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, outcome $outcome, mission $mission) {
         if (!$outcome instanceof persisted_outcome) {
             $restore->get_logger()->process("Cannot process after_restore of outcome " . $outcome->get_id(), backup::LOG_WARNING);
@@ -172,13 +192,21 @@ class email implements has_availability_info_for_user, type, type_with_backup_ha
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class email_config_form_extender implements extender {
-
+    /** @var mixed Context. */
     protected $context;
 
+    /**
+     * Constructor.
+     *
+     * @param context $context Context.
+     */
     public function __construct(context $context) {
         $this->context = $context;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         global $USER;
 
@@ -219,10 +247,16 @@ class email_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -237,5 +271,4 @@ class email_config_form_extender implements extender {
 
         return $errors;
     }
-
 }

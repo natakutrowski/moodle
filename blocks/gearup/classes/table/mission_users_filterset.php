@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Filterset.
@@ -40,7 +40,9 @@ use core_table\local\filter\string_filter;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_users_filterset extends filterset {
-
+    /**
+     * {@inheritDoc}
+     */
     public function get_optional_filters(): array {
         return [
             'term' => string_filter::class,
@@ -56,5 +58,4 @@ class mission_users_filterset extends filterset {
     public function has_any(): bool {
         return !empty($this->get_filters());
     }
-
 }

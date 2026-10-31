@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mission instances table.
@@ -27,8 +27,6 @@
 
 namespace block_gearup\table;
 
-use action_menu_filler;
-use action_menu_link;
 use block_gearup\local\mission\mission;
 use block_gearup\local\mission\helper;
 use block_gearup\local\repository\mission_instance_query;
@@ -48,7 +46,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_instances extends improved_table {
-
     /** @var bool Is compulsory. */
     protected $iscompulsory;
     /** @var mission The mission. */
@@ -277,7 +274,6 @@ class mission_instances extends improved_table {
             if (!$this->missionhelper->is_finishable($this->mission)) {
                 unset($cols['timeended']);
             }
-
         } else {
             $cols += [
                 'timestarted' => get_string('started', 'block_gearup'),
@@ -297,6 +293,9 @@ class mission_instances extends improved_table {
         return $cols;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function prepare_query(): void {
         global $USER;
 
@@ -341,10 +340,16 @@ class mission_instances extends improved_table {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_count(): int {
         return $this->repository->count_instances_from_query($this->query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_rows(): iterable {
         return $this->repository->get_instances_from_query($this->query, $this->get_page_start(), $this->get_page_size());
     }
@@ -357,14 +362,16 @@ class mission_instances extends improved_table {
      */
     public function col_actions($row) {
         $instanceurl = $this->get_instance_url($row);
-        $actions = [];
-
-        $action = new action_menu_link($instanceurl, null, get_string('view', 'core'));
-        $actions[] = $action;
+        $actions = [
+            ['href' => $instanceurl, 'label' => get_string('view', 'core')],
+        ];
 
         if ($this->iseditable) {
-            $actions[] = new action_menu_filler();
-            $action = new action_menu_link($instanceurl, null, get_string('delete', 'core'), false, [
+            $actions[] = [];
+            $actions[] = [
+                'href' => $instanceurl,
+                'label' => get_string('delete', 'core'),
+                'danger' => true,
                 'data-gu-action' => 'open-form',
                 'data-form-class' => 'block_gearup\form\delete_mission_instance_dynamic_form',
                 'data-form-args__missionid' => $row->instance->get_mission()->get_id(),
@@ -373,9 +380,7 @@ class mission_instances extends improved_table {
                 'data-modal-buttons__save__label' => get_string('delete', 'core'),
                 'data-modal-title' => fullname($row->user),
                 'data-modal-large' => 'false',
-            ]);
-            $action->add_class('text-danger');
-            $actions[] = $action;
+            ];
         }
 
         return $this->format_dropdown($actions);
@@ -611,7 +616,7 @@ class mission_instances extends improved_table {
      * @return array Will be passed to {@link self::add_data_keyed}.
      */
     protected function prepare_row($instance) {
-        // TODO Do not fetch user from here.
+        // Future work: Do not fetch user from here.
         $usersql = $this->userfields->get_sql('', false, '', '', false);
         $user = \core_user::get_user($instance->get_subject_id(), $usersql->selects);
         $data = (object) [
@@ -641,17 +646,21 @@ class mission_instances extends improved_table {
      */
     protected function render_filters(): string {
 
-        // No filters when showing a person's instances
+        // No filters when showing a person's instances.
         if ($this->subjectid) {
             return '';
         }
 
-        return $this->get_renderer()->render(new mission_instances_filters($this->mission,
+        return $this->get_renderer()->render(new mission_instances_filters(
+            $this->mission,
             $this->baseurl->params(),
             $this->filterset
         ));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function render_no_results(): string {
         return $this->get_renderer()->zero_state(
             get_string('norecruits', 'block_gearup'),
@@ -660,6 +669,9 @@ class mission_instances extends improved_table {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function render_zero_state(): string {
         $title = get_string('norecruits', 'block_gearup');
         $intro = get_string('nobodyrecruitedyet', 'block_gearup');
@@ -667,10 +679,10 @@ class mission_instances extends improved_table {
             $title = get_string('nousermissions', 'block_gearup');
             $intro = get_string('nousermissionsyet', 'block_gearup');
         }
-        return $this->get_renderer()->zero_state($title,
+        return $this->get_renderer()->zero_state(
+            $title,
             $intro,
             $this->get_renderer()->render_from_template('block_gearup/icons/users', [])
         );
     }
-
 }

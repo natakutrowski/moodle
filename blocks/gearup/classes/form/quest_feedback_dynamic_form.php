@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -39,7 +39,9 @@ use moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quest_feedback_dynamic_form extends mission_dynamic_form_base {
-
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         parent::definition();
         $mform = $this->_form;
@@ -49,6 +51,9 @@ class quest_feedback_dynamic_form extends mission_dynamic_form_base {
         $mform->addRule('feedback', null, 'required', null, 'client');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function check_access_for_mission(): void {
         $mh = di::get('mission_helper');
         $mission = $this->get_mission();
@@ -59,11 +64,14 @@ class quest_feedback_dynamic_form extends mission_dynamic_form_base {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function process_dynamic_save() {
         if ($data = $this->get_data()) {
             unset($data->id);
 
-            // TODO Move all of this to an operator?
+            // Future work: Move all of this to an operator?
             $model = $this->get_persistent();
             $beforerecord = $model->to_record();
             $model->from_record($data);
@@ -72,7 +80,8 @@ class quest_feedback_dynamic_form extends mission_dynamic_form_base {
             $textchanged = $beforerecord->feedback !== ($data->feedback ?? '');
             if ($textchanged) {
                 $fs = get_file_storage();
-                $files = $fs->get_area_files($this->get_mission()->get_context()->id,
+                $files = $fs->get_area_files(
+                    $this->get_mission()->get_context()->id,
                     'block_gearup',
                     'speech',
                     $this->get_mission()->get_id(),

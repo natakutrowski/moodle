@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\objective\type;
 
@@ -36,7 +36,6 @@ use context_system;
  * @covers \block_gearup\local\objective\type\complete_challenge
  */
 final class complete_challenge_test extends base_testcase {
-
     /**
      * Basic test.
      */
@@ -261,7 +260,8 @@ final class complete_challenge_test extends base_testcase {
 
         $type = new complete_challenge();
         $missioninst = $gudg->mock_mission_instance($gudg->mock_quest());
-        $obj = $gudg->mock_objective($type,
+        $obj = $gudg->mock_objective(
+            $type,
             ['missionid' => $cha1->get_id(), 'which' => complete_challenge::WHICH_SPECIFIC],
             ['countneeded' => 10]
         );
@@ -325,5 +325,4 @@ final class complete_challenge_test extends base_testcase {
         $type->initialise_state($objinst, $missioninst);
         $this->assertEquals(3, $objinst->get_counter());
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\form;
 
@@ -31,13 +31,17 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class mission_instance_dynamic_form_base extends mission_dynamic_form_base {
-
+    /** @var string Paramname. */
     protected $paramname = 'missionid';
+    /** @var bool Supportsgroups. */
     protected $supportsgroups = true;
 
     /** @var mission_instance */
     private $missioninst;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         parent::definition();
 
@@ -46,6 +50,9 @@ abstract class mission_instance_dynamic_form_base extends mission_dynamic_form_b
         $mform->setType('missioninstid', PARAM_INT);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_default_data() {
         return [
             'missioninstid' => $this->get_mission_instance()->get_id(),
@@ -67,5 +74,4 @@ abstract class mission_instance_dynamic_form_base extends mission_dynamic_form_b
         }
         return $this->missioninst;
     }
-
 }

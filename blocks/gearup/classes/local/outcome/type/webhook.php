@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome.
@@ -53,7 +53,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class webhook implements type, type_with_update_after_restore {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
@@ -81,18 +83,30 @@ class webhook implements type, type_with_update_after_restore {
         $curl->post(new moodle_url($config->url), json_encode($data));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new webhook_config_form_extender($mission);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('outcomewebhook', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('outcomewebhookdesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, outcome $outcome, mission $mission) {
         if (!$outcome instanceof persisted_outcome) {
             $restore->get_logger()->process("Cannot process after_restore of outcome " . $outcome->get_id(), backup::LOG_WARNING);
@@ -112,7 +126,6 @@ class webhook implements type, type_with_update_after_restore {
             $restore->get_logger()->process("Error while updating outcome " . $outcome->get_id(), backup::LOG_WARNING);
         }
     }
-
 }
 
 /**
@@ -124,13 +137,21 @@ class webhook implements type, type_with_update_after_restore {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class webhook_config_form_extender implements extender {
-
+    /** @var mixed Mission. */
     protected $mission;
 
+    /**
+     * Constructor.
+     *
+     * @param mission $mission Mission.
+     */
     public function __construct(mission $mission) {
         $this->mission = $mission;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $renderer = di::get('renderer');
 
@@ -149,7 +170,8 @@ class webhook_config_form_extender implements extender {
         $mform->setType('cd_url', PARAM_URL);
         $mform->addRule('cd_url', get_string('err_required', 'core_form'), 'required', null, 'client');
 
-        $els[] = $mform->addElement('static',
+        $els[] = $mform->addElement(
+            'static',
             'secret',
             get_string('outcomewebhooksecret', 'block_gearup'),
             html_writer::tag('code', $this->mission->get_secret())
@@ -165,14 +187,19 @@ class webhook_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
         return $errors;
     }
-
 }

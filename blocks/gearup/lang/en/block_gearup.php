@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Language file.
@@ -26,6 +26,8 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+
+// phpcs:disable moodle.Strings.ForbiddenStrings.Found
 
 $string['accept'] = 'Accept';
 $string['accesscounts'] = 'Access counts';
@@ -60,6 +62,7 @@ $string['all'] = 'All';
 $string['allactivitiesarecompleted'] = 'All activities are completed';
 $string['allowmultipleperquiz'] = 'Can count multiple times per quiz';
 $string['allowmultipleperquiz_help'] = 'When that is enabled, taking the same quiz multiple times is permitted. Other restrictions may still apply, such as a quiz\'s own attempt limits.';
+$string['alphabetical'] = 'Alphabetical';
 $string['any'] = 'Any';
 $string['anyactivity'] = 'Any activity';
 $string['anyactivityinthiscourse'] = 'Any activity in this course ({$a})';
@@ -325,6 +328,8 @@ $string['hasnotstarted'] = 'Has not started';
 $string['hasstarted'] = 'Has started';
 $string['hidden'] = 'Hidden';
 $string['hidefromuser'] = 'Hide from user';
+$string['highlightedachievementlimit'] = 'Highlighted achievement limit';
+$string['highlightedachievementlimitdesc'] = 'Maximum number of achievements highlighted on the tracker when there are achievements in progress.';
 $string['howmanytimes'] = 'How many times?';
 $string['howmuchtime'] = 'How much time?';
 $string['immediately'] = 'Immediately';
@@ -410,6 +415,7 @@ $string['missiontype'] = 'Type';
 $string['missionxitemx'] = '{$a->name}: {$a->item}';
 $string['monthly'] = 'Monthly';
 $string['moreconfettis'] = 'More 🎉';
+$string['mostrelevant'] = 'Most relevant';
 $string['mostsuccessful'] = 'Most successful';
 $string['mostunlocked'] = 'Most unlocked';
 $string['mute'] = 'Mute';
@@ -488,6 +494,10 @@ $string['onceperdiscussion'] = 'Once per discussion';
 $string['onceperforum'] = 'Once per forum';
 $string['oncepersection'] = 'Once per section';
 $string['ongoingprogress'] = 'Ongoing progress';
+$string['ongoingquestlimit'] = 'Ongoing quest limit';
+$string['ongoingquestlimitdesc'] = 'Maximum number of started quests displayed on the tracker.';
+$string['ongoingquestorder'] = 'Ongoing quest order';
+$string['ongoingquestorderdesc'] = 'Choose how ongoing quests are ordered on the mission tracker. Most relevant uses the recruit\'s recent activity to show the quests we estimate matter most to them first.';
 $string['ongoingquests'] = 'Ongoing quests';
 $string['ongoingquestscourse'] = 'Ongoing course quests';
 $string['ongoingquestssystem'] = 'Ongoing sitewide quests';
@@ -774,6 +784,8 @@ $string['todifferentpeople_help'] = 'When selected, sending a message will only 
 $string['trackerhiddenbyblocksetting'] = 'The missions tracker is hidden by block setting.';
 $string['trackermissionsorder'] = 'Missions order';
 $string['trackermissionsorder_desc'] = 'The order in which the missions appear on the mission tracker, typically visible on the block.';
+$string['trackersettings'] = 'Mission tracker settings';
+$string['trackersettingsdesc'] = 'The tracker shows learners their missions and progress in the Level Up Quest block or embedded in content.';
 $string['trackervisibility'] = 'Tracker visbility';
 $string['trackervisibility_help'] = 'When the tracker is hidden from the block, the missions and their progress will not be visible. Use this option primarily when the tracker has been manually embedded in the content, such as with a shortcode.';
 $string['trackprogressfromzero'] = 'Track progress from zero to the value';
@@ -927,7 +939,7 @@ $string['youvegotaquest'] = 'You\'ve got a quest!';
 // Deprecated since 1.4.
 $string['typecompleteprofileinstructions'] = 'Please select all the profile fields that must be completed.';
 
-// Deprecated Since 1.6.
+// Deprecated since 1.6.
 $string['deleterecruitsendedchallengesexistsdesc'] = 'A total of {$a->n} challenges(s) have already been completed (or missed) by some recruits. Deleting those will remove all evidence of their attempts.';
 $string['privacy:metadata:prefachievements'] = 'A list of recently unlocked achievements';
 $string['whatisobjectiveofachievement'] = 'What is the objective of this achievement?';

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -42,7 +42,9 @@ use moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quest_assignment_behaviour_dynamic_form extends mission_dynamic_form_base {
-
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         parent::definition();
         $mform = $this->_form;
@@ -72,6 +74,9 @@ class quest_assignment_behaviour_dynamic_form extends mission_dynamic_form_base 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function convert_fields(\stdClass $data) {
         $data = parent::convert_fields($data);
 
@@ -92,6 +97,9 @@ class quest_assignment_behaviour_dynamic_form extends mission_dynamic_form_base 
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_default_data() {
         $data = parent::get_default_data();
 
@@ -107,6 +115,9 @@ class quest_assignment_behaviour_dynamic_form extends mission_dynamic_form_base 
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function extra_validation($data, $files, array &$errors) {
         if (isset($errors['startmode'])) {
             $errors['assignbehaviour'] = $errors['startmode'];
@@ -121,6 +132,9 @@ class quest_assignment_behaviour_dynamic_form extends mission_dynamic_form_base 
         return [];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function check_access_for_mission(): void {
         $mh = di::get('mission_helper');
         $mission = $this->get_mission();
@@ -131,6 +145,12 @@ class quest_assignment_behaviour_dynamic_form extends mission_dynamic_form_base 
         }
     }
 
+    /**
+     * Requires change confirmation.
+     *
+     * @param mixed $newstart Newstart.
+     * @return mixed
+     */
     protected function requires_change_confirmation($newstart = null) {
         $missionhelper = di::get('mission_helper');
         $repository = di::get('repository');
@@ -150,11 +170,14 @@ class quest_assignment_behaviour_dynamic_form extends mission_dynamic_form_base 
         return $needsconfirmation && $repository->has_non_started_instances($this->get_mission()->get_id());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function process_dynamic_save() {
         if ($data = $this->get_data()) {
             unset($data->id);
 
-            // TODO Move all of this to an operator?
+            // Future work: Move all of this to an operator?
             $model = $this->get_persistent();
             $model->from_record($data);
             $model->update();

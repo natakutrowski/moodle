@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\action;
 
@@ -29,22 +29,33 @@ use block_gearup\local\mission\mission_instance;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class mission_instance_action extends static_action {
-
     /** @var int The mission instance ID. */
     protected $missioninstid;
 
+    /**
+     * {@inheritDoc}
+     */
     public function __construct(mission_instance $missioninst) {
         $mission = $missioninst->get_mission();
         $this->missioninstid = $missioninst->get_id();
         parent::__construct($missioninst->get_subject_id(), $mission->get_context(), $mission->get_id());
     }
 
+    /**
+     * Get mission id.
+     *
+     * @return int
+     */
     public function get_mission_id(): int {
         return $this->get_object_id();
     }
 
+    /**
+     * Get mission instance id.
+     *
+     * @return int
+     */
     public function get_mission_instance_id(): int {
         return $this->missioninstid;
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\assigner;
 
@@ -32,7 +32,6 @@ use block_gearup\tests\base_testcase;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class processor_test extends base_testcase {
-
     /**
      * Test.
      *
@@ -71,5 +70,4 @@ final class processor_test extends base_testcase {
         $m2is = $mr->get_instances($m2->get_id());
         $this->assertCount(0, $m2is);
     }
-
 }

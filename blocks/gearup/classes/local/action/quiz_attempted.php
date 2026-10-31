@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\action;
 
@@ -32,7 +32,6 @@ use mod_quiz\quiz_attempt;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quiz_attempted extends static_action {
-
     /** @var \stdClass|false|null */
     protected $quizrecord;
     /** @var quiz_attempt|false|null */
@@ -40,22 +39,45 @@ class quiz_attempted extends static_action {
     /** @var \stdClass|false|null */
     protected $quizattemptrecord;
 
+    /**
+     * {@inheritDoc}
+     */
     public function __construct($userid, context_module $context, $attemptid) {
         parent::__construct($userid, $context, $attemptid);
     }
 
+    /**
+     * Get attempt id.
+     *
+     * @return int
+     */
     public function get_attempt_id(): int {
         return $this->get_object_id();
     }
 
+    /**
+     * Get cm id.
+     *
+     * @return int
+     */
     public function get_cm_id(): int {
         return (int) $this->context->instanceid;
     }
 
+    /**
+     * Get course context.
+     *
+     * @return \context_course
+     */
     public function get_course_context(): \context_course {
         return $this->context->get_course_context();
     }
 
+    /**
+     * Get course id.
+     *
+     * @return int
+     */
     public function get_course_id(): int {
         return (int) $this->get_course_context()->instanceid;
     }
@@ -76,6 +98,8 @@ class quiz_attempted extends static_action {
                     $quizattemptclass = static::resolve_quiz_attempt_class();
                     $quizattempt = new $quizattemptclass($attemptrecord, $quizrecord, $cm, $course);
                 } catch (\moodle_exception $e) {
+                    // Keep the cached attempt unavailable when its course or module cannot be resolved.
+                    $quizattempt = false;
                 }
             }
             $this->quizattempt = $quizattempt;

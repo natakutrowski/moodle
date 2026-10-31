@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\utils;
 
@@ -32,7 +32,6 @@ use context_course;
  * @covers     \block_gearup\local\utils\user_utils
  */
 final class user_utils_test extends base_testcase {
-
     public function test_can_select_group_no_groups(): void {
         $dg = $this->getDataGenerator();
         $c1 = $dg->create_course(['groupmode' => NOGROUPS]);
@@ -574,5 +573,4 @@ final class user_utils_test extends base_testcase {
         $options = user_utils::get_group_select_options(context_course::instance($course->id), $user->id);
         $this->assertEquals($flatten($options), $groupids);
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Action.
@@ -36,10 +36,12 @@ namespace block_gearup\local\action;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class level_attained extends static_action {
-
     /** @var int The level. */
     protected $level;
 
+    /**
+     * {@inheritDoc}
+     */
     public function __construct($userid, $contextorid, int $level) {
         $this->level = $level;
         return parent::__construct($userid, $contextorid);
@@ -53,5 +55,4 @@ class level_attained extends static_action {
     public function get_level(): int {
         return $this->level;
     }
-
 }

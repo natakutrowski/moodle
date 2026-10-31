@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -30,7 +30,12 @@ require_once($CFG->dirroot . '/blocks/edit_form.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_gearup_edit_form extends block_edit_form {
-
+    /**
+     * Specific definition.
+     *
+     * @param mixed $mform Mform.
+     * @return void
+     */
     protected function specific_definition($mform) {
         $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
         $mform->addElement('text', 'config_title', get_string('configtitle', 'block_gearup'));
@@ -42,5 +47,4 @@ class block_gearup_edit_form extends block_edit_form {
         ]);
         $mform->addHelpButton('config_hidetracker', 'trackervisibility', 'block_gearup');
     }
-
 }

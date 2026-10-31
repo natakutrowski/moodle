@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\controller\utils;
 
@@ -34,7 +34,6 @@ use block_gearup\local\routing\url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class mission_route_base extends route_base {
-
     /** @var persisted_quest|persisted_achievement|persisted_challenge The mission. */
     protected $mission;
     /** @var string */
@@ -110,6 +109,9 @@ abstract class mission_route_base extends route_base {
         return $this->urlresolver->reverse($route, ['missionid' => $this->mission->get_id()]);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_html_head_title() {
         return get_string('missionxitemx', 'block_gearup', [
             'name' => $this->get_mission_name(),
@@ -137,8 +139,8 @@ abstract class mission_route_base extends route_base {
         // We must confirm that the mission belonds to the context we're in, and that it was found.
         if (!$this->mission || $this->mission->get_context()->id != $this->context->id) {
             throw new \moodle_exception('notfound');
-
-        } else if (!$this->mission instanceof persisted_quest
+        } else if (
+            !$this->mission instanceof persisted_quest
                 && !$this->mission instanceof persisted_achievement
                 && !$this->mission instanceof persisted_challenge
                 && !$this->mission instanceof persisted_streak
@@ -182,5 +184,4 @@ abstract class mission_route_base extends route_base {
         $mission = $this->mission;
         echo $output->navigation_for_mission_management($this->urlresolver, $mission, $this->get_mission_nav_name());
     }
-
 }

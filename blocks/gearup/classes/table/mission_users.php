@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mission users table.
@@ -42,7 +42,6 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_users extends improved_table {
-
     /** @var mission The mission. */
     protected $mission;
     /** @var object The helper. */
@@ -155,6 +154,9 @@ class mission_users extends improved_table {
         return $this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function prepare_query(): void {
         global $USER;
 
@@ -184,10 +186,16 @@ class mission_users extends improved_table {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_count(): int {
         return $this->repository->count_users_from_query($this->query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_rows(): iterable {
         return $this->repository->get_users_from_query($this->query, $this->get_page_start(), $this->get_page_size());
     }
@@ -216,7 +224,8 @@ class mission_users extends improved_table {
      * @return string Output produced.
      */
     public function col_instances($row) {
-        return html_writer::tag('abbr',
+        return html_writer::tag(
+            'abbr',
             "{$row->mission_instance_100pc_count} / {$row->mission_instance_count}",
             ['title' => get_string('completed', 'block_gearup') . ' / ' . get_string('total', 'core')]
         );
@@ -228,12 +237,16 @@ class mission_users extends improved_table {
      * @return string
      */
     protected function render_filters(): string {
-        return $this->get_renderer()->render((new mission_instances_filters($this->mission,
+        return $this->get_renderer()->render((new mission_instances_filters(
+            $this->mission,
             $this->baseurl->params(),
             $this->filterset
         ))->with_state(false));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function render_no_results(): string {
         return $this->get_renderer()->zero_state(
             get_string('norecruits', 'block_gearup'),
@@ -242,6 +255,9 @@ class mission_users extends improved_table {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function render_zero_state(): string {
         return $this->get_renderer()->zero_state(
             get_string('norecruits', 'block_gearup'),
@@ -249,5 +265,4 @@ class mission_users extends improved_table {
             $this->get_renderer()->render_from_template('block_gearup/icons/users', [])
         );
     }
-
 }

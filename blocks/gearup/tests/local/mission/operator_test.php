@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Testcase.
@@ -44,7 +44,6 @@ use block_gearup\tests\base_testcase;
  * @covers     \block_gearup\local\operator\mission_operator
  */
 final class operator_test extends base_testcase {
-
     /**
      * Test.
      */
@@ -238,7 +237,8 @@ final class operator_test extends base_testcase {
             foreach ($samemethods as $method) {
                 $this->assertSame($objs[$i]->$method(), $dupedobjs[$i]->$method(), 'Failed with ' . $method);
             }
-            $this->assert_persistent_equals($obj->get_persistent(),
+            $this->assert_persistent_equals(
+                $obj->get_persistent(),
                 $dupedobj->get_persistent(),
                 ['id', 'timecreated', 'timemodified', 'missionid']
             );
@@ -258,7 +258,8 @@ final class operator_test extends base_testcase {
             foreach ($samemethods as $method) {
                 $this->assertSame($objs[$i]->$method(), $dupedobjs[$i]->$method());
             }
-            $this->assert_persistent_equals($obj->get_persistent(),
+            $this->assert_persistent_equals(
+                $obj->get_persistent(),
                 $dupedobj->get_persistent(),
                 ['id', 'timecreated', 'timemodified', 'missionid']
             );
@@ -278,7 +279,8 @@ final class operator_test extends base_testcase {
             foreach ($samemethods as $method) {
                 $this->assertSame($objs[$i]->$method(), $dupedobjs[$i]->$method());
             }
-            $this->assert_persistent_equals($obj->get_persistent(),
+            $this->assert_persistent_equals(
+                $obj->get_persistent(),
                 $dupedobj->get_persistent(),
                 ['id', 'timecreated', 'timemodified', 'missionid']
             );
@@ -377,5 +379,4 @@ final class operator_test extends base_testcase {
 
         $mo->assign_mission($mission, $u->id);
     }
-
 }

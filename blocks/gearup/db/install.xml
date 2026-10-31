@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/gearup/db" VERSION="20250603" COMMENT="XMLDB file for Moodle blocks/gearup"
+<XMLDB PATH="blocks/gearup/db" VERSION="20261012" COMMENT="XMLDB file for Moodle blocks/gearup"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -31,28 +31,6 @@
         <KEY NAME="contextid" TYPE="foreign" FIELDS="contextid" REFTABLE="context" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="block_gearup_objective" COMMENT="Objective table">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="missionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="label" TYPE="char" LENGTH="512" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="countneeded" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="configdata" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="supportingurl" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="usermodified" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
-        <KEY NAME="missionid" TYPE="foreign" FIELDS="missionid" REFTABLE="block_gearup_mission" REFFIELDS="id"/>
-      </KEYS>
-      <INDEXES>
-        <INDEX NAME="typeidx" UNIQUE="false" FIELDS="type"/>
-      </INDEXES>
-    </TABLE>
     <TABLE NAME="block_gearup_mission_inst" COMMENT="Mission instance table">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
@@ -80,6 +58,29 @@
         <INDEX NAME="subjectstateidx" UNIQUE="false" FIELDS="subjectid, state"/>
         <INDEX NAME="statedeadlineidx" UNIQUE="false" FIELDS="state, deadline"/>
         <INDEX NAME="subjmissioniteridx" UNIQUE="true" FIELDS="subjectid, missionid, iteration"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="block_gearup_objective" COMMENT="Objective table">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="missionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="label" TYPE="char" LENGTH="512" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="countneeded" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="configdata" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="supportingurl" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="usermodified" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="missionid" TYPE="foreign" FIELDS="missionid" REFTABLE="block_gearup_mission" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="typeidx" UNIQUE="false" FIELDS="type"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="block_gearup_objective_inst" COMMENT="Objective instance table">

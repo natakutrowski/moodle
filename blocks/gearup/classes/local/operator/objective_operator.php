@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Operator.
@@ -42,7 +42,14 @@ use block_gearup\local\objective\type\type_with_state_reevaluation;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class objective_operator {
-
+    /**
+     * Evaluate action on instance.
+     *
+     * @param action $action Action.
+     * @param mission_instance $missioninst Missioninst.
+     * @param objective_instance $objinst Objinst.
+     * @return void
+     */
     public function evaluate_action_on_instance(action $action, mission_instance $missioninst, objective_instance $objinst) {
         if ($objinst->is_completed()) {
             return;
@@ -55,6 +62,13 @@ class objective_operator {
         $this->update_objective_instance_state($objinst);
     }
 
+    /**
+     * Initialise state on instance.
+     *
+     * @param mission_instance $missioninst Missioninst.
+     * @param objective_instance $objinst Objinst.
+     * @return void
+     */
     public function initialise_state_on_instance(mission_instance $missioninst, objective_instance $objinst) {
         if ($objinst->is_completed()) {
             return;
@@ -66,6 +80,13 @@ class objective_operator {
         $this->update_objective_instance_state($objinst);
     }
 
+    /**
+     * Increment instance counter.
+     *
+     * @param objective_instance $objinst Objinst.
+     * @param int $counter Counter.
+     * @return void
+     */
     public function increment_instance_counter(objective_instance $objinst, int $counter) {
         if ($counter <= 0) {
             throw new \coding_exception('Invalid counter to increment by.');
@@ -97,12 +118,24 @@ class objective_operator {
         $this->update_objective_instance_state($objinst);
     }
 
+    /**
+     * Reset instance.
+     *
+     * @param objective_instance $objinst Objinst.
+     * @return void
+     */
     public function reset_instance(objective_instance $objinst) {
-        // TODO We should probably not do this when the mission is complete!
-        // TODO Maybe we do not need a ::reset() method on the objective instance.
+        // Future work: We should probably not do this when the mission is complete!
+        // Future work: Maybe we do not need a ::reset() method on the objective instance.
         $objinst->reset();
     }
 
+    /**
+     * Update objective instance state.
+     *
+     * @param objective_instance $objinst Objinst.
+     * @return void
+     */
     protected function update_objective_instance_state(objective_instance $objinst) {
         if ($objinst->is_completed()) {
             return;
@@ -111,5 +144,4 @@ class objective_operator {
             $objinst->mark_complete();
         }
     }
-
 }

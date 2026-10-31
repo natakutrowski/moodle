@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\external;
 
@@ -30,7 +30,6 @@ use block_gearup\local\exporter\tracker\tracker_exporter;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class get_tracker extends external_api {
-
     /**
      * Parameters.
      *
@@ -88,5 +87,4 @@ class get_tracker extends external_api {
     public static function execute_returns() {
         return di::get('exporter_factory')->get_tracker_exporter_class()::get_read_structure();
     }
-
 }

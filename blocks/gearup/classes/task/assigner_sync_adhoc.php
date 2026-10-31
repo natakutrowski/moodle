@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Adhoc task.
@@ -38,7 +38,9 @@ use block_gearup\di;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assigner_sync_adhoc extends \core\task\adhoc_task {
-
+    /**
+     * {@inheritDoc}
+     */
     public function execute() {
         // Must contain missionid and assignerid.
         $data = $this->get_custom_data();
@@ -70,5 +72,4 @@ class assigner_sync_adhoc extends \core\task\adhoc_task {
 
         $missionoperator->sync_assigner($mission, $assigner);
     }
-
 }

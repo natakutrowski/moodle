@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\form;
 
@@ -40,7 +40,6 @@ require_once($CFG->libdir . '/form/autocomplete.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user_selector extends \MoodleQuickForm_autocomplete {
-
     /** The field name. */
     const FIELD_NAME = 'block_gearup_user_selector';
 
@@ -84,7 +83,6 @@ class user_selector extends \MoodleQuickForm_autocomplete {
     public static function register(): string {
         return static::FIELD_NAME;
     }
-
 }
 
 // The class was namespaced and renamed, so we keep the old alias name.

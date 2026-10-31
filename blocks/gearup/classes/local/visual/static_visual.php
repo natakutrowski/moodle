@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\visual;
 
@@ -29,7 +29,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class static_visual implements visual {
-
     /** @var string */
     protected $alt;
     /** @var string|\lang_string */
@@ -76,5 +75,4 @@ class static_visual implements visual {
     public function get_url(): moodle_url {
         return $this->url;
     }
-
 }

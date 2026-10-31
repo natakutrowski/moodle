@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup;
 
@@ -42,7 +42,6 @@ use restore_dbops;
  * @covers     \restore_gearup_block_structure_step
  */
 final class backup_test extends base_testcase {
-
     /**
      * Test restore in new course.
      */
@@ -194,12 +193,14 @@ final class backup_test extends base_testcase {
                 $this->assertEquals($mibefore->{$prop}, $miafter->{$prop}, $prop);
             }
 
-            $objsbefore = array_values($DB->get_records('block_gearup_objective_inst',
+            $objsbefore = array_values($DB->get_records(
+                'block_gearup_objective_inst',
                 ['missioninstid' => $mibefore->id],
                 'id',
                 '*'
             ));
-            $objsafter = array_values($DB->get_records('block_gearup_objective_inst',
+            $objsafter = array_values($DB->get_records(
+                'block_gearup_objective_inst',
                 ['missioninstid' => $miafter->id],
                 'id',
                 '*'
@@ -321,7 +322,8 @@ final class backup_test extends base_testcase {
      */
     protected function count_mission_instances($contextid) {
         global $DB;
-        return $DB->count_records_select('block_gearup_mission_inst',
+        return $DB->count_records_select(
+            'block_gearup_mission_inst',
             'missionid IN (SELECT id FROM {block_gearup_mission} WHERE contextid = ?)',
             [$contextid]
         );
@@ -336,7 +338,8 @@ final class backup_test extends base_testcase {
      */
     protected function get_mission_instance_by_title($contextid, $iteration, $title) {
         global $DB;
-        return $DB->get_record_select('block_gearup_mission_inst',
+        return $DB->get_record_select(
+            'block_gearup_mission_inst',
             'iteration = ?
             AND missionid IN (SELECT id FROM {block_gearup_mission} WHERE contextid = ?)
             AND missionid IN (SELECT id FROM {block_gearup_mission} WHERE title = ?)',
@@ -491,5 +494,4 @@ final class backup_test extends base_testcase {
             'micha2aofu1' => $micha2aofu1,
         ];
     }
-
 }

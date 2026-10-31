@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\file;
 
@@ -32,7 +32,6 @@ use core_text;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class speech_file_server {
-
     /** @var context */
     protected context $context;
     /** @var int */
@@ -234,5 +233,4 @@ class speech_file_server {
 
         return new static($context, $userid, $missionid, $storyline, $messageid);
     }
-
 }

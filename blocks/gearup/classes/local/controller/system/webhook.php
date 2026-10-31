@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -39,17 +39,21 @@ use context_system;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class webhook extends base {
-
+    /**
+     * {@inheritDoc}
+     */
     protected function get_signing_secret() {
         return get_config('block_gearup', 'webhooksecret') ?: null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function process($type, $payload) {
         if ($type === 'metadata.updated') {
             cache_helper::purge_by_definition('block_gearup', 'metadata');
             $fs = get_file_storage();
             $fs->delete_area_files(context_system::instance()->id, 'block_gearup', 'metadata');
-
         } else if ($type === 'system.deactivate') {
             unset_config('activationid', 'block_gearup');
             unset_config('activationtoken', 'block_gearup');
@@ -58,10 +62,8 @@ class webhook extends base {
             cache_helper::purge_by_definition('block_gearup', 'metadata');
             $fs = get_file_storage();
             $fs->delete_area_files(context_system::instance()->id, 'block_gearup', 'metadata');
-
         } else if ($type === 'system.test') {
             echo json_encode($payload);
         }
     }
-
 }

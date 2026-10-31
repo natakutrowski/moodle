@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Action.
@@ -38,10 +38,12 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class xp_gained extends static_action {
-
     /** @var int The xp. */
     protected $xp;
 
+    /**
+     * {@inheritDoc}
+     */
     public function __construct($userid, int $xp, context $context) {
         $this->xp = $xp;
         return parent::__construct($userid, $context);
@@ -55,5 +57,4 @@ class xp_gained extends static_action {
     public function get_xp(): int {
         return $this->xp;
     }
-
 }

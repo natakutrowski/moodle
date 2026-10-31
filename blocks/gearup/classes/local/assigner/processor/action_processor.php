@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\assigner\processor;
 
@@ -29,7 +29,6 @@ use block_gearup\local\action\action;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface action_processor {
-
     /**
      * Process the action.
      *
@@ -37,5 +36,4 @@ interface action_processor {
      * @return void
      */
     public function process_action(action $action);
-
 }

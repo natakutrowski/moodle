@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mock.
@@ -39,9 +39,13 @@ use DateTimeImmutable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class logged_in_mock extends logged_in {
-
+    /**
+     * Set time.
+     *
+     * @param DateTimeImmutable $time Time.
+     * @return void
+     */
     public function set_time(DateTimeImmutable $time) {
         $this->time = $time;
     }
-
 }

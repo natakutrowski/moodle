@@ -5,10 +5,10 @@
                 <div class="gu-grow gu-mb-4">
                     <h3 class="gu-text-lg gu-font-bold gu-mb-1">{{ mission.title }}</h3>
                     {{#hasdeadline}}
-                    <div class="gu-text-gray-500 gu-text-xs">{{#str}} endsat, block_gearup {{/str}} {{{ deadlinehtml }}}</div>
+                    <div class="gu-text-gray-500 dark:gu-text-gray-400 gu-text-xs">{{#str}} endsat, block_gearup {{/str}} {{{ deadlinehtml }}}</div>
                     {{/hasdeadline}}
                     {{#mission.timing.isrepeating}}
-                    <div class="gu-text-gray-500 gu-text-xs">
+                    <div class="gu-text-gray-500 dark:gu-text-gray-400 gu-text-xs">
                         {{#str}}repeats, block_gearup{{/str}} <span class="gu-lowercase">{{#mission.timing.repeats.daily}}{{#str}}daily, block_gearup{{/str}}{{/mission.timing.repeats.daily}}
                         {{#mission.timing.repeats.weekly}}{{#str}}weekly, block_gearup{{/str}}{{/mission.timing.repeats.weekly}}
                         {{#mission.timing.repeats.fortnightly}}{{#str}}fortnightly, block_gearup{{/str}}{{/mission.timing.repeats.fortnightly}}
@@ -41,7 +41,7 @@
             </div>
 
             <div>
-                <div class="gu-uppercase gu-text-gray-500 gu-text-xs gu-mb-2">{{#str }} objectives, block_gearup {{/str}}</div>
+                <div class="gu-uppercase gu-text-gray-500 dark:gu-text-gray-400 gu-text-xs gu-mb-2">{{#str }} objectives, block_gearup {{/str}}</div>
                 <ul class="gu-list-none gu-m-0 gu-p-0 gu-space-y-1">
                     {{#objinsts}}
                     <li>{{> block_gearup/challenges/objective_instance }}</li>
@@ -51,7 +51,7 @@
 
             {{#mission.hasrewards}}
             <div class="gu-mt-4">
-                <div class="gu-uppercase gu-text-gray-500 gu-text-xs gu-mb-2">{{#str}} rewards, block_gearup {{/str}}</div>
+                <div class="gu-uppercase gu-text-gray-500 dark:gu-text-gray-400 gu-text-xs gu-mb-2">{{#str}} rewards, block_gearup {{/str}}</div>
                 <ul class="gu-m-0 gu-p-0 gu-list-disc gu-list-outside gu-ml-4">
                     {{#mission.rewards}}
                     <li><span>{{ label }} </span></li>

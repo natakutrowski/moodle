@@ -14,13 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
-
-namespace block_gearup\local\xp\compat;
-
-// phpcs:disable Generic.Classes.DuplicateClassName.Found
-// phpcs:disable PSR12.Files.FileHeader.IncorrectOrder
-// phpcs:disable PSR1.Classes.ClassDeclaration.MultipleClasses
+// See <https://levelup.plus>.
 
 /**
  * Reason.
@@ -30,6 +24,12 @@ namespace block_gearup\local\xp\compat;
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+namespace block_gearup\local\xp\compat;
+
+// phpcs:disable Generic.Classes.DuplicateClassName.Found
+// phpcs:disable PSR1.Classes.ClassDeclaration.MultipleClasses
+
 defined('MOODLE_INTERNAL') || die();
 
 if (interface_exists('block_xp\local\reason\reason_with_short_description')) {

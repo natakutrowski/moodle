@@ -1,21 +1,21 @@
 <div>
-    <dl class="gu-grid gu-grid-cols-2 md:gu-grid-flow-col md:gu-grid-cols-1fr gu-bg-gray-50 gu-rounded gu-mb-4">
+    <dl class="gu-grid gu-grid-cols-2 md:gu-grid-flow-col md:gu-grid-cols-1fr gu-bg-gray-50 dark:gu-bg-gray-900 gu-rounded gu-mb-4">
         {{#stats}}
         <div class="gu-flex gu-flex-col gu-p-6 gu-text-center gu-col-span-1">
             <dt class="gu-order-2 gu-text-sm gu-font-medium">{{ label }}</dt>
-            <dd class="gu-order-1 gu-text-5xl gu-font-bold gu-tracking-tight gu-text-gray-700">{{ value }}</dd>
+            <dd class="gu-order-1 gu-text-5xl gu-font-bold gu-tracking-tight gu-text-gray-700 dark:gu-text-gray-300">{{ value }}</dd>
         </div>
         {{/stats}}
     </dl>
     <div class="gu-grid md:gu-grid-cols-2 gu-gap-4">
         {{#charts}}
-            <div class="gu-flex gu-flex-col gu-p-4 gu-bg-gray-50 gu-rounded">
+            <div class="gu-flex gu-flex-col gu-p-4 gu-bg-gray-50 dark:gu-bg-gray-900 gu-rounded">
                 <h3 class="gu-m-0 gu-text-lg gu-grow-0 gu-shrink-0">{{ title }}</h3>
                 <div class="gu-flex gu-flex-col gu-grow [&>.chart-area]:gu-min-h-[4rem] [&_.chart-image]:gu-max-w-full [&_.chart-image]:gu-max-h-full [&_.chart-image]:lg:gu-max-h-[48vh] [&_.chart-image]:gu-h-auto [&_.chart-image]:gu-aspect-square">
                     {{#chart}}
                         {{{ . }}}
                         {{#note}}
-                            <div class="gu-mt-6 gu-text-xs gu-text-gray-700">{{ . }}</div>
+                            <div class="gu-mt-6 gu-text-xs gu-text-gray-700 dark:gu-text-gray-300">{{ . }}</div>
                         {{/note}}
                     {{/chart}}
                     {{^chart}}

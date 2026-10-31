@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -41,10 +41,17 @@ use block_gearup\local\controller\utils\mission_route_base;
 class mission_wizard_assignbehaviour extends mission_route_base {
     use utils\mission_wizard_trait;
 
+    /** @var string Currentstep. */
     protected $currentstep = 'assignbehaviour';
 
+    /** @var mixed Form. */
     protected $form;
 
+    /**
+     * Get form.
+     *
+     * @return mixed
+     */
     protected function get_form() {
         if (!$this->form) {
             $this->form = new quest_assignment_behaviour_form($this->pageurl->out(false), [
@@ -54,14 +61,27 @@ class mission_wizard_assignbehaviour extends mission_route_base {
         return $this->form;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_subpage_html_head_title() {
         return get_string('assignmentbehaviour', 'block_gearup');
     }
 
+    /**
+     * Get wizard title.
+     *
+     * @return mixed
+     */
     protected function get_wizard_title() {
         return get_string('isquestcompulsoryoroptional', 'block_gearup');
     }
 
+    /**
+     * Pre wizard content.
+     *
+     * @return void
+     */
     protected function pre_wizard_content() {
         $form = $this->get_form();
         if ($data = $form->get_data()) {
@@ -69,16 +89,19 @@ class mission_wizard_assignbehaviour extends mission_route_base {
             $mission->from_record($data);
             $mission->update();
             $this->redirect($this->get_wizard_next_url($mission));
-
         } else if ($form->is_cancelled()) {
             $this->redirect($this->urlresolver->reverse('missions'));
         }
     }
 
+    /**
+     * Wizard content.
+     *
+     * @return void
+     */
     protected function wizard_content() {
         $form = $this->get_form();
         $form->set_display_vertical();
         $form->display();
     }
-
 }

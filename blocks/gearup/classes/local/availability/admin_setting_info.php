@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Admin setting info.
@@ -38,7 +38,6 @@ use lang_string;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_setting_info implements info {
-
     /** @var string The expected value. */
     protected $expected;
     /** @var string The setting's label. */
@@ -59,12 +58,18 @@ class admin_setting_info implements info {
         $this->label = $label;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_available(): bool {
         global $CFG;
         $value = (bool) ($CFG->{$this->name} ?? false);
         return $value === $this->expected;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_reasons(): array {
         $reasons = [];
         if (!$this->is_available()) {
@@ -75,5 +80,4 @@ class admin_setting_info implements info {
         }
         return $reasons;
     }
-
 }

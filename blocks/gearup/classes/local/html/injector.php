@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Injector.
@@ -45,7 +45,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class injector {
-
     /** @var access_permissions_factory */
     protected $accesspermsfactory;
     /** @var \cache */
@@ -104,13 +103,15 @@ class injector {
 
         $missioninstids = di::get('repository')->get_achievement_ids_to_announce($context, $USER->id);
         if (empty($missioninstids)) {
-            set_user_preference('block_gearup_achievements_ctxids',
+            set_user_preference(
+                'block_gearup_achievements_ctxids',
                 json_utils::encode_as_list(array_diff($ctxids, [(int) $context->id]))
             );
             return null;
         }
 
-        $page->requires->js_call_amd('block_gearup/achievement_toast',
+        $page->requires->js_call_amd(
+            'block_gearup/achievement_toast',
             'queueMissionInstanceIds',
             [array_map('intval', $missioninstids)]
         );
@@ -146,7 +147,7 @@ class injector {
             return;
         }
 
-        // TODO Retrieve types from subset of available types.
+        // Future work: Retrieve types from subset of available types.
         $types = [];
         $typeresolver = $this->objtyperesolver;
         $videojsenabled = in_array('videojs', explode(',', $CFG->media_plugins_sortorder ?? ''));
@@ -159,8 +160,9 @@ class injector {
             return;
         }
 
-        // TODO Cache results?
-        $incompletetypes = $this->repository->get_incomplete_objective_instance_type_names_amongst_types($types,
+        // Future work: Cache results?
+        $incompletetypes = $this->repository->get_incomplete_objective_instance_type_names_amongst_types(
+            $types,
             $USER->id,
             $context
         );

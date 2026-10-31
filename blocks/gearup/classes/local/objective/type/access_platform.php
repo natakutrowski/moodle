@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective.
@@ -54,23 +54,37 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class access_platform implements type, type_with_state_reevaluation {
-
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         $this->evaluate_state($instance, $action->get_time());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new access_platform_config_form_extender();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typeaccessplatform', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typeaccessplatformdesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         // There is a limitation here. When the objective is set in the context of a course,
         // and another course is being viewed, we may not capture that the platform was accessed. That is
@@ -82,6 +96,9 @@ class access_platform implements type, type_with_state_reevaluation {
             || $action instanceof dashboard_viewed;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -91,6 +108,9 @@ class access_platform implements type, type_with_state_reevaluation {
         return $evaluation->is_valid() || $evaluation->is_late();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function reevaluate_state(objective_instance $instance) {
         $this->evaluate_state($instance, new DateTimeImmutable(), true);
     }
@@ -106,7 +126,7 @@ class access_platform implements type, type_with_state_reevaluation {
         $state = $this->get_normalized_state($instance->get_type_state());
         $evaluator = $this->get_evaluator($now, $instance);
 
-        // TODO Wrap all in a transaction?
+        // Future work: Wrap all in a transaction?
 
         // When late, we need to reset the counter.
         if ($evaluator->is_late()) {
@@ -150,7 +170,6 @@ class access_platform implements type, type_with_state_reevaluation {
     protected function get_normalized_state($state) {
         return $state ?? (object) ['la' => 0];
     }
-
 }
 
 /**
@@ -162,11 +181,14 @@ class access_platform implements type, type_with_state_reevaluation {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class access_platform_config_form_extender implements extender {
-
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
-        $els[] = $mform->addElement('select',
+        $els[] = $mform->addElement(
+            'select',
             'cd_mode',
             get_string('accesscounts', 'block_gearup'),
             frequency_evaluator::get_form_options()
@@ -182,12 +204,17 @@ class access_platform_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         return [];
     }
-
 }

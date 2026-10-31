@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Table.
@@ -43,7 +43,6 @@ use context_course;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class users extends improved_table {
-
     /** @var context The context. */
     protected $context;
     /** @var repository The repo. */
@@ -156,6 +155,9 @@ class users extends improved_table {
         return $row->mission_count;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function prepare_query(): void {
         global $USER;
 
@@ -186,18 +188,30 @@ class users extends improved_table {
         $this->query = $query;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_count(): int {
         return $this->repository->count_users_from_query($this->query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_rows() {
         return $this->repository->get_users_from_query($this->query, $this->get_page_start(), $this->get_page_size());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function render_filters(): string {
         return $this->get_renderer()->render(new users_filters($this->context, $this->baseurl->params(), $this->filterset));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function render_no_results(): string {
         return $this->get_renderer()->zero_state(
             get_string('norecruits', 'block_gearup'),
@@ -206,6 +220,9 @@ class users extends improved_table {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function render_zero_state(): string {
         return $this->get_renderer()->zero_state(
             get_string('norecruits', 'block_gearup'),
@@ -213,5 +230,4 @@ class users extends improved_table {
             $this->get_renderer()->render_from_template('block_gearup/icons/users', [])
         );
     }
-
 }

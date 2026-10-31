@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mission controller.
@@ -48,11 +48,16 @@ use core\chart_series;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_insights extends mission_route_base {
-
+    /** @var mixed Form. */
     protected $form;
+    /** @var string Missionnavname. */
     protected $missionnavname = 'mission_insights';
+    /** @var bool Supportsgroups. */
     protected $supportsgroups = true;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function post_login() {
         parent::post_login();
         if (!$this->lm->use_insights()) {
@@ -60,6 +65,12 @@ class mission_insights extends mission_route_base {
         }
     }
 
+    /**
+     * Get group sql.
+     *
+     * @param string $useridfield Useridfield.
+     * @return array
+     */
     protected function get_group_sql($useridfield = 'subjectid') {
         static $i = 0;
 
@@ -75,10 +86,19 @@ class mission_insights extends mission_route_base {
         return [$sql, $params];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_subpage_html_head_title() {
         return get_string('insights', 'block_gearup');
     }
 
+    /**
+     * Get complete vs incomplete insight.
+     *
+     * @param mission $mission Mission.
+     * @return mixed
+     */
     protected function get_complete_vs_incomplete_insight(mission $mission) {
         $incompletecolor = '#64748B';
         $completedcolor = '#22C55E';
@@ -93,7 +113,8 @@ class mission_insights extends mission_route_base {
 
         // The number of users that have started the mission.
         [$groupsql, $groupparams] = $this->get_group_sql();
-        $total = mission_inst::count_records_select("missionid = :missionid AND state IN (:state1, :state2, :state3) AND $groupsql",
+        $total = mission_inst::count_records_select(
+            "missionid = :missionid AND state IN (:state1, :state2, :state3) AND $groupsql",
             [
                 'missionid' => $missionid,
                 'state1' => mission_instance::STATE_STARTED,
@@ -155,6 +176,12 @@ class mission_insights extends mission_route_base {
             ])]);
     }
 
+    /**
+     * Get challenge success rate.
+     *
+     * @param mission $mission Mission.
+     * @return mixed
+     */
     protected function get_challenge_success_rate(mission $mission) {
         $incompletecolor = '#64748B';
         $completedcolor = '#22C55E';
@@ -226,6 +253,12 @@ class mission_insights extends mission_route_base {
             ])]);
     }
 
+    /**
+     * Get completion rate insight.
+     *
+     * @param mission $mission Mission.
+     * @return mixed
+     */
     protected function get_completion_rate_insight(mission $mission) {
         global $DB;
 
@@ -266,13 +299,14 @@ class mission_insights extends mission_route_base {
         unset($seriesdata[100]); // Fail safe.
         $total = array_sum($seriesdata);
 
-        // TODO We should return a meaningful placeholder here, if there are users who have completed it, but none in progress.
+        // Future work: Return a meaningful placeholder when users have completed it, but none are in progress.
         if ($total <= 0) {
             return $defaultdata;
         }
 
         [$groupsql, $groupparams] = $this->get_group_sql();
-        $avgcompletionrate = $DB->get_field_select(mission_inst::TABLE,
+        $avgcompletionrate = $DB->get_field_select(
+            mission_inst::TABLE,
             'AVG(completionratio)',
             "missionid = :missionid AND state = :state AND $groupsql",
             [
@@ -329,6 +363,12 @@ class mission_insights extends mission_route_base {
             ])]);
     }
 
+    /**
+     * Get completion time insight.
+     *
+     * @param mission $mission Mission.
+     * @return mixed
+     */
     protected function get_completion_time_insight(mission $mission) {
         global $DB;
 
@@ -448,6 +488,13 @@ class mission_insights extends mission_route_base {
         ]);
     }
 
+    /**
+     * Get streak active insight.
+     *
+     * @param mission $mission Mission.
+     * @param bool $activeonly Activeonly.
+     * @return mixed
+     */
     protected function get_streak_active_insight(mission $mission, $activeonly = true) {
         global $DB;
 
@@ -523,6 +570,13 @@ class mission_insights extends mission_route_base {
             ])]);
     }
 
+    /**
+     * Get streak spread insight.
+     *
+     * @param mission $mission Mission.
+     * @param bool $activeonly Activeonly.
+     * @return mixed
+     */
     protected function get_streak_spread_insight(mission $mission, $activeonly = true) {
         global $DB;
 
@@ -583,6 +637,11 @@ class mission_insights extends mission_route_base {
             ])]);
     }
 
+    /**
+     * Get recruits count.
+     *
+     * @return mixed
+     */
     protected function get_recruits_count() {
         $repository = di::get('repository');
         $query = (new user_query($this->context))
@@ -592,6 +651,9 @@ class mission_insights extends mission_route_base {
         return $repository->count_users_from_query($query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         parent::pre_content();
 
@@ -612,6 +674,11 @@ class mission_insights extends mission_route_base {
         $this->page_insights_content();
     }
 
+    /**
+     * Page advanced heading.
+     *
+     * @return void
+     */
     protected function page_advanced_heading() {
         global $PAGE;
         $output = $this->get_renderer();
@@ -640,6 +707,11 @@ class mission_insights extends mission_route_base {
         ]);
     }
 
+    /**
+     * Page insights content.
+     *
+     * @return mixed
+     */
     protected function page_insights_content() {
         if (!$this->is_quest() && !$this->is_challenge() && !$this->is_achievement()) {
             throw new \coding_exception('Unsupported mission type');
@@ -710,6 +782,11 @@ class mission_insights extends mission_route_base {
         echo $output->render_from_template('block_gearup/mission_insights', $data);
     }
 
+    /**
+     * Page insights content streak.
+     *
+     * @return mixed
+     */
     protected function page_insights_content_streak() {
         global $DB;
 
@@ -768,6 +845,13 @@ class mission_insights extends mission_route_base {
         echo $output->render_from_template('block_gearup/mission_insights', $data);
     }
 
+    /**
+     * Get scale step.
+     *
+     * @param mixed $seriesdata Seriesdata.
+     * @param mixed $total Total.
+     * @return mixed
+     */
     protected function get_scale_step($seriesdata, $total) {
         $highestratio = array_reduce(array_keys($seriesdata), function ($carry, $key) use ($seriesdata) {
             $val = $seriesdata[$key];
@@ -781,6 +865,12 @@ class mission_insights extends mission_route_base {
         return [$ymax, $ymax >= 40 ? 10 : 5];
     }
 
+    /**
+     * Format time.
+     *
+     * @param mixed $value Value.
+     * @return mixed
+     */
     protected function format_time($value) {
         $value = human_utils::duration_approx($value);
         if ($value < 60) {
@@ -789,6 +879,12 @@ class mission_insights extends mission_route_base {
         return format_time($value);
     }
 
+    /**
+     * Format tiny time.
+     *
+     * @param mixed $value Value.
+     * @return mixed
+     */
     protected function format_tiny_time($value) {
         if ($value < 60) {
             return $this->format_scale_value(60, '<1');
@@ -798,6 +894,13 @@ class mission_insights extends mission_route_base {
         return $this->format_scale_value($scale, floor($value / $scale));
     }
 
+    /**
+     * Format scale value.
+     *
+     * @param mixed $scale Scale.
+     * @param mixed $value Value.
+     * @return mixed
+     */
     protected function format_scale_value($scale, $value) {
         $str = 'tinytimeminutes';
         if ($scale === YEARSECS) {
@@ -812,6 +915,12 @@ class mission_insights extends mission_route_base {
         return get_string($str, 'block_gearup', $value);
     }
 
+    /**
+     * Get scale string.
+     *
+     * @param mixed $scale Scale.
+     * @return mixed
+     */
     protected function get_scale_string($scale) {
         $str = 'minutes';
         if ($scale === YEARSECS) {

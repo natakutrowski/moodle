@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Action.
@@ -36,7 +36,9 @@ namespace block_gearup\local\action;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class dashboard_viewed extends static_action {
-
+    /**
+     * {@inheritDoc}
+     */
     public function __construct($userid) {
         return parent::__construct($userid, SYSCONTEXTID);
     }
@@ -51,5 +53,4 @@ class dashboard_viewed extends static_action {
         debugging('The method dashboard_viewed::get_course_id is deprecated, do not use.', DEBUG_DEVELOPER);
         return SITEID;
     }
-
 }

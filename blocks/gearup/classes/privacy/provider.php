@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Provider
@@ -54,7 +54,6 @@ class provider implements
     \core_privacy\local\request\core_userlist_provider,
     \core_privacy\local\request\plugin\provider,
     \core_privacy\local\request\user_preference_provider {
-
     /**
      * Returns metadata.
      *
@@ -416,5 +415,4 @@ class provider implements
             unset_user_preference('block_gearup_achievements_ctxids', $userid);
         }
     }
-
 }

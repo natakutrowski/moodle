@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\assigner\type;
 
@@ -41,7 +41,6 @@ use restore_dbops;
  * @covers     \block_gearup\local\assigner\type\quest_state
  */
 final class quest_state_test extends base_testcase {
-
     /**
      * Provider.
      *
@@ -332,5 +331,4 @@ final class quest_state_test extends base_testcase {
             [$targetmission->get_id(), $u2->id]
         ));
     }
-
 }

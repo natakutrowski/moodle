@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\mission;
 
@@ -36,7 +36,6 @@ use Generator;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class streak_lifecycle_test extends base_testcase {
-
     /**
      * Test lifecycle.
      *
@@ -115,7 +114,7 @@ final class streak_lifecycle_test extends base_testcase {
         $this->assertSame(2, $mi->get_counter());
         $this->assertSame($origstart->getTimestamp(), $mi->get_time_started()->getTimestamp()); // No change on counter 2.
 
-        // Jump past the deadline, again
+        // Jump past the deadline, again.
         $clock->bump(($nextexpecteddeadline->getTimestamp() - $clock->time()) + 1);
         $mo->evaluate_instance($mi);
         $this->assertSame(mission_instance::STATE_STARTED, $mi->get_state());
@@ -137,7 +136,8 @@ final class streak_lifecycle_test extends base_testcase {
 
         // Confirm there is a new iteration.
         $this->assertEquals(2, mission_inst::count_records(['missionid' => $mission->get_id()]));
-        $mi2 = di::get('repository')->get_instance($DB->get_field(mission_inst::TABLE,
+        $mi2 = di::get('repository')->get_instance($DB->get_field(
+            mission_inst::TABLE,
             'id',
             ['iteration' => 1, 'missionid' => $mission->get_id()]
         ));
@@ -206,7 +206,8 @@ final class streak_lifecycle_test extends base_testcase {
 
         // Confirm there is a new iteration.
         $this->assertEquals(2, mission_inst::count_records(['missionid' => $mission->get_id()]));
-        $mi2 = di::get('repository')->get_instance($DB->get_field(mission_inst::TABLE,
+        $mi2 = di::get('repository')->get_instance($DB->get_field(
+            mission_inst::TABLE,
             'id',
             ['iteration' => 1, 'missionid' => $mission->get_id()]
         ));
@@ -502,5 +503,4 @@ final class streak_lifecycle_test extends base_testcase {
         $mo->evaluate_instance($mi);
         $this->assertSame($expecteddeadline->getTimestamp(), $mi->get_deadline()->getTimestamp());
     }
-
 }

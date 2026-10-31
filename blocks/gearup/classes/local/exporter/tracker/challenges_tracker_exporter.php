@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\exporter\tracker;
 
@@ -33,7 +33,6 @@ use renderer_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class challenges_tracker_exporter extends missions_tracker_exporter_base {
-
     /**
      * Return the list of properties.
      *
@@ -65,7 +64,8 @@ class challenges_tracker_exporter extends missions_tracker_exporter_base {
         $ef = di::get('exporter_factory');
         $context = $this->related['context'];
 
-        $challenges = $mr->get_challenge_instances_by_subject_id($this->userid,
+        $challenges = $mr->get_challenge_instances_by_subject_id(
+            $this->userid,
             [mission_instance::STATE_STARTED, mission_instance::STATE_COMPLETED],
             $context,
             ['mi.timecompleted DESC', 'mi.timestarted DESC']

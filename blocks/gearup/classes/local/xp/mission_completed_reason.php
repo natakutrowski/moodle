@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mission completed reason.
@@ -44,7 +44,6 @@ abstract class mission_completed_reason implements
     compat\reason_with_location,
     compat\reason_with_short_description,
     compat\reason_with_tracking {
-
     /** @var mission|null|false $mission The mission, do not use directly, refer to self::get_mission() instead. */
     protected $mission = null;
 
@@ -64,6 +63,11 @@ abstract class mission_completed_reason implements
         $this->set_object_id($missioninstid ?: null);
     }
 
+    /**
+     * Get location name.
+     *
+     * @return mixed
+     */
     public function get_location_name() {
         $mission = $this->get_mission();
         if (!$mission) {
@@ -72,6 +76,11 @@ abstract class mission_completed_reason implements
         return $mission->get_title();
     }
 
+    /**
+     * Get location url.
+     *
+     * @return mixed
+     */
     public function get_location_url() {
         $mission = $this->get_mission();
         if (!$mission || !$mission->get_id()) {
@@ -146,6 +155,7 @@ abstract class mission_completed_reason implements
      */
     public function set_object_id(?int $objectid): void {
         $this->objectid = $objectid;
+        $this->mission = null;
     }
 
     /**

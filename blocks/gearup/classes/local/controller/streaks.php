@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\controller;
 
@@ -34,11 +34,16 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class streaks extends route_base {
-
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_html_head_title() {
         return get_string('streaks', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function post_login() {
         parent::post_login();
         if (!$this->lm->use_streaks()) {
@@ -46,6 +51,9 @@ class streaks extends route_base {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         $repository = di::get('repository');
         $output = $this->get_renderer();

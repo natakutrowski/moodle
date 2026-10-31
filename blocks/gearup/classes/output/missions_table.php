@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Missions table.
@@ -47,7 +47,6 @@ use html_writer;
  * @deprecated Since Quest v1.3.0
  */
 class missions_table extends flexible_table {
-
     /** @var object The mission helper. */
     protected $missionhelper;
     /** @var context The context. */
@@ -175,7 +174,8 @@ class missions_table extends flexible_table {
     public function col_title($row) {
         $title = $row->mission->get_title();
         if (!$this->is_downloading()) {
-            return html_writer::link($this->urlresolver->reverse('mission', ['missionid' => $row->mission->get_id()]),
+            return html_writer::link(
+                $this->urlresolver->reverse('mission', ['missionid' => $row->mission->get_id()]),
                 s($title)
             );
         }
@@ -199,5 +199,4 @@ class missions_table extends flexible_table {
             'actions' => $this->col_actions($data),
         ];
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -43,7 +43,6 @@ use Throwable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class objincr implements controller {
-
     /**
      * Handle the request.
      *
@@ -58,7 +57,6 @@ class objincr implements controller {
         try {
             header('Content-Type: application/json');
             $this->process_request($request);
-
         } catch (Throwable $err) {
             // We must handle all exceptions, otherwise Moodle die(s a 200 for exceptions).
             header('HTTP/1.1 500 Internal Server Error');
@@ -168,5 +166,4 @@ class objincr implements controller {
         $missionoperator->evaluate_instance($missioninst);
         header('HTTP/1.1 204 No Content');
     }
-
 }

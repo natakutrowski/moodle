@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Testcase.
@@ -42,8 +42,9 @@ use context_module;
  * @covers     \block_gearup\local\objective\type\complete_activity
  */
 final class complete_activity_test extends base_testcase {
-
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Missioninst. */
     protected $missioninst;
 
     public function setUp(): void {
@@ -104,7 +105,8 @@ final class complete_activity_test extends base_testcase {
 
         $type->consume_action($action, $objinst, $this->missioninst);
         $this->assertEquals(1, $objinst->get_counter());
-        $this->assertEquals((object) ['seen' => [['courseid' => $action->get_course_id(), 'section' => 0]]],
+        $this->assertEquals(
+            (object) ['seen' => [['courseid' => $action->get_course_id(), 'section' => 0]]],
             $objinst->get_type_state()
         );
 
@@ -266,5 +268,4 @@ final class complete_activity_test extends base_testcase {
         $this->assertTrue($type->is_action_passing_constraints($action1a, $objinst, $this->missioninst));
         $this->assertFalse($type->is_action_passing_constraints($action1b, $objinst, $this->missioninst));
     }
-
 }

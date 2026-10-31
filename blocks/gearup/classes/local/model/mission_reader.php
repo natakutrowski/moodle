@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\model;
 
@@ -34,7 +34,6 @@ use block_gearup\local\utils\db_utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_reader extends db_reader {
-
     /** @var mission_query The query. */
     protected $query;
     /** @var string[] Field alises, where the keys are the original and the values are for SQL. */
@@ -164,7 +163,8 @@ class mission_reader extends db_reader {
         if ($query->has_annotation('completed_count')) {
             $this->hasannotations = true;
             $groupfilter = $this->make_filter_group_id_sql('mi.subjectid');
-            $this->add_select('completed_count',
+            $this->add_select(
+                'completed_count',
                 "(SELECT COUNT(mi.id)
                     FROM {" . mission_inst::TABLE . "} mi
                    WHERE mi.missionid = m.id
@@ -179,7 +179,8 @@ class mission_reader extends db_reader {
         if ($query->has_annotation('not_completed_count')) {
             $this->hasannotations = true;
             $groupfilter = $this->make_filter_group_id_sql('mi.subjectid');
-            $this->add_select('not_completed_count',
+            $this->add_select(
+                'not_completed_count',
                 "(SELECT COUNT(mi.id)
                     FROM {" . mission_inst::TABLE . "} mi
                    WHERE mi.missionid = m.id
@@ -194,7 +195,8 @@ class mission_reader extends db_reader {
         if ($query->has_annotation('highest_counter')) {
             $this->hasannotations = true;
             $groupfilter = $this->make_filter_group_id_sql('mi.subjectid');
-            $this->add_select('highest_counter',
+            $this->add_select(
+                'highest_counter',
                 "(SELECT COALESCE(MAX(mi.counter), 0)
                     FROM {" . mission_inst::TABLE . "} mi
                    WHERE mi.missionid = m.id
@@ -206,7 +208,8 @@ class mission_reader extends db_reader {
         if ($query->has_annotation('highest_counter_current')) {
             $this->hasannotations = true;
             $groupfilter = $this->make_filter_group_id_sql('mi.subjectid');
-            $this->add_select('highest_counter_current',
+            $this->add_select(
+                'highest_counter_current',
                 "(SELECT COALESCE(MAX(mi.counter), 0)
                     FROM {" . mission_inst::TABLE . "} mi
                    WHERE mi.missionid = m.id
@@ -226,7 +229,8 @@ class mission_reader extends db_reader {
             $subsqlcast = db_utils::cast_as_float($subsql);
 
             $groupfilter = $this->make_filter_group_id_sql('mi.subjectid');
-            $this->add_select('completion_rate',
+            $this->add_select(
+                'completion_rate',
                 "(SELECT COALESCE(
                  (SELECT COUNT(mi.id)
                     FROM {" . mission_inst::TABLE . "} mi
@@ -244,7 +248,8 @@ class mission_reader extends db_reader {
             $this->hasannotations = true;
             $groupfilter = $this->make_filter_group_id_sql('mi.subjectid');
             $alias = $this->get_field_alias('inprogress_average_rate');
-            $this->add_select('inprogress_average_rate',
+            $this->add_select(
+                'inprogress_average_rate',
                 "(SELECT AVG(mi.completionratio)
                     FROM {" . mission_inst::TABLE . "} mi
                    WHERE mi.missionid = m.id
@@ -259,7 +264,8 @@ class mission_reader extends db_reader {
             $this->hasannotations = true;
             $groupfilter = $this->make_filter_group_id_sql('mi.subjectid');
             $alias = $this->get_field_alias('inprogress_partial_count');
-            $this->add_select('inprogress_partial_count',
+            $this->add_select(
+                'inprogress_partial_count',
                 "(SELECT COUNT(mi.id)
                     FROM {" . mission_inst::TABLE . "} mi
                    WHERE mi.missionid = m.id
@@ -276,7 +282,8 @@ class mission_reader extends db_reader {
             $this->hasannotations = true;
             $groupfilter = $this->make_filter_group_id_sql('mi.subjectid');
             $alias = $this->get_field_alias('inprogress_zero_count');
-            $this->add_select('inprogress_zero_count',
+            $this->add_select(
+                'inprogress_zero_count',
                 "(SELECT COUNT(mi.id)
                     FROM {" . mission_inst::TABLE . "} mi
                    WHERE mi.missionid = m.id
@@ -291,7 +298,8 @@ class mission_reader extends db_reader {
         if ($query->has_annotation('recruit_count')) {
             $this->hasannotations = true;
             $groupfilter = $this->make_filter_group_id_sql('mi.subjectid');
-            $this->add_select('recruit_count',
+            $this->add_select(
+                'recruit_count',
                 "(SELECT COUNT(DISTINCT mi.subjectid)
                     FROM {" . mission_inst::TABLE . "} mi
                    WHERE mi.missionid = m.id
@@ -311,7 +319,8 @@ class mission_reader extends db_reader {
             $subsqlcast = db_utils::cast_as_float($subsql);
 
             $groupfilter = $this->make_filter_group_id_sql('mi.subjectid');
-            $this->add_select('success_rate',
+            $this->add_select(
+                'success_rate',
                 "(SELECT CASE
                          WHEN m.type = :success_rate_challenge
                          THEN COALESCE(
@@ -476,5 +485,4 @@ class mission_reader extends db_reader {
         $this->query = $query;
         return $this;
     }
-
 }

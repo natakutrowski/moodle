@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome.
@@ -67,7 +67,9 @@ class award_badge implements
     type_with_backup_handling,
     type_with_update_after_restore,
     user_facing_type {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         $config = $outcome->get_type_config();
         $userid = $missioninst->get_subject_id();
@@ -90,6 +92,9 @@ class award_badge implements
         $this->award_the_badge($userid, $config->badgeid, $issuerid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         global $CFG;
         $isenabled = !empty($CFG->enablebadges);
@@ -98,18 +103,30 @@ class award_badge implements
         ]);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_user(int $userid, context $context): info {
         return new permission_required_info(['moodle/badges:viewbadges', 'moodle/badges:awardbadge'], $context, $userid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new award_badge_config_form_extender($mission);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('outcomeawardbadge', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('outcomeawardbadgedesc', 'block_gearup');
     }
@@ -165,12 +182,18 @@ class award_badge implements
         badges_award_handle_manual_criteria_review($data);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function extend_backup(backup_facade $backup, outcome $outcome, mission $mission) {
         $config = $outcome->get_type_config();
         $backup->set_mapping_id('badge', $config->badgeid);
         $backup->set_mapping_id('user', $config->issuerid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, outcome $outcome, mission $mission) {
         global $USER;
 
@@ -226,15 +249,24 @@ class award_badge implements
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class award_badge_config_form_extender implements extender {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Mission. */
     protected $mission;
 
+    /**
+     * Constructor.
+     *
+     * @param mission $mission Mission.
+     */
     public function __construct(mission $mission) {
         $this->mission = $mission;
         $this->context = $mission->get_context();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $allbadges = $this->get_compatible_badges($this->context);
         $coursebadges = array_map(function ($badge) {
@@ -261,7 +293,8 @@ class award_badge_config_form_extender implements extender {
 
         $els[] = $mform->addElement('selectgroups', 'cd_badgeid', get_string('thebadge', 'block_gearup'), $options);
 
-        $els[] = $mform->addElement('select',
+        $els[] = $mform->addElement(
+            'select',
             'cd_issuerid',
             get_string('badgeissuer', 'block_gearup'),
             $this->get_possible_issuers($mform)
@@ -270,10 +303,16 @@ class award_badge_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -350,5 +389,4 @@ class award_badge_config_form_extender implements extender {
 
         return $options;
     }
-
 }

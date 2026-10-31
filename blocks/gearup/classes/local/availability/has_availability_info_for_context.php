@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Has availability info.
@@ -38,7 +38,6 @@ namespace block_gearup\local\availability;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface has_availability_info_for_context {
-
     /**
      * Get availability info for the given context.
      *
@@ -48,5 +47,4 @@ interface has_availability_info_for_context {
      * @return info
      */
     public function get_availability_info_for_context(\context $context): info;
-
 }

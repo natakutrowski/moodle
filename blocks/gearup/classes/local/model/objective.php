@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective persistent.
@@ -40,8 +40,32 @@ use lang_string;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class objective extends persistent {
-
+    /** Table. */
     const TABLE = 'block_gearup_objective';
+
+    /**
+     * After delete.
+     *
+     * @param bool $result Whether deletion succeeded.
+     * @return void
+     */
+    protected function after_delete($result) {
+        global $DB;
+
+        // If there is no other objective at that existing sortorder, change all orders.
+        if (
+            $result && !$DB->record_exists(static::TABLE, [
+                'missionid' => $this->get('missionid'), 'sortorder' => $this->get('sortorder'),
+            ])
+        ) {
+            $DB->execute(
+                'UPDATE {block_gearup_objective}
+                    SET sortorder = sortorder - 1
+                  WHERE missionid = ? AND sortorder > ?',
+                [$this->get('missionid'), $this->get('sortorder')]
+            );
+        }
+    }
 
     /**
      * Properties.
@@ -52,6 +76,10 @@ class objective extends persistent {
         return [
             'missionid' => [
                 'type' => PARAM_INT,
+            ],
+            'sortorder' => [
+                'type' => PARAM_INT,
+                'default' => 0,
             ],
             'type' => [
                 'type' => PARAM_RAW,
@@ -74,6 +102,20 @@ class objective extends persistent {
                 'default' => null,
             ],
         ];
+    }
+
+    /**
+     * Append new objectives to the mission.
+     */
+    protected function before_create() {
+        global $DB;
+        if ($this->get('sortorder') == 0) {
+            $max = $DB->get_field_sql(
+                'SELECT MAX(sortorder) FROM {block_gearup_objective} WHERE missionid = ?',
+                [$this->get('missionid')]
+            );
+            $this->set('sortorder', (int) $max + 1);
+        }
     }
 
     /**
@@ -117,6 +159,58 @@ class objective extends persistent {
             throw new \coding_exception('The type does not exist.');
         }
         return $type;
+    }
+
+    /**
+     * Swap positions.
+     *
+     * @param int $dir -1 to move up, 1 to move down.
+     * @return void
+     */
+    protected function move(int $dir): void {
+        global $DB;
+
+        if (!$this->get('id')) {
+            throw new \coding_exception('Cannot move an unsaved objective.');
+        }
+
+        $transaction = $DB->start_delegated_transaction();
+        $comparison = $dir < 0 ? '<' : '>';
+        $sort = $dir < 0 ? 'DESC' : 'ASC';
+        $records = $DB->get_records_sql(
+            "SELECT id, sortorder
+               FROM {block_gearup_objective}
+              WHERE missionid = ? AND (sortorder $comparison ? OR (sortorder = ? AND id $comparison ?))
+           ORDER BY sortorder $sort, id $sort",
+            [$this->get('missionid'), $this->get('sortorder'), $this->get('sortorder'), $this->get('id')],
+            0,
+            1,
+        );
+        $adjacent = reset($records);
+        if ($adjacent) {
+            $DB->set_field(static::TABLE, 'sortorder', $adjacent->sortorder - $dir, ['id' => $adjacent->id]);
+            $DB->set_field(static::TABLE, 'sortorder', $adjacent->sortorder, ['id' => $this->get('id')]);
+            $this->set('sortorder', $adjacent->sortorder);
+        }
+        $transaction->allow_commit();
+    }
+
+    /**
+     * Move down.
+     *
+     * @return void
+     */
+    public function move_down(): void {
+        $this->move(1);
+    }
+
+    /**
+     * Move up.
+     *
+     * @return void
+     */
+    public function move_up(): void {
+        $this->move(-1);
     }
 
     /**
@@ -171,16 +265,16 @@ class objective extends persistent {
             return new lang_string('invaliddata', 'core_error');
         }
 
-        // TODO Decide whether we should validate the config structure at all
+        // Future work: Decide whether we should validate the config structure at all
         // considering the type is already the one that generates it.
         // $structure = $type->get_config_structure();
         // try {
-        // TODO This fails when additional keys are left behind, we should take note of this
+        // Future work: This fails when additional keys are left behind, we should take note of this
         // when we modify the config structure of an objective type.
         // \external_api::validate_parameters($structure, is_object($value) ? (array) $value : $value);
         // } catch (\invalid_parameter_exception $e) {
         // return new lang_string('invaliddata', 'core_error');
-        // }
+        // }.
 
         return true;
     }
@@ -216,4 +310,13 @@ class objective extends persistent {
         return true;
     }
 
+    /**
+     * Get all by mission ID.
+     *
+     * @param int $missionid The mission ID.
+     * @return static[]
+     */
+    public static function get_all_by_missionid(int $missionid): array {
+        return static::get_records_select('missionid = ?', [$missionid], 'sortorder ASC, id ASC');
+    }
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Actions processor.
@@ -38,13 +38,24 @@ use block_gearup\local\action\action;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class default_processor implements processor {
-
+    /** @var mixed Repository. */
     protected $repository;
+    /** @var mixed Objtyperesolver. */
     protected $objtyperesolver;
+    /** @var mixed Missionoperator. */
     protected $missionoperator;
+    /** @var mixed Objoperator. */
     protected $objoperator;
 
-    // TODO Type annotations.
+    // Future work: Type annotations.
+    /**
+     * Constructor.
+     *
+     * @param mixed $repository Repository.
+     * @param mixed $objtyperesolver Objtyperesolver.
+     * @param mixed $missionoperator Missionoperator.
+     * @param mixed $objoperator Objoperator.
+     */
     public function __construct($repository, $objtyperesolver, $missionoperator, $objoperator) {
         $this->repository = $repository;
         $this->objtyperesolver = $objtyperesolver;
@@ -72,7 +83,8 @@ class default_processor implements processor {
         // context paths would still cause a hit on this, for instance for incomplete types at the system level.
         // The complexity of realibly implementing this cache is also high as we would need to invalidate the cache
         // quite a few case scenario.
-        $objinstances = $this->repository->get_incomplete_objective_instances_of_types($types,
+        $objinstances = $this->repository->get_incomplete_objective_instances_of_types(
+            $types,
             $action->get_user_id(),
             $action->get_context()
         );
@@ -81,7 +93,7 @@ class default_processor implements processor {
         }
 
         // Fetch the mission instances.
-        // TODO Fetching the instance could be done as we resolve the incomplete objective instances.
+        // Future work: Fetching the instance could be done as we resolve the incomplete objective instances.
         $missioninstids = array_unique(array_map(function ($objinst) {
             return $objinst->get_mission_instance_id();
         }, $objinstances));
@@ -100,7 +112,7 @@ class default_processor implements processor {
             }
             // There will be inconstencies errors if we do not pass the same objinstance as the one
             // contained within the mission instance. We should have a better system for this.
-            // TODO Avoid having to do this manually!
+            // Future work: Avoid having to do this manually!
             $objinstance = $missioninst->get_instance_of_objective($objinstance->get_objective()->get_id());
             $this->objoperator->evaluate_action_on_instance($action, $missioninst, $objinstance);
         }

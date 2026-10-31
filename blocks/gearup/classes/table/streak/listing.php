@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\table\streak;
 
@@ -35,7 +35,6 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class listing extends improved_table {
-
     /** @var object The mission helper. */
     protected $missionhelper;
     /** @var mission_query The query. */
@@ -52,6 +51,9 @@ class listing extends improved_table {
         parent::__construct('block_gearup_streaks');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function init(): self {
         $this->repository = di::get('repository');
         $this->renderer = di::get('renderer');
@@ -79,19 +81,34 @@ class listing extends improved_table {
         return $this;
     }
 
+    /**
+     * Define query.
+     *
+     * @param mission_query $query Query.
+     * @return self
+     */
     public function define_query(mission_query $query): self {
         $this->query = $query;
         return $this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_count(): int {
         return $this->repository->count_missions_from_query($this->query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_rows() {
         return $this->repository->get_missions_from_query($this->query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function prepare_query(): void {
         $this->query
             ->annotate_recruit_count()
@@ -135,12 +152,14 @@ class listing extends improved_table {
      */
     public function col_streak($row) {
         if ($this->missionhelper->is_archived($row->mission)) {
-            return \html_writer::tag('abbr',
+            return \html_writer::tag(
+                'abbr',
                 "{$row->annotations->highest_counter}",
                 ['title' => get_string('beststreak', 'block_gearup')]
             );
         }
-        return \html_writer::tag('abbr',
+        return \html_writer::tag(
+            'abbr',
             "{$row->annotations->highest_counter_current} / {$row->annotations->highest_counter}",
             ['title' => get_string('currentstreak', 'block_gearup') . ' / ' . get_string('beststreak', 'block_gearup')]
         );
@@ -159,11 +178,11 @@ class listing extends improved_table {
             if ($this->missionhelper->is_archived($row->mission)) {
                 $suffix .= html_writer::span(get_string('archived', 'block_gearup'), 'gu-ml-1 badge gu-badge-secondary');
             }
-            return html_writer::link($this->get_url_resolver()->reverse('mission', ['missionid' => $row->mission->get_id()]),
+            return html_writer::link(
+                $this->get_url_resolver()->reverse('mission', ['missionid' => $row->mission->get_id()]),
                 s($title)
             ) . $suffix;
         }
         return $title;
     }
-
 }

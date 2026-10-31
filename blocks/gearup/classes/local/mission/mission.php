@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mission.
@@ -40,25 +40,44 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface mission {
+    // Const SECRECY_NONE = 0;
+    // const SECRECY_SECRET = 1;.
 
-    // const SECRECY_NONE = 0;
-    // const SECRECY_SECRET = 1;
-
+    /** Repeat never. */
     const REPEAT_NEVER = 0;
+    /** Repeat always. */
     const REPEAT_ALWAYS = -1;
 
+    /** State wizard. */
     const STATE_WIZARD = 0;
+    /** State active. */
     const STATE_ACTIVE = 1;
+    /** State archived. */
     const STATE_ARCHIVED = 2;
 
+    /** Start always. */
     const START_ALWAYS = 0;
+    /** Start optin. */
     const START_OPTIN = 1;
 
+    /** Visible always. */
     const VISIBLE_ALWAYS = 0;
+    /** Visible secret. */
     const VISIBLE_SECRET = 1;
+    /** Visible never. */
     const VISIBLE_NEVER = 2;
 
+    /**
+     * Get id.
+     *
+     * @return int
+     */
     public function get_id(): int;
+    /**
+     * Get context.
+     *
+     * @return context
+     */
     public function get_context(): context;
 
     /**
@@ -71,8 +90,23 @@ interface mission {
      */
     public function get_state(): int;
 
+    /**
+     * Get title.
+     *
+     * @return string
+     */
     public function get_title(): string;
+    /**
+     * Get description.
+     *
+     * @return string
+     */
     public function get_description(): string;
+    /**
+     * Get visual.
+     *
+     * @return visual|null
+     */
     public function get_visual(): ?visual;
 
     /**
@@ -102,6 +136,11 @@ interface mission {
      */
     public function get_objective(int $id): objective;
 
+    /**
+     * Get objectives.
+     *
+     * @return array
+     */
     public function get_objectives(): array;
 
     /**
@@ -160,5 +199,4 @@ interface mission {
      * @return string|null
      */
     public function get_voice_id(): ?string;
-
 }

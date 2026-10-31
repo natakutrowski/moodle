@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Earn XP.
@@ -54,10 +54,14 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class earn_xp implements has_availability_info, has_availability_info_for_context, type, type_with_state_initialisation {
-
+    /** Mode start at zero. */
     const MODE_START_AT_ZERO = 0;
+    /** Mode start at current. */
     const MODE_START_AT_CURRENT = 1;
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof xp_gained) {
             return;
@@ -65,10 +69,16 @@ class earn_xp implements has_availability_info, has_availability_info_for_contex
         $instance->increment_counter($action->get_xp());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         return new plugin_required_info('block_xp', 'Level Up XP', 2022112600, 'v3.13');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_context(\context $context): info {
         if (!class_exists('block_xp\di')) {
             return new static_info(false);
@@ -89,18 +99,30 @@ class earn_xp implements has_availability_info, has_availability_info_for_contex
         return new static_info(true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): extender {
         return new earn_xp_config_form_extender();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typeearnxp', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typeearnxpdesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
         $coursecontext = $missioninst->get_mission()->get_context()->get_course_context(false);
         $world = \block_xp\di::get('course_world_factory')->get_world($coursecontext ? $coursecontext->instanceid : SITEID);
@@ -115,10 +137,16 @@ class earn_xp implements has_availability_info, has_availability_info_for_contex
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof xp_gained;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -156,17 +184,22 @@ class earn_xp implements has_availability_info, has_availability_info_for_contex
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class earn_xp_config_form_extender implements extender {
-
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
-        // TODO State that changing cd_mode will not affect the counter of existing instances, or
+        // Future work: State that changing cd_mode will not affect the counter of existing instances, or
         // lock the setting so that the user cannot change it when there are instances.
         $els[] = $mform->addElement('advcheckbox', 'cd_mode', get_string('includepointscurrentlyheld', 'block_gearup'));
 
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         if (!empty($data->cd_mode)) {
             $data->cd_mode = earn_xp::MODE_START_AT_CURRENT;
@@ -176,7 +209,9 @@ class earn_xp_config_form_extender implements extender {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
     }
-
 }

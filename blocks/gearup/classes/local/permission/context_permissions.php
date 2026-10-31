@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Context permissions.
@@ -39,7 +39,6 @@ use required_capability_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class context_permissions implements access_permissions {
-
     /** @var context The context. */
     protected $context;
 
@@ -113,5 +112,4 @@ class context_permissions implements access_permissions {
     public function require_manage_licence($userid = null) {
         return require_capability('block/gearup:managelicence', $this->context, $userid);
     }
-
 }

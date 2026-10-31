@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\exporter\tracker;
 
@@ -36,7 +36,6 @@ use renderer_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tracker_exporter extends \core\external\exporter {
-
     /** @var object */
     protected $lm;
     /** @var int The user ID. */
@@ -149,15 +148,12 @@ class tracker_exporter extends \core\external\exporter {
                 if ($key === achievement::class) {
                     $ctxkey = 'achievementscontext';
                     $ctxdata = (new achievements_tracker_exporter($this->userid, $this->related))->export($output);
-
                 } else if ($key === challenge::class && $this->lm->use_challenges()) {
                     $ctxkey = 'challengescontext';
                     $ctxdata = (new challenges_tracker_exporter($this->userid, $this->related))->export($output);
-
                 } else if ($key === quest::class) {
                     $ctxkey = 'questscontext';
                     $ctxdata = (new quests_tracker_exporter($this->userid, $this->related))->export($output);
-
                 } else if ($key === streak::class && $this->lm->use_streaks()) {
                     $ctxkey = 'streakscontext';
                     $ctxdata = (new streaks_tracker_exporter($this->userid, $this->related))->export($output);
@@ -210,5 +206,4 @@ class tracker_exporter extends \core\external\exporter {
         }
         return array_values(array_unique($normalised));
     }
-
 }

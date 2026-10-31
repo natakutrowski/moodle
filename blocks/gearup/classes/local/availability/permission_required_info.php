@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Permission required info.
@@ -36,7 +36,6 @@ namespace block_gearup\local\availability;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class permission_required_info implements info {
-
     /** @var \context The permission context. */
     protected $context;
     /** @var string[] The permission names. */
@@ -57,10 +56,16 @@ class permission_required_info implements info {
         $this->userid = $userid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_available(): bool {
         return has_all_capabilities($this->permnames, $this->context, $this->userid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_reasons(): array {
         $reasons = [];
         if (!$this->is_available()) {
@@ -79,5 +84,4 @@ class permission_required_info implements info {
         }
         return $reasons;
     }
-
 }

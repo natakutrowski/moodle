@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Version file.
@@ -27,10 +27,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version      = 2026070700;
+$plugin->version      = 2026101401;
 $plugin->requires     = 2024100700;   // Moodle 4.5.0.
 $plugin->component    = 'block_gearup';
 $plugin->maturity     = MATURITY_STABLE;
-$plugin->release      = '1.9.1';
-$plugin->supported    = [405, 502];
+$plugin->release      = '1.10.0a';
+$plugin->supported    = [405, 503];
 $plugin->dependencies = [];

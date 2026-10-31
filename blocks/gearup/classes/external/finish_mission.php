@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * External.
@@ -38,7 +38,6 @@ use block_gearup\di;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class finish_mission extends external_api {
-
     /**
      * Parameters.
      *
@@ -100,5 +99,4 @@ class finish_mission extends external_api {
     public static function execute_returns() {
         return new external_value(PARAM_BOOL, '');
     }
-
 }

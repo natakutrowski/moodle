@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Backup.
@@ -41,7 +41,6 @@ use context_course;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_facade {
-
     /** @var backup_structure_step The step. */
     protected $step;
 
@@ -112,5 +111,4 @@ class backup_facade {
     public static function from_structure_step($step) {
         return new static($step);
     }
-
 }

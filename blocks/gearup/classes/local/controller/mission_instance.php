@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -42,13 +42,16 @@ use core_user;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_instance extends mission_route_base {
-
+    /** @var string Missionnavname. */
     protected $missionnavname = 'mission_users';
     /** @var mission_inst The mission instance. */
     protected $missioninst;
     /** @var bool */
     protected $supportsgroups = true;  // To validate access.
 
+    /**
+     * {@inheritDoc}
+     */
     protected function define_optional_params() {
         return [
             ['action', null, PARAM_ALPHANUMEXT, false],
@@ -57,6 +60,9 @@ class mission_instance extends mission_route_base {
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function post_login() {
         parent::post_login();
 
@@ -69,10 +75,16 @@ class mission_instance extends mission_route_base {
         $this->missioninst = $missioninst;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_subpage_html_head_title() {
         return fullname(core_user::get_user($this->missioninst->get_subject_id()));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function pre_content() {
         parent::pre_content();
 
@@ -88,6 +100,9 @@ class mission_instance extends mission_route_base {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         $output = $this->get_renderer();
 
@@ -98,5 +113,4 @@ class mission_instance extends mission_route_base {
             ->set_return_to($this->get_param('returnto'));
         echo $output->render($renderable);
     }
-
 }

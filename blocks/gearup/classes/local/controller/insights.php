@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -50,11 +50,14 @@ use block_gearup\table\missions;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class insights extends route_base {
-
     /** @var string[] */
     protected $allowedtypes = [];
+    /** @var bool Supportsgroups. */
     protected $supportsgroups = true;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function define_optional_params() {
         return [
             ['download', null, PARAM_ALPHANUMEXT, false],
@@ -62,6 +65,9 @@ class insights extends route_base {
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function post_login() {
         parent::post_login();
         if (!$this->lm->use_insights()) {
@@ -75,14 +81,25 @@ class insights extends route_base {
         ];
     }
 
+    /**
+     * Get download filename.
+     *
+     * @return mixed
+     */
     protected function get_download_filename() {
         return $this->get_param('downloadfilename') ?: 'missions-' . $this->context->id . '-report-' . date('Y-m-d');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_html_head_title() {
         return get_string('insights', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function pre_content() {
         parent::pre_content();
         if ($this->get_param('download')) {
@@ -93,6 +110,11 @@ class insights extends route_base {
         }
     }
 
+    /**
+     * Get table.
+     *
+     * @return mixed
+     */
     protected function get_table() {
         $query = new mission_query($this->context);
         $query->set_context_id($this->context->id);
@@ -109,6 +131,11 @@ class insights extends route_base {
         return $table;
     }
 
+    /**
+     * Get stats.
+     *
+     * @return mixed
+     */
     protected function get_stats() {
         $repo = di::get('repository');
         $groupid = $this->get_group_id();
@@ -276,6 +303,9 @@ class insights extends route_base {
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         global $PAGE;
         $output = $this->get_renderer();
@@ -315,6 +345,12 @@ class insights extends route_base {
         ] + $stats);
     }
 
+    /**
+     * Format tiny time.
+     *
+     * @param mixed $value Value.
+     * @return mixed
+     */
     protected function format_tiny_time($value) {
         if ($value < 60) {
             return $this->format_scale_value(60, '<1');
@@ -324,6 +360,13 @@ class insights extends route_base {
         return $this->format_scale_value($scale, floor($value / $scale));
     }
 
+    /**
+     * Format scale value.
+     *
+     * @param mixed $scale Scale.
+     * @param mixed $value Value.
+     * @return mixed
+     */
     protected function format_scale_value($scale, $value) {
         $str = 'tinytimeminutes';
         if ($scale === YEARSECS) {
@@ -337,5 +380,4 @@ class insights extends route_base {
         }
         return get_string($str, 'block_gearup', $value);
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\output;
 
@@ -35,6 +35,10 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tracker implements named_templatable, renderable {
+    /** Sort by relevance. */
+    const SORT_MOST_RELEVANT = 0;
+    /** Sort alphabetically by title. */
+    const SORT_ALPHABETICAL = 2;
 
     /** @var context The context. */
     protected $context;
@@ -61,6 +65,9 @@ class tracker implements named_templatable, renderable {
         $this->urlresolver = $urlresolver;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function export_for_template(renderer_base $output) {
         $exporter = di::get('exporter_factory')->get_tracker_exporter($this->userid, [
             'context' => $this->context,
@@ -71,6 +78,9 @@ class tracker implements named_templatable, renderable {
         return $exporter->export($output);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_template_name(renderer_base $renderer): string {
         return 'block_gearup/tracker';
     }
@@ -141,5 +151,4 @@ class tracker implements named_templatable, renderable {
 
         return $order;
     }
-
 }

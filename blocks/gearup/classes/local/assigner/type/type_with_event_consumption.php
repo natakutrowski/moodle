@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Assigner type.
@@ -40,7 +40,6 @@ use block_gearup\local\mission\mission;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface type_with_event_consumption extends type {
-
     /**
      * Get the eligible users from the event.
      *
@@ -78,5 +77,4 @@ interface type_with_event_consumption extends type {
      * @return bool
      */
     public function is_event_passing_constraints(event $event, assigner $assigner): bool;
-
 }

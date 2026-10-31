@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Complete course.
@@ -63,7 +63,6 @@ class complete_course implements
     type_with_state_initialisation,
     type_with_supporting_url,
     type_with_update_after_restore {
-
     /** Any course. */
     const WHICH_ANY = 0;
     /** One specific course. */
@@ -72,6 +71,9 @@ class complete_course implements
     /** The URL mode. */
     const URLMODE_COURSE = 1;
 
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
         $objective = $instance->get_objective();
         $config = $objective->get_type_config();
@@ -87,6 +89,9 @@ class complete_course implements
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof course_completed) {
             return false;
@@ -94,22 +99,37 @@ class complete_course implements
         $instance->increment_counter(1);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         return new completion_required_info();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new complete_course_config_form($mission->get_context());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typecompletecourse', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typecompletecoursedesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url(objective $objective, $urltype): ?moodle_url {
         if ($urltype === static::URLMODE_COURSE) {
             $config = $objective->get_type_config();
@@ -122,10 +142,16 @@ class complete_course implements
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof course_completed;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -148,14 +174,25 @@ class complete_course implements
         return true;
     }
 
+    /**
+     * Is course completed.
+     *
+     * @param mixed $courseid Courseid.
+     * @param mixed $userid Userid.
+     * @return mixed
+     */
     public function is_course_completed($courseid, $userid) {
         $completion = course_utils::get_completion_info($courseid);
         return $completion->is_course_complete($userid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, objective $objective, mission $mission) {
         if (!$objective instanceof persisted_objective) {
-            $restore->get_logger()->process("Cannot process after_restore of objective " . $objective->get_id(),
+            $restore->get_logger()->process(
+                "Cannot process after_restore of objective " . $objective->get_id(),
                 backup::LOG_WARNING
             );
             return;
@@ -181,7 +218,6 @@ class complete_course implements
             $restore->get_logger()->process("Error while updating objective " . $objective->get_id(), backup::LOG_WARNING);
         }
     }
-
 }
 
 
@@ -194,10 +230,13 @@ class complete_course implements
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class complete_course_config_form implements extender, extender_with_supporting_url_modes {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Coursecontext. */
     protected $coursecontext;
+    /** @var mixed Courseid. */
     protected $courseid;
+    /** @var mixed Incourse. */
     protected $incourse;
 
     /**
@@ -215,6 +254,9 @@ class complete_course_config_form implements extender, extender_with_supporting_
         $this->courseid = $this->incourse ? $this->coursecontext->instanceid : null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
@@ -229,7 +271,8 @@ class complete_course_config_form implements extender, extender_with_supporting_
             $mform->setType('cd_courseid', PARAM_INT);
             $mform->setConstant('cd_courseid', $this->courseid);
 
-            $els[] = $mform->addElement('static',
+            $els[] = $mform->addElement(
+                'static',
                 'cd_courseidhint',
                 get_string('course', 'core'),
                 get_string('thiscoursen', 'block_gearup', $this->coursecontext->get_context_name(false, true))
@@ -239,7 +282,6 @@ class complete_course_config_form implements extender, extender_with_supporting_
             $els[] = $mform->addElement('hidden', 'countneeded');
             $mform->setType('countneeded', PARAM_INT);
             $mform->setConstant('countneeded', 1);
-
         } else {
             $els[] = $mform->addElement('select', 'cd_which', get_string('elligiblecourse', 'block_gearup'), [
                 complete_course::WHICH_ANY => get_string('anycourse', 'block_gearup'),
@@ -269,6 +311,9 @@ class complete_course_config_form implements extender, extender_with_supporting_
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         if ($data->cd_which == complete_course::WHICH_SPECIFIC) {
             $data->cd_courseid = (int) $data->cd_courseid;
@@ -281,6 +326,9 @@ class complete_course_config_form implements extender, extender_with_supporting_
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url_modes(): array {
         if ($this->incourse) {
             return [];
@@ -290,6 +338,9 @@ class complete_course_config_form implements extender, extender_with_supporting_
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if (!isset($data->cd_which)) {
@@ -300,5 +351,4 @@ class complete_course_config_form implements extender, extender_with_supporting_
         }
         return $errors;
     }
-
 }

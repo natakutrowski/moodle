@@ -121,6 +121,7 @@ Feature: Testing completing sections
     And I click on ".availability-item .availability-eye img" "css_element"
     And I click on "Save and return to course" "button"
     And I am on the "Completorman" "block_gearup > mission" page
+    And I click on "Actions" "button" in the definition "List of objectives"
     And I click on "Edit" "button" in the definition "List of objectives"
     And I set the field "Complete when" to "Only accessible"
     And I click on "Save changes" "button" in the "Edit objective" "dialogue"
@@ -141,6 +142,7 @@ Feature: Testing completing sections
       | Page 2a | c1     | page     | 3       | 2          | 1              |
       | Page 2b | c1     | page     | 3       | 2          | 1              |
     And I am on the "Completorman" "block_gearup > mission" page logged in as "t1"
+    And I click on "Actions" "button" in the definition "List of objectives"
     And I click on "Edit" "button" in the definition "List of objectives"
     And I set the field "Eligible section(s)" to "Any section"
     And I set the field "Number of sections" to "2"
@@ -180,6 +182,7 @@ Feature: Testing completing sections
       | name    | course | activity | section | completion | completionview |
       | Page 1a | c1     | page     | 2       | 2          | 1              |
     And I am on the "Completorman" "block_gearup > mission" page logged in as "t1"
+    And I click on "Actions" "button" in the definition "List of objectives"
     And I click on "Edit" "button" in the definition "List of objectives"
     And I set the field "Eligible section(s)" to "Any section"
     And I set the field "Number of sections" to "2"

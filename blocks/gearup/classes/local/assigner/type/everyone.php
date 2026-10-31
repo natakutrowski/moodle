@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Everyone assigner.
@@ -51,7 +51,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class everyone implements has_availability_info_for_context, has_availability_info_for_user, type {
-
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_context(context $context): info {
         if ($context->contextlevel >= CONTEXT_COURSE) {
             return new static_info(false, [new lang_string('requirestobeoutsidecourse', 'block_gearup')]);
@@ -59,26 +61,40 @@ class everyone implements has_availability_info_for_context, has_availability_in
         return new static_info(true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_user(int $userid, context $context): info {
         return new permission_required_info('moodle/site:config', $context, $userid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new everyone_config_type_form();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('assignereveryone', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('assignereveryonedesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_elligible_users_sql(assigner $assigner, mission $mission): array {
         return ['SELECT id FROM {user}', []];
     }
-
 }
 
 /**
@@ -90,11 +106,14 @@ class everyone implements has_availability_info_for_context, has_availability_in
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class everyone_config_type_form implements extender {
-
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
-        $els[] = $mform->addElement('static',
+        $els[] = $mform->addElement(
+            'static',
             'cd_notes',
             get_string('notes', 'block_gearup'),
             markdown_to_html(get_string('assignereveryoneformnotes', 'block_gearup'))
@@ -103,13 +122,18 @@ class everyone_config_type_form implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         return $errors;
     }
-
 }

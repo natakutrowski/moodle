@@ -184,7 +184,13 @@ async function refreshTemplateContentsAtNode(node) {
 export function smartRefreshFromNode(node, focusNode = false) {
     let pendingPromise = new Pending('block_gearup/refreshable:smartRefreshFromNode');
     let promises = [];
-    const initiatorXpath = getXPathByTag(node);
+
+    let focusTarget = node;
+    // If we're in a dropdown item, select the dropdown button.
+    if (node.closest('.dropdown-item')) {
+        focusTarget = node.closest('.dropdown')?.querySelector('[data-bs-toggle="dropdown"], [data-toggle="dropdown"]') ?? node;
+    }
+    const initiatorXpath = getXPathByTag(focusTarget);
 
     const refreshableTemplate = findClosestRefreshableTemplate(node);
     if (refreshableTemplate) {

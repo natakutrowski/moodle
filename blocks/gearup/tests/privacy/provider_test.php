@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Testcase.
@@ -54,7 +54,6 @@ use core_privacy\local\request\writer;
  * @covers     \block_gearup\privacy\provider
  */
 final class provider_test extends base_testcase {
-
     /**
      * Test.
      */
@@ -707,6 +706,13 @@ final class provider_test extends base_testcase {
         $this->assertEquals(null, $mission->objectives[1]->statedata);
     }
 
+    /**
+     * Assert contextlist equals.
+     *
+     * @param mixed $contextlist Contextlist.
+     * @param mixed $expectedids Expectedids.
+     * @return void
+     */
     protected function assert_contextlist_equals($contextlist, $expectedids) {
         $contextids = array_map('intval', $contextlist->get_contextids());
         sort($contextids);
@@ -714,11 +720,17 @@ final class provider_test extends base_testcase {
         $this->assertEquals($expectedids, $contextids);
     }
 
+    /**
+     * Assert userlist equals.
+     *
+     * @param mixed $userlist Userlist.
+     * @param mixed $expectedids Expectedids.
+     * @return void
+     */
     protected function assert_userlist_equals($userlist, $expectedids) {
         $userids = array_map('intval', $userlist->get_userids());
         sort($userids);
         sort($expectedids);
         $this->assertEquals($expectedids, $userids);
     }
-
 }

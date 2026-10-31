@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -47,7 +47,6 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 trait mission_wizard_trait {
-
     /** @var mission|null Defined by the parent class, maybe. */
     protected $mission;
     /** @var array|null The steps. */
@@ -204,6 +203,12 @@ trait mission_wizard_trait {
         });
     }
 
+    /**
+     * Get wizard next url.
+     *
+     * @param mixed $mission Mission.
+     * @return mixed
+     */
     protected function get_wizard_next_url($mission) {
         $nexturl = null;
         $foundstep = false;
@@ -222,6 +227,11 @@ trait mission_wizard_trait {
         return $nexturl;
     }
 
+    /**
+     * Pre content.
+     *
+     * @return mixed
+     */
     final protected function pre_content() {
         parent::pre_content();
 
@@ -246,6 +256,11 @@ trait mission_wizard_trait {
         }
     }
 
+    /**
+     * Content.
+     *
+     * @return void
+     */
     final protected function content() {
         $output = $this->get_renderer();
         $backurl = $this->urlresolver->reverse('missions');
@@ -292,5 +307,4 @@ trait mission_wizard_trait {
      * @return void
      */
     abstract protected function wizard_content();
-
 }

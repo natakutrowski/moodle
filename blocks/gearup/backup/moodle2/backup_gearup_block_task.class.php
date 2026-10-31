@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Backup.
@@ -41,7 +41,6 @@ require_once($CFG->dirroot . '/blocks/gearup/backup/moodle2/restore_gearup_short
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_gearup_block_task extends backup_block_task {
-
     /**
      * Define settings.
      */
@@ -80,5 +79,4 @@ class backup_gearup_block_task extends backup_block_task {
         $content = shortcode_questtracker_decode_rule::encode_content($content);
         return $content;
     }
-
 }

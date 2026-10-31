@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
+
 /**
  * Routes config.
  *
@@ -35,7 +36,6 @@ namespace block_gearup\local\routing;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class system_routes_config implements routes_config {
-
     /** @var route_definition[] Routes. */
     protected $routes;
 
@@ -92,5 +92,4 @@ class system_routes_config implements routes_config {
     public function get_routes() {
         return $this->routes;
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Course context required info.
@@ -38,7 +38,6 @@ use lang_string;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_context_required_info implements info {
-
     /** @var \context The context. */
     protected $context;
     /** @var bool Whether the front page is considered a course. */
@@ -55,16 +54,21 @@ class course_context_required_info implements info {
         $this->includefrontpage = $includefrontpage;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_available(): bool {
         $coursecontext = $this->context->get_course_context(false);
         return $coursecontext !== false && (!$this->includefrontpage ? $coursecontext->instanceid != SITEID : true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_reasons(): array {
         if (!$this->is_available()) {
             return [new lang_string('requirestobeincourse', 'block_gearup')];
         }
         return [];
     }
-
 }

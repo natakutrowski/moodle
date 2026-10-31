@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\form;
 
@@ -34,7 +34,7 @@ require_once($CFG->libdir . '/pear/HTML/QuickForm/html.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class divider extends \HTML_QuickForm_html {
-
+    /** Field name. */
     const FIELD_NAME = 'block_gearup_divider';
 
     /**
@@ -46,7 +46,9 @@ class divider extends \HTML_QuickForm_html {
      * @param array $attributes Attributes.
      */
     public function __construct($elementname = null) {
-        $hr = \html_writer::empty_tag('hr', ['class' => 'gu-border-0 gu-my-4 gu-border-t gu-border-gray-200 gu-opacity-100']);
+        $hr = \html_writer::empty_tag('hr', [
+            'class' => 'gu-border-0 gu-my-4 gu-border-t gu-border-gray-200 dark:gu-border-gray-700 gu-opacity-100',
+        ]);
         parent::__construct($hr);
         $this->setName($elementname);
     }
@@ -60,7 +62,6 @@ class divider extends \HTML_QuickForm_html {
     public static function register(): string {
         return static::FIELD_NAME;
     }
-
 }
 
 // The class was namespaced and renamed, so we keep the old alias name.

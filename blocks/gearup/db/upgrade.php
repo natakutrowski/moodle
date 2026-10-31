@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 use block_gearup\local\utils\json_utils;
 
@@ -39,7 +39,6 @@ function xmldb_block_gearup_upgrade($oldversion) {
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2021100351) {
-
         // Define field timelimit to be added to block_gearup_mission.
         $table = new xmldb_table('block_gearup_mission');
         $field = new xmldb_field('timelimit', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'startmode');
@@ -54,7 +53,6 @@ function xmldb_block_gearup_upgrade($oldversion) {
     }
 
     if ($oldversion < 2021100352) {
-
         // Define field deadline to be added to block_gearup_mission_inst.
         $table = new xmldb_table('block_gearup_mission_inst');
         $field = new xmldb_field('deadline', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'completionratio');
@@ -69,7 +67,6 @@ function xmldb_block_gearup_upgrade($oldversion) {
     }
 
     if ($oldversion < 2021100353) {
-
         // Define index statedeadlineidx (not unique) to be added to block_gearup_mission_inst.
         $table = new xmldb_table('block_gearup_mission_inst');
         $index = new xmldb_index('statedeadlineidx', XMLDB_INDEX_NOTUNIQUE, ['state', 'deadline']);
@@ -84,7 +81,6 @@ function xmldb_block_gearup_upgrade($oldversion) {
     }
 
     if ($oldversion < 2021100354) {
-
         // Define field iteration to be added to block_gearup_mission_inst.
         $table = new xmldb_table('block_gearup_mission_inst');
         $field = new xmldb_field('iteration', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'missionid');
@@ -99,7 +95,6 @@ function xmldb_block_gearup_upgrade($oldversion) {
     }
 
     if ($oldversion < 2021100355) {
-
         // Define index subjmissioniteridx (unique) to be added to block_gearup_mission_inst.
         $table = new xmldb_table('block_gearup_mission_inst');
         $index = new xmldb_index('subjmissioniteridx', XMLDB_INDEX_UNIQUE, ['subjectid', 'missionid', 'iteration']);
@@ -114,7 +109,6 @@ function xmldb_block_gearup_upgrade($oldversion) {
     }
 
     if ($oldversion < 2023032201) {
-
         // Rename field repeat on table block_gearup_mission to repeatcount.
         $table = new xmldb_table('block_gearup_mission');
         $field = new xmldb_field('repeat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'feedback');
@@ -129,7 +123,6 @@ function xmldb_block_gearup_upgrade($oldversion) {
     }
 
     if ($oldversion < 2023032202) {
-
         // Define field repeatcount to be added to block_gearup_mission.
         $table = new xmldb_table('block_gearup_mission');
         $field = new xmldb_field('repeatcount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'feedback');
@@ -144,7 +137,6 @@ function xmldb_block_gearup_upgrade($oldversion) {
     }
 
     if ($oldversion < 2024010600) {
-
         // Changing precision of field visual on table block_gearup_mission to (280).
         $table = new xmldb_table('block_gearup_mission');
         $field = new xmldb_field('visual', XMLDB_TYPE_CHAR, '280', null, null, null, null, 'visibility');
@@ -157,7 +149,6 @@ function xmldb_block_gearup_upgrade($oldversion) {
     }
 
     if ($oldversion < 2024052901) {
-
         // Define field supportingurl to be added to block_gearup_objective.
         $table = new xmldb_table('block_gearup_objective');
         $field = new xmldb_field('supportingurl', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'configdata');
@@ -172,7 +163,6 @@ function xmldb_block_gearup_upgrade($oldversion) {
     }
 
     if ($oldversion < 2025012900) {
-
         // Define field counter to be added to block_gearup_mission_inst.
         $table = new xmldb_table('block_gearup_mission_inst');
         $field = new xmldb_field('counter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'state');
@@ -187,7 +177,6 @@ function xmldb_block_gearup_upgrade($oldversion) {
     }
 
     if ($oldversion < 2025020200) {
-
         // Convert preference to needs attention on instances.
         $records = $DB->get_records('user_preferences', ['name' => 'block_gearup_achievements']);
         foreach ($records as $record) {
@@ -207,7 +196,6 @@ function xmldb_block_gearup_upgrade($oldversion) {
     }
 
     if ($oldversion < 2025020202) {
-
         // Flag the contexts in which users have achievements to announce.
         $ctxids = $DB->sql_group_concat('m.contextid', ',', 'm.contextid');
         $sql = "SELECT mi.subjectid, $ctxids AS ctxids
@@ -229,7 +217,6 @@ function xmldb_block_gearup_upgrade($oldversion) {
     }
 
     if ($oldversion < 2025060300) {
-
         // Define field voiceid to be added to block_gearup_mission.
         $table = new xmldb_table('block_gearup_mission');
         $field = new xmldb_field('voiceid', XMLDB_TYPE_CHAR, '64', null, null, null, null, 'visual');
@@ -244,12 +231,31 @@ function xmldb_block_gearup_upgrade($oldversion) {
     }
 
     if ($oldversion < 2025061503) {
-
         $task = new \block_gearup\task\sync_metadata_adhoc();
         \core\task\manager::queue_adhoc_task($task, true);
 
         // Gearup savepoint reached.
         upgrade_block_savepoint(true, 2025061503, 'gearup');
+    }
+
+    if ($oldversion < 2026101200) {
+        // Define field sortorder to be added to block_gearup_objective.
+        $table = new xmldb_table('block_gearup_objective');
+        $field = new xmldb_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'id');
+
+        // Conditionally launch add field sortorder.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Gearup savepoint reached.
+        upgrade_block_savepoint(true, 2026101200, 'gearup');
+    }
+
+    if ($oldversion < 2026101201) {
+        // Maintain the current objective order.
+        $DB->execute('UPDATE {block_gearup_objective} SET sortorder = id WHERE sortorder = 0');
+        upgrade_block_savepoint(true, 2026101201, 'gearup');
     }
 
     return true;

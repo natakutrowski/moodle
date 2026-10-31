@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Assigner type.
@@ -40,7 +40,6 @@ use lang_string;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface type {
-
     /**
      * Get the config form extender.
      *
@@ -81,5 +80,4 @@ interface type {
      * @return lang_string
      */
     public function get_short_description(): lang_string;
-
 }

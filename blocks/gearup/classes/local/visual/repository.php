@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Repository.
@@ -36,7 +36,6 @@ namespace block_gearup\local\visual;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface repository {
-
     /**
      * Get the list of visuals.
      *
@@ -51,5 +50,4 @@ interface repository {
      * @return visual[]
      */
     public function get_visuals(): array;
-
 }

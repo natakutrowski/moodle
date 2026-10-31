@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 use block_gearup\di;
 use block_gearup\local\action\motrain_level_attained;
@@ -106,7 +106,8 @@ function block_gearup_myprofile_navigation(core_user\output\myprofile\tree $tree
     );
 
     if (empty($achievements)) {
-        $node = new node('block_gearup_achievements',
+        $node = new node(
+            'block_gearup_achievements',
             'list',
             '',
             null,
@@ -114,7 +115,8 @@ function block_gearup_myprofile_navigation(core_user\output\myprofile\tree $tree
             html_writer::tag('em', get_string('noneyetexcl', 'block_gearup'))
         );
     } else {
-        $node = new node('block_gearup_achievements',
+        $node = new node(
+            'block_gearup_achievements',
             'list',
             '',
             null,
@@ -180,7 +182,6 @@ function block_gearup_pluginfile($course, $bi, context $context, $filearea, $arg
         if (!$file || strpos($file->get_mimetype(), 'image/') !== 0) {
             return false;
         }
-
     } else if ($filearea === 'speech') {
         $fileserver = speech_file_server::from_pluginfile($context, $USER->id, $args);
         if (!$fileserver->can_access()) {

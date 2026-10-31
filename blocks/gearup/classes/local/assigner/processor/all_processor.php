@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Assigner all processor.
@@ -36,12 +36,10 @@ namespace block_gearup\local\assigner\processor;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface all_processor {
-
     /**
      * Process all.
      *
      * @return void
      */
     public function process_all();
-
 }

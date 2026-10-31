@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome.
@@ -61,7 +61,9 @@ class remove_from_group implements
     type,
     type_with_backup_handling,
     type_with_update_after_restore {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         global $CFG;
         require_once($CFG->dirroot . '/group/lib.php');
@@ -81,6 +83,9 @@ class remove_from_group implements
         groups_remove_member($config->groupid, $missioninst->get_subject_id());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_context(context $context): info {
         global $USER;
         return new info_stack([
@@ -89,18 +94,30 @@ class remove_from_group implements
         ]);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new remove_from_group_config_form_extender($mission);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('outcomeremovefromgroup', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('outcomeremovefromgroupdesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function extend_backup(backup_facade $backup, outcome $outcome, mission $mission) {
         $config = $outcome->get_type_config();
         $groupid = $config->groupid ?? 0;
@@ -109,9 +126,13 @@ class remove_from_group implements
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, outcome $outcome, mission $mission) {
         if (!$outcome instanceof persisted_outcome) {
-            $restore->get_logger()->process("Cannot process after_restore of outcome " . $outcome->get_id(),
+            $restore->get_logger()->process(
+                "Cannot process after_restore of outcome " . $outcome->get_id(),
                 backup::LOG_WARNING
             );
             return;
@@ -139,16 +160,26 @@ class remove_from_group implements
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class remove_from_group_config_form_extender implements extender {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Repository. */
     protected $repository;
 
+    /**
+     * Constructor.
+     *
+     * @param mission $mission Mission.
+     */
     public function __construct(mission $mission) {
         $this->mission = $mission;
         $this->context = $mission->get_context();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $groups = array_map(function ($group) {
             return format_string($group->name, true, ['context' => $this->context]);
@@ -157,10 +188,16 @@ class remove_from_group_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -170,5 +207,4 @@ class remove_from_group_config_form_extender implements extender {
 
         return $errors;
     }
-
 }

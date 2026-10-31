@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\utils;
 
@@ -26,7 +26,6 @@ namespace block_gearup\local\utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class db_utils {
-
     /**
      * Cast an expression as float.
      *
@@ -40,5 +39,4 @@ class db_utils {
         }
         return "CAST($expr AS FLOAT)";
     }
-
 }

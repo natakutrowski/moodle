@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\form\wizard;
 
@@ -34,16 +34,20 @@ use core\form\persistent;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class streak_timing_form extends persistent {
-
+    /** @var mixed Persistentclass. */
     protected static $persistentclass = mission_model::class;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         $mform = $this->_form;
 
         $mform->addElement('hidden', 'repeatcount');
         $mform->setConstant('repeatcount', mission::REPEAT_ALWAYS);
 
-        $mform->addElement(radiogroup::register(),
+        $mform->addElement(
+            radiogroup::register(),
             'timelimit',
             get_string('streaktimeinterval', 'block_gearup'),
             timing_dynamic_form::get_time_options()
@@ -53,12 +57,18 @@ class streak_timing_form extends persistent {
         $this->add_action_buttons(false, get_string('continue'));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_default_data() {
         $data = parent::get_default_data();
         $data->timelimit = WEEKSECS;
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data() {
         $data = parent::get_data();
         if (is_object($data)) {
@@ -67,5 +77,4 @@ class streak_timing_form extends persistent {
         }
         return $data;
     }
-
 }

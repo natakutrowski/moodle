@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * External.
@@ -40,7 +40,6 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class get_assigner_types extends external_api {
-
     /**
      * Parameters.
      *
@@ -90,5 +89,4 @@ class get_assigner_types extends external_api {
     public static function execute_returns() {
         return new external_multiple_structure(assigner_type_exporter::get_read_structure());
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -45,12 +45,15 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assigner_dynamic_form extends persistent_dynamic_form {
-
+    /** @var mixed Persistentclass. */
     protected static $persistentclass = assigner::class;
 
     /** @var object|null|false A form extender, null, or false. */
     protected $typeconfigform = null;
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition() {
 
         $mform = $this->_form;
@@ -236,7 +239,7 @@ class assigner_dynamic_form extends persistent_dynamic_form {
             throw new \moodle_exception('notfound');
         }
 
-        // TODO Move this elsewhere where we can extend it?
+        // Future work: Move this elsewhere where we can extend it?
         $this->_dynamicdata['mission'] = $mission;
         $this->_dynamicdata['context'] = $mission->get_context();
 
@@ -314,7 +317,7 @@ class assigner_dynamic_form extends persistent_dynamic_form {
             $configdata = $data->configdata;
             unset($data->configdata);
 
-            // TODO Move all of this to an operator?
+            // Future work: Move all of this to an operator?
             $model = $this->get_persistent();
             $model->set('configdata', $configdata);
 
@@ -330,14 +333,12 @@ class assigner_dynamic_form extends persistent_dynamic_form {
                     'assignerid' => $model->get('id'),
                 ]);
                 \core\task\manager::queue_adhoc_task($task);
-
             } else {
                 $model->from_record((object) array_diff_key((array) $data, ['id' => true, 'missionid' => true, 'type' => true]));
                 $model->update();
 
-                // TODO Should an update retrigger a global sync?
+                // Future work: Should an update retrigger a global sync?
             }
-
         }
     }
 
@@ -374,8 +375,7 @@ class assigner_dynamic_form extends persistent_dynamic_form {
      * @return void
      */
     protected function process_dynamic_deletion() {
-        // TODO Move this to an operator?
+        // Future work: Move this to an operator?
         $this->get_persistent()->delete();
     }
-
 }

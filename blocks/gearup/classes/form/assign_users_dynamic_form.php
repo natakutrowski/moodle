@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -40,9 +40,12 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assign_users_dynamic_form extends mission_dynamic_form_base {
-
+    /** @var string Paramname. */
     protected $paramname = 'missionid';
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition() {
         parent::definition();
 
@@ -59,6 +62,9 @@ class assign_users_dynamic_form extends mission_dynamic_form_base {
         $mform->addElement('static', 'cd_spaced', '', html_writer::div('', 'gu-h-20'));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function check_access_for_mission(): void {
         if ($this->get_mission()->get_state() !== mission::STATE_ACTIVE) {
             throw new \moodle_exception('invalidmissionstate', 'block_gearup');
@@ -85,5 +91,4 @@ class assign_users_dynamic_form extends mission_dynamic_form_base {
             }
         }
     }
-
 }

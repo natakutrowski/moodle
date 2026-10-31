@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective.
@@ -54,7 +54,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class not_access_platform implements type, type_with_state_initialisation, type_with_state_reevaluation {
-
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         $state = $this->get_normalized_state($instance);
 
@@ -74,18 +76,30 @@ class not_access_platform implements type, type_with_state_initialisation, type_
         $instance->set_stale_from($loginby); // Set stale when should be marked as complete.
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new not_access_platform_config_form_extender();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typenotaccessplatform', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typenotaccessplatformdesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof logged_in
             || $action instanceof course_accessed
@@ -93,6 +107,9 @@ class not_access_platform implements type, type_with_state_initialisation, type_
             || $action instanceof dashboard_viewed;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -101,6 +118,9 @@ class not_access_platform implements type, type_with_state_initialisation, type_
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
         $state = $this->get_normalized_state($instance);
         $loginby = $this->get_login_by_date(new DateTimeImmutable(), $instance);
@@ -110,6 +130,9 @@ class not_access_platform implements type, type_with_state_initialisation, type_
         $instance->set_stale_from($loginby);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function reevaluate_state(objective_instance $instance) {
         $state = $this->get_normalized_state($instance);
 
@@ -149,7 +172,6 @@ class not_access_platform implements type, type_with_state_initialisation, type_
         $state = $objinst->get_type_state();
         return $state ?? (object) ['lb' => 0];
     }
-
 }
 
 /**
@@ -161,7 +183,9 @@ class not_access_platform implements type, type_with_state_initialisation, type_
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class not_access_platform_config_form_extender implements extender {
-
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
@@ -170,22 +194,28 @@ class not_access_platform_config_form_extender implements extender {
         $mform->setType('countneeded', PARAM_INT);
         $mform->setConstant('countneeded', 1);
 
-        $mform->addElement('duration',
+        $mform->addElement(
+            'duration',
             'cd_time',
             get_string('howmuchtime', 'block_gearup'),
-            ['units' => [DAYSECS, WEEKSECS]]
+            ['defaultunit' => WEEKSECS, 'units' => [DAYSECS, WEEKSECS]]
         );
         $mform->setDefault('cd_time', WEEKSECS);
 
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         return [];
     }
-
 }

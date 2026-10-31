@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective.
@@ -48,26 +48,43 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class webhook implements type {
-
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new webhook_config_form_extender($mission, $objective);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typewebhook', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typewebhookdesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -75,7 +92,6 @@ class webhook implements type {
     ): bool {
         return false;
     }
-
 }
 
 /**
@@ -87,15 +103,25 @@ class webhook implements type {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class webhook_config_form_extender implements extender {
-
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Objective. */
     protected $objective;
 
+    /**
+     * Constructor.
+     *
+     * @param mission $mission Mission.
+     * @param objective|null $objective Objective.
+     */
     public function __construct(mission $mission, ?objective $objective) {
         $this->mission = $mission;
         $this->objective = $objective;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         global $USER;
 
@@ -108,7 +134,6 @@ class webhook_config_form_extender implements extender {
         if (!$this->objective) {
             $els[] = $mform->addElement('static', 'whendpoint', '', get_string('typewebhooksavetogeturl', 'block_gearup'));
         } else {
-
             $url = $resolver->reverse('objincr', [
                 'objectiveid' => $this->objective->get_id(),
                 'secret' => $this->mission->get_secret(),
@@ -122,12 +147,14 @@ class webhook_config_form_extender implements extender {
                 'amount' => '1',
             ]);
 
-            $urlhtml = str_replace('id-or-email',
+            $urlhtml = str_replace(
+                'id-or-email',
                 '<strong>' . s('<id-or-email>') . '</strong>',
                 str_replace('number', '<strong>' . s('<number>') . '</strong>', s($url->out(false)))
             );
 
-            $els[] = $mform->addElement('static',
+            $els[] = $mform->addElement(
+                'static',
                 'instructions',
                 '',
                 $renderer->code_instructions(markdown_to_html(
@@ -142,12 +169,17 @@ class webhook_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         return [];
     }
-
 }

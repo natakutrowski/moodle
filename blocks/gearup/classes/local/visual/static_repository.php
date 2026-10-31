@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Repository.
@@ -36,16 +36,25 @@ namespace block_gearup\local\visual;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class static_repository implements repository {
-
     /** @var callable|visual[] The visuals data. */
     protected $visualsdata;
     /** @var visual[] Indexed by ID. */
     protected $visuals;
 
+    /**
+     * Constructor.
+     *
+     * @param mixed $visualsdata Visualsdata.
+     */
     public function __construct($visualsdata) {
         $this->visualsdata = $visualsdata;
     }
 
+    /**
+     * Init.
+     *
+     * @return mixed
+     */
     protected function init() {
         if ($this->visuals !== null) {
             return;
@@ -60,14 +69,19 @@ class static_repository implements repository {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_visual(string $id): ?visual {
         $this->init();
         return $this->visuals[$id] ?: null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_visuals(): array {
         $this->init();
         return $this->visuals;
     }
-
 }

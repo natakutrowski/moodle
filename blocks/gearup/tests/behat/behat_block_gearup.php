@@ -14,10 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 // NOTE: no MOODLE_INTERNAL test here, this file may be required by behat before including /config.php.
 
+use Behat\Mink\Exception\ExpectationException;
 use block_gearup\di;
 use block_gearup\local\model\mission;
 
@@ -33,6 +34,18 @@ require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class behat_block_gearup extends behat_base {
+    /**
+     * Get exact named selectors.
+     *
+     * @return array
+     */
+    public static function get_exact_named_selectors(): array {
+        return [
+            new behat_component_named_selector('objective', [
+                ".//*[starts-with(@id, 'objectives-list-')]/div[.//*[normalize-space(.) = %locator%]]",
+            ]),
+        ];
+    }
 
     /**
      * Resolve a page URL.
@@ -188,4 +201,37 @@ class behat_block_gearup extends behat_base {
         $this->execute('behat_general::should_exist_in_the', [$label, $type, $node, 'NodeElement']);
     }
 
+    /**
+     * Check the number of recently completed achievements in the Quest tracker.
+     *
+     * @Then /^there (?:is|are) (\d+) recently completed achievements? in the Quest tracker$/
+     * @param int $count The expected count.
+     */
+    public function there_are_recently_completed_achievements_in_the_quest_tracker(int $count) {
+        $tracker = $this->find('css_element', '[data-template="block_gearup/tracker"]');
+        $selector = './/*[starts-with(@id, "gu-achievements-")]'
+            . '//a[@data-element="trigger" and @data-id][not(.//*[@title])]';
+        $items = $tracker->findAll('xpath', $selector);
+        if ($this->running_javascript()) {
+            $items = array_filter($items, function ($item) {
+                return $item->isVisible();
+            });
+        }
+        $actual = count($items);
+        if ($actual !== $count) {
+            throw new ExpectationException(
+                "Expected {$count} recently completed achievements in the Quest tracker, found {$actual}.",
+                $this->getSession()
+            );
+        }
+    }
+
+    /**
+     * Reset caches.
+     *
+     * @AfterScenario
+     */
+    public function reset_caches() {
+        \block_gearup\di::set_container(new \block_gearup\local\default_container());
+    }
 }

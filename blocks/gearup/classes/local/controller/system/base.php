@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -40,7 +40,6 @@ use Throwable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class base implements controller {
-
     /**
      * Get the signing secret.
      *
@@ -99,7 +98,6 @@ abstract class base implements controller {
         try {
             header('Content-Type: application/json');
             $this->process($data->type, $data->payload);
-
         } catch (Throwable $err) {
             // We must handle all exceptions, otherwise Moodle returns a 200 for exceptions.
             header('HTTP/1.1 500 Internal Server Error');
@@ -119,5 +117,4 @@ abstract class base implements controller {
      * @param object $payload The payload.
      */
     abstract protected function process($type, $payload);
-
 }

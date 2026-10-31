@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective.
@@ -59,7 +59,9 @@ class attain_motrain_level implements
     has_availability_info_for_context,
     type,
     type_with_state_initialisation {
-
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof motrain_level_attained) {
             return;
@@ -67,10 +69,16 @@ class attain_motrain_level implements
         $instance->increment_counter(1);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         return new plugin_required_info('block_motrain', 'Motrain', 2023052800, 'v1.8.1');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_context(\context $context): info {
         global $USER;
         if (!class_exists('block_motrain\manager')) {
@@ -79,18 +87,30 @@ class attain_motrain_level implements
         return new permission_required_info('block/motrain:manage', $context, $USER->id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new attain_motrain_level_config_form_extender();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typeattainmotrainlevel', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typeattainmotrainleveldesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
         $manager = block_motrain\manager::instance();
         if (!$manager->is_player($instance->get_subject_id())) {
@@ -110,10 +130,16 @@ class attain_motrain_level implements
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof motrain_level_attained;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -139,13 +165,19 @@ class attain_motrain_level implements
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class attain_motrain_level_config_form_extender implements extender {
-
+    /** @var mixed Manager. */
     protected $manager;
 
+    /**
+     * Constructor.
+     */
     public function __construct() {
         $this->manager = block_motrain\manager::instance();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
@@ -166,11 +198,16 @@ class attain_motrain_level_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
     }
-
 }

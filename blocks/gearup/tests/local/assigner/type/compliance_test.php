@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Testcase.
@@ -42,10 +42,10 @@ use block_gearup\tests\base_testcase;
  * @covers     \block_gearup\local\assigner\type\type
  */
 final class compliance_test extends base_testcase {
-
     public function test_assigner_compliance(): void {
         foreach ($this->get_instantiable_reflection_classes('local\\assigner\\type') as $class) {
-            if ($class->hasMethod('get_elligile_users_sql_from_event')
+            if (
+                $class->hasMethod('get_elligile_users_sql_from_event')
                     || $class->hasMethod('is_event_compatible')
                     || $class->hasMethod('is_event_passing_constraints')
             ) {
@@ -65,5 +65,4 @@ final class compliance_test extends base_testcase {
             $this->assert_availability_info_compliance($class);
         }
     }
-
 }

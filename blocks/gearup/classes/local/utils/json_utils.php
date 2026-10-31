@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Utils.
@@ -36,7 +36,6 @@ namespace block_gearup\local\utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class json_utils {
-
     /**
      * Decode to list.
      *
@@ -70,5 +69,4 @@ class json_utils {
     public static function encode_as_list(array $list) {
         return json_encode(array_values($list));
     }
-
 }

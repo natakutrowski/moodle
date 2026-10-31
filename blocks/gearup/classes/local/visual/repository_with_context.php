@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Repository.
@@ -38,7 +38,6 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface repository_with_context extends repository {
-
     /**
      * Get a visual from a context.
      *
@@ -61,5 +60,4 @@ interface repository_with_context extends repository {
      * @return visual[]
      */
     public function get_visuals_in_context(context $context): array;
-
 }

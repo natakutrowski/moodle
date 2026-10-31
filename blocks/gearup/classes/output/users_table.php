@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Table.
@@ -48,7 +48,6 @@ use table_sql;
  * @deprecated Since Quest 1.4, use \block_gearup\table\users instead.
  */
 class users_table extends table_sql {
-
     /** @var context The context. */
     protected $context;
     /** @var repository The repo. */

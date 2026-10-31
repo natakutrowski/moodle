@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Observer.
@@ -44,7 +44,6 @@ use core\event\user_deleted;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class observer {
-
     /**
      * Observe all events.
      *
@@ -76,7 +75,7 @@ class observer {
             return;
         }
 
-        // TODO This should be moved elsewhere.
+        // Future work: This should be moved elsewhere.
         $missionoperator = di::get('mission_operator');
         $missions = di::get('repository')->get_missions($context);
         foreach ($missions as $mission) {
@@ -91,7 +90,7 @@ class observer {
      * @return void
      */
     public static function user_deleted(user_deleted $event) {
-        // TODO This should be moved elsewhere.
+        // Future work: This should be moved elsewhere.
         $missionoperator = di::get('mission_operator');
         $query = (new mission_instance_query(context_system::instance()))
             ->set_subject_id($event->objectid);
@@ -132,5 +131,4 @@ class observer {
             $ap->process_event($event);
         }
     }
-
 }

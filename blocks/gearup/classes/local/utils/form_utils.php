@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Utils.
@@ -45,7 +45,6 @@ use Locale;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class form_utils {
-
     /**
      * Add an image group from a visual repository.
      *
@@ -130,7 +129,8 @@ class form_utils {
         });
 
         // Language field.
-        $el1 = $mform->createElement('select',
+        $el1 = $mform->createElement(
+            'select',
             $fieldname . '_lang',
             get_string('language', 'core'),
             ['' => '--'] + array_combine(array_keys($bycode), array_map(function ($lang) {
@@ -154,7 +154,8 @@ class form_utils {
         }, []);
         core_collator::ksort($options, core_collator::SORT_NATURAL);
         $options = ['' => '--'] + $options;
-        $el2 = $mform->createElement('select',
+        $el2 = $mform->createElement(
+            'select',
             $fieldname,
             get_string('voice', 'block_gearup'),
             $options,
@@ -163,7 +164,8 @@ class form_utils {
 
         // Play button.
         $btnfieldid = \html_writer::random_id('voiceid_play');
-        $el3 = $mform->createElement('static', $fieldname . '_play', '', \html_writer::div(\html_writer::tag('button',
+        $el3 = $mform->createElement('static', $fieldname . '_play', '', \html_writer::div(\html_writer::tag(
+            'button',
             di::get('renderer')->pix_icon('t/go', get_string('play', 'block_gearup')),
             [
                 'id' => $btnfieldid,
@@ -174,7 +176,8 @@ class form_utils {
             ]
         )), 'fitem');
 
-        $els[] = $mform->addGroup([$el0, $el1, $el2, $el3],
+        $els[] = $mform->addGroup(
+            [$el0, $el1, $el2, $el3],
             $fieldname . '_group',
             get_string('voice', 'block_gearup'),
             ' ',

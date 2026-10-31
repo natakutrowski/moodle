@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mission instance persistent.
@@ -39,7 +39,7 @@ use core\persistent;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_inst extends persistent {
-
+    /** Table. */
     const TABLE = 'block_gearup_mission_inst';
 
     /**
@@ -128,5 +128,4 @@ class mission_inst extends persistent {
         global $DB;
         return $DB->count_records_select(static::TABLE, 'missionid = ?', [$missionid], 'COUNT(DISTINCT subjectid)');
     }
-
 }

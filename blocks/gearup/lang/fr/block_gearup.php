@@ -931,3 +931,15 @@ $string['typecompleteprofileinstructions'] = 'Veuillez sélectionner tous les ch
 $string['deleterecruitsendedchallengesexistsdesc'] = 'Au total, {$a->n} défi(s) ont déjà été terminés (ou manqués) par certains participants. Leur suppression effacera toute trace de leurs tentatives.';
 $string['privacy:metadata:prefachievements'] = 'Liste des succès récemment débloqués';
 $string['whatisobjectiveofachievement'] = 'Quel est l’objectif de ce succès ?';
+
+// CampusFR 2026: translated strings added for the updated release.
+$string['alphabetical'] = 'Par ordre alphabétique';
+$string['highlightedachievementlimit'] = 'Nombre maximal de succès mis en avant';
+$string['highlightedachievementlimitdesc'] = 'Nombre maximal de succès mis en avant dans le suivi des missions lorsque des succès sont en cours.';
+$string['mostrelevant'] = 'Les plus pertinents';
+$string['ongoingquestlimit'] = 'Nombre maximal de quêtes en cours';
+$string['ongoingquestlimitdesc'] = 'Nombre maximal de quêtes commencées affichées dans le suivi des missions.';
+$string['ongoingquestorder'] = 'Ordre des quêtes en cours';
+$string['ongoingquestorderdesc'] = 'Choisissez comment classer les quêtes en cours dans le suivi des missions. L’option « Les plus pertinents » utilise l’activité récente du participant pour afficher en premier les quêtes jugées les plus importantes pour lui.';
+$string['trackersettings'] = 'Paramètres du suivi des missions';
+$string['trackersettingsdesc'] = 'Le suivi des missions présente aux apprenants leurs missions et leur progression dans le bloc Level Up Quest ou directement dans le contenu.';

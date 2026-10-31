@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Helper.
@@ -27,7 +27,7 @@
 
 namespace block_gearup\local\mission;
 
-// TODO This is to access the TYPE_ constants, but we should not be doing it like this.
+// Future work: This is to access the TYPE_ constants, but we should not be doing it like this.
 use block_gearup\local\model\mission as mission_model;
 
 /**
@@ -41,7 +41,6 @@ use block_gearup\local\model\mission as mission_model;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class helper {
-
     /**
      * Calculate the completion ratio.
      *
@@ -373,5 +372,4 @@ class helper {
         $state = $missioninst->get_state();
         return $state === $missioninst::STATE_STARTED;
     }
-
 }

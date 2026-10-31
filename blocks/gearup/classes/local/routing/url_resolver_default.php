@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
+
 /**
  * URL resolver.
  *
@@ -38,7 +39,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class url_resolver_default implements url_resolver {
-
     /** The GET argument for routing without $CFG->slasharguments. */
     const ROUTE_GET_PARAM = '_r';
 
@@ -75,7 +75,8 @@ class url_resolver_default implements url_resolver {
 
         if (isset($_SERVER['REQUEST_URI']) && !empty($_SERVER['REQUEST_URI'])) {
             // Checks whether $_SERVER['REQUEST_URI'] contains '.../index.php/' instead of '.../index.php?'.
-            if ((strpos($_SERVER['REQUEST_URI'], $routepath . '/') !== false)
+            if (
+                (strpos($_SERVER['REQUEST_URI'], $routepath . '/') !== false)
                     && isset($_SERVER['PATH_INFO']) && !empty($_SERVER['PATH_INFO'])
             ) {
                 $hasforcedslashargs = true;
@@ -182,5 +183,4 @@ class url_resolver_default implements url_resolver {
         $absurl->set_slashargument($url, static::ROUTE_GET_PARAM);
         return $absurl;
     }
-
 }

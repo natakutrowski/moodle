@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -42,19 +42,28 @@ use block_gearup\local\utils\human_utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class my_achievements extends route_base {
-
+    /** @var bool Requiremanage. */
     protected $requiremanage = false;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function define_optional_params() {
         return [
             ['returnurl', false, PARAM_LOCALURL],
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_html_head_title() {
         return get_string('achievements', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         global $USER;
 
@@ -113,5 +122,4 @@ class my_achievements extends route_base {
 
         echo $output->render_from_template('block_gearup/my_achievements', $tplcontext);
     }
-
 }

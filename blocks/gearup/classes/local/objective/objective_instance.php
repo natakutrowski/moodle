@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective instance.
@@ -36,21 +36,20 @@ namespace block_gearup\local\objective;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface objective_instance {
+    /*
+     * Complete the objective.
+     *
+     * @return void
+     * public function complete();
+     */
 
-    // /**
-    // * Complete the objective.
-    // *
-    // * @return void
-    // */
-    // public function complete();
-
-    // /**
-    // * Compute the value of the action.
-    // *
-    // * @param action $action The action.
-    // * @return integer
-    // */
-    // public function compute_action_value(action $action): int;
+    /*
+     * Compute the value of the action.
+     *
+     * @param action $action The action.
+     * @return integer
+     * public function compute_action_value(action $action): int;
+     */
 
     /**
      * Get the counter.
@@ -176,5 +175,4 @@ interface objective_instance {
      * @param null|object $state The state.
      */
     public function set_type_state($state);
-
 }

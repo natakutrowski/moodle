@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\exporter;
 
@@ -38,7 +38,6 @@ use renderer_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_chat_exporter extends \core\external\exporter {
-
     /** @var mission The mission. */
     protected $mission;
     /** @var array The objectives. */
@@ -314,6 +313,15 @@ class mission_chat_exporter extends \core\external\exporter {
         return str_replace(array_keys($placeholders), array_values($placeholders), $text);
     }
 
+    /**
+     * Convert item.
+     *
+     * @param string $text Text.
+     * @param int $idx Idx.
+     * @param int $messageid Messageid.
+     * @param string $section Section.
+     * @return mixed
+     */
     protected function convert_item(string $text, int $idx, int $messageid, string $section) {
         $data = [
             'timestamp' => $messageid,
@@ -334,7 +342,6 @@ class mission_chat_exporter extends \core\external\exporter {
                     }, $this->get_rewards())),
                 ],
             ];
-
         } else if ($text === '[objectives]') {
             $objectives = $this->get_objectives();
             if (empty($objectives)) {
@@ -393,6 +400,11 @@ class mission_chat_exporter extends \core\external\exporter {
         }));
     }
 
+    /**
+     * Get objectives.
+     *
+     * @return array
+     */
     protected function get_objectives(): array {
         if ($this->objectives === null) {
             $this->objectives = array_values($this->mission->get_objectives());
@@ -400,6 +412,11 @@ class mission_chat_exporter extends \core\external\exporter {
         return $this->objectives;
     }
 
+    /**
+     * Get objective instances.
+     *
+     * @return array
+     */
     protected function get_objective_instances(): array {
         if ($this->objinsts === null) {
             $this->objinsts = [];
@@ -407,6 +424,11 @@ class mission_chat_exporter extends \core\external\exporter {
         return $this->objinsts;
     }
 
+    /**
+     * Get rewards.
+     *
+     * @return array
+     */
     protected function get_rewards(): array {
         if ($this->rewards === null) {
             $alloutcomes = array_values(di::get('repository')->get_outcomes($this->mission->get_id()));
@@ -418,24 +440,48 @@ class mission_chat_exporter extends \core\external\exporter {
         return $this->rewards;
     }
 
+    /**
+     * Has completed.
+     *
+     * @return bool
+     */
     protected function has_completed(): bool {
         return $this->related['state']->hascompleted;
     }
 
+    /**
+     * Is ended.
+     *
+     * @return bool
+     */
     protected function is_ended(): bool {
         return $this->related['state']->isended;
     }
 
+    /**
+     * Has speech.
+     *
+     * @return bool
+     */
     protected function has_speech(): bool {
         return (bool) $this->mission->get_voice_id() && di::get('lm')->use_speech();
     }
 
+    /**
+     * Has started.
+     *
+     * @return bool
+     */
     protected function has_started(): bool {
         return $this->related['state']->hasstarted;
     }
 
+    /**
+     * Needs attention.
+     *
+     * @return bool
+     */
     protected function needs_attention(): bool {
         return $this->related['state']->needsattention;
     }
-
 }

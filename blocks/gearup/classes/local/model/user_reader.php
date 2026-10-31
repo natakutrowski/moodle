@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\model;
 
@@ -32,7 +32,6 @@ use core\dml\sql_join;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user_reader extends db_reader {
-
     /** @var string[] */
     protected $fieldaliases;
 
@@ -91,6 +90,9 @@ class user_reader extends db_reader {
         $this->add_join('mission_instance', new sql_join("JOIN {block_gearup_mission_inst} mi ON u.id = mi.subjectid"));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function prepare_query() {
         if (!isset($this->select['user'])) {
             $this->select = array_merge([
@@ -151,7 +153,8 @@ class user_reader extends db_reader {
         }
 
         if ($query->has_condition('term')) {
-            [$sql, $params] = user_utils::get_filter_user_by_term_sql($query->get_condition('term'),
+            [$sql, $params] = user_utils::get_filter_user_by_term_sql(
+                $query->get_condition('term'),
                 array_keys(user_utils::get_visible_identity_fields($query->get_acting_context()))
             );
             $this->add_where('term', $sql);
@@ -160,7 +163,8 @@ class user_reader extends db_reader {
 
         if ($query->has_annotation('mission_count')) {
             if ($query->has_condition('contextid')) {
-                $this->add_select('mission_count',
+                $this->add_select(
+                    'mission_count',
                     '(SELECT COUNT(DISTINCT mi.missionid)
                         FROM {' . mission_inst::TABLE . '} mi
                         JOIN {' . mission::TABLE . '} m
@@ -174,7 +178,8 @@ class user_reader extends db_reader {
 
         if ($query->has_annotation('mission_instance_counter_best')) {
             if ($query->has_condition('missionid')) {
-                $this->add_select('mission_instance_counter_best',
+                $this->add_select(
+                    'mission_instance_counter_best',
                     '(SELECT MAX(mi.counter) FROM {' . mission_inst::TABLE . '} mi
                        WHERE mi.subjectid = u.id
                          AND mi.missionid = :mission_instance_counter_best) AS mission_instance_counter_best'
@@ -189,7 +194,8 @@ class user_reader extends db_reader {
                 $annotationalias = $this->get_field_alias('mission_instance_counter_latest');
                 $missionidp1 = $this->get_field_alias('mission_instance_counter_latest_p1');
                 $missionidp2 = $this->get_field_alias('mission_instance_counter_latest_p2');
-                $this->add_select('mission_instance_counter_latest',
+                $this->add_select(
+                    'mission_instance_counter_latest',
                     "(SELECT MAX(mi.counter) FROM {" . mission_inst::TABLE . "} mi
                        WHERE mi.subjectid = u.id
                          AND mi.missionid = :{$missionidp1}
@@ -209,7 +215,8 @@ class user_reader extends db_reader {
             if ($query->has_condition('missionid')) {
                 $missionidparam = $this->get_field_alias('mission_instance_counter_reset_count1');
                 $stateparam = $this->get_field_alias('mission_instance_counter_reset_count2');
-                $this->add_select("mission_instance_counter_reset_count",
+                $this->add_select(
+                    "mission_instance_counter_reset_count",
                     "(SELECT COUNT(mi.id) FROM {" . mission_inst::TABLE . "} mi
                        WHERE mi.subjectid = u.id
                          AND mi.missionid = :{$missionidparam}
@@ -223,7 +230,8 @@ class user_reader extends db_reader {
 
         if ($query->has_annotation('mission_instance_count')) {
             if ($query->has_condition('missionid')) {
-                $this->add_select('mission_instance_count',
+                $this->add_select(
+                    'mission_instance_count',
                     '(SELECT COUNT(mi.id) FROM {' . mission_inst::TABLE . '} mi
                        WHERE mi.subjectid = u.id
                          AND mi.missionid = :mission_instance_count) AS mission_instance_count'
@@ -234,7 +242,8 @@ class user_reader extends db_reader {
 
         if ($query->has_annotation('mission_instance_100pc_count')) {
             if ($query->has_condition('missionid')) {
-                $this->add_select('mission_instance_100pc_count',
+                $this->add_select(
+                    'mission_instance_100pc_count',
                     '(SELECT COUNT(mi.id) FROM {' . mission_inst::TABLE . '} mi
                        WHERE mi.subjectid = u.id
                          AND mi.missionid = :mission_instance_100pc_count
@@ -246,7 +255,8 @@ class user_reader extends db_reader {
 
         if ($query->has_annotation('mission_instance_ended_count')) {
             if ($query->has_condition('missionid')) {
-                $this->add_select('mission_instance_ended_count',
+                $this->add_select(
+                    'mission_instance_ended_count',
                     '(SELECT COUNT(mi.id) FROM {' . mission_inst::TABLE . '} mi
                        WHERE mi.subjectid = u.id
                          AND mi.missionid = :mission_instance_ended_count1
@@ -282,5 +292,4 @@ class user_reader extends db_reader {
 
         return $this;
     }
-
 }

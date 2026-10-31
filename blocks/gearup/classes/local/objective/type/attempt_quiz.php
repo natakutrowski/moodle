@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Attempt quiz.
@@ -55,7 +55,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class attempt_quiz implements type, type_with_supporting_url, type_with_update_after_restore {
-
     /** Any activity. */
     const WHICH_ANY = 0;
     /** Any activity in the course. */
@@ -71,6 +70,9 @@ class attempt_quiz implements type, type_with_supporting_url, type_with_update_a
     /** Unique per module. */
     const UNIQUENESS_PER_CM = 1;
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof quiz_attempted) {
             return false;
@@ -102,18 +104,30 @@ class attempt_quiz implements type, type_with_supporting_url, type_with_update_a
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new attempt_quiz_config_form($mission);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typeattemptquiz', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typeattemptquizdesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url(objective $objective, $urltype): ?moodle_url {
         if ($urltype === static::URLMODE_CM) {
             $config = $objective->get_type_config();
@@ -173,10 +187,16 @@ class attempt_quiz implements type, type_with_supporting_url, type_with_update_a
         return new basic_uniqueness_evaluator(['courseid', 'cmid']);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof quiz_attempted;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -259,7 +279,7 @@ class attempt_quiz implements type, type_with_supporting_url, type_with_update_a
             }
 
             // Checking that the grade is greater than 0, just making sure that we don't use a scale
-            // as a negative grade is a scale. Also we do not want divisions by zero.s
+            // as a negative grade is a scale. Also we do not want divisions by zero.s.
             $quiz = $qa->get_quiz();
             if ($quiz->grade > 0) {
                 $quizgrade = $rawgrade * $quiz->grade / $quiz->sumgrades;
@@ -274,9 +294,13 @@ class attempt_quiz implements type, type_with_supporting_url, type_with_update_a
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, objective $objective, mission $mission) {
         if (!$objective instanceof persisted_objective) {
-            $restore->get_logger()->process("Cannot process after_restore of objective " . $objective->get_id(),
+            $restore->get_logger()->process(
+                "Cannot process after_restore of objective " . $objective->get_id(),
                 backup::LOG_WARNING
             );
             return;
@@ -315,7 +339,6 @@ class attempt_quiz implements type, type_with_supporting_url, type_with_update_a
             $restore->get_logger()->process("Error while updating objective " . $objective->get_id(), backup::LOG_WARNING);
         }
     }
-
 }
 
 /**
@@ -327,12 +350,17 @@ class attempt_quiz implements type, type_with_supporting_url, type_with_update_a
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class attempt_quiz_config_form implements extender, extender_with_supporting_url_modes {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Coursecontext. */
     protected $coursecontext;
+    /** @var mixed Courseid. */
     protected $courseid;
+    /** @var mixed Incourse. */
     protected $incourse;
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Whichoptions. */
     protected $whichoptions;
 
     /**
@@ -360,6 +388,9 @@ class attempt_quiz_config_form implements extender, extender_with_supporting_url
         $this->whichoptions = $options;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
         $incourse = $this->incourse;
@@ -444,6 +475,9 @@ class attempt_quiz_config_form implements extender, extender_with_supporting_url
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
 
         // Default to unique per cm, except when using a specific quiz or uniqueness is not required.
@@ -453,7 +487,7 @@ class attempt_quiz_config_form implements extender, extender_with_supporting_url
         }
         unset($data->cd_uniquenessdisabled);
 
-        // cast to int.
+        // Cast to int.
         if (isset($data->cd_which)) {
             $data->cd_which = (int) $data->cd_which;
         }
@@ -467,6 +501,9 @@ class attempt_quiz_config_form implements extender, extender_with_supporting_url
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url_modes(): array {
         if (!in_array(attempt_quiz::WHICH_SPECIFIC_IN_COURSE, $this->whichoptions)) {
             return [];
@@ -525,19 +562,22 @@ class attempt_quiz_config_form implements extender, extender_with_supporting_url
         }, $this->get_which_options());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if (!isset($data->cd_which)) {
             $errors['cd_which'] = get_string('invaliddata', 'core_error');
         }
-        if (($data->cd_which ?? null) == attempt_quiz::WHICH_SPECIFIC_IN_COURSE
+        if (
+            ($data->cd_which ?? null) == attempt_quiz::WHICH_SPECIFIC_IN_COURSE
                 && empty($data->cd_cmid)
         ) {
             $errors['cd_cmid'] = get_string('invaliddata', 'core_error');
         }
         return $errors;
     }
-
 }
 
 /**
@@ -559,7 +599,6 @@ class attempt_quiz_config_form implements extender, extender_with_supporting_url
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class basic_uniqueness_evaluator {
-
     /** @var string[] The keys used for uniqueness, ordered. */
     protected $keys;
     /** @var int The nubmer of keys. */
@@ -661,5 +700,4 @@ class basic_uniqueness_evaluator {
         }
         return true;
     }
-
 }

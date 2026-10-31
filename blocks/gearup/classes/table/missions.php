@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Table.
@@ -42,7 +42,6 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class missions extends improved_table {
-
     /** @var object The helper. */
     protected $missionhelper;
     /** @var object The repo. */
@@ -166,6 +165,9 @@ class missions extends improved_table {
         }, ARRAY_FILTER_USE_BOTH);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function prepare_query(): void {
         $query = $this->query;
 
@@ -184,68 +186,152 @@ class missions extends improved_table {
         $query->add_order_by('title', SORT_ASC);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_count(): int {
         return $this->repository->count_missions_from_query($this->query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_rows(): iterable {
         return $this->repository->get_missions_from_query($this->query, $this->get_page_start(), $this->get_page_size());
     }
 
+    /**
+     * Col recruitcount.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_recruitcount($row) {
         return $row->annotations->recruit_count ?? 0;
     }
 
+    /**
+     * Col completedcount.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_completedcount($row) {
         return $row->annotations->completed_count ?? 0;
     }
 
+    /**
+     * Col notcompletedcount.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_notcompletedcount($row) {
         return $row->annotations->not_completed_count ?? 0;
     }
 
+    /**
+     * Col inprogresszerocount.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_inprogresszerocount($row) {
         return $row->annotations->inprogress_zero_count ?? 0;
     }
 
+    /**
+     * Col inprogresspartialcount.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_inprogresspartialcount($row) {
         return $row->annotations->inprogress_partial_count ?? 0;
     }
 
+    /**
+     * Col inprogressaveragerate.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_inprogressaveragerate($row) {
         return $this->format_ratio($row->annotations->inprogress_average_rate ?? 0);
     }
 
+    /**
+     * Col fastestcompletiontime approx.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_fastestcompletiontime_approx($row) {
         $time = $row->annotations->fastest_completion_time ?? null;
         return $time === null ? '-' : $this->format_duration_approx($time);
     }
 
+    /**
+     * Col fastestcompletiontime mins.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_fastestcompletiontime_mins($row) {
         $time = $row->annotations->fastest_completion_time ?? null;
         return $time === null ? '-' : $this->format_duration_mins($time);
     }
 
+    /**
+     * Col slowestcompletiontime approx.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_slowestcompletiontime_approx($row) {
         $time = $row->annotations->slowest_completion_time ?? null;
         return $time === null ? '-' : $this->format_duration_approx($time);
     }
 
+    /**
+     * Col slowestcompletiontime mins.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_slowestcompletiontime_mins($row) {
         $time = $row->annotations->slowest_completion_time ?? null;
         return $time === null ? '-' : $this->format_duration_mins($time);
     }
 
+    /**
+     * Col averagecompletiontime approx.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_averagecompletiontime_approx($row) {
         $time = $row->annotations->average_completion_time ?? null;
         return $time === null ? '-' : $this->format_duration_approx(floor($time));
     }
 
+    /**
+     * Col averagecompletiontime mins.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_averagecompletiontime_mins($row) {
         $time = $row->annotations->average_completion_time ?? null;
         return $time === null ? '-' : $this->format_duration_mins(floor($time));
     }
 
+    /**
+     * Col completionrate.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_completionrate($row) {
         if ($this->missionhelper->is_a_challenge($row->mission)) {
             return 'N/A';
@@ -255,6 +341,12 @@ class missions extends improved_table {
         return $this->format_ratio($ratio);
     }
 
+    /**
+     * Col successrate.
+     *
+     * @param mixed $row Row.
+     * @return mixed
+     */
     public function col_successrate($row) {
         if (!$this->missionhelper->is_a_challenge($row->mission)) {
             return 'N/A';
@@ -271,7 +363,8 @@ class missions extends improved_table {
     public function col_title($row) {
         $title = $row->mission->get_title();
         if (!$this->is_downloading()) {
-            return html_writer::link($this->get_url_resolver()->reverse('mission', ['missionid' => $row->mission->get_id()]),
+            return html_writer::link(
+                $this->get_url_resolver()->reverse('mission', ['missionid' => $row->mission->get_id()]),
                 s($title)
             );
         }
@@ -296,17 +389,25 @@ class missions extends improved_table {
         return '-';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function prepare_row($row) {
         $row->instances_count = ($row->annotations->completed_count ?? 0) + ($row->annotations->not_completed_count ?? 0);
         return $row;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function render_no_results(): string {
         return '';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function render_zero_state(): string {
         return '';
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\form\streak;
 
@@ -34,12 +34,15 @@ use moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class timing_dynamic_form extends mission_dynamic_form_base {
-
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         parent::definition();
         $mform = $this->_form;
 
-        $mform->addElement(radiogroup::register(),
+        $mform->addElement(
+            radiogroup::register(),
             'timelimit',
             get_string('streaktimeinterval', 'block_gearup'),
             self::get_time_options()
@@ -47,6 +50,9 @@ class timing_dynamic_form extends mission_dynamic_form_base {
         $mform->addHelpButton('timelimit', 'streaktimeinterval', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function check_access_for_mission(): void {
         $mh = di::get('mission_helper');
         $mission = $this->get_mission();
@@ -55,6 +61,9 @@ class timing_dynamic_form extends mission_dynamic_form_base {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data() {
         $data = parent::get_data();
         if (is_object($data)) {
@@ -64,6 +73,9 @@ class timing_dynamic_form extends mission_dynamic_form_base {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function process_dynamic_save() {
         if ($data = $this->get_data()) {
             unset($data->id);
@@ -112,5 +124,4 @@ class timing_dynamic_form extends mission_dynamic_form_base {
             ],
         ];
     }
-
 }

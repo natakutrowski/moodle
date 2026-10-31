@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Course completion required.
@@ -39,7 +39,6 @@ use lang_string;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_completion_required_info implements info {
-
     /** @var \context The context. */
     protected $context;
 
@@ -52,6 +51,9 @@ class course_completion_required_info implements info {
         $this->context = $context;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_available(): bool {
         global $CFG;
 
@@ -66,11 +68,13 @@ class course_completion_required_info implements info {
         return $completioninfo->is_enabled() != COMPLETION_DISABLED;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_reasons(): array {
         if (!$this->is_available()) {
             return [new lang_string('completionnotenabledforcourse', 'core_completion')];
         }
         return [];
     }
-
 }

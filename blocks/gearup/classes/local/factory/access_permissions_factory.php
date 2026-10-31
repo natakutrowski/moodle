@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Access permissions factory.
@@ -38,9 +38,13 @@ use block_gearup\local\permission\context_permissions;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class access_permissions_factory {
-
+    /**
+     * Get permissions for context.
+     *
+     * @param \context $context Context.
+     * @return context_permissions
+     */
     public function get_permissions_for_context(\context $context) {
         return new context_permissions($context);
     }
-
 }

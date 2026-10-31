@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\form;
 
@@ -30,7 +30,9 @@ use block_gearup\local\operator\mission_operator;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class increment_mission_instance_counter_dynamic_form extends mission_instance_dynamic_form_base {
-
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         parent::definition();
 
@@ -42,6 +44,9 @@ class increment_mission_instance_counter_dynamic_form extends mission_instance_d
         $mform->setType('quantity', PARAM_INT);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function check_access_for_mission(): void {
         $missioninst = $this->get_mission_instance();
         $missionhelper = di::get('mission_helper');
@@ -66,6 +71,9 @@ class increment_mission_instance_counter_dynamic_form extends mission_instance_d
         return $errors;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function process_dynamic_save() {
         if ($data = $this->get_data()) {
             $mo = di::get('mission_operator');

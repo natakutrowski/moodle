@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\objective\type;
 
@@ -38,7 +38,6 @@ use restore_dbops;
  * @covers     \block_gearup\local\objective\type\watch_video
  */
 final class watch_video_test extends base_testcase {
-
     public function test_passing_constraints(): void {
         $gudg = $this->generator;
         $u1 = $this->getDataGenerator()->create_user();
@@ -139,5 +138,4 @@ final class watch_video_test extends base_testcase {
         $page2ctx = context_module::instance($mission->get_objectives()[0]->get_type_config()->cmid);
         $this->assertEquals($newid, $page2ctx->get_course_context()->instanceid);
     }
-
 }

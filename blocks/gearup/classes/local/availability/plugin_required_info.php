@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Plugin required info.
@@ -36,7 +36,6 @@ namespace block_gearup\local\availability;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class plugin_required_info implements info {
-
     /** @var string The plugin component. */
     protected $component;
     /** @var string The plugin name. */
@@ -61,6 +60,9 @@ class plugin_required_info implements info {
         $this->release = $release;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_available(): bool {
         $plugman = \core_plugin_manager::instance();
         $plugin = $plugman->get_plugin_info($this->component);
@@ -81,6 +83,9 @@ class plugin_required_info implements info {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_reasons(): array {
         if (!$this->is_available()) {
             $plugman = \core_plugin_manager::instance();
@@ -89,11 +94,9 @@ class plugin_required_info implements info {
             if (!$plugin) {
                 $params = ['name' => $this->name, 'component' => $this->component];
                 return [new \lang_string('requiresplugin', 'block_gearup', $params)];
-
             } else if (!($plugin->is_enabled() ?? true)) {
                 $params = ['name' => $plugin->displayname, 'component' => $this->component];
                 return [new \lang_string('pluginnotenabled', 'block_gearup', $params)];
-
             } else if ($this->version) {
                 $params = ['name' => $plugin->displayname, 'component' => $this->component,
                     'release' => $this->release ?? $this->version];
@@ -102,5 +105,4 @@ class plugin_required_info implements info {
         }
         return [];
     }
-
 }

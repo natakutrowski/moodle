@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\repository;
 
@@ -27,7 +27,6 @@ namespace block_gearup\local\repository;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user_query extends query_base {
-
     /** @var string[] The valid order bys. */
     protected $validorderbys = ['firstname', 'lastname', 'username', 'idnumber', 'email', 'id',
         'mission_instance_counter_best', 'mission_instance_counter_latest'];
@@ -193,5 +192,4 @@ class user_query extends query_base {
         $this->set_condition('groupid', $groupid);
         return $this;
     }
-
 }

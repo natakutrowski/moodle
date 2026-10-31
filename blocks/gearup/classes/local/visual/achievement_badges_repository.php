@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Repository.
@@ -42,7 +42,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class achievement_badges_repository implements repository_with_context {
-
     /** @var api_client */
     protected $apiclient;
     /** @var cache */
@@ -54,17 +53,29 @@ class achievement_badges_repository implements repository_with_context {
     /** @var visual[][] Indexed by context ID. */
     protected $visualsinctx = [];
 
+    /**
+     * Constructor.
+     *
+     * @param cache $cache Cache.
+     * @param api_client $apiclient Apiclient.
+     */
     public function __construct(cache $cache, api_client $apiclient) {
         $this->cache = $cache;
         $this->apiclient = $apiclient;
         $this->maxlocal = di::get('lm')->max_achievement_badges();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_visual(string $id): ?visual {
         $this->load();
         return $this->visuals[$id] ?? null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_visual_from_context(string $id, context $context): ?visual {
         if (strpos($id, 'local/') === 0) {
             $contextid = (int) $context->id;
@@ -74,11 +85,17 @@ class achievement_badges_repository implements repository_with_context {
         return $this->get_visual($id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_visuals(): array {
         $this->load();
         return array_values($this->visuals);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_visuals_from_context(context $context): array {
         $contextid = (int) $context->id;
         $this->load();
@@ -86,6 +103,9 @@ class achievement_badges_repository implements repository_with_context {
         return array_values(array_merge($this->visuals, $this->visualsinctx[$contextid]));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_visuals_in_context(context $context): array {
         $contextid = (int) $context->id;
         $this->load_in_context($contextid);
@@ -118,7 +138,8 @@ class achievement_badges_repository implements repository_with_context {
 
             $allfiles = [];
             if ($this->maxlocal === null || $this->maxlocal > 0) {
-                $allfiles = $fs->get_area_files($contextid,
+                $allfiles = $fs->get_area_files(
+                    $contextid,
                     'block_gearup',
                     'achievementbadges',
                     0,
@@ -136,7 +157,8 @@ class achievement_badges_repository implements repository_with_context {
                     continue;
                 }
                 $id = 'local/' . $file->get_filename();
-                $data[$id] = new static_visual($id,
+                $data[$id] = new static_visual(
+                    $id,
                     moodle_url::make_pluginfile_url(
                         $file->get_contextid(),
                         $file->get_component(),
@@ -151,5 +173,4 @@ class achievement_badges_repository implements repository_with_context {
             $this->visualsinctx[$contextid] = $data;
         }
     }
-
 }

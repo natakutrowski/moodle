@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Dummy form extender.
@@ -36,7 +36,6 @@ namespace block_gearup\local\form;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class dummy_extender implements extender {
-
     /**
      * Definition of the form.
      *
@@ -70,5 +69,4 @@ class dummy_extender implements extender {
         // Do not add any logic here, extending classes should not have to call the parent.
         return [];
     }
-
 }

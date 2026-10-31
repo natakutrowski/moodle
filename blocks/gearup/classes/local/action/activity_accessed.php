@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Activity accessed action.
@@ -38,21 +38,37 @@ use context_module;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class activity_accessed extends static_action {
-
+    /**
+     * {@inheritDoc}
+     */
     public function __construct($userid, context_module $context) {
         return parent::__construct($userid, $context, $context->instanceid);
     }
 
+    /**
+     * Get cm id.
+     *
+     * @return int
+     */
     public function get_cm_id(): int {
         return $this->get_object_id();
     }
 
+    /**
+     * Get course context.
+     *
+     * @return \context_course
+     */
     public function get_course_context(): \context_course {
         return $this->context->get_course_context();
     }
 
+    /**
+     * Get course id.
+     *
+     * @return int
+     */
     public function get_course_id(): int {
         return (int) $this->get_course_context()->instanceid;
     }
-
 }

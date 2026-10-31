@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\setting;
 
@@ -29,7 +29,6 @@ use block_gearup\di;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class activation_status extends static_setting {
-
     /**
      * Constructor.
      */
@@ -50,5 +49,4 @@ class activation_status extends static_setting {
         ];
         return di::get('renderer')->render_from_template('block_gearup/admin/setting/activation_status', $context);
     }
-
 }

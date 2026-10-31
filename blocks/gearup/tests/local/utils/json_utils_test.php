@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Testcase.
@@ -40,7 +40,6 @@ use block_gearup\tests\base_testcase;
  * @covers     \block_gearup\local\utils\json_utils
  */
 final class json_utils_test extends base_testcase {
-
     /**
      * Decode to list provider.
      *
@@ -106,5 +105,4 @@ final class json_utils_test extends base_testcase {
     public function test_encode_as_list($data, $expected): void {
         $this->assertEquals($expected, json_utils::encode_as_list($data));
     }
-
 }

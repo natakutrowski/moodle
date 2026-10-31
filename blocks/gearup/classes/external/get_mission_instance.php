@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * External.
@@ -38,7 +38,6 @@ use block_gearup\di;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class get_mission_instance extends external_api {
-
     /**
      * Parameters.
      *
@@ -93,5 +92,4 @@ class get_mission_instance extends external_api {
         $exporterclass = di::get('exporter_factory')->get_mission_instance_exporter_class();
         return $exporterclass::get_read_structure();
     }
-
 }

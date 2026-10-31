@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Usage reporter.
@@ -39,7 +39,6 @@ use block_gearup\local\http\client_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class usage_reporter {
-
     /** @var api_client The API client. */
     protected $client;
     /** @var usage_report_maker The maker. */
@@ -72,7 +71,6 @@ class usage_reporter {
 
         try {
             $resp = $this->client->post('/api/v1/quest/usage', $usage);
-
         } catch (client_exception $e) {
             debugging('Error while reporting usage: ' . $e->getMessage());
             return false;
@@ -85,5 +83,4 @@ class usage_reporter {
 
         return true;
     }
-
 }

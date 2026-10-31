@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective instance persistent.
@@ -40,7 +40,7 @@ use lang_string;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class objective_inst extends persistent {
-
+    /** Table. */
     const TABLE = 'block_gearup_objective_inst';
 
     /** @var type The objective type. */
@@ -66,7 +66,7 @@ class objective_inst extends persistent {
                 'type' => PARAM_INT,
                 'default' => 0,
                 'choices' => [
-                    // TODO Replace these.
+                    // Future work: Replace these.
                     0, // Incomplete.
                     1, // Complete.
                 ],
@@ -214,5 +214,4 @@ class objective_inst extends persistent {
         global $DB;
         $DB->delete_records(self::TABLE, ['objectiveid' => $objectiveid]);
     }
-
 }

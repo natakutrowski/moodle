@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\objective\type;
 
@@ -37,7 +37,6 @@ use Generator;
  * @covers     \block_gearup\local\objective\type\profile_field_value
  */
 final class profile_field_value_test extends base_testcase {
-
     /** @var \block_gearup\local\mission\mission */
     protected $mission;
     /** @var \block_gearup\local\mission\mission_instance */
@@ -324,7 +323,7 @@ final class profile_field_value_test extends base_testcase {
         ];
         yield [$data, $config, [[-10, 1], [-5, 1], [0, 1], [4, 1], [8, 1], [10, 0], [11, 1]]];
 
-        // // Testing greater than tracking (no tracking).
+        // Testing greater than tracking (no tracking).
         $data = ['countneeded' => 1];
         $config = [
             't' => $int,
@@ -369,7 +368,7 @@ final class profile_field_value_test extends base_testcase {
         yield [$data, $config, [[-10, 0], [-5, 0], [0, 0], [4, 4], [8, 8], [10, 10], [11, 10], [20, 10]]];
         yield [$data, $config, [[0, 0], [5, 5], [10, 10], [5, 5], [0, 0], [1, 1], [-3, 0]]];
 
-        // // Disabled with other target, in which case count needed is expected to be 1.
+        // Disabled with other target, in which case count needed is expected to be 1.
         $data['countneeded'] = 1;
         $config['v'] = -5;
         yield [$data, $config, [[-10, 0], [-5, 1], [0, 1], [4, 1], [8, 1], [10, 1], [11, 1], [20, 1]]];
@@ -1019,5 +1018,4 @@ final class profile_field_value_test extends base_testcase {
         $objinst = $missioninst->get_objective_instances()[0];
         $this->assertEquals($expected, $objinst->get_counter());
     }
-
 }

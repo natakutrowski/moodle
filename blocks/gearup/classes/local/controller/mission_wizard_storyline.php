@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\controller;
 
@@ -33,10 +33,17 @@ use block_gearup\local\controller\utils\mission_route_base;
 class mission_wizard_storyline extends mission_route_base {
     use utils\mission_wizard_trait;
 
+    /** @var string Currentstep. */
     protected $currentstep = 'storyline';
 
+    /** @var mixed Form. */
     protected $form;
 
+    /**
+     * Get form.
+     *
+     * @return mixed
+     */
     protected function get_form() {
         if (!$this->form) {
             $this->form = new mission_storyline_form($this->pageurl->out(false), [
@@ -48,6 +55,9 @@ class mission_wizard_storyline extends mission_route_base {
         return $this->form;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_subpage_html_head_title() {
         if ($this->is_streak()) {
             return get_string('streakinstructions', 'block_gearup');
@@ -57,6 +67,11 @@ class mission_wizard_storyline extends mission_route_base {
         return get_string('storyline', 'block_gearup');
     }
 
+    /**
+     * Get wizard title.
+     *
+     * @return mixed
+     */
     protected function get_wizard_title() {
         if ($this->is_streak()) {
             return get_string('whatisnarrativeofstreak', 'block_gearup');
@@ -66,6 +81,11 @@ class mission_wizard_storyline extends mission_route_base {
         return get_string('whatisnarrative', 'block_gearup');
     }
 
+    /**
+     * Pre wizard content.
+     *
+     * @return void
+     */
     protected function pre_wizard_content() {
         $form = $this->get_form();
         if ($data = $form->get_data()) {
@@ -76,10 +96,14 @@ class mission_wizard_storyline extends mission_route_base {
         }
     }
 
+    /**
+     * Wizard content.
+     *
+     * @return void
+     */
     protected function wizard_content() {
         $form = $this->get_form();
         $form->set_display_vertical();
         $form->display();
     }
-
 }

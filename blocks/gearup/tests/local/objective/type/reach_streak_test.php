@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\objective\type;
 
@@ -38,7 +38,6 @@ use context_system;
  * @covers     \block_gearup\local\objective\type\reach_streak
  */
 final class reach_streak_test extends base_testcase {
-
     /** @var mission */
     protected $mission;
     /** @var mission_instance */
@@ -345,5 +344,4 @@ final class reach_streak_test extends base_testcase {
             $this->assertGreaterThan($prevcounter, $objinst->get_counter());
         }
     }
-
 }

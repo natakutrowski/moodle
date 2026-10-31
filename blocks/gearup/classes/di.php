@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Dependency manager.
@@ -37,7 +37,6 @@ use coding_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class di {
-
     /** @var container Our container. */
     protected static $container;
 
@@ -53,7 +52,8 @@ class di {
         }
 
         // Get the clock from core if we can.
-        if ($id === 'clock'
+        if (
+            $id === 'clock'
                 && class_exists(\core\di::class)
                 && interface_exists(\core\clock::class)
                 && \core\di::get_container()->has(\core\clock::class)
@@ -79,10 +79,9 @@ class di {
      * @param local\container $container The container.
      */
     public static function set_container(local\container $container) {
-        if (!PHPUNIT_TEST) {
+        if (!PHPUNIT_TEST && !defined('BEHAT_TEST')) {
             throw new coding_exception('Containers can only be set during testing.');
         }
         self::$container = $container;
     }
-
 }

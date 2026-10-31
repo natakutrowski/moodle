@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\output;
 
@@ -36,7 +36,6 @@ use templatable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class group_switcher implements named_templatable, renderable, templatable {
-
     /** @var moodle_url The base URL. */
     public $baseurl;
     /** @var int|object|context */
@@ -57,6 +56,9 @@ class group_switcher implements named_templatable, renderable, templatable {
         $this->groupid = $groupid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function export_for_template(renderer_base $output) {
         global $USER;
 
@@ -72,8 +74,10 @@ class group_switcher implements named_templatable, renderable, templatable {
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_template_name(renderer_base $renderer): string {
         return 'block_gearup/group_switcher';
     }
-
 }

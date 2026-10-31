@@ -1,6 +1,20 @@
 Changelog
 =========
 
+v1.10.0
+-------
+
+New features
+
+- Support for dark mode
+- Objectives can be reordered within a mission
+- Choose how many quests and achievements appear on the mission tracker
+- Quests can now be ordered alphabetically on the mission tracker
+
+Technical changes
+
+- Compatibility with Moodle 5.3
+
 v1.9.1
 ------
 

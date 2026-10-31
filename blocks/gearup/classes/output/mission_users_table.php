@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mission users table.
@@ -42,7 +42,6 @@ use renderer_base;
  * @deprecated Since Quest 1.4, use block_gearup\table\mission_users instead.
  */
 class mission_users_table extends \block_gearup\table\mission_users {
-
     /**
      * Constructor.
      *
@@ -65,5 +64,4 @@ class mission_users_table extends \block_gearup\table\mission_users {
         $this->define_query(new user_query($mission->get_context()));
         $this->init();
     }
-
 }

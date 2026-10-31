@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -40,7 +40,9 @@ use context_system;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class activate extends base {
-
+    /**
+     * {@inheritDoc}
+     */
     protected function get_signing_secret() {
         $secret = null;
         $actsecret = get_config('block_gearup', 'activationsecret');
@@ -54,6 +56,9 @@ class activate extends base {
         return $secret;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function process($type, $payload) {
         $lm = di::get('lm');
         if ($lm->is_activated()) {
@@ -70,5 +75,4 @@ class activate extends base {
         }
         unset_config('activationsecret', 'block_gearup');
     }
-
 }

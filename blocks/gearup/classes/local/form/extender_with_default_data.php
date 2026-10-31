@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form extender.
@@ -36,7 +36,6 @@ namespace block_gearup\local\form;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface extender_with_default_data extends extender {
-
     /**
      * Manipulation of data before it is loaded in the form.
      *
@@ -44,5 +43,4 @@ interface extender_with_default_data extends extender {
      * @return object You must return the data.
      */
     public function get_default_data($data);
-
 }

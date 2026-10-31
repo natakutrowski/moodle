@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mission instances table.
@@ -41,7 +41,6 @@ use renderer_base;
  * @deprecated Since Quest 1.4, use \block_gearup\table\mission_instances instead.
  */
 class mission_instances_table extends \block_gearup\table\mission_instances {
-
     /**
      * Constructor.
      *
@@ -76,5 +75,4 @@ class mission_instances_table extends \block_gearup\table\mission_instances {
         $this->define_query(new \block_gearup\local\repository\mission_instance_query($mission->get_context()));
         $this->init();
     }
-
 }

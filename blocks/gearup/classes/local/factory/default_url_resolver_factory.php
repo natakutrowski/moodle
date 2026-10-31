@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * URL resolver factory.
@@ -40,7 +40,6 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class default_url_resolver_factory implements url_resolver_context_factory {
-
     /** @var url_resolver The base resolver. */
     protected $baseresolver;
 
@@ -53,6 +52,9 @@ class default_url_resolver_factory implements url_resolver_context_factory {
         $this->baseresolver = $baseresolver;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_resolver_for_context(context $context, ?context $pagecontext): url_resolver {
         $injector = new url_resolver_param_injector($this->baseresolver, $context);
         if ($pagecontext && $context->id != $pagecontext->id) {
@@ -60,5 +62,4 @@ class default_url_resolver_factory implements url_resolver_context_factory {
         }
         return $injector;
     }
-
 }

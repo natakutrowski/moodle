@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\speech;
 
@@ -31,7 +31,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class voices_repository {
-
     /** @var api_client */
     protected $apiclient;
     /** @var cache */
@@ -39,6 +38,12 @@ class voices_repository {
     /** @var voices[]|null */
     protected $voices;
 
+    /**
+     * Constructor.
+     *
+     * @param cache $cache Cache.
+     * @param api_client $apiclient Apiclient.
+     */
     public function __construct(cache $cache, api_client $apiclient) {
         $this->cache = $cache;
         $this->apiclient = $apiclient;
@@ -73,5 +78,4 @@ class voices_repository {
             }, []);
         }
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\model;
 
@@ -36,7 +36,6 @@ use core_user\fields;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_inst_reader extends db_reader {
-
     /** @var mission_instance_query The query. */
     protected $query;
 
@@ -56,9 +55,7 @@ class mission_inst_reader extends db_reader {
         $sql = '1=1';
         $params = [];
 
-        if (!$status || $status === 'any') {
-            // Nothing to do.
-        } else if ($status === 'inprogress_zero') {
+        if ($status === 'inprogress_zero') {
             $sql = 'mi.state = :status AND mi.completionratio = 0';
             $params['status'] = mission_instance::STATE_STARTED;
         } else if ($status === 'inprogress_partial') {
@@ -93,7 +90,7 @@ class mission_inst_reader extends db_reader {
         } else if ($status === 'not_ended') {
             $sql = 'mi.state != :status';
             $params['status'] = mission_instance::STATE_ENDED;
-        } else {
+        } else if ($status && $status !== 'any') {
             debugging("Invalid or unknown status to filter by: {$status}", DEBUG_DEVELOPER);
         }
 
@@ -215,7 +212,8 @@ class mission_inst_reader extends db_reader {
         if ($query->has_condition('subject:term')) {
             $this->join_subject_table();
             $permitteduseridentityfields = array_keys(user_utils::get_visible_identity_fields($query->get_acting_context()));
-            [$sql, $params] = user_utils::get_filter_user_by_term_sql($query->get_condition('subject:term'),
+            [$sql, $params] = user_utils::get_filter_user_by_term_sql(
+                $query->get_condition('subject:term'),
                 $permitteduseridentityfields,
                 's'
             );
@@ -263,7 +261,6 @@ class mission_inst_reader extends db_reader {
                 $sql = $sql . ' ' . ($dir === SORT_ASC ? 'ASC' : 'DESC');
                 $this->add_order_by($name, $sql);
             }
-
         }
     }
 
@@ -328,5 +325,4 @@ class mission_inst_reader extends db_reader {
         $this->query = $query;
         return $this;
     }
-
 }

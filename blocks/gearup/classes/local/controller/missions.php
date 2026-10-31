@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Missions controller.
@@ -50,17 +50,25 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class missions extends route_base {
-
+    /**
+     * {@inheritDoc}
+     */
     protected function define_optional_params() {
         return [
             ['action', null, PARAM_ALPHANUMEXT, false],
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_html_head_title() {
         return get_string('overview', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function pre_content() {
         parent::pre_content();
 
@@ -73,6 +81,9 @@ class missions extends route_base {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         global $PAGE;
 
@@ -168,5 +179,4 @@ class missions extends route_base {
             'data-template-context__helpformatted' => $output->help_icon('shortcodes', 'block_gearup'),
         ];
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\output;
 
@@ -37,7 +37,6 @@ use templatable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_instances_filters implements named_templatable, renderable, templatable {
-
     /** @var mission The mission. */
     public $mission;
     /** @var filterset The filterset. */
@@ -60,6 +59,9 @@ class mission_instances_filters implements named_templatable, renderable, templa
         $this->filterset = $filterset;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function export_for_template(renderer_base $output) {
         global $USER;
 
@@ -108,13 +110,21 @@ class mission_instances_filters implements named_templatable, renderable, templa
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_template_name(renderer_base $renderer): string {
         return 'block_gearup/table/mission_instances_filters';
     }
 
+    /**
+     * With state.
+     *
+     * @param bool $withstate Withstate.
+     * @return self
+     */
     public function with_state(bool $withstate): self {
         $this->withstatus = $withstate;
         return $this;
     }
-
 }

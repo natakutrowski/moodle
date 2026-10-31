@@ -30,7 +30,7 @@
     {{! Emulate {{< block_gearup/page_intro because JS rendering fails with blocks and partials it seems. }}
     <div class="gu-flex gu-gap-4 gu-mb-4 gu-flex-col sm:gu-flex-row">
         <div class="gu-grow">
-            <p class="gu-m-0 gu-mt-1 gu-max-w-3xl gu-text-gray-500">
+            <p class="gu-m-0 gu-mt-1 gu-max-w-3xl gu-text-gray-500 dark:gu-text-gray-400">
                 {{$ pageintrodesc }}{{/ pageintrodesc }}
             </p>
         </div>
@@ -45,10 +45,10 @@
         {{/ description }}
     {{/ block_gearup/section_intro }}
 
-    <div class="gu-border-t gu-border-gray-200 gu-py-5 sm:gu-p-0">
-        <dl class="gu-divide-y gu-divide-gray-200">
+    <div class="gu-border-t gu-border-gray-200 dark:gu-border-gray-700 gu-py-5 sm:gu-p-0">
+        <dl class="gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700">
             <div class="gu-py-4 sm:gu-py-5 sm:gu-grid sm:gu-grid-cols-3 sm:gu-gap-4">
-                <dt class="gu-font-medium gu-text-gray-500">
+                <dt class="gu-font-medium gu-text-gray-500 dark:gu-text-gray-400">
                     {{#str}} listofassigners, block_gearup {{/str}}
                 </dt>
                 <dd class="gu-m-0 gu-mt-1 sm:gu-mt-0 sm:gu-col-span-2">

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\course;
 
@@ -36,7 +36,6 @@ use core_availability\tree;
  * @covers     \block_gearup\local\course\section_completion_checker
  */
 final class section_completion_checker_test extends base_testcase {
-
     /**
      * Test setting the modinfo.
      */
@@ -427,7 +426,8 @@ final class section_completion_checker_test extends base_testcase {
 
         $section1 = $dg->create_course_section(['course' => $c1->id, 'section' => 1]);
         $section1num = $this->get_section_number($section1);
-        $unavailablefor1year = tree::get_root_json([condition::get_json(condition::DIRECTION_FROM, time() + YEARSECS)],
+        $unavailablefor1year = tree::get_root_json(
+            [condition::get_json(condition::DIRECTION_FROM, time() + YEARSECS)],
             tree::OP_AND,
             $show
         );

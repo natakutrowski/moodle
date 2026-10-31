@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -40,13 +40,19 @@ use core\output\notification;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class library extends route_base {
-
+    /** @var mixed Form. */
     protected $form;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_html_head_title() {
         return get_string('library', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function pre_content() {
         parent::pre_content();
 
@@ -56,14 +62,16 @@ class library extends route_base {
         if ($form->is_cancelled()) {
             redirect($this->pageurl);
         } else if ($data = $form->get_data()) {
-            file_save_draft_area_files($data->achievementbadges,
+            file_save_draft_area_files(
+                $data->achievementbadges,
                 $this->context->id,
                 'block_gearup',
                 'achievementbadges',
                 0,
                 library_form::get_achievement_badges_options()
             );
-            file_save_draft_area_files($data->questnarrators,
+            file_save_draft_area_files(
+                $data->questnarrators,
                 $this->context->id,
                 'block_gearup',
                 'questnarrators',
@@ -74,6 +82,11 @@ class library extends route_base {
         }
     }
 
+    /**
+     * Get form.
+     *
+     * @return mixed
+     */
     protected function get_form() {
         if (!$this->form) {
             $this->form = new library_form($this->pageurl->get_compatible_url());
@@ -88,7 +101,8 @@ class library extends route_base {
      */
     protected function get_initial_form_data() {
         $achievementbadgesdraftitemid = file_get_submitted_draft_itemid('achievementbadges');
-        file_prepare_draft_area($achievementbadgesdraftitemid,
+        file_prepare_draft_area(
+            $achievementbadgesdraftitemid,
             $this->context->id,
             'block_gearup',
             'achievementbadges',
@@ -97,7 +111,8 @@ class library extends route_base {
         );
 
         $questnarratorsdraftitemid = file_get_submitted_draft_itemid('questnarrators');
-        file_prepare_draft_area($questnarratorsdraftitemid,
+        file_prepare_draft_area(
+            $questnarratorsdraftitemid,
             $this->context->id,
             'block_gearup',
             'questnarrators',
@@ -111,6 +126,9 @@ class library extends route_base {
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         $output = $this->get_renderer();
 
@@ -125,5 +143,4 @@ class library extends route_base {
             'form' => $formcontent,
         ]);
     }
-
 }

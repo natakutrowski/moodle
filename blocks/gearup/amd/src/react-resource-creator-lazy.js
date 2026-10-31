@@ -890,14 +890,14 @@ const ListEntry = ({ resource, onSelect }) => {
     const headingId = useUniqueId();
     const buttonListeners = useRoleButtonListeners(onSelect);
     const disabledOpacityClass = `${!isavailable ? 'gu-opacity-60 group-focus:gu-opacity-100 group-hover:gu-opacity-100' : ''}`;
-    return (react.createElement("div", { className: "gu-p-[0.2rem] gu-relative gu-group focus:gu-z-10 hover:gu-bg-gray-100" },
+    return (react.createElement("div", { className: "gu-p-[0.2rem] gu-relative gu-group focus:gu-z-10 hover:gu-bg-gray-100 dark:hover:gu-bg-gray-800" },
         react.createElement("div", { tabIndex: 0, role: "button", "aria-describedby": headingId, className: "gu-px-1.5 gu-py-0.5", ...buttonListeners },
             react.createElement("div", { id: headingId, className: `gu-flex` },
                 react.createElement("div", { className: classNames(disabledOpacityClass, 'gu-text-xl gu-text-medium') }, label),
                 !isavailable ? (react.createElement("div", { className: "gu-ml-2" },
                     react.createElement("span", { className: "badge gu-badge-pill gu-badge-warning" },
                         react.createElement(components_Str, { id: "unavailable" })))) : null),
-            react.createElement("div", { className: classNames(disabledOpacityClass, 'gu-text-gray-500'), dangerouslySetInnerHTML: { __html: description } }))));
+            react.createElement("div", { className: classNames(disabledOpacityClass, 'gu-text-gray-500 dark:gu-text-gray-400'), dangerouslySetInnerHTML: { __html: description } }))));
 };
 const Container = ({ children }) => {
     return react.createElement("div", { className: "gu-min-h-full gu-max-h-full gu-flex gu-flex-col" }, children);
@@ -909,7 +909,7 @@ const EmptyResult = ({ message, content }) => {
 };
 const PlainResourceList = ({ resources, onSelect, emptyContent }) => {
     return (react.createElement("div", { className: "gu-flex-1 gu-min-h-full gu-max-h-full gu-flex gu-flex-col" },
-        react.createElement("div", { className: "gu-max-h-full gu-overflow-y-auto gu-flex gu-flex-1" }, resources.length ? (react.createElement("div", { className: "gu-flex-1 gu-divide-y gu-divide-gray-200" }, resources.map((o) => {
+        react.createElement("div", { className: "gu-max-h-full gu-overflow-y-auto gu-flex gu-flex-1" }, resources.length ? (react.createElement("div", { className: "gu-flex-1 gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700" }, resources.map((o) => {
             return react.createElement(ListEntry, { key: o.name, resource: o, onSelect: () => onSelect && onSelect(o) });
         }))) : (emptyContent || react.createElement(EmptyResult, null)))));
 };
@@ -994,7 +994,7 @@ const App = ({ resources, onSelected, formClass, formArgs = {}, formResourceArgA
                 react.createElement(LinkButton, { onClick: () => handleSelect() },
                     react.createElement(components_Str, { id: "chooseanother" }))),
             react.createElement("h3", { className: "gu-mt-1" }, selected.label),
-            react.createElement("div", { className: "gu-my-4 gu-mt-2 gu-bg-gray-100 gu-p-2", dangerouslySetInnerHTML: { __html: selected.description } }),
+            react.createElement("div", { className: "gu-my-4 gu-mt-2 gu-bg-gray-100 dark:gu-bg-gray-800 gu-p-2", dangerouslySetInnerHTML: { __html: selected.description } }),
             selected.isavailable ? (react.createElement(DynamicFormLoader, { onFormLoaded: onFormLoaded, formClass: formClass, formArgs: { ...formArgs, [formResourceArgAlias]: selected.name } })) : (react.createElement("div", null,
                 react.createElement("p", null,
                     react.createElement(components_Str, { id: "unavailablebecause" })),

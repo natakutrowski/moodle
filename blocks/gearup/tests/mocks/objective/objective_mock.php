@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Mock.
@@ -39,37 +39,61 @@ use block_gearup\local\objective\type\type;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class objective_mock implements objective {
-
+    /** @var mixed Data. */
     protected $data;
+    /** @var mixed Type. */
     protected $type;
 
+    /**
+     * Constructor.
+     *
+     * @param type $type Type.
+     * @param object $data Data.
+     */
     public function __construct(type $type, object $data) {
         $this->type = $type;
         $this->data = $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_id(): int {
         return $this->data->id ?? 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_count_needed(): int {
         return $this->data->countneeded ?? 1;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_label(): string {
         return $this->data->label ?? 'Objective label';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_mission_id(): int {
         return $this->data->missionid ?? 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_type(): type {
         return $this->type;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_type_config() {
         return $this->data->typeconfig ?? null;
     }
-
 }

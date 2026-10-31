@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -41,7 +41,7 @@ use block_gearup\local\utils\user_utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class mission_dynamic_form_base extends persistent_dynamic_form {
-
+    /** @var mixed Persistentclass. */
     protected static $persistentclass = mission::class;
 
     /** @var int The param name behind which the mission ID is set. */
@@ -49,6 +49,9 @@ abstract class mission_dynamic_form_base extends persistent_dynamic_form {
     /** @var bool Whether the form supports groups. */
     protected $supportsgroups = false;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         $mform = $this->_form;
 
@@ -126,7 +129,8 @@ abstract class mission_dynamic_form_base extends persistent_dynamic_form {
         $ap->require_manage();
 
         // Validate that the user is not at risk of affecting recruits they should not see.
-        if ($this->is_groups_supported() && course_utils::uses_group_mode($context)
+        if (
+            $this->is_groups_supported() && course_utils::uses_group_mode($context)
                 && !user_utils::can_view_all_participants($context, $USER->id)
         ) {
             throw new \moodle_exception('accessnotpermittedcannotviewallparticipants', 'block_gearup');

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Assigners processor.
@@ -38,11 +38,15 @@ use core\event\base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class dummy_processor implements all_processor, event_processor {
-
+    /**
+     * {@inheritDoc}
+     */
     public function process_all() {
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function process_event(base $event) {
     }
-
 }

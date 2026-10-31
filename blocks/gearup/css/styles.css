@@ -64,7 +64,7 @@
 
     /** Heading in the block. */
     .block_gearup .gu-heading-xs {
-        @apply gu-uppercase gu-text-gray-600 gu-text-xs gu-tracking-normal gu-mb-4 gu-border-0 gu-border-b gu-border-solid gu-border-gray-200 gu-font-normal;
+        @apply gu-uppercase gu-text-gray-600 dark:gu-text-gray-400 gu-text-xs gu-tracking-normal gu-mb-4 gu-border-0 gu-border-b gu-border-solid gu-border-gray-200 dark:gu-border-gray-700 gu-font-normal;
     }
 
     /** Hide accepted file types from some filemanager. **/

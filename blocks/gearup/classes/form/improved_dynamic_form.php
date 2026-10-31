@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\form;
 
@@ -36,7 +36,6 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class improved_dynamic_form extends dynamic_form {
-
     /** @var array Equivalent to customdata but for dynamic forms (made by us). */
     protected $_dynamicdata = [];
 
@@ -268,5 +267,4 @@ abstract class improved_dynamic_form extends dynamic_form {
     public function set_data_for_dynamic_submission(): void {
         $this->set_data($this->get_default_data());
     }
-
 }

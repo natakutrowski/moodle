@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective.
@@ -57,11 +57,20 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class completion_rate implements has_availability_info, has_availability_info_for_context, type, type_with_state_initialisation {
-
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
         $this->check_and_complete($instance, $missioninst);
     }
 
+    /**
+     * Check and complete.
+     *
+     * @param objective_instance $instance Instance.
+     * @param mission_instance $missioninst Missioninst.
+     * @return void
+     */
     protected function check_and_complete(objective_instance $instance, mission_instance $missioninst) {
         $context = $missioninst->get_mission()->get_context();
         $coursecontext = $context->get_course_context(false);
@@ -82,14 +91,23 @@ class completion_rate implements has_availability_info, has_availability_info_fo
         $instance->increment_counter(1);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         $this->check_and_complete($instance, $missioninst);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         return new completion_required_info();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_context(context $context): info {
         return new info_stack([
             new course_context_required_info($context),
@@ -139,22 +157,37 @@ class completion_rate implements has_availability_info, has_availability_info_fo
         return $cmswithcompletion > 0 ? $cmscompleted / $cmswithcompletion : 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new completion_rate_config_form();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typecompletionrate', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typecompletionratedesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof activity_completed;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -170,7 +203,6 @@ class completion_rate implements has_availability_info, has_availability_info_fo
         global $CFG;
         require_once($CFG->libdir . '/completionlib.php');
     }
-
 }
 
 
@@ -183,7 +215,9 @@ class completion_rate implements has_availability_info, has_availability_info_fo
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class completion_rate_config_form implements extender {
-
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
@@ -202,13 +236,18 @@ class completion_rate_config_form implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         return $errors;
     }
-
 }

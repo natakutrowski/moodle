@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\exporter\tracker;
 
@@ -33,7 +33,6 @@ use renderer_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class achievements_tracker_exporter extends missions_tracker_exporter_base {
-
     /**
      * Return the list of properties.
      *
@@ -89,46 +88,40 @@ class achievements_tracker_exporter extends missions_tracker_exporter_base {
         $context = $this->related['context'];
         $urlresolver = $this->related['url_resolver'] ?? di::get('url_resolver');
 
-        $ntohighlight = 3;
+        $ntohighlight = max(0, (int) get_config('block_gearup', 'trackermaxachievements'));
         $nachievements = $mr->count_achievement_instances_by_subject_id($userid, null, $context);
         $ncompletedachievements = 0;
         $instances = [];
         $recentlycompleted = [];
         $hascompletedall = empty($nachievements);
-        $showinstancesonly = $nachievements <= $ntohighlight;
+        $highlightcompleted = $nachievements <= 3;
 
         // If we have any achievements.
         if ($nachievements) {
-
             // Check how many achievements we completed.
-            $ncompletedachievements = $mr->count_achievement_instances_by_subject_id($userid,
+            $ncompletedachievements = $mr->count_achievement_instances_by_subject_id(
+                $userid,
                 mission_instance::STATE_ENDED,
                 $context
             );
             $hascompletedall = $nachievements == $ncompletedachievements;
 
-            // If there are less than 3 achievements, we show all them all as instance. Else we only show ongoing ones.
-            $filters = [mission_instance::STATE_STARTED, mission_instance::STATE_COMPLETED, mission_instance::STATE_ENDED];
-            $orderby = ['mi.state ASC', 'mi.completionratio DESC', 'mi.timestarted DESC'];
-            if (!$showinstancesonly) {
-                $filters = [mission_instance::STATE_STARTED];
-            }
-
             // No need to fetch the ongoing ones if we've completed everything.
-            if ($showinstancesonly || !$hascompletedall) {
-                $instances = $mr->get_achievement_instances_by_subject_id($userid,
-                    $filters,
+            if (!$hascompletedall) {
+                $instances = $mr->get_achievement_instances_by_subject_id(
+                    $userid,
+                    [mission_instance::STATE_STARTED],
                     $context,
-                    $orderby,
+                    ['mi.completionratio DESC', 'mi.timestarted DESC'],
                     0,
                     $ntohighlight
                 );
             }
         }
 
-        // If there are mot than 3 achievements, and
-        if (!$showinstancesonly && $ncompletedachievements > 0) {
-            $recentlycompleted = $mr->get_achievement_instances_by_subject_id(
+        // Highlight completed achievements when there are few achievements, otherwise show them separately.
+        if ($ncompletedachievements > 0) {
+            $completed = $mr->get_achievement_instances_by_subject_id(
                 $userid,
                 [mission_instance::STATE_ENDED, mission_instance::STATE_COMPLETED],
                 $context,
@@ -136,6 +129,11 @@ class achievements_tracker_exporter extends missions_tracker_exporter_base {
                 0,
                 5
             );
+            if ($highlightcompleted) {
+                $instances = array_merge($instances, $completed);
+            } else {
+                $recentlycompleted = $completed;
+            }
         }
 
         $moreurl = $urlresolver->reverse('my_achievements');
@@ -143,7 +141,7 @@ class achievements_tracker_exporter extends missions_tracker_exporter_base {
         if ($pageurl) {
             $moreurl->param('returnurl', $pageurl->out_as_local_url(false));
         }
-        $hasmore = $nachievements > $ntohighlight;
+        $hasmore = $nachievements > count($instances) + count($recentlycompleted);
 
         return [
             'context' => (new context_exporter($context))->export($output),

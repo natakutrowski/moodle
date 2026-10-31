@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * API client.
@@ -43,7 +43,6 @@ require_once($CFG->libdir . '/filelib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class api_client {
-
     /** @var string $apihost */
     protected $apihost;
     /** @var \core\files\curl_security_helper */
@@ -187,5 +186,4 @@ class api_client {
             'headers' => $headers,
         ];
     }
-
 }

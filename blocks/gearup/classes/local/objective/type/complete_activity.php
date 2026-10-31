@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Complete activity.
@@ -63,7 +63,6 @@ class complete_activity implements
     type_with_state_initialisation,
     type_with_supporting_url,
     type_with_update_after_restore {
-
     /** Not unique. */
     const UNIQUENESS_DISABLED = 0;
     /** Unique per course. */
@@ -81,9 +80,12 @@ class complete_activity implements
     /** URL mode to course module. */
     const URLMODE_CM = 1;
 
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
 
-        // TODO Test this!
+        // Future work: Test this!
         $userid = $missioninst->get_subject_id();
         $objective = $instance->get_objective();
         $config = $objective->get_type_config();
@@ -105,13 +107,15 @@ class complete_activity implements
             return;
         }
 
-        /** @var \cm_info[] */
+        /** @var \cm_info[] $cms */
         $cms = [];
         if ($which == static::WHICH_SPECIFIC_IN_COURSE) {
             try {
                 $cm = $modinfo->get_cm($config->cmid);
                 $cms[] = $cm;
             } catch (\moodle_exception $e) {
+                // A removed or unavailable activity contributes no completion progress.
+                $cms = [];
             }
         } else {
             $cms = $modinfo->get_cms();
@@ -138,6 +142,9 @@ class complete_activity implements
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof activity_completed) {
             return false;
@@ -168,22 +175,37 @@ class complete_activity implements
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         return new completion_required_info();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new complete_activity_config_form($mission);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typecompleteactivity', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typecompleteactivitydesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url(objective $objective, $urltype): ?moodle_url {
         if ($urltype === static::URLMODE_CM) {
             $config = $objective->get_type_config();
@@ -236,10 +258,16 @@ class complete_activity implements
         return $state;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof activity_completed;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -306,9 +334,13 @@ class complete_activity implements
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, objective $objective, mission $mission) {
         if (!$objective instanceof persisted_objective) {
-            $restore->get_logger()->process("Cannot process after_restore of objective " . $objective->get_id(),
+            $restore->get_logger()->process(
+                "Cannot process after_restore of objective " . $objective->get_id(),
                 backup::LOG_WARNING
             );
             return;
@@ -355,7 +387,6 @@ class complete_activity implements
         global $CFG;
         require_once($CFG->libdir . '/completionlib.php');
     }
-
 }
 
 
@@ -368,12 +399,17 @@ class complete_activity implements
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class complete_activity_config_form implements extender, extender_with_supporting_url_modes {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Coursecontext. */
     protected $coursecontext;
+    /** @var mixed Courseid. */
     protected $courseid;
+    /** @var mixed Incourse. */
     protected $incourse;
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Whichoptions. */
     protected $whichoptions;
 
     /**
@@ -401,6 +437,9 @@ class complete_activity_config_form implements extender, extender_with_supportin
         $this->whichoptions = $options;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
         $incourse = $this->incourse;
@@ -474,6 +513,9 @@ class complete_activity_config_form implements extender, extender_with_supportin
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         if ($data->cd_which == complete_activity::WHICH_SPECIFIC_IN_COURSE) {
             $data->cd_uniqueness = complete_activity::UNIQUENESS_DISABLED;
@@ -481,6 +523,9 @@ class complete_activity_config_form implements extender, extender_with_supportin
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url_modes(): array {
         if (!in_array(complete_activity::WHICH_SPECIFIC_IN_COURSE, $this->whichoptions)) {
             return [];
@@ -539,6 +584,9 @@ class complete_activity_config_form implements extender, extender_with_supportin
         }, $this->get_which_options());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if (!isset($data->cd_which)) {
@@ -546,5 +594,4 @@ class complete_activity_config_form implements extender, extender_with_supportin
         }
         return $errors;
     }
-
 }

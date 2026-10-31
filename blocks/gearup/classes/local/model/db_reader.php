@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\model;
 
@@ -30,7 +30,6 @@ use Generator;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class db_reader {
-
     /** @var sql_join[] An array of joins. */
     protected $joins = [];
     /** @var array[] Array of column names and direction. */

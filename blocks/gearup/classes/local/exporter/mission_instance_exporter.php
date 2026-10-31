@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Exporter.
@@ -44,7 +44,6 @@ use renderer_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_instance_exporter extends \core\external\exporter {
-
     /** @var mission_instance The instance. */
     protected $missioninst;
 
@@ -303,14 +302,9 @@ class mission_instance_exporter extends \core\external\exporter {
         ]);
         $objinsts = $missioninst->get_objective_instances();
 
-        // TODO Do not sort these here.
-        usort($objinsts, function ($obj1, $obj2) {
-            return $obj1->get_objective()->get_id() - $obj2->get_objective()->get_id();
-        });
-
         $completionratio = $missioninst->get_completion_ratio();
 
-        // TODO We could improve how we resolve the user here.
+        // Future work: We could improve how we resolve the user here.
         $user = $USER;
         if ($USER->id != $missioninst->get_subject_id()) {
             $namefields = 'id' . fields::for_name()
@@ -469,6 +463,13 @@ class mission_instance_exporter extends \core\external\exporter {
         ];
     }
 
+    /**
+     * Convert storyline message to contenttype.
+     *
+     * @param mixed $message Message.
+     * @param bool $isunread Isunread.
+     * @return mixed
+     */
     protected function convert_storyline_message_to_contenttype($message, bool $isunread) {
         if ($message === '[objectives]') {
             return ['contenttype' => 'objectives', 'isunread' => $isunread];
@@ -549,5 +550,4 @@ class mission_instance_exporter extends \core\external\exporter {
         $days = floor($secsleft / DAYSECS);
         return get_string('numdays', 'core', $days);
     }
-
 }

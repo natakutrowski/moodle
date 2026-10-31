@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\controller;
 
@@ -29,13 +29,19 @@ use block_gearup\local\controller\utils\mission_route_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_advanced extends mission_route_base {
-
+    /** @var string Missionnavname. */
     protected $missionnavname = 'mission_advanced';
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_subpage_html_head_title() {
         return get_string('navadvanced', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         $output = $this->get_renderer();
         $this->page_mission_header();
@@ -48,5 +54,4 @@ class mission_advanced extends mission_route_base {
             'isarchivable' => $this->missionhelper->is_archivable($this->mission),
         ]);
     }
-
 }

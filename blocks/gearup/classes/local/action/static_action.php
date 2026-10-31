@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Static action.
@@ -38,14 +38,27 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class static_action implements action {
-
+    /** @var mixed Userid. */
     protected $userid;
+    /** @var mixed Objectid. */
     protected $objectid;
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Contextid. */
     protected $contextid;
+    /** @var mixed Targetuserid. */
     protected $targetuserid;
+    /** @var mixed Time. */
     protected $time;
 
+    /**
+     * Constructor.
+     *
+     * @param mixed $userid Userid.
+     * @param mixed $contextorid Contextorid.
+     * @param mixed $objectid Objectid.
+     * @param mixed $targetuserid Targetuserid.
+     */
     public function __construct($userid, $contextorid, $objectid = null, $targetuserid = null) {
         $this->userid = (int) $userid;
         $this->objectid = $objectid !== null ? (int) $objectid : null;
@@ -55,14 +68,23 @@ class static_action implements action {
         $this->time = new \DateTimeImmutable();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_user_id(): int {
         return $this->userid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_object_id(): ?int {
         return $this->objectid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_context(): \context {
         if (!$this->context) {
             $this->context = context::instance_by_id($this->contextid);
@@ -70,12 +92,17 @@ class static_action implements action {
         return $this->context;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_target_user_id(): ?int {
         return $this->targetuserid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_time(): \DateTimeImmutable {
         return $this->time;
     }
-
 }

@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Level Up Quest.
 //
 // Level Up Quest is free software: you can redistribute it and/or modify
@@ -15,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Exporter.
@@ -43,7 +42,6 @@ use renderer_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class objective_type_exporter extends \core\external\exporter {
-
     /** @var type The type. */
     private $type;
 
@@ -105,11 +103,11 @@ class objective_type_exporter extends \core\external\exporter {
     protected function get_other_values(renderer_base $output) {
         global $USER;
 
-        // TODO Should we pass the user as related instead?
+        // Future work: Should we pass the user as related instead?
         $type = $this->type;
         $context = $this->related['context'];
 
-        // TODO Get this from related instead?
+        // Future work: Get this from related instead?
         $otr = di::get('objective_type_resolver');
 
         $desc = strip_tags(markdown_to_html($type->get_short_description()), '<a><em>');
@@ -152,5 +150,4 @@ class objective_type_exporter extends \core\external\exporter {
             }, $unavailablereasons),
         ];
     }
-
 }

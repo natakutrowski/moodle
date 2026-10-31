@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -44,31 +44,46 @@ use core_table\local\filter\string_filter;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class users extends route_base {
-
     /** @var object The repository. */
     protected $repository;
+    /** @var bool Supportsgroups. */
     protected $supportsgroups = true;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function define_optional_params() {
         return [
             ['term', null, PARAM_RAW],
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_html_head_title() {
         return get_string('recruits', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function post_login() {
         parent::post_login();
         $this->repository = di::get('repository');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function pre_content() {
         parent::pre_content();
         require_capability('moodle/user:viewdetails', $this->context);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         global $PAGE;
         $output = $this->get_renderer();
@@ -123,5 +138,4 @@ class users extends route_base {
 
         echo $tablehtml;
     }
-
 }

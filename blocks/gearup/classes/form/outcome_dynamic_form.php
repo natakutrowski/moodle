@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -46,12 +46,15 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class outcome_dynamic_form extends persistent_dynamic_form {
-
+    /** @var mixed Persistentclass. */
     protected static $persistentclass = outcome::class;
 
     /** @var object|null|false A form extender, null, or false. */
     protected $typeconfigform = null;
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition() {
 
         $mform = $this->_form;
@@ -80,7 +83,8 @@ class outcome_dynamic_form extends persistent_dynamic_form {
         $mform->addElement('hidden', 'visibility');
         if (!$isreward) {
             $mform->setConstant('visibility', 0);
-            $mform->addElement('static',
+            $mform->addElement(
+                'static',
                 'visibilitytip',
                 '',
                 html_writer::div(get_string('outcomehiddenfromuser', 'block_gearup'), 'gu-text-sm')
@@ -337,7 +341,7 @@ class outcome_dynamic_form extends persistent_dynamic_form {
             $configdata = $data->configdata;
             unset($data->configdata);
 
-            // TODO Move all of this to an operator?
+            // Future work: Move all of this to an operator?
             $model = $this->get_persistent();
             $model->set('configdata', $configdata);
 
@@ -348,7 +352,6 @@ class outcome_dynamic_form extends persistent_dynamic_form {
                 $model->from_record((object) array_diff_key((array) $data, ['id' => true, 'missionid' => true, 'type' => true]));
                 $model->update();
             }
-
         }
     }
 
@@ -385,8 +388,7 @@ class outcome_dynamic_form extends persistent_dynamic_form {
      * @return void
      */
     protected function process_dynamic_deletion() {
-        // TODO Move this to an operator?
+        // Future work: Move this to an operator?
         $this->get_persistent()->delete();
     }
-
 }

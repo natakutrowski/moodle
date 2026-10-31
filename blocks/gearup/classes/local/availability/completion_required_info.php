@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Completion required.
@@ -39,7 +39,9 @@ use lang_string;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class completion_required_info implements info {
-
+    /**
+     * {@inheritDoc}
+     */
     public function is_available(): bool {
         global $CFG;
 
@@ -50,11 +52,13 @@ class completion_required_info implements info {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_reasons(): array {
         if (!$this->is_available()) {
             return [new lang_string('completionnotenabledforsite', 'core_completion')];
         }
         return [];
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Access permissions interface.
@@ -36,7 +36,6 @@ namespace block_gearup\local\permission;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface access_permissions {
-
     /**
      * Whether the user can access the content.
      *
@@ -84,5 +83,4 @@ interface access_permissions {
      * @throws \required_capability_exception
      */
     public function require_manage_licence($userid = null);
-
 }

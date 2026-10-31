@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\objective\type;
 
@@ -34,7 +34,6 @@ use Generator;
  * @covers     \block_gearup\local\objective\type\complete_profile
  */
 final class complete_profile_test extends base_testcase {
-
     /** @var \stdClass */
     protected $u1;
 
@@ -178,10 +177,13 @@ final class complete_profile_test extends base_testcase {
             $user->{$key} = $value;
         }
 
-        user_update_user($user, false);
+        if (method_exists(\core\user::class, 'update_user')) {
+            \core\user::update_user($user, false);
+        } else {
+            user_update_user($user, false);
+        }
         if (!empty($profilefields)) {
             profile_save_data((object) (['id' => $user->id] + $profilefields));
         }
     }
-
 }

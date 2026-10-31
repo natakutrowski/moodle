@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\outcome\type;
 
@@ -32,7 +32,6 @@ use context_course;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class xp_test extends base_testcase {
-
     public function setUp(): void {
         parent::setUp();
         if (!class_exists('block_xp\di')) {
@@ -83,5 +82,4 @@ final class xp_test extends base_testcase {
         $this->assertEquals(10, $world->get_store()->get_state($u1->id)->get_xp());
         $this->assertEquals(0, $world->get_store()->get_state($u2->id)->get_xp());
     }
-
 }

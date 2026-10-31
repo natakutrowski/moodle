@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * URL resolver.
@@ -38,7 +38,6 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class url_resolver_param_injector implements url_resolver {
-
     /** @var int The context ID. */
     protected $contextid;
     /** @var string The param name. */
@@ -58,14 +57,23 @@ class url_resolver_param_injector implements url_resolver {
         $this->paramname = $paramname ?? 'guctxid';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_route_url() {
         return $this->urlresolver->get_route_url();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function match($uri) {
         return $this->urlresolver->match($uri);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function reverse($name, array $params = []) {
         $url = $this->urlresolver->reverse($name, $params);
 

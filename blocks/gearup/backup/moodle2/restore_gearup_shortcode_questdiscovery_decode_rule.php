@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Decode rule.
@@ -40,7 +40,6 @@ require_once($CFG->dirroot . '/backup/util/helper/restore_decode_rule.class.php'
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_gearup_shortcode_questdiscovery_decode_rule extends restore_decode_rule {
-
     /**
      * Constructor.
      */
@@ -117,5 +116,4 @@ class restore_gearup_shortcode_questdiscovery_decode_rule extends restore_decode
     protected function validate_params($linkname, $urltemplate, $mappings) {
         return ['1' => $mappings];
     }
-
 }

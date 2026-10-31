@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\assigner\type;
 
@@ -31,7 +31,6 @@ use block_gearup\local\mission\mission;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface type_with_action_consumption extends type {
-
     /**
      * Whether the action is compatible.
      *
@@ -51,5 +50,4 @@ interface type_with_action_consumption extends type {
      * @return bool
      */
     public function is_action_passing_constraints(action $action, assigner $assigner): bool;
-
 }

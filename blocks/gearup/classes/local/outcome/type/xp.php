@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome.
@@ -58,7 +58,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class xp implements has_availability_info, has_availability_info_for_context, has_availability_info_for_user, user_facing_type {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         $config = $outcome->get_type_config();
         if (!class_exists('block_xp\di')) {
@@ -95,10 +97,16 @@ class xp implements has_availability_info, has_availability_info_for_context, ha
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         return new plugin_required_info('block_xp', 'Level Up XP', 2022112600, 'v3.13');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_context(\context $context): info {
         if (!class_exists('block_xp\di')) {
             return new static_info(false);
@@ -126,6 +134,9 @@ class xp implements has_availability_info, has_availability_info_for_context, ha
         return new static_info(true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_user(int $userid, \context $context): info {
         if (!class_exists('block_xp\di')) {
             return new static_info(false);
@@ -144,18 +155,33 @@ class xp implements has_availability_info, has_availability_info_for_context, ha
         return new static_info($cando, $reasons);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new xp_config_form_extender();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('outcomexp', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('outcomexpdesc', 'block_gearup');
     }
 
+    /**
+     * Resolve world from context.
+     *
+     * @param \context $context Context.
+     * @return mixed
+     */
     protected function resolve_world_from_context(\context $context) {
         $coursecontext = $context->get_course_context(false);
         $courseid = $coursecontext ? $coursecontext->instanceid : SITEID;
@@ -173,20 +199,28 @@ class xp implements has_availability_info, has_availability_info_for_context, ha
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class xp_config_form_extender implements extender {
-
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
-        // TODO Explain where points will be awarded.
+        // Future work: Explain where points will be awarded.
         $els[] = $mform->addElement('text', 'cd_points', get_string('xp', 'block_xp'));
         $mform->addRule('cd_points', get_string('err_required', 'core_form'), 'required', null, 'client');
         $mform->setType('cd_points', PARAM_INT);
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if ($data->cd_points <= 0) {
@@ -194,5 +228,4 @@ class xp_config_form_extender implements extender {
         }
         return $errors;
     }
-
 }

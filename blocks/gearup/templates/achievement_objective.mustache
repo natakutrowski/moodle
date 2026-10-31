@@ -1,6 +1,6 @@
 {{! @deprecated Since 1.6 }}
 {{^hasobjectives}}
-<div class="gu-border-dashed gu-border-gray-200 gu-border-2 gu-rounded-lg gu-p-4" id="objectives-list-{{ uniqid }}">
+<div class="gu-border-dashed gu-border-gray-200 dark:gu-border-gray-700 gu-border-2 gu-rounded-lg gu-p-4" id="objectives-list-{{ uniqid }}">
     <div class="gu-text-lg gu-font-medium gu-leading-none">
         {{#str}} noobjective, block_gearup{{/str}}
     </div>
@@ -26,7 +26,7 @@
 </div>
 {{/hasobjectives}}
 {{#hasobjectives}}
-<div class="gu-divide-y gu-divide-gray-200" id="objectives-list-{{ uniqid }}">
+<div class="gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700" id="objectives-list-{{ uniqid }}">
     {{#objectives.0}}
     <div class="gu-flex gu-py-4 sm:gu-py-4 first:gu-pt-0 last:gu-pb-0">
         <div class="gu-grow gu-flex">
@@ -39,12 +39,15 @@
         </div>
         {{#iseditable}}
         <div class="gu-ml-2 gu-shrink-0">
-            <button class="btn btn-secondary btn-sm" data-action="resource-edit"
-                data-form-class="block_gearup\form\objective_dynamic_form" data-form-args__id="{{ id }}"
-                data-form-args__missionid="{{ missionid }}" data-modal-title="{{#str}} editobjective, block_gearup {{/str}}">
-                <span class="gu-sr-only">{{#str}} edit {{/str}}</span>
-                {{#pix}} i/edit {{/pix}}
-            </button>
+            {{< block_gearup/widgets/dropdown-vdots }}
+            {{$ items }}
+                <button class="dropdown-item" type="button" data-action="resource-edit"
+                    data-form-class="block_gearup\form\objective_dynamic_form" data-form-args__id="{{ id }}"
+                    data-form-args__missionid="{{ missionid }}" data-modal-title="{{#str}} editobjective, block_gearup {{/str}}">
+                    {{#str}} edit, core {{/str}}
+                </button>
+            {{/ items }}
+            {{/ block_gearup/widgets/dropdown-vdots }}
         </div>
         {{/iseditable}}
     </div>

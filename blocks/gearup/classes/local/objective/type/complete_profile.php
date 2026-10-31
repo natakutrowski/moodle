@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Complete profile.
@@ -57,10 +57,12 @@ require_once($CFG->dirroot . '/user/profile/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class complete_profile implements type, type_with_state_initialisation, type_with_supporting_url {
-
     /** URL mode edit profile. */
     const URLMODE_EDIT_PROFILE = 1;
 
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
         $userid = $missioninst->get_subject_id();
         if (!$this->has_completed_profile($instance, $userid)) {
@@ -69,6 +71,9 @@ class complete_profile implements type, type_with_state_initialisation, type_wit
         $instance->increment_counter(1);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$this->has_completed_profile($instance, $action->get_user_id())) {
             return;
@@ -76,19 +81,31 @@ class complete_profile implements type, type_with_state_initialisation, type_wit
         $instance->increment_counter(1);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         $currentfields = $objective ? $objective->get_type_config()->f ?? [] : [];
         return new complete_profile_config_form_extender($currentfields);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typecompleteprofile', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new \lang_string('typecompleteprofiledesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url(objective $objective, $urltype): ?moodle_url {
         if ($urltype === static::URLMODE_EDIT_PROFILE) {
             return new moodle_url('/user/edit.php');
@@ -96,10 +113,16 @@ class complete_profile implements type, type_with_state_initialisation, type_wit
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof profile_updated;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -209,14 +232,21 @@ class complete_profile implements type, type_with_state_initialisation, type_wit
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class complete_profile_config_form_extender implements extender, extender_with_supporting_url_modes {
-
     /** @var array */
     protected $currentfields;
 
+    /**
+     * Constructor.
+     *
+     * @param array $currentfields Currentfields.
+     */
     public function __construct(array $currentfields = []) {
         $this->currentfields = $currentfields;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         global $DB;
 
@@ -248,7 +278,6 @@ class complete_profile_config_form_extender implements extender, extender_with_s
         foreach ($fieldcategories as $category) {
             $fields = $DB->get_records('user_info_field', ['categoryid' => $category->id], 'sortorder ASC');
             foreach ($fields as $fieldrecord) {
-
                 // We cannot check visibility using the field class itself as its logic is too vague.
                 if ($fieldrecord->visible != PROFILE_VISIBLE_ALL) {
                     continue;
@@ -289,16 +318,25 @@ class complete_profile_config_form_extender implements extender, extender_with_s
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url_modes(): array {
         return [
             complete_profile::URLMODE_EDIT_PROFILE => get_string('editprofilepage', 'block_gearup'),
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if (empty($data->cd_f) || count($data->cd_f) <= 0) {
@@ -306,5 +344,4 @@ class complete_profile_config_form_extender implements extender, extender_with_s
         }
         return $errors;
     }
-
 }

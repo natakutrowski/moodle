@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\xp;
 
@@ -27,7 +27,11 @@ namespace block_gearup\local\xp;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class achievement_unlocked_reason extends mission_completed_reason {
-
+    /**
+     * Get short description.
+     *
+     * @return mixed
+     */
     public function get_short_description() {
         return get_string('achievementunlocked', 'block_gearup');
     }
@@ -38,5 +42,4 @@ class achievement_unlocked_reason extends mission_completed_reason {
     public static function get_type() {
         return __CLASS__;
     }
-
 }

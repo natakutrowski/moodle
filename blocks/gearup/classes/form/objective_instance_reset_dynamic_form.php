@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\form;
 
@@ -32,7 +32,9 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class objective_instance_reset_dynamic_form extends improved_dynamic_form {
-
+    /**
+     * {@inheritDoc}
+     */
     public function definition() {
         $mform = $this->_form;
         $mform->setDisableShortforms(true);
@@ -136,9 +138,9 @@ class objective_instance_reset_dynamic_form extends improved_dynamic_form {
      * @return \moodle_url
      */
     protected function get_page_url_for_dynamic_submission(): \moodle_url {
-        return $this->get_url_resolver()->reverse('mission',
+        return $this->get_url_resolver()->reverse(
+            'mission',
             ['missionid' => $this->get_mission_instance()->get_mission()->get_id()]
         );
     }
-
 }

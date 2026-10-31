@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Router.
@@ -39,7 +39,6 @@ use moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class router {
-
     /** @var url_resolver The URL resolver. */
     protected $urlresolver;
 
@@ -91,5 +90,4 @@ class router {
 
         return new $class();
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Adhoc task.
@@ -38,7 +38,9 @@ use block_gearup\di;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_evaluate_adhoc extends \core\task\adhoc_task {
-
+    /**
+     * {@inheritDoc}
+     */
     public function execute() {
         // Must contain missionid.
         $data = $this->get_custom_data();
@@ -56,11 +58,10 @@ class mission_evaluate_adhoc extends \core\task\adhoc_task {
             return;
         }
 
-        // TODO It is unnecessary to fetch conpleted instances here.
+        // Future work: It is unnecessary to fetch conpleted instances here.
         $missioninsts = $repository->get_instances($data->missionid);
         foreach ($missioninsts as $missioninst) {
             $missionoperator->evaluate_instance($missioninst);
         }
     }
-
 }

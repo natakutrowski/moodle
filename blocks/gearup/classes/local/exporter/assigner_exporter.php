@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Level Up Quest.
 //
 // Level Up Quest is free software: you can redistribute it and/or modify
@@ -15,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Exporter.
@@ -40,7 +39,6 @@ use renderer_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assigner_exporter extends \core\external\exporter {
-
     /** @var assigner The assigner. */
     protected $assigner;
 

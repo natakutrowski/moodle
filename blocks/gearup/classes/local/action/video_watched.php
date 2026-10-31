@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Action.
@@ -38,10 +38,12 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class video_watched extends static_action {
-
     /** @var string The video unique identifier. */
     protected $videoid;
 
+    /**
+     * {@inheritDoc}
+     */
     public function __construct($userid, context $context, string $videoid) {
         $this->videoid = $videoid;
         return parent::__construct($userid, $context);
@@ -55,5 +57,4 @@ class video_watched extends static_action {
     public function get_video_id(): string {
         return $this->videoid;
     }
-
 }

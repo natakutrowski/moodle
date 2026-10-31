@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Container.
@@ -38,7 +38,6 @@ use cache;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class default_container implements container {
-
     /** @var array The objects supported by this container. */
     protected static $supports = [
         'achievement_badges_repository' => true,
@@ -465,5 +464,4 @@ class default_container implements container {
     public function has($id) {
         return array_key_exists($id, static::$supports);
     }
-
 }

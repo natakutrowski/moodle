@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 use block_gearup\di;
 use block_gearup\local\visual\visual;
@@ -35,7 +35,6 @@ require_once($CFG->libdir . '/form/group.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_gearup_form_imagegroup extends MoodleQuickForm_group {
-
     /** @var object[] Sections objects [label, options] with options [value, src]. */
     protected $options;
     /** @var string[] Of valid values. */
@@ -69,7 +68,7 @@ class block_gearup_form_imagegroup extends MoodleQuickForm_group {
             $alloptionvalues = array_merge($alloptionvalues, $option->options);
         }
 
-        // TODO If availability_info then remove from valid options. Although this may cause
+        // Future work: If availability_info then remove from valid options. Although this may cause
         // previous values that become unavailable from being included.
         $this->validvalues = array_map(function ($option) {
             return $option instanceof visual ? $option->get_id() : (string) $option['value'];
@@ -124,7 +123,6 @@ class block_gearup_form_imagegroup extends MoodleQuickForm_group {
         ];
         return $context;
     }
-
 }
 
 MoodleQuickForm::registerElementType('block_gearup_imagegroup', __FILE__, 'block_gearup_form_imagegroup');

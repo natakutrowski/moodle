@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -44,10 +44,17 @@ use block_gearup\local\controller\utils\mission_route_base;
 class mission_wizard_identity extends mission_route_base {
     use utils\mission_wizard_trait;
 
+    /** @var string Currentstep. */
     protected $currentstep = 'create';
 
+    /** @var mixed Form. */
     protected $form;
 
+    /**
+     * Get form.
+     *
+     * @return mixed
+     */
     protected function get_form() {
         if (!$this->form) {
             $persistent = $this->mission->get_persistent();
@@ -67,7 +74,6 @@ class mission_wizard_identity extends mission_route_base {
                 $this->form = new streak_identity_form($this->pageurl->out(false), [
                     'persistent' => $persistent,
                 ]);
-
             } else {
                 throw new \coding_exception('Invalid or unknown mission type.');
             }
@@ -75,10 +81,18 @@ class mission_wizard_identity extends mission_route_base {
         return $this->form;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_subpage_html_head_title() {
         return get_string('missionidentity', 'block_gearup');
     }
 
+    /**
+     * Get wizard title.
+     *
+     * @return mixed
+     */
     protected function get_wizard_title() {
         if ($this->is_achievement()) {
             return get_string('whatisidentityachievement', 'block_gearup');
@@ -92,6 +106,11 @@ class mission_wizard_identity extends mission_route_base {
         throw new \coding_exception('Unknown mission type.');
     }
 
+    /**
+     * Pre wizard content.
+     *
+     * @return void
+     */
     protected function pre_wizard_content() {
         $form = $this->get_form();
         if ($data = $form->get_data()) {
@@ -102,10 +121,14 @@ class mission_wizard_identity extends mission_route_base {
         }
     }
 
+    /**
+     * Wizard content.
+     *
+     * @return void
+     */
     protected function wizard_content() {
         $form = $this->get_form();
         $form->set_display_vertical();
         $form->display();
     }
-
 }

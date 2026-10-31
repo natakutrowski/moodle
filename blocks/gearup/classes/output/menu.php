@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Renderer.
@@ -42,10 +42,14 @@ use templatable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class menu implements templatable {
-
     /** @var array The menu items. */
     protected $items = [];
 
+    /**
+     * Constructor.
+     *
+     * @param array $items Items.
+     */
     public function __construct(array $items = []) {
         foreach ($items as $item) {
             if (empty($item['label'])) {
@@ -56,11 +60,19 @@ class menu implements templatable {
         }
     }
 
+    /**
+     * Add divider.
+     *
+     * @return self
+     */
     public function add_divider(): self {
         $this->items[] = ['isdivider' => true];
         return $this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function export_for_template(renderer_base $output) {
         $menuitems = array_values(array_filter(array_map(function ($item) {
             $attrs = [];
@@ -71,13 +83,11 @@ class menu implements templatable {
             foreach ($item as $key => $value) {
                 if ($key === 'label' || $key === 'class') {
                     continue;
-
                 } else if ($key === 'danger') {
                     if (empty($item['disabled'])) {
                         $classes[] = $value ? 'text-danger' : null;
                     }
                     continue;
-
                 } else if ($key === 'disabled') {
                     if (!$value) {
                         continue;
@@ -116,6 +126,11 @@ class menu implements templatable {
         ];
     }
 
+    /**
+     * Get read structure.
+     *
+     * @return external_single_structure
+     */
     public static function get_read_structure() {
         return new external_single_structure([
             'hasmenu' => new external_value(PARAM_BOOL, 'Whether the menu has items.'),
@@ -134,5 +149,4 @@ class menu implements templatable {
             ])),
         ]);
     }
-
 }

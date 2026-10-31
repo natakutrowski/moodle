@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -46,7 +46,9 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class delete_context_recruits_dynamic_form extends improved_dynamic_form {
-
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         $repo = di::get('repository');
         $context = $this->_dynamicdata['context'];
@@ -59,15 +61,18 @@ class delete_context_recruits_dynamic_form extends improved_dynamic_form {
 
         $userquery = (new user_query($context))->set_context_id($context->id);
         $nrecruits = $repo->count_users_from_query($userquery);
-        $mform->addElement('html', html_writer::div(markdown_to_html(get_string('deletecontextrecruitsintro',
+        $mform->addElement('html', html_writer::div(markdown_to_html(get_string(
+            'deletecontextrecruitsintro',
             'block_gearup',
             ['n' => $nrecruits]
         )), 'last-of-type:[&_p]:gu-mb-0'));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function process_dynamic_save() {
         if ($data = $this->get_data()) {
-
             // Executing or deferring the execution.
             $result = context_recruits_delete_adhoc::process_or_schedule_deletion($this->_dynamicdata['context']);
 
@@ -81,7 +86,8 @@ class delete_context_recruits_dynamic_form extends improved_dynamic_form {
             $nrecruits = $result->nrecruits ?? 0;
             $ninstances = $result->ninstances ?? 0;
             if ($nrecruits !== $ninstances) {
-                $message = get_string('successdeletedxrecruitsforymissions',
+                $message = get_string(
+                    'successdeletedxrecruitsforymissions',
                     'block_gearup',
                     ['recruits' => $nrecruits, 'missions' => $ninstances]
                 );
@@ -93,6 +99,9 @@ class delete_context_recruits_dynamic_form extends improved_dynamic_form {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function check_access_for_dynamic_submission(): void {
         global $USER;
 
@@ -100,19 +109,26 @@ class delete_context_recruits_dynamic_form extends improved_dynamic_form {
         $ap->require_manage();
 
         // Validate that the user is not at risk of deleting recruits they should not see.
-        if (course_utils::uses_group_mode($this->_dynamicdata['context'])
+        if (
+            course_utils::uses_group_mode($this->_dynamicdata['context'])
                 && !user_utils::can_view_all_participants($this->_dynamicdata['context'], $USER->id)
         ) {
             throw new \moodle_exception('accessnotpermittedcannotviewallparticipants', 'block_gearup');
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_default_data() {
         return (object) [
             'guctxid' => $this->optional_param('guctxid', 0, PARAM_INT),
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function initialise_for_dynamic_submission(): void {
         $contextid = $this->optional_param('guctxid', 0, PARAM_INT);
 
@@ -123,8 +139,10 @@ class delete_context_recruits_dynamic_form extends improved_dynamic_form {
         $this->_dynamicdata['context'] = $context;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_url_for_dynamic_submission(): \moodle_url {
         return $this->get_url_resolver()->reverse('users');
     }
-
 }

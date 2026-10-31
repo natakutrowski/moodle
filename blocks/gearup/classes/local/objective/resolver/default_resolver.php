@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Resolver.
@@ -40,12 +40,16 @@ use block_gearup\local\objective\type\type;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class default_resolver implements resolver {
-
     /** @var object */
     protected $lm;
     /** @var type[] The types. */
     protected $types;
 
+    /**
+     * Constructor.
+     *
+     * @param mixed $lm Lm.
+     */
     public function __construct($lm) {
         $this->lm = $lm;
     }
@@ -176,5 +180,4 @@ class default_resolver implements resolver {
         }
         return true;
     }
-
 }

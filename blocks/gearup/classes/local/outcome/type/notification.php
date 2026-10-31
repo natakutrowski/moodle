@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome.
@@ -50,13 +50,18 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class notification implements has_availability_info, type {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         $config = $outcome->get_type_config();
         $userid = $missioninst->get_subject_id();
         $this->send_message($userid, $config->subject, $config->message);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         global $CFG;
         $reasons = [];
@@ -69,14 +74,23 @@ class notification implements has_availability_info, type {
         return new static_info($messagingenabled, $reasons);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new notification_config_form_extender();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('outcomenotification', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('outcomenotificationdesc', 'block_gearup');
     }
@@ -118,7 +132,7 @@ class notification implements has_availability_info, type {
 
         // To be done when the quest gets its own URL.
         // $message->contextname       = null;
-        // $message->contexturl        = null;
+        // $message->contexturl        = null;.
         message_send($message);
     }
 }
@@ -132,7 +146,9 @@ class notification implements has_availability_info, type {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class notification_config_form_extender implements extender {
-
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els[] = $mform->addElement('text', 'cd_subject', get_string('messagesubject', 'block_gearup'));
         $mform->addRule('cd_subject', get_string('err_required', 'core_form'), 'required', null, 'client');
@@ -143,14 +159,19 @@ class notification_config_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
         return $errors;
     }
-
 }

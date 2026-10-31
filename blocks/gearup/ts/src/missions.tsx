@@ -61,9 +61,9 @@ const Pill = ({ onClick, children, active }: { onClick: () => void; children: Re
     return (
         <a
             className={classNames(
-                'gu-px-2 gu-py-1 gu-rounded gu-no-underline hover:gu-no-underline',
+                'gu-px-2 gu-py-1 gu-rounded !gu-no-underline',
                 !active
-                    ? 'gu-bg-gray-200 gu-text-inherit hover:gu-text-inherit hover:gu-bg-gray-100'
+                    ? 'gu-bg-gray-200 dark:gu-bg-gray-700 gu-text-inherit hover:gu-text-inherit hover:gu-bg-gray-100 dark:hover:gu-bg-gray-800'
                     : 'gu-bg-blue-600 gu-text-white hover:gu-text-white'
             )}
             {...props}
@@ -110,10 +110,10 @@ const App: React.FC<AppProps> = ({ missions, usechallenges, createchallengeurl, 
     if (!missions.length) {
         return (
             <ZeroStateBlock title={<Str id="nothinghereyet" />} subtitle={<Str id="getstartednewitem" />}>
-                <div className="gu-divide-y gu-divide-gray-200 gu-mt-4">
+                <div className="gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700 gu-mt-4">
                     <a
                         href={createquesturl}
-                        className="gu-p-4 gu-flex gu-flex-row gu-text-current gu-no-underline hover:gu-bg-gray-100"
+                        className="gu-p-4 gu-flex gu-flex-row gu-text-current !gu-no-underline hover:gu-bg-gray-100 dark:hover:gu-bg-gray-800"
                     >
                         <div className="gu-shrink-0 gu-w-12 gu-mr-4">
                             <QuestIcon />
@@ -122,7 +122,7 @@ const App: React.FC<AppProps> = ({ missions, usechallenges, createchallengeurl, 
                             <div className="gu-text-xl gu-text-medium">
                                 <Str id="quest" />
                             </div>
-                            <div className="gu-max-w-md gu-text-gray-500">
+                            <div className="gu-max-w-md gu-text-gray-500 dark:gu-text-gray-400">
                                 <Str id="questexplaination" />
                             </div>
                         </div>
@@ -130,7 +130,7 @@ const App: React.FC<AppProps> = ({ missions, usechallenges, createchallengeurl, 
 
                     <a
                         href={createachievementurl}
-                        className="gu-p-4 gu-flex gu-flex-row gu-text-current gu-no-underline hover:gu-bg-gray-100"
+                        className="gu-p-4 gu-flex gu-flex-row gu-text-current !gu-no-underline hover:gu-bg-gray-100 dark:hover:gu-bg-gray-800"
                     >
                         <div className="gu-shrink-0 gu-w-12 gu-mr-4">
                             <AchievementIcon />
@@ -139,7 +139,7 @@ const App: React.FC<AppProps> = ({ missions, usechallenges, createchallengeurl, 
                             <div className="gu-text-xl gu-text-medium">
                                 <Str id="achievement" />
                             </div>
-                            <div className="gu-max-w-md gu-text-gray-500">
+                            <div className="gu-max-w-md gu-text-gray-500 dark:gu-text-gray-400">
                                 <Str id="achievementexplaination" />
                             </div>
                         </div>
@@ -148,7 +148,7 @@ const App: React.FC<AppProps> = ({ missions, usechallenges, createchallengeurl, 
                     {usechallenges && createchallengeurl ? (
                         <a
                             href={createchallengeurl}
-                            className="gu-p-4 gu-flex gu-flex-row gu-text-current gu-no-underline hover:gu-bg-gray-100"
+                            className="gu-p-4 gu-flex gu-flex-row gu-text-current !gu-no-underline hover:gu-bg-gray-100 dark:hover:gu-bg-gray-800"
                         >
                             <div className="gu-shrink-0 gu-w-12 gu-mr-4">
                                 <ChallengeIcon />
@@ -157,7 +157,7 @@ const App: React.FC<AppProps> = ({ missions, usechallenges, createchallengeurl, 
                                 <div className="gu-text-xl gu-text-medium">
                                     <Str id="challenge" />
                                 </div>
-                                <div className="gu-max-w-md gu-text-gray-500">
+                                <div className="gu-max-w-md gu-text-gray-500 dark:gu-text-gray-400">
                                     <Str id="challengeexplaination" />
                                 </div>
                             </div>
@@ -203,12 +203,12 @@ const App: React.FC<AppProps> = ({ missions, usechallenges, createchallengeurl, 
             {filter && !finalMissions.length ? (
                 <ZeroStateBlock title={<Str id="nonehereyet" />} subtitle={<Str id="getstartednewone" />}></ZeroStateBlock>
             ) : (
-                <div className="gu-flex gu-flex-col gu-divide-y gu-divide-gray-200">
+                <div className="gu-flex gu-flex-col gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700">
                     {finalMissions.map((mission) => {
                         return (
                             <div key={mission.id}>
                                 <a
-                                    className="gu-rounded gu-p-2 gu-flex gu-gap-2 hover:gu-bg-gray-200 gu-transition-colors gu-text-inherit gu-no-underline hover:gu-no-underline hover:gu-text-inherit"
+                                    className="gu-rounded gu-p-2 gu-flex gu-gap-2 hover:gu-bg-gray-200 dark:hover:gu-bg-gray-700 gu-transition-colors gu-text-inherit !gu-no-underline hover:gu-text-inherit"
                                     href={mission.manageurl}
                                 >
                                     <div className="gu-h-12 gu-w-12 gu-shrink-0">
@@ -227,7 +227,7 @@ const App: React.FC<AppProps> = ({ missions, usechallenges, createchallengeurl, 
                                                 ) : null}
                                             </div>
                                         </div>
-                                        <div className="gu-text-xs gu-text-gray-500 gu-flex gu-items-center gu-leading-none">
+                                        <div className="gu-text-xs gu-text-gray-500 dark:gu-text-gray-400 gu-flex gu-items-center gu-leading-none">
                                             <div className="gu-flex gu-items-center gu-divide-x gu-grow">
                                                 <div className="gu-shrink-0 gu-flex gu-gap-1 gu-items-center gu-pr-1">
                                                     <div className="gu-w-4 gu-h-4 gu-shrink-0">
@@ -350,7 +350,7 @@ const AchievementBadge = ({ visual }: { visual: Mission['visual'] }) => {
 const QuestNarrator = ({ visual }: { visual: Mission['visual'] }) => {
     if (!visual) {
         return (
-            <div className="gu-flex gu-items-center gu-text-3xl gu-justify-center gu-h-full gu-w-full gu-bg-gray-200 gu-p-1 gu-rounded">
+            <div className="gu-flex gu-items-center gu-text-3xl gu-justify-center gu-h-full gu-w-full gu-bg-gray-200 dark:gu-bg-gray-700 gu-p-1 gu-rounded">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"

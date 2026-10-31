@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Objective type.
@@ -43,7 +43,6 @@ use lang_string;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface type {
-
     /**
      * Consume the action.
      *
@@ -83,12 +82,12 @@ interface type {
      */
     public function get_short_description(): lang_string;
 
-    // /**
-    // * Get the state structure.
-    // *
-    // * @return external_description
-    // */
-    // public function get_state_structure(): \external_description;
+    /*
+     * Get the state structure.
+     *
+     * @return external_description
+     * public function get_state_structure(): \external_description;
+     */
 
     /**
      * Whether the objective type is compatible with the action.
@@ -111,5 +110,4 @@ interface type {
         objective_instance $instance,
         mission_instance $missioninst
     ): bool;
-
 }

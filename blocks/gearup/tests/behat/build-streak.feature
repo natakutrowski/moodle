@@ -50,7 +50,8 @@ Feature: Testing build up a streak
     And I follow "Great Streak"
     And I follow "Recruits"
     And I follow "Student One"
-    And I choose the "View" item in the "Menu" action menu
+    And I open the action menu in ".flexible" "css_element"
+    And I click on "View" "link" in the ".flexible" "css_element"
     And I press "Finalise"
     And I click on "Finalise" "button" in the "Finalise mission" "dialogue"
 

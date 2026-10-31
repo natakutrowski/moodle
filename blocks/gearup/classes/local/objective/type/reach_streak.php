@@ -14,7 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
+
+/**
+ * Objective.
+ *
+ * @package    block_gearup
+ * @copyright  2025 Frédéric Massart
+ * @author     Frédéric Massart <fred@branchup.tech>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace block_gearup\local\objective\type;
 
@@ -44,12 +53,14 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class reach_streak implements type, type_with_state_initialisation {
-
     /** Any. */
     const WHICH_ANY = 0;
     /** Any in context. */
     const WHICH_ANY_IN_CONTEXT = 1;
 
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
         $repo = di::get('repository');
         $objective = $instance->get_objective();
@@ -85,6 +96,9 @@ class reach_streak implements type, type_with_state_initialisation {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof streak_reached) {
             return false;
@@ -92,14 +106,26 @@ class reach_streak implements type, type_with_state_initialisation {
         $instance->increment_counter(1);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new reach_streak_config_form($mission, di::get('repository'));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typereachstreak', 'block_gearup');
     }
 
+    /**
+     * Get normalised config.
+     *
+     * @param objective $objective Objective.
+     * @return \stdClass
+     */
     protected function get_normalised_config(objective $objective): \stdClass {
         $config = $objective->get_type_config();
         $config->which = (int) ($config->which ?? static::WHICH_ANY);
@@ -107,14 +133,23 @@ class reach_streak implements type, type_with_state_initialisation {
         return $config;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typereachstreakdesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof streak_reached;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -145,7 +180,6 @@ class reach_streak implements type, type_with_state_initialisation {
 
         return true;
     }
-
 }
 
 
@@ -158,9 +192,11 @@ class reach_streak implements type, type_with_state_initialisation {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class reach_streak_config_form implements extender {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Repository. */
     protected $repository;
 
     /**
@@ -175,6 +211,9 @@ class reach_streak_config_form implements extender {
         $this->repository = $repository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
@@ -201,6 +240,9 @@ class reach_streak_config_form implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         $data->cd_which = (int) $data->cd_which;
         $data->cd_streak = (int) $data->cd_streak;
@@ -208,6 +250,9 @@ class reach_streak_config_form implements extender {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if ($data->cd_streak <= 1) {
@@ -215,5 +260,4 @@ class reach_streak_config_form implements extender {
         }
         return $errors;
     }
-
 }

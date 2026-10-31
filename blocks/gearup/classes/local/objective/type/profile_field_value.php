@@ -14,7 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
+
+/**
+ * Objective.
+ *
+ * @package    block_gearup
+ * @copyright  2025 Frédéric Massart
+ * @author     Frédéric Massart <fred@branchup.tech>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace block_gearup\local\objective\type;
 
@@ -49,7 +58,6 @@ require_once($CFG->dirroot . '/user/profile/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class profile_field_value implements type, type_with_state_initialisation {
-
     /** Int. */
     const VALUE_TYPE_INT = 'int';
     /** Text. */
@@ -57,6 +65,9 @@ class profile_field_value implements type, type_with_state_initialisation {
     /** Bool. */
     const VALUE_TYPE_BOOL = 'bool';
 
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
         $userid = $missioninst->get_subject_id();
         $value = $this->get_tracked_counter_value($instance, $userid, true);
@@ -65,6 +76,9 @@ class profile_field_value implements type, type_with_state_initialisation {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         $config = $this->get_normalised_config($instance->get_objective());
         $userid = $missioninst->get_subject_id();
@@ -75,7 +89,6 @@ class profile_field_value implements type, type_with_state_initialisation {
             if (!$keepbest) {
                 $instance->reset_counter();
             }
-
         } else if ($value >= 1) {
             if ($config->track) {
                 if (!$keepbest || $instance->get_counter() < $value) {
@@ -89,23 +102,38 @@ class profile_field_value implements type, type_with_state_initialisation {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         $config = $this->get_normalised_config($objective ? $objective : null);
         return new profile_field_value_config_form_extender($mission->get_context(), $config->f ?? null);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typeprofilefieldvalue', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new \lang_string('typeprofilefieldvaluedesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof user_modified || $action instanceof profile_updated;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -141,11 +169,9 @@ class profile_field_value implements type, type_with_state_initialisation {
                 && in_array($config->c, ['eq', 'gte'])
                 && $config->v > 1;
             $config->keepbest = $config->track && $config->keepbest ?? false;
-
         } else if ($config->t === static::VALUE_TYPE_TEXT) {
             $config->c ??= 'eq';
             $config->v = $config->v ?? '';
-
         } else if ($config->t === static::VALUE_TYPE_BOOL) {
             $config->c ??= 'true';
         }
@@ -200,14 +226,12 @@ class profile_field_value implements type, type_with_state_initialisation {
                         return max(0, min($testvalue, $value));
                     }
                     return $passes ? 1 : 0;
-
                 } else if ($condition === 'gte') {
                     $passes = $value >= $testvalue ? true : false;
                     if ($config->track && $testvalue > 0) {
                         return max(0, min($testvalue, $value));
                     }
                     return $passes ? 1 : 0;
-
                 } else if ($condition === 'gt') {
                     return $value > $testvalue ? 1 : 0;
                 } else if ($condition === 'lt') {
@@ -244,7 +268,6 @@ class profile_field_value implements type, type_with_state_initialisation {
 
         return 0;
     }
-
 }
 
 /**
@@ -256,7 +279,6 @@ class profile_field_value implements type, type_with_state_initialisation {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class profile_field_value_config_form_extender implements extender, extender_with_default_data {
-
     /** @var \context */
     protected $context;
     /** @var ?string */
@@ -272,6 +294,9 @@ class profile_field_value_config_form_extender implements extender, extender_wit
         $this->currentfield = $currentfield;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         global $DB;
 
@@ -283,13 +308,13 @@ class profile_field_value_config_form_extender implements extender, extender_wit
         foreach ($fieldcategories as $category) {
             $options = [];
 
-            $fields = $DB->get_records_select('user_info_field',
+            $fields = $DB->get_records_select(
+                'user_info_field',
                 'categoryid = ? AND datatype IN (?, ?)',
                 [$category->id, 'text', 'checkbox'],
                 'sortorder ASC'
             );
             foreach ($fields as $fieldrecord) {
-
                 // Only allow tracking of the value when the user could see others value, else this could leak data.
                 $anycapability = [];
                 if ($fieldrecord->visible == PROFILE_VISIBLE_ALL) {
@@ -395,6 +420,9 @@ class profile_field_value_config_form_extender implements extender, extender_wit
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         $data->countneeded = 1;
         $data->cd_c = 'eq';
@@ -410,11 +438,9 @@ class profile_field_value_config_form_extender implements extender, extender_wit
             if ($data->cd_track && in_array($data->cd_cond_number, ['eq', 'gte'])) {
                 $data->countneeded = max(1, $data->cd_v);
             }
-
         } else if ($data->cd_t === profile_field_value::VALUE_TYPE_TEXT) {
             $data->cd_c = $data->cd_cond_text;
             $data->cd_v = $data->cd_value_text ?? '';
-
         } else if ($data->cd_t === profile_field_value::VALUE_TYPE_BOOL) {
             $data->cd_c = $data->cd_cond_bool;
         }
@@ -428,17 +454,18 @@ class profile_field_value_config_form_extender implements extender, extender_wit
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_default_data($data) {
         $data->cd_t = $data->cd_t ?? null;
 
         if ($data->cd_t === profile_field_value::VALUE_TYPE_INT) {
             $data->cd_cond_number = $data->cd_c ?? null;
             $data->cd_value_number = $data->cd_v ?? null;
-
         } else if ($data->cd_t === profile_field_value::VALUE_TYPE_TEXT) {
             $data->cd_cond_text = $data->cd_c ?? null;
             $data->cd_value_text = $data->cd_v ?? null;
-
         } else if ($data->cd_t === profile_field_value::VALUE_TYPE_BOOL) {
             $data->cd_cond_bool = $data->cd_c;
         }
@@ -446,6 +473,9 @@ class profile_field_value_config_form_extender implements extender, extender_wit
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -461,5 +491,4 @@ class profile_field_value_config_form_extender implements extender, extender_wit
 
         return $errors;
     }
-
 }

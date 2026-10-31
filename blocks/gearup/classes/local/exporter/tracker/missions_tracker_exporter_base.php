@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\exporter\tracker;
 
@@ -27,7 +27,6 @@ namespace block_gearup\local\exporter\tracker;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class missions_tracker_exporter_base extends \core\external\exporter {
-
     /** @var int The user ID. */
     protected $userid;
 
@@ -54,5 +53,4 @@ abstract class missions_tracker_exporter_base extends \core\external\exporter {
             'url_resolver' => 'block_gearup\local\routing\url_resolver?',
         ];
     }
-
 }

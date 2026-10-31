@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\utils;
 
@@ -31,7 +31,6 @@ use core_user\fields;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user_utils {
-
     /**
      * Can select group in a group selector.
      *
@@ -324,7 +323,6 @@ class user_utils {
             $sql = "SELECT u.id, $sqlparts->selects FROM {user} u $sqlparts->joins WHERE u.id = :userid";
             $user = $DB->get_record_sql($sql, array_merge(['userid' => $userid], $sqlparts->params), MUST_EXIST);
         } catch (\moodle_exception $e) {
-
             // The exception is likely to happen when a database field no longer exists, as the core code does
             // a JOIN on the field table, leading to returning nothing for an invalid custom field.
 
@@ -364,7 +362,8 @@ class user_utils {
         }
         if ($loaddefaults && !empty($nullcustomfields)) {
             [$insql, $inparams] = $DB->get_in_or_equal($nullcustomfields, SQL_PARAMS_NAMED);
-            $defaultvalues = $DB->get_records_select('user_info_field',
+            $defaultvalues = $DB->get_records_select(
+                'user_info_field',
                 "shortname $insql AND defaultdata IS NOT NULL",
                 $inparams,
                 '',
@@ -393,5 +392,4 @@ class user_utils {
             'email' => get_string('email', 'core'),
         ], array_flip($identityfields));
     }
-
 }

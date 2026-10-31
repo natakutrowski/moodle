@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Adhoc task.
@@ -41,7 +41,9 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class context_recruits_delete_adhoc extends \core\task\adhoc_task {
-
+    /**
+     * {@inheritDoc}
+     */
     public function execute() {
         // Must contain contextid.
         $data = $this->get_custom_data();
@@ -120,5 +122,4 @@ class context_recruits_delete_adhoc extends \core\task\adhoc_task {
 
         return static::delete_recruits($context->id);
     }
-
 }

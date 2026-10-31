@@ -1,5 +1,5 @@
 {{^hasoutcomes}}
-<div class="gu-border-dashed gu-border-gray-200 gu-border-2 gu-rounded-lg gu-p-4" id="outcomes-list-{{ uniqid }}">
+<div class="gu-border-dashed gu-border-gray-200 dark:gu-border-gray-700 gu-border-2 gu-rounded-lg gu-p-4" id="outcomes-list-{{ uniqid }}">
     <div class="gu-text-lg gu-font-medium gu-leading-none">
         {{#str}} nooutcomes, block_gearup{{/str}}
     </div>
@@ -25,7 +25,7 @@
 </div>
 {{/hasoutcomes}}
 {{#hasoutcomes}}
-<div class="gu-divide-y gu-divide-gray-200" id="outcomes-list-{{ uniqid }}">
+<div class="gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700" id="outcomes-list-{{ uniqid }}">
     {{#outcomes}}
     <div class="gu-flex gu-py-4 sm:gu-py-4 first:gu-pt-0 last:gu-pb-0">
         <div class="gu-grow">
@@ -33,7 +33,7 @@
             <div class="">
                 {{ label }}
             </div>
-            <div class="gu-text-xs gu-text-gray-700">
+            <div class="gu-text-xs gu-text-gray-700 dark:gu-text-gray-300">
                 {{ type }}
             </div>
             {{/ isreward }}
@@ -45,15 +45,18 @@
         </div>
         {{#iseditable}}
         <div class="gu-ml-2 gu-shrink-0">
-            <button class="btn btn-secondary btn-sm"
-                data-gu-action="open-form"
-                data-form-class="block_gearup\form\outcome_dynamic_form"
-                data-form-args__id="{{ id }}"
-                data-form-args__missionid="{{ missionid }}"
-                data-modal-title="{{#str}} editoutcome, block_gearup {{/str}}">
-                <span class="gu-sr-only">{{#str}} edit {{/str}}</span>
-                {{#pix}} i/edit {{/pix}}
-            </button>
+            {{< block_gearup/widgets/dropdown-vdots }}
+            {{$ items }}
+                <button class="dropdown-item" type="button"
+                    data-gu-action="open-form"
+                    data-form-class="block_gearup\form\outcome_dynamic_form"
+                    data-form-args__id="{{ id }}"
+                    data-form-args__missionid="{{ missionid }}"
+                    data-modal-title="{{#str}} editoutcome, block_gearup {{/str}}">
+                    {{#str}} edit, core {{/str}}
+                </button>
+            {{/ items }}
+            {{/ block_gearup/widgets/dropdown-vdots }}
         </div>
         {{/iseditable}}
     </div>

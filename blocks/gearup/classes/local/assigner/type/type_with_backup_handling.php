@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Assigner type backup handling.
@@ -40,7 +40,6 @@ use block_gearup\local\mission\mission;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface type_with_backup_handling extends type {
-
     /**
      * Process backup.
      *
@@ -49,5 +48,4 @@ interface type_with_backup_handling extends type {
      * @param mission $mission The mission.
      */
     public function extend_backup(backup_facade $backup, assigner $assigner, mission $mission);
-
 }

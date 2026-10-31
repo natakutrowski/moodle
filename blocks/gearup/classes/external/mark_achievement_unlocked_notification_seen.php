@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * External.
@@ -37,7 +37,6 @@ namespace block_gearup\external;
  * @deprecated Since Quest 1.6, use mark_mission_seen instead.
  */
 class mark_achievement_unlocked_notification_seen extends external_api {
-
     /**
      * Parameters.
      *
@@ -67,5 +66,4 @@ class mark_achievement_unlocked_notification_seen extends external_api {
     public static function execute_returns() {
         return new external_value(PARAM_BOOL, '');
     }
-
 }

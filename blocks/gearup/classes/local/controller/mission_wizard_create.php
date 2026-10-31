@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -45,10 +45,17 @@ use block_gearup\local\model\mission;
 class mission_wizard_create extends route_base {
     use utils\mission_wizard_trait;
 
+    /** @var string Currentstep. */
     protected $currentstep = 'create';
 
+    /** @var mixed Form. */
     protected $form;
 
+    /**
+     * Get form.
+     *
+     * @return mixed
+     */
     protected function get_form() {
         if (!$this->form) {
             $type = $this->get_param('type');
@@ -80,7 +87,6 @@ class mission_wizard_create extends route_base {
                     'placeholdertitle' => get_string('samplemyfirststreak', 'block_gearup'),
                 ]);
                 $this->form->set_data(['title' => get_string('samplemyfirststreak', 'block_gearup')]);
-
             } else {
                 throw new \coding_exception('Invalid or unknown mission type.');
             }
@@ -88,6 +94,9 @@ class mission_wizard_create extends route_base {
         return $this->form;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_html_head_title() {
         if ($this->get_param('type') === 'achievement') {
             return get_string('newachievement', 'block_gearup');
@@ -101,6 +110,11 @@ class mission_wizard_create extends route_base {
         throw new \coding_exception('Unknown mission type.');
     }
 
+    /**
+     * Get wizard title.
+     *
+     * @return mixed
+     */
     protected function get_wizard_title() {
         if ($this->get_param('type') === 'achievement') {
             return get_string('whatisidentityachievement', 'block_gearup');
@@ -114,13 +128,17 @@ class mission_wizard_create extends route_base {
         throw new \coding_exception('Unknown mission type.');
     }
 
+    /**
+     * Pre wizard content.
+     *
+     * @return void
+     */
     protected function pre_wizard_content() {
         $form = $this->get_form();
         if ($data = $form->get_data()) {
             $mission = new mission(0, $data);
             $mission->create();
             $this->redirect($this->get_wizard_next_url($mission));
-
         } else if ($form->is_cancelled()) {
             $returnurl = $this->urlresolver->reverse('missions');
             if ($this->get_param('type') === 'streak') {
@@ -130,10 +148,14 @@ class mission_wizard_create extends route_base {
         }
     }
 
+    /**
+     * Wizard content.
+     *
+     * @return void
+     */
     protected function wizard_content() {
         $form = $this->get_form();
         $form->set_display_vertical();
         $form->display();
     }
-
 }

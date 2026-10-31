@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Restore.
@@ -39,7 +39,6 @@ use block_gearup\local\model\mission;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_gearup_block_structure_step extends restore_structure_step {
-
     /** @var \restore_gearup_block_task */
     protected $task;
     /** @var int[] */
@@ -76,7 +75,8 @@ class restore_gearup_block_structure_step extends restore_structure_step {
 
         if ($userinfo) {
             $paths[] = new restore_path_element('block_gearup_missioninst', '/block/missions/mission/missioninsts/missioninst');
-            $paths[] = new restore_path_element('block_gearup_objinst',
+            $paths[] = new restore_path_element(
+                'block_gearup_objinst',
                 '/block/missions/mission/missioninsts/missioninst/objinsts/objinst'
             );
         }
@@ -98,7 +98,8 @@ class restore_gearup_block_structure_step extends restore_structure_step {
             $this->log('block_gearup: deleting all data in target course', backup::LOG_DEBUG);
 
             // Removing objective instances.
-            $DB->delete_records_subquery('block_gearup_objective_inst',
+            $DB->delete_records_subquery(
+                'block_gearup_objective_inst',
                 'missioninstid',
                 'id',
                 'SELECT mi.id
@@ -110,7 +111,8 @@ class restore_gearup_block_structure_step extends restore_structure_step {
             );
 
             // Removing mission instances.
-            $DB->delete_records_subquery('block_gearup_mission_inst',
+            $DB->delete_records_subquery(
+                'block_gearup_mission_inst',
                 'missionid',
                 'id',
                 'SELECT m.id
@@ -120,7 +122,8 @@ class restore_gearup_block_structure_step extends restore_structure_step {
             );
 
             // Removing mission objectives.
-            $DB->delete_records_subquery('block_gearup_objective',
+            $DB->delete_records_subquery(
+                'block_gearup_objective',
                 'missionid',
                 'id',
                 'SELECT m.id
@@ -130,7 +133,8 @@ class restore_gearup_block_structure_step extends restore_structure_step {
             );
 
             // Removing mission outcomes.
-            $DB->delete_records_subquery('block_gearup_outcome',
+            $DB->delete_records_subquery(
+                'block_gearup_outcome',
                 'missionid',
                 'id',
                 'SELECT m.id
@@ -140,7 +144,8 @@ class restore_gearup_block_structure_step extends restore_structure_step {
             );
 
             // Removing mission assigners.
-            $DB->delete_records_subquery('block_gearup_assigner',
+            $DB->delete_records_subquery(
+                'block_gearup_assigner',
                 'missionid',
                 'id',
                 'SELECT m.id
@@ -189,6 +194,7 @@ class restore_gearup_block_structure_step extends restore_structure_step {
         global $DB, $USER;
 
         $oldid = $data['id'];
+        $data['sortorder'] = $data['sortorder'] ?? $oldid;
         $data['missionid'] = $this->get_new_parentid('block_gearup_mission');
         $data['usermodified'] = $this->get_mappingid('user', $data['usermodified'], $USER->id);
         unset($data['id']);
@@ -258,7 +264,8 @@ class restore_gearup_block_structure_step extends restore_structure_step {
 
         // Fix iteration of missions that were restored without the iteration field.
         foreach ($this->fixiterationofmissions as $missionid) {
-            $missioninsts = $DB->get_recordset_select('block_gearup_mission_inst',
+            $missioninsts = $DB->get_recordset_select(
+                'block_gearup_mission_inst',
                 'missionid = ? AND iteration > 0',
                 [$missionid],
                 'subjectid ASC, iteration ASC, timecreated ASC'
@@ -303,5 +310,4 @@ class restore_gearup_block_structure_step extends restore_structure_step {
             $processor->process_restore($restore);
         }
     }
-
 }

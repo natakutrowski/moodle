@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -44,13 +44,16 @@ use core_user;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_user extends mission_route_base {
-
+    /** @var string Missionnavname. */
     protected $missionnavname = 'mission_users';
     /** @var \stdClass The user. */
     protected $user;
     /** @var bool */
     protected $supportsgroups = true;  // To validate access.
 
+    /**
+     * {@inheritDoc}
+     */
     protected function define_optional_params() {
         return [
             ['action', false, PARAM_ALPHANUMEXT, false],
@@ -58,6 +61,9 @@ class mission_user extends mission_route_base {
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function post_login() {
         parent::post_login();
 
@@ -66,15 +72,20 @@ class mission_user extends mission_route_base {
         $this->user = $user;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_subpage_html_head_title() {
         return fullname($this->user);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function pre_content() {
         parent::pre_content();
 
         if ($this->get_param('action') === 'delete') {
-
             if (!$this->missionhelper->is_active($this->mission)) {
                 throw new \coding_exception('The mission is not active.');
             }
@@ -90,6 +101,9 @@ class mission_user extends mission_route_base {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         global $PAGE;
         $output = $this->get_renderer();

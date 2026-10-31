@@ -1,5 +1,5 @@
 {{^hasobjectives}}
-<div class="gu-border-dashed gu-border-gray-200 gu-border-2 gu-rounded-lg gu-p-4" id="objectives-list-{{ uniqid }}">
+<div class="gu-border-dashed gu-border-gray-200 dark:gu-border-gray-700 gu-border-2 gu-rounded-lg gu-p-4" id="objectives-list-{{ uniqid }}">
     <div class="gu-text-lg gu-font-medium gu-leading-none">
         {{#str}} noobjectives, block_gearup{{/str}}
     </div>
@@ -25,7 +25,7 @@
 </div>
 {{/hasobjectives}}
 {{#hasobjectives}}
-<div class="gu-divide-y gu-divide-gray-200" id="objectives-list-{{ uniqid }}">
+<div class="gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700" id="objectives-list-{{ uniqid }}">
     {{#objectives}}
     <div class="gu-flex gu-py-4 sm:gu-py-4 first:gu-pt-0 last:gu-pb-0">
         {{^ label}}
@@ -43,22 +43,37 @@
             <div class="">
                 {{ label }}
             </div>
-            <div class="gu-text-xs gu-text-gray-700">
+            <div class="gu-text-xs gu-text-gray-700 dark:gu-text-gray-300">
                 {{ countneeded }}x {{ type }}
             </div>
         </div>
         {{/ label }}
         {{#iseditable}}
         <div class="gu-ml-2 gu-shrink-0">
-            <button class="btn btn-secondary btn-sm"
-                data-gu-action="open-form"
-                data-form-class="block_gearup\form\objective_dynamic_form"
-                data-form-args__id="{{ id }}"
-                data-form-args__missionid="{{ missionid }}"
-                data-modal-title="{{#str}} editobjective, block_gearup {{/str}}">
-                <span class="gu-sr-only">{{#str}} edit {{/str}}</span>
-                {{#pix}} i/edit {{/pix}}
-            </button>
+            {{< block_gearup/widgets/dropdown-vdots }}
+            {{$ items }}
+                <button class="dropdown-item" type="button"
+                    data-gu-action="open-form"
+                    data-form-class="block_gearup\form\objective_dynamic_form"
+                    data-form-args__id="{{ id }}"
+                    data-form-args__missionid="{{ missionid }}"
+                    data-modal-title="{{#str}} editobjective, block_gearup {{/str}}">
+                    {{#str}} edit, core {{/str}}
+                </button>
+                {{^isfirst}}
+                <button class="dropdown-item" type="button" data-action="reorder-objective"
+                    data-objectiveid="{{ id }}" data-direction="up">
+                    {{#str}} moveup, core {{/str}}
+                </button>
+                {{/isfirst}}
+                {{^islast}}
+                <button class="dropdown-item" type="button" data-action="reorder-objective"
+                    data-objectiveid="{{ id }}" data-direction="down">
+                    {{#str}} movedown, core {{/str}}
+                </button>
+                {{/islast}}
+            {{/ items }}
+            {{/ block_gearup/widgets/dropdown-vdots }}
         </div>
         {{/iseditable}}
     </div>
@@ -85,8 +100,22 @@
 
 {{#iseditable}}
 {{#js}}
-require(['block_gearup/modal_form', 'block_gearup/react-launcher'], function(ModalForm, ReactLauncher) {
+require(['block_gearup/modal_form', 'block_gearup/react-launcher', 'block_gearup/utils',
+        'block_gearup/refreshable', 'core/notification', 'block_gearup/role_button'],
+        function(ModalForm, ReactLauncher, Utils, Refreshable, Notification, RoleButton) {
 ReactLauncher.registerLaunchInModal('#objectives-list-{{ uniqid }}', '[data-action=new-resource]');
+
+RoleButton.delegateClick('#objectives-list-{{ uniqid }}', '[data-action="reorder-objective"]', async(button) => {
+    try {
+        await Utils.ws('block_gearup_reorder_objective', {
+            objectiveid: button.dataset.objectiveid,
+            direction: button.dataset.direction,
+        });
+        await Refreshable.smartRefreshFromNode(button, true);
+    } catch (error) {
+        Notification.exception(error);
+    }
+});
 });
 {{/js}}
 {{/iseditable}}

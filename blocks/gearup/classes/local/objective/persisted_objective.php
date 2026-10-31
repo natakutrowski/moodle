@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Persisted objective.
@@ -41,36 +41,64 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class persisted_objective implements objective, objective_with_supporting_url {
-
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Persistent. */
     protected $persistent;
+    /** @var mixed Objtyperesolver. */
     protected $objtyperesolver;
 
+    /**
+     * Constructor.
+     *
+     * @param objective_persistent $persistent Persistent.
+     * @param mixed $objtyperesolver Objtyperesolver.
+     */
     public function __construct(objective_persistent $persistent, $objtyperesolver) {
         $this->persistent = $persistent;
         $this->objtyperesolver = $objtyperesolver;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_id(): int {
         return $this->persistent->get('id');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_count_needed(): int {
         return $this->persistent->get('countneeded');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_label(): string {
         return $this->persistent->get('label');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_mission_id(): int {
         return $this->persistent->get('missionid');
     }
 
+    /**
+     * Get persistent.
+     *
+     * @return objective_persistent
+     */
     public function get_persistent(): objective_persistent {
         return $this->persistent;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url(): ?moodle_url {
         $supportingurl = $this->persistent->get('supportingurl');
         if ($supportingurl === null) {
@@ -85,13 +113,18 @@ class persisted_objective implements objective, objective_with_supporting_url {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_type(): type {
         $type = $this->persistent->get('type');
         return $this->objtyperesolver->get_type($type);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_type_config() {
         return $this->persistent->get('configdata');
     }
-
 }

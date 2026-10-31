@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Static info.
@@ -36,7 +36,6 @@ namespace block_gearup\local\availability;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class static_info implements info {
-
     /** @var bool Whether available. */
     protected $isavailable;
     /** @var \lang_string[] The reasons. */
@@ -72,5 +71,4 @@ class static_info implements info {
     public function get_reasons(): array {
         return $this->reasons;
     }
-
 }

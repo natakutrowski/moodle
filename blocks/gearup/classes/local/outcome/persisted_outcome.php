@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Persisted outcome.
@@ -39,34 +39,57 @@ use block_gearup\local\outcome\type\type;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class persisted_outcome implements outcome {
-
+    /** @var mixed Persistent. */
     protected $persistent;
+    /** @var mixed Typeresolver. */
     protected $typeresolver;
 
+    /**
+     * Constructor.
+     *
+     * @param outcome_persistent $persistent Persistent.
+     * @param mixed $typeresolver Typeresolver.
+     */
     public function __construct(outcome_persistent $persistent, $typeresolver) {
         $this->persistent = $persistent;
         $this->typeresolver = $typeresolver;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_id(): int {
         return $this->persistent->get('id');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_label(): string {
         return $this->persistent->get('label');
     }
 
+    /**
+     * Get persistent.
+     *
+     * @return outcome_persistent
+     */
     public function get_persistent(): outcome_persistent {
         return $this->persistent;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_type(): type {
         $type = $this->persistent->get('type');
         return $this->typeresolver->get_type($type);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_type_config() {
         return $this->persistent->get('configdata');
     }
-
 }

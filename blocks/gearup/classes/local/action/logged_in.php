@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Logged in action.
@@ -36,9 +36,10 @@ namespace block_gearup\local\action;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class logged_in extends static_action {
-
+    /**
+     * {@inheritDoc}
+     */
     public function __construct($userid) {
         return parent::__construct($userid, SYSCONTEXTID);
     }
-
 }

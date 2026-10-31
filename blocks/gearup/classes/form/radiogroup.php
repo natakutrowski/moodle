@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\form;
 
@@ -37,7 +37,6 @@ require_once($CFG->libdir . '/form/group.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class radiogroup extends \MoodleQuickForm_group {
-
     /** The field name. */
     const FIELD_NAME = 'block_gearup_radiogroup';
 
@@ -125,7 +124,6 @@ class radiogroup extends \MoodleQuickForm_group {
     public static function register() {
         return static::FIELD_NAME;
     }
-
 }
 
 // The class was namespaced and renamed, so we keep the old alias name.

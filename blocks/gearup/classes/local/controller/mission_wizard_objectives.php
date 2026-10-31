@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -42,12 +42,21 @@ use html_writer;
 class mission_wizard_objectives extends mission_route_base {
     use utils\mission_wizard_trait;
 
+    /** @var string Currentstep. */
     protected $currentstep = 'objectives';
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_subpage_html_head_title() {
         return get_string('objectives', 'block_gearup');
     }
 
+    /**
+     * Get wizard title.
+     *
+     * @return mixed
+     */
     protected function get_wizard_title() {
         if ($this->is_achievement()) {
             return get_string('whatareobjectivesofachievement', 'block_gearup');
@@ -61,6 +70,11 @@ class mission_wizard_objectives extends mission_route_base {
         throw new \coding_exception('Unknown mission type');
     }
 
+    /**
+     * Wizard content.
+     *
+     * @return void
+     */
     protected function wizard_content() {
         $output = $this->get_renderer();
 
@@ -73,5 +87,4 @@ class mission_wizard_objectives extends mission_route_base {
             echo html_writer::div($button, 'gu-mt-6');
         }
     }
-
 }

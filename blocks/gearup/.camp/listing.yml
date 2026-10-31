@@ -1,0 +1,34 @@
+# Schema: https://camp-registry.org/schema/listing.schema.json
+name: Level Up Quest
+summary: Guide learners through quests, achievements and challenges with clear goals, progress tracking and rewards.
+
+description: |
+  ## Give learners a mission and a reason to keep going.
+
+  Level Up Quest brings quests, achievements and challenges to Moodle. Turn course participation into a series of goals, show learners what to do next and celebrate their progress.
+
+  ## Features
+
+  - Create quests with objectives, instructions and rewards.
+  - Recognise learner accomplishments with achievements.
+  - Set time-limited challenges and recurring streaks.
+  - Track activity, section and course completion, quiz attempts, participation and other learner actions.
+  - Recruit learners manually or automatically using recruitment rules.
+  - Follow learner progress through mission trackers, reports and insights.
+  - Reward completion with actions such as awarding badges, sending messages or assigning another quest.
+  - Unlock course content through the free Level Up Quest Availability companion plugin.
+
+  ## Requirements
+
+  Level Up Quest is a commercial plugin and requires a licence key for activation. Moodle 4.5 or later is required. Optional integrations may require additional plugins or services.
+
+  [Discover Level Up Quest](https://www.levelup.plus/quest/) or [read the documentation](https://docs.levelup.plus/quest/docs).
+
+labels:
+  - paid-service
+  - external-account
+  - commercial-support-available
+
+links:
+  docs: https://docs.levelup.plus/quest/docs
+  changelog: https://docs.levelup.plus/quest/release-notes

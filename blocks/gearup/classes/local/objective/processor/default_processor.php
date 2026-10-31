@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Processor.
@@ -51,7 +51,6 @@ use block_gearup\local\model\mission as mission_model;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class default_processor implements backup_processor, restore_processor {
-
     /** @var resolver The type resolver. */
     protected $objectivetyperesolver;
     /** @var object The repository. */
@@ -68,6 +67,9 @@ class default_processor implements backup_processor, restore_processor {
         $this->repository = $repository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function process_backup(backup_facade $backup) {
         global $DB;
 
@@ -102,6 +104,9 @@ class default_processor implements backup_processor, restore_processor {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function process_restore(restore_context $restore) {
         global $DB;
 

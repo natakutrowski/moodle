@@ -3,6 +3,7 @@ const plugin = require('tailwindcss/plugin');
 module.exports = {
     prefix: 'gu-',
     important: '.block_gearup',
+    darkMode: ['selector', '[data-bs-theme="dark"]'],
     content: [
         './templates/**/*.mustache',
         './amd/src/**/*.js',

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Complete section.
@@ -70,7 +70,6 @@ class complete_section implements
     type_with_state_initialisation,
     type_with_supporting_url,
     type_with_update_after_restore {
-
     /** Not unique. */
     const UNIQUENESS_DISABLED = 0;
     /** Unique per course. */
@@ -86,9 +85,12 @@ class complete_section implements
     /** URL mode section. */
     const URLMODE_SECTION = 1;
 
+    /**
+     * {@inheritDoc}
+     */
     public function initialise_state(objective_instance $instance, mission_instance $missioninst) {
 
-        // TODO Test this!
+        // Future work: Test this!
         $userid = $missioninst->get_subject_id();
         $objective = $instance->get_objective();
         $config = $objective->get_type_config();
@@ -143,6 +145,9 @@ class complete_section implements
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function consume_action(action $action, objective_instance $instance, mission_instance $missioninst) {
         if (!$action instanceof activity_completed) {
             return false;
@@ -171,10 +176,16 @@ class complete_section implements
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         return new completion_required_info();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_context(context $context): info {
         $coursecontext = $context->get_course_context(false);
         if ($coursecontext) {
@@ -186,18 +197,30 @@ class complete_section implements
         return new static_info(true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission, ?objective $objective): \block_gearup\local\form\extender {
         return new config_form($mission->get_context());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): \lang_string {
         return new \lang_string('typecompletesection', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): \lang_string {
         return new \lang_string('typecompletesectiondesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url(objective $objective, $urltype): ?moodle_url {
         if ($urltype === static::URLMODE_SECTION) {
             $config = $objective->get_type_config();
@@ -249,10 +272,16 @@ class complete_section implements
         return $state;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof activity_completed;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_action_passing_constraints(
         action $action,
         objective_instance $instance,
@@ -263,7 +292,7 @@ class complete_section implements
             return false;
         }
 
-        // TODO Ideally, we would want the system to be able to discard this before we retrieve the instance,
+        // Future work: Ideally, we would want the system to be able to discard this before we retrieve the instance,
         // as such that we do not need to retrieve an instance when the section is not completed yet.
         $objective = $instance->get_objective();
         $config = $objective->get_type_config();
@@ -346,9 +375,13 @@ class complete_section implements
         return $checker->is_completed($sectionnum);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, objective $objective, mission $mission) {
         if (!$objective instanceof persisted_objective) {
-            $restore->get_logger()->process("Cannot process after_restore of objective " . $objective->get_id(),
+            $restore->get_logger()->process(
+                "Cannot process after_restore of objective " . $objective->get_id(),
                 backup::LOG_WARNING
             );
             return;
@@ -374,7 +407,6 @@ class complete_section implements
             $restore->get_logger()->process("Error while updating objective " . $objective->get_id(), backup::LOG_WARNING);
         }
     }
-
 }
 
 /**
@@ -386,11 +418,15 @@ class complete_section implements
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class config_form implements extender, extender_with_default_data, extender_with_supporting_url_modes {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Coursecontext. */
     protected $coursecontext;
+    /** @var mixed Courseid. */
     protected $courseid;
+    /** @var mixed Incourse. */
     protected $incourse;
+    /** @var mixed Whichsectionoptions. */
     protected $whichsectionoptions;
 
     /**
@@ -417,13 +453,17 @@ class config_form implements extender, extender_with_default_data, extender_with
         $this->whichsectionoptions = $options;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
         $incourse = $this->incourse;
 
         $whichsectionoptions = $this->get_which_section_options();
-        $els[] = $mform->addElement('select',
+        $els[] = $mform->addElement(
+            'select',
             'cd_whichsection',
             get_string('elligiblesection', 'block_gearup'),
             $whichsectionoptions
@@ -435,7 +475,7 @@ class config_form implements extender, extender_with_default_data, extender_with
             $mform->freeze('cd_whichsection');
         }
 
-        // TODO If the course has been deleted get_section_name wil fail. And modinfo could be empty.
+        // Future work: If the course has been deleted get_section_name wil fail. And modinfo could be empty.
         if ($incourse) {
             $els[] = $mform->addElement('hidden', 'cd_courseid', $this->courseid);
             $mform->setType('cd_courseid', PARAM_INT);
@@ -443,7 +483,8 @@ class config_form implements extender, extender_with_default_data, extender_with
 
             $modinfo = course_utils::get_modinfo($this->courseid);
             $sections = $modinfo ? $modinfo->get_section_info_all() : [];
-            $els[] = $mform->addElement('select',
+            $els[] = $mform->addElement(
+                'select',
                 'cd_sectionnum',
                 get_string('choosesection', 'block_gearup'),
                 array_map(function ($sectioninfo) {
@@ -487,11 +528,17 @@ class config_form implements extender, extender_with_default_data, extender_with
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_default_data($data) {
         $data->cd_ignoreunavailable = empty($data->cd_ignoreunavailable) ? 0 : 1;
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         if ($data->cd_whichsection == complete_section::WHICH_SPECIFIC_SECTION_IN_COURSE) {
             $data->cd_uniqueness = complete_section::UNIQUENESS_DISABLED;
@@ -502,6 +549,9 @@ class config_form implements extender, extender_with_default_data, extender_with
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_supporting_url_modes(): array {
         if (!$this->incourse) {
             return [];
@@ -532,7 +582,6 @@ class config_form implements extender, extender_with_default_data, extender_with
                 case complete_section::WHICH_SPECIFIC_SECTION_IN_COURSE:
                     $label = get_string('specificsection', 'block_gearup');
                     break;
-
             }
 
             if ($label) {
@@ -543,6 +592,9 @@ class config_form implements extender, extender_with_default_data, extender_with
         }, []);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if (!isset($data->cd_whichsection)) {
@@ -550,5 +602,4 @@ class config_form implements extender, extender_with_default_data, extender_with
         }
         return $errors;
     }
-
 }

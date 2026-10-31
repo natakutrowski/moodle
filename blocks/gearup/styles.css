@@ -155,6 +155,7 @@
     position: relative;
 }
 .block_gearup .gu-sticky {
+    position: -webkit-sticky;
     position: sticky;
 }
 .block_gearup .gu--inset-1 {
@@ -628,7 +629,6 @@
 }
 .block_gearup .gu-select-none {
     -webkit-user-select: none;
-       -moz-user-select: none;
             user-select: none;
 }
 .block_gearup .gu-snap-y {
@@ -942,6 +942,9 @@
 .block_gearup .gu-bg-opacity-0 {
     --tw-bg-opacity: 0;
 }
+.block_gearup .gu-fill-white {
+    fill: #fff;
+}
 .block_gearup .gu-p-0 {
     padding: 0px;
 }
@@ -1181,6 +1184,9 @@
     --tw-text-opacity: 1;
     color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
+.block_gearup .\!gu-no-underline {
+    text-decoration-line: none !important;
+}
 .block_gearup .gu-no-underline {
     text-decoration-line: none;
 }
@@ -1324,6 +1330,12 @@
     --tw-text-opacity: 1;
     color: rgb(75 85 99 / var(--tw-text-opacity, 1));
 }
+.block_gearup  .gu-heading-xs:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-border-opacity: 1;
+    border-color: rgb(55 65 81 / var(--tw-border-opacity, 1));
+    --tw-text-opacity: 1;
+    color: rgb(156 163 175 / var(--tw-text-opacity, 1));
+}
 /** Hide accepted file types from some filemanager. **/
 .block_gearup :is( .gu-accepted-types-hidden fieldset input[type='hidden'] + p),:is(
     .block_gearup .gu-accepted-types-hidden fieldset .form-filetypes-descriptions) {
@@ -1396,10 +1408,6 @@
             opacity: 0;
         }
     }
-.block_gearup .after\:gu-hidden::after {
-    content: var(--tw-content);
-    display: none;
-}
 .block_gearup .first\:gu-mt-4:first-child {
     margin-top: 1rem;
 }
@@ -1592,6 +1600,130 @@
         grid-template-columns: repeat(6, minmax(0, 1fr));
     }
 }
+.block_gearup :is(.dark\:gu-divide-gray-700:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) > :not([hidden]) ~ :not([hidden])) {
+    --tw-divide-opacity: 1;
+    border-color: rgb(55 65 81 / var(--tw-divide-opacity, 1));
+}
+.block_gearup :is(.dark\:gu-divide-gray-800:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) > :not([hidden]) ~ :not([hidden])) {
+    --tw-divide-opacity: 1;
+    border-color: rgb(31 41 55 / var(--tw-divide-opacity, 1));
+}
+.block_gearup .dark\:gu-border:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    border-width: 1px;
+}
+.block_gearup .dark\:gu-border-solid:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    border-style: solid;
+}
+.block_gearup .dark\:gu-border-\[\#434b52\]:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-border-opacity: 1;
+    border-color: rgb(67 75 82 / var(--tw-border-opacity, 1));
+}
+.block_gearup .dark\:gu-border-\[\#58616a\]:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-border-opacity: 1;
+    border-color: rgb(88 97 106 / var(--tw-border-opacity, 1));
+}
+.block_gearup .dark\:gu-border-\[\#718a7b\]:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-border-opacity: 1;
+    border-color: rgb(113 138 123 / var(--tw-border-opacity, 1));
+}
+.block_gearup .dark\:gu-border-gray-600:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-border-opacity: 1;
+    border-color: rgb(75 85 99 / var(--tw-border-opacity, 1));
+}
+.block_gearup .dark\:gu-border-gray-700:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-border-opacity: 1;
+    border-color: rgb(55 65 81 / var(--tw-border-opacity, 1));
+}
+.block_gearup .dark\:gu-border-yellow-700:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-border-opacity: 1;
+    border-color: rgb(161 98 7 / var(--tw-border-opacity, 1));
+}
+.block_gearup .dark\:gu-bg-\[\#212529\]:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-bg-opacity: 1;
+    background-color: rgb(33 37 41 / var(--tw-bg-opacity, 1));
+}
+.block_gearup .dark\:gu-bg-\[\#292e33\]:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-bg-opacity: 1;
+    background-color: rgb(41 46 51 / var(--tw-bg-opacity, 1));
+}
+.block_gearup .dark\:gu-bg-\[\#3b5146\]:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-bg-opacity: 1;
+    background-color: rgb(59 81 70 / var(--tw-bg-opacity, 1));
+}
+.block_gearup .dark\:gu-bg-gray-600:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-bg-opacity: 1;
+    background-color: rgb(75 85 99 / var(--tw-bg-opacity, 1));
+}
+.block_gearup .dark\:gu-bg-gray-700:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-bg-opacity: 1;
+    background-color: rgb(55 65 81 / var(--tw-bg-opacity, 1));
+}
+.block_gearup .dark\:gu-bg-gray-800:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-bg-opacity: 1;
+    background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1));
+}
+.block_gearup .dark\:gu-bg-gray-900:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-bg-opacity: 1;
+    background-color: rgb(17 24 39 / var(--tw-bg-opacity, 1));
+}
+.block_gearup .dark\:gu-bg-indigo-400:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-bg-opacity: 1;
+    background-color: rgb(129 140 248 / var(--tw-bg-opacity, 1));
+}
+.block_gearup .dark\:gu-bg-indigo-400\/25:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    background-color: rgb(129 140 248 / 0.25);
+}
+.block_gearup .dark\:gu-bg-yellow-950:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-bg-opacity: 1;
+    background-color: rgb(66 32 6 / var(--tw-bg-opacity, 1));
+}
+.block_gearup .dark\:gu-fill-\[\#212529\]:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    fill: #212529;
+}
+.block_gearup .dark\:gu-text-amber-400:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-text-opacity: 1;
+    color: rgb(251 191 36 / var(--tw-text-opacity, 1));
+}
+.block_gearup .dark\:gu-text-gray-300:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-text-opacity: 1;
+    color: rgb(209 213 219 / var(--tw-text-opacity, 1));
+}
+.block_gearup .dark\:gu-text-gray-400:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-text-opacity: 1;
+    color: rgb(156 163 175 / var(--tw-text-opacity, 1));
+}
+.block_gearup .dark\:gu-text-gray-600:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-text-opacity: 1;
+    color: rgb(75 85 99 / var(--tw-text-opacity, 1));
+}
+.block_gearup .dark\:gu-text-green-400:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-text-opacity: 1;
+    color: rgb(74 222 128 / var(--tw-text-opacity, 1));
+}
+.block_gearup .dark\:gu-text-indigo-400:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-text-opacity: 1;
+    color: rgb(129 140 248 / var(--tw-text-opacity, 1));
+}
+.block_gearup .dark\:gu-text-red-400:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-text-opacity: 1;
+    color: rgb(248 113 113 / var(--tw-text-opacity, 1));
+}
+.block_gearup .dark\:hover\:gu-bg-gray-700:hover:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-bg-opacity: 1;
+    background-color: rgb(55 65 81 / var(--tw-bg-opacity, 1));
+}
+.block_gearup .dark\:hover\:gu-bg-gray-800:hover:where([data-bs-theme="dark"], [data-bs-theme="dark"] *) {
+    --tw-bg-opacity: 1;
+    background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1));
+}
+.block_gearup :is(.gu-group:hover .dark\:group-hover\:gu-text-gray-200:where([data-bs-theme="dark"], [data-bs-theme="dark"] *)) {
+    --tw-text-opacity: 1;
+    color: rgb(229 231 235 / var(--tw-text-opacity, 1));
+}
+.block_gearup :is(.gu-group:hover .dark\:group-hover\:gu-text-indigo-300:where([data-bs-theme="dark"], [data-bs-theme="dark"] *)) {
+    --tw-text-opacity: 1;
+    color: rgb(165 180 252 / var(--tw-text-opacity, 1));
+}
 .block_gearup :is(.\[\&\>\.chart-area\]\:gu-min-h-\[4rem\]>.chart-area) {
     min-height: 4rem;
 }
@@ -1621,6 +1753,10 @@
 }
 .block_gearup :is(.\[\&_pre\]\:gu-p-2 pre) {
     padding: 0.5rem;
+}
+.block_gearup :is(.dark\:\[\&_pre\]\:gu-bg-gray-800 pre:where([data-bs-theme="dark"], [data-bs-theme="dark"] *)) {
+    --tw-bg-opacity: 1;
+    background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1));
 }
 .block_gearup :is(.no-overflow .\[\.no-overflow_\&\]\:gu-mx-0) {
     margin-left: 0px;

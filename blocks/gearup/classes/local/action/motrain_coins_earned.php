@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Action.
@@ -36,10 +36,12 @@ namespace block_gearup\local\action;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class motrain_coins_earned extends static_action {
-
     /** @var int The coins. */
     protected $coins;
 
+    /**
+     * {@inheritDoc}
+     */
     public function __construct($userid, int $coins) {
         $this->coins = $coins;
         return parent::__construct($userid, SYSCONTEXTID);
@@ -53,5 +55,4 @@ class motrain_coins_earned extends static_action {
     public function get_coins(): int {
         return $this->coins;
     }
-
 }

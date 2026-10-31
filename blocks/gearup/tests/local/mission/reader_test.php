@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\mission;
 
@@ -43,7 +43,6 @@ use context_system;
  * @covers     \block_gearup\local\mission\mission_reader
  */
 final class reader_test extends base_testcase {
-
     /**
      * Test.
      */
@@ -466,5 +465,4 @@ final class reader_test extends base_testcase {
             $this->assert_persistent_equals($persistent, $actualpersistent);
         }
     }
-
 }

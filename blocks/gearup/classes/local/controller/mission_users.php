@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -48,7 +48,6 @@ use core_table\local\filter\string_filter;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mission_users extends mission_route_base {
-
     /** @var filterset */
     protected $filterset;
     /** @var object */
@@ -58,6 +57,9 @@ class mission_users extends mission_route_base {
     /** @var bool */
     protected $supportsgroups = true;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function define_optional_params() {
         return [
             ['term', null, PARAM_NOTAGS, true],
@@ -70,24 +72,47 @@ class mission_users extends mission_route_base {
         ];
     }
 
+    /**
+     * Can export.
+     *
+     * @return bool
+     */
     protected function can_export(): bool {
         return $this->lm->use_export_recruits();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_subpage_html_head_title() {
         return get_string('recruits', 'block_gearup');
     }
 
+    /**
+     * Get page wide user preference name.
+     *
+     * @return mixed
+     */
     protected function get_page_wide_user_preference_name() {
         return 'block_gearup_mission_instances_wideview_' . $this->missionhelper->get_type($this->mission);
     }
 
+    /**
+     * Get download filename.
+     *
+     * @return mixed
+     */
     protected function get_download_filename() {
         $groupidstr = $this->get_group_id() ? '-' . $this->get_group_id() : '';
         return $this->get_param('downloadfilename') ?: 'mission-' . $this->mission->get_id()
             . $groupidstr . '-report-' . date('Y-m-d');
     }
 
+    /**
+     * Get recruits count.
+     *
+     * @return mixed
+     */
     protected function get_recruits_count() {
         $repository = di::get('repository');
         $query = (new user_query($this->context))
@@ -97,10 +122,16 @@ class mission_users extends mission_route_base {
         return $repository->count_users_from_query($query);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function is_page_wide() {
         return (bool) get_user_preferences($this->get_page_wide_user_preference_name(), false);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function pre_content() {
         parent::pre_content();
 
@@ -119,6 +150,11 @@ class mission_users extends mission_route_base {
         }
     }
 
+    /**
+     * Get table.
+     *
+     * @return mixed
+     */
     protected function get_table() {
         if (!$this->table) {
             $repository = di::get('repository');
@@ -140,7 +176,6 @@ class mission_users extends mission_route_base {
                     $filterset->add_filter(new integer_filter('groupid', null, [$groupid]));
                 }
                 $table->set_filterset($filterset);
-
             } else if ($this->is_streak() && !$this->get_param('download')) {
                 $table = (new \block_gearup\table\streak\users())
                     ->define_mission($this->mission)
@@ -158,7 +193,6 @@ class mission_users extends mission_route_base {
                     $filterset->add_filter(new integer_filter('groupid', null, [$groupid]));
                 }
                 $table->set_filterset($filterset);
-
             } else {
                 $query = new mission_instance_query($this->context);
                 $table = (new mission_instances())
@@ -188,7 +222,6 @@ class mission_users extends mission_route_base {
                     }
                 }
                 $table->set_filterset($filterset);
-
             }
             $table->define_baseurl($this->pageurl);
             $this->table = $table;
@@ -196,6 +229,9 @@ class mission_users extends mission_route_base {
         return $this->table;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         $this->page_mission_header();
         $this->page_mission_navigation();
@@ -205,6 +241,11 @@ class mission_users extends mission_route_base {
         $table->out(20);
     }
 
+    /**
+     * Page advanced heading.
+     *
+     * @return void
+     */
     protected function page_advanced_heading() {
         global $PAGE;
         $output = $this->get_renderer();
@@ -259,5 +300,4 @@ class mission_users extends mission_route_base {
             ]) : [],
         ]);
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Host only.
@@ -38,12 +38,16 @@ use core\files\curl_security_helper;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class host_only extends curl_security_helper {
-
     /** @var string */
     protected $host;
     /** @var int */
     protected $port = 443;
 
+    /**
+     * Constructor.
+     *
+     * @param mixed $host Host.
+     */
     public function __construct($host) {
         $port = null;
         if (strpos($host, ':') !== false) {
@@ -53,16 +57,32 @@ class host_only extends curl_security_helper {
         $this->port = $port ?? $this->port;
     }
 
+    /**
+     * Is enabled.
+     *
+     * @return bool
+     */
     public function is_enabled() {
         return true;
     }
 
+    /**
+     * Host is blocked.
+     *
+     * @param mixed $host Host.
+     * @return mixed
+     */
     protected function host_is_blocked($host) {
         return $host !== $this->host;
     }
 
+    /**
+     * Port is blocked.
+     *
+     * @param mixed $port Port.
+     * @return mixed
+     */
     protected function port_is_blocked($port) {
         return $port != $this->port;
     }
-
 }

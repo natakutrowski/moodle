@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\speech;
 
@@ -27,7 +27,6 @@ namespace block_gearup\local\speech;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class static_voice implements voice {
-
     /** @var string */
     protected $id;
     /** @var string */
@@ -102,5 +101,4 @@ class static_voice implements voice {
     public function get_sample_url(): ?\moodle_url {
         return $this->sampleurl;
     }
-
 }

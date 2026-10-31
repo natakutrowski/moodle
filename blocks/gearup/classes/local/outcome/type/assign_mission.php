@@ -14,7 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
+
+/**
+ * Outcome.
+ *
+ * @package    block_gearup
+ * @copyright  2024 Frédéric Massart
+ * @author     Frédéric Massart <fred@branchup.tech>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace block_gearup\local\outcome\type;
 
@@ -41,7 +50,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class assign_mission implements type, type_with_update_after_restore {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         $mr = di::get('repository');
         $mo = di::get('mission_operator');
@@ -59,15 +70,29 @@ abstract class assign_mission implements type, type_with_update_after_restore {
         $mo->assign_mission($mission, $userid);
     }
 
+    /**
+     * Get missionid prop in config.
+     *
+     * @return string
+     */
     protected function get_missionid_prop_in_config(): string {
         return 'missionid';
     }
 
+    /**
+     * Get mission id.
+     *
+     * @param outcome $outcome Outcome.
+     * @return int
+     */
     protected function get_mission_id(outcome $outcome): int {
         $name = $this->get_missionid_prop_in_config();
         return $outcome->get_type_config()->{$name} ?? 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, outcome $outcome, mission $mission) {
         if (!$outcome instanceof persisted_outcome) {
             $restore->get_logger()->process("Cannot process after_restore of outcome " . $outcome->get_id(), backup::LOG_WARNING);
@@ -108,35 +133,67 @@ abstract class assign_mission implements type, type_with_update_after_restore {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class assign_mission_config_form_extender implements extender {
-
+    /** @var mixed Context. */
     protected $context;
+    /** @var mixed Mission. */
     protected $mission;
+    /** @var mixed Repository. */
     protected $repository;
 
+    /**
+     * Constructor.
+     *
+     * @param mission $mission Mission.
+     * @param mixed $repository Repository.
+     */
     public function __construct(mission $mission, $repository) {
         $this->mission = $mission;
         $this->context = $mission->get_context();
         $this->repository = $repository;
     }
 
+    /**
+     * Get field name.
+     *
+     * @return mixed
+     */
     protected function get_field_name() {
         return 'cd_missionid';
     }
 
+    /**
+     * Get label.
+     *
+     * @return string
+     */
     abstract protected function get_label(): string;
 
+    /**
+     * Get mission options.
+     *
+     * @return array
+     */
     abstract protected function get_mission_options(): array;
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $options = ['' => get_string('choosedots', 'core')] + $this->get_mission_options();
         $els[] = $mform->addElement('select', $this->get_field_name(), $this->get_label(), $options);
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         $fieldname = $this->get_field_name();
@@ -147,5 +204,4 @@ abstract class assign_mission_config_form_extender implements extender {
 
         return $errors;
     }
-
 }

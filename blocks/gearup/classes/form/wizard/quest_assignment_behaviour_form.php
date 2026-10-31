@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -39,9 +39,12 @@ use core\form\persistent;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quest_assignment_behaviour_form extends persistent {
-
+    /** @var mixed Persistentclass. */
     protected static $persistentclass = mission::class;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         $mform = $this->_form;
 
@@ -49,5 +52,4 @@ class quest_assignment_behaviour_form extends persistent {
 
         $this->add_action_buttons(false, get_string('continue'));
     }
-
 }

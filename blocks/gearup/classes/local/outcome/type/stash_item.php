@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Outcome.
@@ -62,7 +62,9 @@ class stash_item implements
     has_availability_info_for_user,
     type_with_update_after_restore,
     user_facing_type {
-
+    /**
+     * {@inheritDoc}
+     */
     public function apply(outcome $outcome, mission_instance $missioninst) {
         $context = $missioninst->get_mission()->get_context();
         try {
@@ -95,10 +97,16 @@ class stash_item implements
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info(): info {
         return new plugin_required_info('block_stash', 'Stash', 2022042100, 'v1.3.4');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_context(\context $context): info {
         if (!class_exists('block_stash\manager')) {
             return new static_info(false);
@@ -118,26 +126,47 @@ class stash_item implements
         return new static_info($isavailable, $reasons);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_user(int $userid, \context $context): info {
         return new permission_required_info('block/stash:addinstance', $context, $userid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
         return new stash_item_form_extender($mission->get_context());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('outcomestashitem', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('outcomestashitemdesc', 'block_gearup');
     }
 
+    /**
+     * Get manager.
+     *
+     * @param \context $context Context.
+     * @return mixed
+     */
     protected function get_manager(\context $context) {
         return \block_stash\manager::get($context->get_course_context()->instanceid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, outcome $outcome, mission $mission) {
         if (!$outcome instanceof persisted_outcome) {
             $restore->get_logger()->process("Cannot process after_restore of outcome " . $outcome->get_id(), backup::LOG_WARNING);
@@ -174,17 +203,24 @@ class stash_item implements
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class stash_item_form_extender implements extender {
-
     /** @var \context The context. */
     protected $context;
     /** @var int The course ID. */
     protected $courseid;
 
+    /**
+     * Constructor.
+     *
+     * @param \context $context Context.
+     */
     public function __construct(\context $context) {
         $this->context = $context;
         $this->courseid = $context->get_course_context()->instanceid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         $els = [];
 
@@ -203,10 +239,16 @@ class stash_item_form_extender implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
         if (empty($data->cd_itemid)) {
@@ -217,5 +259,4 @@ class stash_item_form_extender implements extender {
         }
         return $errors;
     }
-
 }

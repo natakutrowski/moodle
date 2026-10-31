@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * External.
@@ -38,7 +38,6 @@ use block_gearup\di;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mark_mission_seen extends external_api {
-
     /**
      * Parameters.
      *
@@ -85,7 +84,7 @@ class mark_mission_seen extends external_api {
             throw new \coding_exception('The mission is not active.');
         }
 
-        // TODO Should we move this to the operator?
+        // Future work: Should we move this to the operator?
         $missioninst->set_needs_attention(false);
 
         return true;
@@ -99,5 +98,4 @@ class mark_mission_seen extends external_api {
     public static function execute_returns() {
         return new external_value(PARAM_BOOL, '');
     }
-
 }

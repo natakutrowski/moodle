@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\form;
 
@@ -31,14 +31,17 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class delete_mission_dynamic_form extends mission_dynamic_form_base {
-
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         parent::definition();
 
         $mform = $this->_form;
         $mform->setDisableShortforms(true);
 
-        $mform->addElement('html', html_writer::div(markdown_to_html(get_string('deletemissionintro', 'block_gearup')),
+        $mform->addElement('html', html_writer::div(
+            markdown_to_html(get_string('deletemissionintro', 'block_gearup')),
             'last-of-type:[&_p]:gu-mb-0'
         ));
 
@@ -46,19 +49,27 @@ class delete_mission_dynamic_form extends mission_dynamic_form_base {
         $mform->setType('redirecturl', PARAM_LOCALURL);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_default_data() {
         return (object) ((array) parent::get_default_data() + [
             'redirecturl' => $this->optional_param('redirecturl', null, PARAM_LOCALURL),
         ]);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function is_available_when_archived(): bool {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function process_dynamic_save() {
         if ($data = $this->get_data()) {
-
             $mh = di::get('mission_helper');
             $mission = $this->get_mission();
 
@@ -82,5 +93,4 @@ class delete_mission_dynamic_form extends mission_dynamic_form_base {
             }
         }
     }
-
 }

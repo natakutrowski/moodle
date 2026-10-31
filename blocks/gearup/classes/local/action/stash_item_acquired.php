@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Action.
@@ -38,10 +38,12 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class stash_item_acquired extends static_action {
-
     /** @var int The quantity. */
     protected $quantity;
 
+    /**
+     * {@inheritDoc}
+     */
     public function __construct($userid, int $itemid, int $quantity, context $context) {
         $this->quantity = (int) $quantity;
         return parent::__construct($userid, $context, (int) $itemid);
@@ -64,5 +66,4 @@ class stash_item_acquired extends static_action {
     public function get_quantity(): int {
         return $this->quantity;
     }
-
 }

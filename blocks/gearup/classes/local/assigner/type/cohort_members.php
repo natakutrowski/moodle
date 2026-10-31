@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Cohort members assigner.
@@ -55,25 +55,39 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cohort_members implements has_availability_info_for_user, type, type_with_event_consumption, type_with_update_after_restore {
-
+    /**
+     * {@inheritDoc}
+     */
     public function get_availability_info_for_user(int $userid, context $context): info {
         return new permission_required_info('moodle/cohort:view', $context, $userid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_config_form_extender(mission $mission): \block_gearup\local\form\extender {
-        // TODO What happens when someone else edits this instance?
-        // TODO Let users select the cohorts they can see (cohort_get_available_cohorts).
+        // Future work: What happens when someone else edits this instance?
+        // Future work: Let users select the cohorts they can see (cohort_get_available_cohorts).
         return new cohort_members_config_type_form($mission->get_context());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_display_name(): lang_string {
         return new lang_string('assignercohortmembers', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_short_description(): lang_string {
         return new lang_string('assignercohortmembersdesc', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_elligible_users_sql(assigner $assigner, mission $mission): array {
         global $DB;
 
@@ -89,20 +103,32 @@ class cohort_members implements has_availability_info_for_user, type, type_with_
         return [$sql, $params];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_elligile_users_sql_from_event(event $event, assigner $assigner, mission $mission): array {
         return ["SELECT {$event->relateduserid} AS id", []];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_event_compatible(event $event): bool {
         return $event instanceof \core\event\cohort_member_added;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function is_event_passing_constraints(event $event, assigner $assigner): bool {
         $config = $assigner->get_type_config();
         $cohortids = $config->cohortids ?? [];
         return in_array($event->objectid, $cohortids);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function update_after_restore(restore_context $restore, assigner $assigner, mission $mission) {
         if (!$assigner instanceof persisted_assigner) {
             $restore->get_logger()->process("Cannot process after_restore of assigner " . $assigner->get_id(), backup::LOG_WARNING);
@@ -134,14 +160,21 @@ class cohort_members implements has_availability_info_for_user, type, type_with_
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cohort_members_config_type_form implements extender {
-
     /** @var context The context. */
     protected $context;
 
+    /**
+     * Constructor.
+     *
+     * @param context $context Context.
+     */
     public function __construct(context $context) {
         $this->context = $context;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function definition($mform): array {
         global $CFG;
         require_once($CFG->dirroot . '/cohort/lib.php');
@@ -165,10 +198,16 @@ class cohort_members_config_type_form implements extender {
         return $els;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function get_data($data) {
         return $data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function validation($data, $files) {
         $errors = [];
 
@@ -179,5 +218,4 @@ class cohort_members_config_type_form implements extender {
 
         return $errors;
     }
-
 }

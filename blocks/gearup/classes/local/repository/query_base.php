@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_gearup\local\repository;
 
@@ -29,7 +29,6 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class query_base implements query {
-
     /** @var context The acting context. */
     private $actingcontext;
     /** @var array[] Array of annotations. */
@@ -168,5 +167,4 @@ abstract class query_base implements query {
     final protected function unset_condition($name) {
         unset($this->conditions[$name]);
     }
-
 }

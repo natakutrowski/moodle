@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -40,7 +40,6 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class persistent_dynamic_form extends improved_dynamic_form {
-
     /** @var string Peristent class. */
     protected static $persistentclass = objective::class;
 
@@ -74,8 +73,8 @@ abstract class persistent_dynamic_form extends improved_dynamic_form {
             if (isset($mform->_types[$name])) {
                 // We already have a PARAM_* type for this field.
                 continue;
-
-            } else if (!isset($properties[$name]) || in_array($name, $fieldstoremove)
+            } else if (
+                !isset($properties[$name]) || in_array($name, $fieldstoremove)
                     || in_array($name, $foreignfields)
             ) {
                 // Ignoring foreign and unknown fields.
@@ -285,5 +284,4 @@ abstract class persistent_dynamic_form extends improved_dynamic_form {
 
         unset($this->_dynamicdata['persistent']);
     }
-
 }

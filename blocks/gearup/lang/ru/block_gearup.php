@@ -931,3 +931,15 @@ $string['typecompleteprofileinstructions'] = 'Выберите все поля �
 $string['deleterecruitsendedchallengesexistsdesc'] = 'Всего испытаний, уже завершённых (или пропущенных) некоторыми участниками: {$a->n}. Их удаление сотрёт все сведения об этих попытках.';
 $string['privacy:metadata:prefachievements'] = 'Список недавно разблокированных достижений';
 $string['whatisobjectiveofachievement'] = 'Какова цель этого достижения?';
+
+// CampusFR 2026: translated strings added for the updated release.
+$string['alphabetical'] = 'По алфавиту';
+$string['highlightedachievementlimit'] = 'Максимальное количество выделенных достижений';
+$string['highlightedachievementlimitdesc'] = 'Максимальное количество достижений, выделяемых в трекере миссий при наличии достижений в процессе выполнения.';
+$string['mostrelevant'] = 'Наиболее актуальные';
+$string['ongoingquestlimit'] = 'Максимальное количество текущих квестов';
+$string['ongoingquestlimitdesc'] = 'Максимальное количество начатых квестов, отображаемых в трекере миссий.';
+$string['ongoingquestorder'] = 'Порядок текущих квестов';
+$string['ongoingquestorderdesc'] = 'Выбери порядок отображения текущих квестов в трекере миссий. При выборе «Наиболее актуальные» сначала показываются квесты, которые, по оценке системы, наиболее важны для участника на основе его недавней активности.';
+$string['trackersettings'] = 'Настройки трекера миссий';
+$string['trackersettingsdesc'] = 'Трекер показывает ученикам их миссии и прогресс в блоке Level Up Quest или непосредственно в содержимом курса.';

@@ -20,7 +20,7 @@ const ListEntry: React.FC<{
     const disabledOpacityClass = `${!isavailable ? 'gu-opacity-60 group-focus:gu-opacity-100 group-hover:gu-opacity-100' : ''}`;
 
     return (
-        <div className="gu-p-[0.2rem] gu-relative gu-group focus:gu-z-10 hover:gu-bg-gray-100">
+        <div className="gu-p-[0.2rem] gu-relative gu-group focus:gu-z-10 hover:gu-bg-gray-100 dark:hover:gu-bg-gray-800">
             <div tabIndex={0} role="button" aria-describedby={headingId} className="gu-px-1.5 gu-py-0.5" {...buttonListeners}>
                 <div id={headingId} className={`gu-flex`}>
                     <div className={classNames(disabledOpacityClass, 'gu-text-xl gu-text-medium')}>{label}</div>
@@ -33,7 +33,7 @@ const ListEntry: React.FC<{
                     ) : null}
                 </div>
                 <div
-                    className={classNames(disabledOpacityClass, 'gu-text-gray-500')}
+                    className={classNames(disabledOpacityClass, 'gu-text-gray-500 dark:gu-text-gray-400')}
                     dangerouslySetInnerHTML={{ __html: description }}
                 />
             </div>
@@ -62,7 +62,7 @@ const PlainResourceList: React.FC<ResourceListProps & { emptyContent?: ReactNode
         <div className="gu-flex-1 gu-min-h-full gu-max-h-full gu-flex gu-flex-col">
             <div className="gu-max-h-full gu-overflow-y-auto gu-flex gu-flex-1">
                 {resources.length ? (
-                    <div className="gu-flex-1 gu-divide-y gu-divide-gray-200">
+                    <div className="gu-flex-1 gu-divide-y gu-divide-gray-200 dark:gu-divide-gray-700">
                         {resources.map((o) => {
                             return <ListEntry key={o.name} resource={o} onSelect={() => onSelect && onSelect(o)} />;
                         })}

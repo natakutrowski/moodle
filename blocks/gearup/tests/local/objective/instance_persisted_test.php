@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Testcase.
@@ -41,7 +41,6 @@ use block_gearup\tests\base_testcase;
  * @covers     \block_gearup\local\objective\persisted_objective_instance
  */
 final class instance_persisted_test extends base_testcase {
-
     /**
      * Test.
      */
@@ -140,5 +139,4 @@ final class instance_persisted_test extends base_testcase {
         $mia = $mr->get_instance($mia->get_id());
         $this->assertEquals(5, $mia->get_instance_of_objective($obj1->get('id'))->get_counter());
     }
-
 }

@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Level Up Quest.
 //
 // Level Up Quest is free software: you can redistribute it and/or modify
@@ -15,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Exporter.
@@ -319,10 +318,10 @@ class mission_exporter extends \core\external\exporter {
         $missionhelper = $this->related['mission_helper'];
         $missioninst = $this->related['mission_instance'] ?? null;
 
-        // TODO Use user from related object?
+        // Future work: Use user from related object?
         $canmanage = $accessperms->can_manage($USER->id);
 
-        // TODO Get as a related object instead?
+        // Future work: Get as a related object instead?
         $repository = di::get('repository');
 
         $manageurl = null;
@@ -471,6 +470,11 @@ class mission_exporter extends \core\external\exporter {
         return $data;
     }
 
+    /**
+     * Get assignment behaviour properties.
+     *
+     * @return array
+     */
     protected function get_assignment_behaviour_properties() {
         $mh = $this->related['mission_helper'];
         $mission = $this->mission;
@@ -582,6 +586,11 @@ class mission_exporter extends \core\external\exporter {
         return $data;
     }
 
+    /**
+     * Get timing properties.
+     *
+     * @return mixed
+     */
     protected function get_timing_properties() {
         $mission = $this->mission;
         $missionhelper = $this->related['mission_helper'];
@@ -638,6 +647,11 @@ class mission_exporter extends \core\external\exporter {
         return $data;
     }
 
+    /**
+     * Get url resolver.
+     *
+     * @return mixed
+     */
     protected function get_url_resolver() {
         if (isset($this->related['url_resolver'])) {
             return $this->related['url_resolver'];
@@ -648,6 +662,12 @@ class mission_exporter extends \core\external\exporter {
         return $this->urlresolver;
     }
 
+    /**
+     * Should export objectives.
+     *
+     * @param mission_instance|null $missioninst Missioninst.
+     * @return mixed
+     */
     protected function should_export_objectives(?mission_instance $missioninst) {
         if (!$missioninst) {
             return false;
@@ -662,6 +682,12 @@ class mission_exporter extends \core\external\exporter {
         return (bool) preg_match('/^\s*\[objectives\]\s*$/m', $this->mission->get_description() ?? '');
     }
 
+    /**
+     * Should export rewards.
+     *
+     * @param mission_instance|null $missioninst Missioninst.
+     * @return mixed
+     */
     protected function should_export_rewards(?mission_instance $missioninst) {
         if (!$missioninst) {
             return false;
@@ -681,9 +707,13 @@ class mission_exporter extends \core\external\exporter {
             || (bool) preg_match('/^\s*\[rewards\]\s*$/m', $this->mission->get_instructions() ?? '');
     }
 
+    /**
+     * With quest edges.
+     *
+     * @return self
+     */
     public function with_quest_edges(): self {
         $this->with(static::WITH_QUEST_EDGES);
         return $this;
     }
-
 }

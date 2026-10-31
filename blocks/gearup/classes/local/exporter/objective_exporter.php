@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Level Up Quest.
 //
 // Level Up Quest is free software: you can redistribute it and/or modify
@@ -15,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Exporter.
@@ -41,7 +40,6 @@ use renderer_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class objective_exporter extends \core\external\exporter {
-
     /** @var objective The objective. */
     protected $objective;
 
@@ -93,6 +91,12 @@ class objective_exporter extends \core\external\exporter {
             'iscountable' => [
                 'type' => PARAM_BOOL,
             ],
+            'isfirst' => [
+                'type' => PARAM_BOOL,
+            ],
+            'islast' => [
+                'type' => PARAM_BOOL,
+            ],
             'supportingurl' => [
                 'type' => PARAM_URL,
                 'null' => NULL_ALLOWED,
@@ -108,6 +112,7 @@ class objective_exporter extends \core\external\exporter {
      */
     protected function get_other_values(renderer_base $output) {
         $objective = $this->objective;
+        $objectives = $this->related['mission']->get_objectives();
         $supportingurl = $objective instanceof objective_with_supporting_url ? $objective->get_supporting_url() : null;
         return [
             'id' => $objective->get_id(),
@@ -116,6 +121,8 @@ class objective_exporter extends \core\external\exporter {
             'type' => (string) $objective->get_type()->get_display_name(),
             'countneeded' => $objective->get_count_needed(),
             'iscountable' => $objective->get_count_needed() > 1,
+            'isfirst' => $objectives && reset($objectives)->get_id() === $objective->get_id(),
+            'islast' => $objectives && end($objectives)->get_id() === $objective->get_id(),
             'supportingurl' => $supportingurl ? $supportingurl->out(false) : null,
         ];
     }

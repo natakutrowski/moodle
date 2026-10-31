@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -43,11 +43,14 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class library_form extends moodleform {
-
+    /**
+     * {@inheritDoc}
+     */
     protected function definition() {
         $mform = $this->_form;
 
-        $mform->addElement('filemanager',
+        $mform->addElement(
+            'filemanager',
             'questnarrators',
             get_string('questnarrators', 'block_gearup'),
             ['class' => 'gu-accepted-types-hidden'],
@@ -55,7 +58,8 @@ class library_form extends moodleform {
         );
         $mform->addElement('static', 'questnarratorsdesc', '', get_string('questnarratorsdesc', 'block_gearup'));
 
-        $mform->addElement('filemanager',
+        $mform->addElement(
+            'filemanager',
             'achievementbadges',
             get_string('achievementbadges', 'block_gearup'),
             ['class' => 'gu-accepted-types-hidden'],
@@ -66,6 +70,11 @@ class library_form extends moodleform {
         $this->add_action_buttons();
     }
 
+    /**
+     * Get achievement badges options.
+     *
+     * @return array
+     */
     public static function get_achievement_badges_options() {
         $lm = di::get('lm');
         $maxfiles = $lm->max_achievement_badges();
@@ -73,11 +82,15 @@ class library_form extends moodleform {
         return ['subdirs' => 0, 'maxfiles' => $maxfiles, 'accepted_types' => ['image/jpeg', 'image/png']];
     }
 
+    /**
+     * Get quest narrators options.
+     *
+     * @return array
+     */
     public static function get_quest_narrators_options() {
         $lm = di::get('lm');
         $maxfiles = $lm->max_quest_narrators();
         $maxfiles = $maxfiles === null ? -1 : max(1, $maxfiles);
         return ['subdirs' => 0, 'maxfiles' => $maxfiles, 'accepted_types' => ['image/jpeg', 'image/png']];
     }
-
 }

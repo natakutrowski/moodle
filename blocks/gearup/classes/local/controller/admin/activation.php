@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Controller.
@@ -44,13 +44,19 @@ use core\notification;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class activation extends route_base {
-
+    /** @var bool Requiremanage. */
     protected $requiremanage = false;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function get_page_html_head_title() {
         return get_string('activation', 'block_gearup');
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function pre_content() {
         parent::pre_content();
         global $CFG;
@@ -89,12 +95,14 @@ class activation extends route_base {
                 $message = get_string('licenceactivated', 'block_gearup');
                 $messagelevel = notification::SUCCESS;
             } catch (api_exception $e) {
-                $message = get_string('activationerror',
+                $message = get_string(
+                    'activationerror',
                     'block_gearup',
                     $e->get_error_message() . ' (' . $e->get_error_code() . ')'
                 );
             } catch (client_exception $e) {
-                $message = get_string('activationerror',
+                $message = get_string(
+                    'activationerror',
                     'block_gearup',
                     $e->getMessage() . ' (' . $e->get_http_code() . ')'
                 );
@@ -111,6 +119,9 @@ class activation extends route_base {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function content() {
         $output = $this->get_renderer();
         $templatename = 'block_gearup/activation-readonly';
@@ -124,5 +135,4 @@ class activation extends route_base {
             'sesskey' => sesskey(),
         ]);
     }
-
 }

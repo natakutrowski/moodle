@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up Quest.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
-
+// See <https://levelup.plus>.
 
 /**
  * Base testcase.
@@ -58,10 +57,14 @@ use restore_controller;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class base_testcase extends \advanced_testcase {
-
     /** @var \block_gearup_generator The data generator. */
     protected $generator;
 
+    /**
+     * Set up.
+     *
+     * @return void
+     */
     public function setUp(): void {
         global $CFG;
 
@@ -81,6 +84,11 @@ abstract class base_testcase extends \advanced_testcase {
         }
     }
 
+    /**
+     * Reset container.
+     *
+     * @return void
+     */
     protected function reset_container() {
         \block_gearup\di::set_container(new \block_gearup\local\default_container());
     }
@@ -101,6 +109,12 @@ abstract class base_testcase extends \advanced_testcase {
         $blockmanager->add_block('gearup', 'gearuptest', 0, false);
     }
 
+    /**
+     * Assert availability info compliance.
+     *
+     * @param mixed $reflectorclass Reflectorclass.
+     * @return void
+     */
     protected function assert_availability_info_compliance($reflectorclass) {
         $class = $reflectorclass instanceof ReflectionClass ? $reflectorclass : new ReflectionClass($reflectorclass);
         if ($class->hasMethod('get_availability_info')) {
@@ -148,7 +162,8 @@ abstract class base_testcase extends \advanced_testcase {
         $CFG->backup_file_logger_level = backup::LOG_NONE;
 
         // Do backup with default settings. MODE_IMPORT means it will just create the directory and not zip it.
-        $bc = new backup_controller(backup::TYPE_1COURSE,
+        $bc = new backup_controller(
+            backup::TYPE_1COURSE,
             $course->id,
             backup::FORMAT_MOODLE,
             backup::INTERACTIVE_NO,
@@ -263,6 +278,12 @@ abstract class base_testcase extends \advanced_testcase {
         return $this->mock_clock_with_frozen($ts);
     }
 
+    /**
+     * Get instantiable reflection classes.
+     *
+     * @param mixed $namespace Namespace.
+     * @return void
+     */
     protected function get_instantiable_reflection_classes($namespace) {
         $classes = array_keys(core_component::get_component_classes_in_namespace('block_gearup', $namespace));
         foreach ($classes as $classname) {
@@ -273,5 +294,4 @@ abstract class base_testcase extends \advanced_testcase {
             yield $class;
         }
     }
-
 }
