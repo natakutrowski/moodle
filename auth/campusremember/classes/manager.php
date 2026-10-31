@@ -9,6 +9,8 @@ final class manager {
     private const TABLE = 'auth_campusremember_tokens';
     private const COOKIE = '__Host-CampusFRRemember';
     private const LIFETIME = 30 * DAYSECS;
+    private const ROTATE_INTERVAL = DAYSECS;
+    private const PREVIOUS_GRACE = 120; // Concurrent browser tabs.
 
     private static function web_request(): bool {
         if ((defined('CLI_SCRIPT') && CLI_SCRIPT) ||
@@ -19,6 +21,12 @@ final class manager {
             return false;
         }
         return true;
+    }
+
+    /** Event observers remain registered even if auth is disabled. */
+    private static function plugin_enabled(): bool {
+        global $CFG;
+        return in_array('campusremember', explode(',', (string)($CFG->auth ?? '')), true);
     }
 
     private static function is_eligible(\stdClass $user): bool {
@@ -65,7 +73,8 @@ final class manager {
     public static function on_login(\core\event\user_loggedin $event): void {
         global $USER, $DB;
         // Any successful normal-form login replaces the persistent identity of this device.
-        if (!self::web_request() || ($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' ||
+        if (!self::plugin_enabled() || !self::web_request() ||
+                ($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' ||
                 !preg_match('~/login/index\.php$~', $_SERVER['SCRIPT_NAME'] ?? '') ||
                 empty($_POST['logintoken']) || (int)$event->userid !== (int)$USER->id) {
             return;
@@ -92,6 +101,9 @@ final class manager {
             'userid' => $USER->id,
             'selector' => $selector,
             'tokenhash' => hash('sha256', $validator),
+            'prevtokenhash' => null,
+            'prevvaliduntil' => 0,
+            'lastrotated' => $now,
             'pwfingerprint' => hash('sha256', $passwordhash),
             'timecreated' => $now,
             'lastused' => $now,
@@ -101,9 +113,10 @@ final class manager {
     }
 
     /** Log the user in from an opt-in, unexpired browser cookie. */
-    public static function try_restore(): void {
+    public static function try_restore(bool $redirect = true): void {
         global $CFG, $DB;
-        if (!self::web_request() || ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET' ||
+        if (!self::plugin_enabled() || !self::web_request() ||
+                ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET' ||
                 (isloggedin() && !isguestuser())) {
             return;
         }
@@ -113,10 +126,17 @@ final class manager {
         }
         [$selector, $validator] = $parts;
         $record = $DB->get_record(self::TABLE, ['selector' => $selector]);
-        if (!$record || (int)$record->expires <= time() ||
-                !hash_equals($record->tokenhash, hash('sha256', $validator))) {
-            if ($record && ((int)$record->expires <= time() ||
-                    hash_equals($record->tokenhash, hash('sha256', $validator)))) {
+        $now = time();
+        $givenhash = hash('sha256', $validator);
+        $current = $record && hash_equals($record->tokenhash, $givenhash);
+        // A recently rotated validator can be accepted briefly to avoid
+        // logging out parallel tabs whose requests were already in flight.
+        $previous = $record && !$current && !empty($record->prevtokenhash) &&
+            (int)$record->prevvaliduntil >= $now &&
+            hash_equals($record->prevtokenhash, $givenhash);
+        if (!$record || (int)$record->expires <= $now || (!$current && !$previous)) {
+            // A wrong validator must never delete a legitimate device token.
+            if ($record && (int)$record->expires <= $now) {
                 $DB->delete_records(self::TABLE, ['id' => $record->id]);
             }
             self::forget_cookie();
@@ -134,7 +154,35 @@ final class manager {
         // A normal Moodle login starts a new session and regenerates its session ID.
         \complete_user_login($user);
         \core\session\manager::apply_concurrent_login_limit($user->id, session_id());
-        $DB->set_field(self::TABLE, 'lastused', time(), ['id' => $record->id]);
+        // Absolute 30-day expiry is unchanged by rotation.
+        // Compare-and-swap prevents two requests rotating the same validator
+        // into different values. A losing request uses the grace path.
+        if ($current && $now - (int)$record->lastrotated >= self::ROTATE_INTERVAL) {
+            $freshvalidator = bin2hex(random_bytes(32));
+            $freshhash = hash('sha256', $freshvalidator);
+            $DB->execute(
+                'UPDATE {auth_campusremember_tokens}
+                    SET tokenhash = ?, prevtokenhash = ?, prevvaliduntil = ?,
+                        lastrotated = ?, lastused = ?
+                  WHERE id = ? AND tokenhash = ?',
+                [
+                    $freshhash, $record->tokenhash,
+                    min($now + self::PREVIOUS_GRACE, (int)$record->expires),
+                    $now, $now, $record->id, $record->tokenhash,
+                ]
+            );
+            $savedhash = $DB->get_field(self::TABLE, 'tokenhash', ['id' => $record->id]);
+            if (is_string($savedhash) && hash_equals($freshhash, $savedhash)) {
+                self::set_cookie($selector . ':' . $freshvalidator, (int)$record->expires);
+            }
+        } else {
+            $DB->set_field(self::TABLE, 'lastused', $now, ['id' => $record->id]);
+        }
+
+        // Early restoration continues the originally requested PHP page.
+        if (!$redirect) {
+            return;
+        }
         // Stay on the originally requested protected URL, when safe.
         $requesturi = $_SERVER['REQUEST_URI'] ?? '';
         // CampusFR: replace Moodle's default dashboard.

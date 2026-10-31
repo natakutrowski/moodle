@@ -4,7 +4,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'auth_campusremember';
-$plugin->version = 2026103100;
+$plugin->version = 2026103103;
 $plugin->requires = 2025041400;
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.1.0 DEV prototype';
+$plugin->maturity = MATURITY_STABLE;
+$plugin->release = '1.0.2';

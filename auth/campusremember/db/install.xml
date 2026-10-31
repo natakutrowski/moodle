@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="auth/campusremember/db" VERSION="2026103100" COMMENT="CampusFR persistent browser tokens" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB PATH="auth/campusremember/db" VERSION="2026103103" COMMENT="CampusFR persistent browser tokens" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
     <TABLE NAME="auth_campusremember_tokens" COMMENT="Persistent login tokens for opted-in devices">
       <FIELDS>
@@ -7,6 +7,9 @@
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
         <FIELD NAME="selector" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false" />
         <FIELD NAME="tokenhash" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" />
+        <FIELD NAME="prevtokenhash" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" />
+        <FIELD NAME="prevvaliduntil" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" />
+        <FIELD NAME="lastrotated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" />
         <FIELD NAME="pwfingerprint" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" />
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
         <FIELD NAME="lastused" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
