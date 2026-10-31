@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reason;
 
@@ -44,7 +44,8 @@ class glossary_entry_published_reason extends parent_glossary_entry_published_re
     protected function get_object_name(): ?string {
         if ($this->objectname === null) {
             $db = \block_xp\di::get('db');
-            $this->objectname = $db->get_field('glossary_entries',
+            $this->objectname = $db->get_field(
+                'glossary_entries',
                 'concept',
                 ['id' => (int) $this->get_object_id()],
                 IGNORE_MISSING
@@ -53,6 +54,11 @@ class glossary_entry_published_reason extends parent_glossary_entry_published_re
         return $this->objectname ?: null;
     }
 
+    /**
+     * Get location name.
+     *
+     * @return string|null
+     */
     public function get_location_name() {
         $context = $this->get_module_context();
         if (!$context) {
@@ -66,6 +72,11 @@ class glossary_entry_published_reason extends parent_glossary_entry_published_re
         return format_string($objectname, true, ['context' => $context]);
     }
 
+    /**
+     * Get location URL.
+     *
+     * @return \moodle_url|null
+     */
     public function get_location_url() {
         $context = $this->get_module_context();
         if (!$context) {
@@ -76,5 +87,4 @@ class glossary_entry_published_reason extends parent_glossary_entry_published_re
         }
         return new moodle_url('/mod/glossary/showentry.php', ['eid' => (int) $this->get_object_id()]);
     }
-
 }

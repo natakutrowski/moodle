@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Filter.
@@ -41,19 +41,42 @@ use lang_string;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class section implements rulefilter {
-
+    /**
+     * Get action tester.
+     *
+     * @param context $effectivecontext The context.
+     * @param object $config The config.
+     * @return action_tester
+     */
     public function get_action_tester(context $effectivecontext, object $config): action_tester {
         return new section_tester($config->int1 ?? 0);
     }
 
+    /**
+     * Get compatible context levels.
+     *
+     * @return int[]
+     */
     public function get_compatible_context_levels(): array {
         return [CONTEXT_COURSE];
     }
 
+    /**
+     * Get display name.
+     *
+     * @return lang_string
+     */
     public function get_display_name(): lang_string {
         return new lang_string('rulefiltersection', 'block_xp');
     }
 
+    /**
+     * Get config label.
+     *
+     * @param object $config The config.
+     * @param context|null $effectivecontext The context.
+     * @return string
+     */
     public function get_label_for_config(object $config, ?context $effectivecontext = null): string {
         global $CFG;
         require_once($CFG->dirroot . '/course/lib.php');
@@ -74,16 +97,30 @@ class section implements rulefilter {
         return get_string('unknownsectiona', 'block_xp', $sectionnum);
     }
 
+    /**
+     * Get short description.
+     *
+     * @return lang_string
+     */
     public function get_short_description(): lang_string {
         return new lang_string('rulefiltersectiondesc', 'block_xp');
     }
 
+    /**
+     * Check admin compatibility.
+     *
+     * @return bool
+     */
     public function is_compatible_with_admin(): bool {
         return false;
     }
 
+    /**
+     * Check whether multiple are allowed.
+     *
+     * @return bool
+     */
     public function is_multiple_allowed(): bool {
         return true;
     }
-
 }

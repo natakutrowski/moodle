@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Course world navigation factory.
@@ -29,7 +31,6 @@ use block_xp\local\course_world;
 use block_xp\local\config\config;
 use block_xp\local\factory\course_world_navigation_factory as course_world_navigation_factory_interface;
 use block_xp\local\routing\url_resolver;
-use local_xp\local\config\default_course_world_config;
 
 /**
  * Course world navigation factory.
@@ -38,9 +39,9 @@ use local_xp\local\config\default_course_world_config;
  * @copyright  2018 Frédéric Massart
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated Since XP 21, use navigator instead.
  */
 class course_world_navigation_factory implements course_world_navigation_factory_interface {
-
     /** @var config The admin config. */
     protected $adminconfig;
     /** @var course_world_navigation_factory_interface The parent factory. */
@@ -90,11 +91,18 @@ class course_world_navigation_factory implements course_world_navigation_factory
         $parentlinks = $this->parentfactory->get_course_navigation($world);
         $accessperms = $world->get_access_permissions();
         $canmanage = $accessperms->can_manage();
-        $courseid = $world->get_courseid();
-        $urlresolver = $this->resolver;
 
         $links = [];
         $toadd = [];
+        $tohide = [];
+
+        $canseeaipage = $this->adminconfig->get('enablemcp')
+            && $canmanage
+            && has_capability('local/xp:usemcp', \context_system::instance())
+            && has_capability('local/xp:usemcp', $world->get_context());
+        if (!$canseeaipage) {
+            $tohide[] = 'ai';
+        }
 
         $links = $parentlinks;
         while ($add = array_shift($toadd)) {
@@ -140,6 +148,10 @@ class course_world_navigation_factory implements course_world_navigation_factory
                 array_unshift($links, $add['link']);
             }
         }
+
+        $links = array_values(array_filter($links, function ($link) use ($tohide) {
+            return !in_array($link['id'], $tohide);
+        }));
 
         return $links;
     }

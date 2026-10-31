@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Usage report maker.
@@ -36,7 +38,6 @@ use block_xp\di;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class usage_report_maker extends \block_xp\local\plugin\usage_report_maker {
-
     /** @var string Hash. */
     protected $lkh = '55d68a34b9e5dab6c097da2cb71a75cecab2b666';
 
@@ -51,6 +52,7 @@ class usage_report_maker extends \block_xp\local\plugin\usage_report_maker {
         $config = di::get('config');
 
         $data->lkh = $this->lkh;
+        $data->xp_globalworld = (bool) $config->get('enableglobalworld');
         $data->xp_drops = $this->db->count_records_select('local_xp_drops', 'enabled != ?', [0]);
         $data->xp_teamladders = $this->db->count_records_select('local_xp_config', 'enablegroupladder != ?', [0]);
 
@@ -71,7 +73,15 @@ class usage_report_maker extends \block_xp\local\plugin\usage_report_maker {
                                                               GROUP BY ladderparticipation");
         $data->xp_ladders_participation = $ladderparticipation;
 
+        $data->xp_mcp_enabled = (bool) $config->get('enablemcp');
+        $data->xp_mcp_risks = (int) $config->get('mcprisksallowed');
+        $data->xp_mcp_users = $this->db->count_records_select(
+            'local_xp_oauth_token',
+            'expires > ?',
+            [di::get('clock')->time()],
+            'COUNT(DISTINCT userid)'
+        );
+
         return $data;
     }
-
 }

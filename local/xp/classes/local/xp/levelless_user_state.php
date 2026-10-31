@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\xp;
 
@@ -32,7 +32,6 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class levelless_user_state extends levelless_state implements state_with_user {
-
     /** @var int The course ID. */
     protected $courseid;
     /** @var stdClass The user object. */
@@ -51,6 +50,11 @@ class levelless_user_state extends levelless_state implements state_with_user {
         $this->courseid = !empty($courseid) ? $courseid : SITEID;
     }
 
+    /**
+     * Get link.
+     *
+     * @return moodle_url
+     */
     public function get_link() {
         $userid = $this->user->id;
         $profileurl = new moodle_url('/user/profile.php', ['id' => $userid]);
@@ -60,16 +64,30 @@ class levelless_user_state extends levelless_state implements state_with_user {
         return $profileurl;
     }
 
+    /**
+     * Get name.
+     *
+     * @return string
+     */
     public function get_name() {
         return fullname($this->user);
     }
 
+    /**
+     * Get picture.
+     *
+     * @return moodle_url|null
+     */
     public function get_picture() {
         return user_utils::user_picture($this->user);
     }
 
+    /**
+     * Get user.
+     *
+     * @return stdClass
+     */
     public function get_user() {
         return $this->user;
     }
-
 }

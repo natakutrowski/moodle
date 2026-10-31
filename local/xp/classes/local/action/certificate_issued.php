@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\action;
 
@@ -29,25 +29,23 @@ use block_xp\local\action\static_action;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class certificate_issued extends static_action {
-
     /**
      * Constructor.
      *
-     * @param \context $context The module context.
+     * @param \context $context The module context, or the issuance context when the module is unknown.
      * @param int $recipientid The user the certificate was issued to.
-     * @param int $issueid The customcert issue row id.
+     * @param int $issueid The certificate issue row id.
      */
     public function __construct(\context $context, int $recipientid, int $issueid) {
         parent::__construct('certificate_issued', $context, $recipientid, $issueid);
     }
 
     /**
-     * Get the issue ID..
+     * Get the issue ID.
      *
      * @return int|null
      */
     public function get_issue_id(): ?int {
         return $this->objectid;
     }
-
 }

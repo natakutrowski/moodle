@@ -14,19 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\factory;
 
 use block_xp\local\division\division;
 use block_xp\local\division\empty_division;
 use block_xp\local\leaderboard\leaderboard;
+use block_xp\local\leaderboard\ranker;
 use block_xp\local\userfilter\user_filter;
 use block_xp\local\xp\state_anonymiser;
 use local_xp\local\config\default_course_world_config;
 use local_xp\local\division\cohort_division;
+use local_xp\local\leaderboard\global_leaderboard;
 use local_xp\local\userfilter\leaderboard_participants;
 use local_xp\local\userfilter\stack;
+use local_xp\local\world\global_world;
 use local_xp\local\xp\firstname_initial_lastname_anonymiser;
 
 /**
@@ -38,7 +41,6 @@ use local_xp\local\xp\firstname_initial_lastname_anonymiser;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class world_leaderboard_factory extends \block_xp\local\factory\world_leaderboard_factory {
-
     /**
      * Get the leaderboard
      *
@@ -82,7 +84,8 @@ class world_leaderboard_factory extends \block_xp\local\factory\world_leaderboar
     protected function get_default_division(int $targetuserid): division {
         $ladderiso = (int) $this->config->get('ladderiso');
         if ($ladderiso === default_course_world_config::LEADERBOARD_ISO_COHORTS) {
-            $candidates = $this->db->get_records('cohort_members',
+            $candidates = $this->db->get_records(
+                'cohort_members',
                 ['userid' => $targetuserid],
                 'cohortid ASC',
                 'id, cohortid, userid',
@@ -97,4 +100,17 @@ class world_leaderboard_factory extends \block_xp\local\factory\world_leaderboar
         return parent::get_default_division($targetuserid);
     }
 
+    /**
+     * Get the leaderboard instance.
+     *
+     * @param array $columns
+     * @param ranker|null $ranker
+     * @return leaderboard
+     */
+    protected function get_leaderboard_instance(array $columns, ?ranker $ranker = null): leaderboard {
+        if ($this->world instanceof global_world) {
+            return new global_leaderboard($ranker, $columns, $this->world->get_levels_info());
+        }
+        return parent::get_leaderboard_instance($columns, $ranker);
+    }
 }

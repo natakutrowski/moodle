@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Observer.
@@ -37,7 +39,6 @@ use local_xp\local\xp\level_with_badge_award;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class observer {
-
     /**
      * Act when a course is deleted.
      *
@@ -56,9 +57,11 @@ class observer {
         $DB->delete_records('local_xp_config', $conditions);
         $DB->delete_records('local_xp_drops', $conditions);
         $DB->delete_records('local_xp_log', $ctxconditions);
+        $DB->delete_records('local_xp_source', ['sourcecontextid' => $contextid]);
 
         // Delete logs that are associated with the course, or the orphan ones, in case the deletion order is not deterministic.
-        $DB->execute("DELETE FROM {local_xp_rule} WHERE ruleid IN (SELECT id FROM {block_xp_rule} WHERE contextid = :contextid)",
+        $DB->execute(
+            "DELETE FROM {local_xp_rule} WHERE ruleid IN (SELECT id FROM {block_xp_rule} WHERE contextid = :contextid)",
             $ctxconditions
         );
         $DB->execute("DELETE FROM {local_xp_rule} WHERE ruleid NOT IN (SELECT id FROM {block_xp_rule})");
@@ -74,7 +77,12 @@ class observer {
      * @param \block_xp\event\user_leveledup $event The event.
      */
     public static function user_leveledup(\block_xp\event\user_leveledup $event) {
-        $world = di::get('course_world_factory')->get_world($event->courseid);
+        $context = $event->get_context();
+        if (!$context) {
+            return;
+        }
+
+        $world = di::get('context_world_factory')->get_world_from_context($context);
         $levelsinfo = $world->get_levels_info();
 
         $levelnum = $event->other['level'] ?? 0;

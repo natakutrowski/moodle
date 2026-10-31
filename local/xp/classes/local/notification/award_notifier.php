@@ -1,18 +1,20 @@
 <?php
-// This file is part of a 3rd party created module for Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Award notifier.
@@ -39,8 +41,7 @@ use block_xp\local\course_world;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class award_notifier {
-
-    /** @var stdClass The user to send from. */
+    /** @var \stdClass The user to send from. */
     protected $awardedby;
     /** @var config The admin config. */
     protected $config;
@@ -97,14 +98,11 @@ class award_notifier {
         $message->smallmessage = $smallmessage;
         $message->notification = 1;
 
-        try {
-            $message->courseid = $this->world->get_courseid();
-        } catch (coding_exception $e) {
-            // The property courseid did not exist in older versions.
-            $pleaselinter = true;
+        $coursecontext = $this->world->get_context()->get_course_context(false);
+        if ($coursecontext) {
+            $message->courseid = $coursecontext->instanceid;
         }
 
         message_send($message);
     }
-
 }

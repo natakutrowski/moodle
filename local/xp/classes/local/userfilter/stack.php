@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\userfilter;
 
@@ -29,7 +29,6 @@ use block_xp\local\userfilter\user_filter;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class stack implements user_filter {
-
     /** @var user_filter[] */
     protected $filters;
     /** @var bool Whether we AND, the filters. */
@@ -67,5 +66,4 @@ class stack implements user_filter {
         $operator = $this->and ? ' AND ' : ' OR ';
         return ['((' . implode(") $operator (", $sqls) . '))', $params];
     }
-
 }

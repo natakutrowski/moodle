@@ -1,27 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * External function.
- *
- * @package    local_xp
- * @copyright  2023 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 namespace local_xp\external;
 
@@ -32,6 +25,7 @@ use block_xp\external\external_single_structure;
 use block_xp\external\external_value;
 use block_xp\local\iterator\map_iterator;
 use block_xp\local\sql\limit;
+use block_xp\local\utils\world_utils;
 use local_xp\local\config\default_course_world_config;
 use moodle_exception;
 
@@ -44,7 +38,6 @@ use moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class get_course_world_group_ladder extends external_api {
-
     /**
      * External function parameters.
      *
@@ -52,33 +45,36 @@ class get_course_world_group_ladder extends external_api {
      */
     public static function execute_parameters() {
         return new external_function_parameters([
-            'courseid' => new external_value(PARAM_INT),
+            'courseid' => new external_value(PARAM_INT, '', VALUE_DEFAULT),
             'page' => new external_value(PARAM_INT, '', VALUE_DEFAULT, 0),
             'perpage' => new external_value(PARAM_INT, '', VALUE_DEFAULT, 50),
+            'contextid' => new external_value(PARAM_INT, '', VALUE_DEFAULT),
         ]);
     }
 
     /**
      * External function.
      *
-     * @param int $courseid The course ID.
+     * @param ?int $courseid The course ID.
      * @param int $page The page number.
      * @param int $perpage The number of items per page.
+     * @param ?int $contextid The context ID.
      * @return object
      */
-    public static function execute($courseid, $page, $perpage) {
+    public static function execute($courseid = null, $page = 0, $perpage = 50, $contextid = null) {
         global $USER;
-        $params = self::validate_parameters(self::execute_parameters(),
-            compact('courseid', 'page', 'perpage')
+        $params = self::validate_parameters(
+            self::execute_parameters(),
+            compact('courseid', 'page', 'perpage', 'contextid')
         );
         extract($params); // @codingStandardsIgnoreLine
 
-        $adminconfig = di::get('config');
-        $worldfactory = di::get('course_world_factory');
-        $world = $worldfactory->get_world($courseid);
+        if (!empty($contextid)) {
+            $world = di::get('context_world_factory')->get_world_from_context(\context::instance_by_id($contextid));
+        } else {
+            $world = di::get('course_world_factory')->get_world($courseid ?? 0);
+        }
         $config = $world->get_config();
-        $courseid = $world->get_courseid(); // Ensure that we get the real course ID.
-        $userid = $USER->id;
         self::validate_context($world->get_context());
         di::get('addon')->require_activated();
 
@@ -86,6 +82,11 @@ class get_course_world_group_ladder extends external_api {
         $perms = $world->get_access_permissions();
         if (!$perms->can_manage()) {
             $perms->require_access();
+        }
+
+        // Check that the world supports this.
+        if (!world_utils::supports_team_leaderboard($world)) {
+            throw new \moodle_exception('errorfeaturenotenabled', 'block_xp');
         }
 
         // Permission checks: The group ladder must be enabled.
@@ -113,7 +114,7 @@ class get_course_world_group_ladder extends external_api {
             'total' => $leaderboard->get_count(),
             'ranking' => iterator_to_array(new map_iterator(
                 $leaderboard->get_ranking($limit),
-                function ($rank) use ($userid, $myids) {
+                function ($rank) use ($myids) {
                     return [
                         'rank' => $rank->get_rank(),
                         'state' => self::serialize_state(
@@ -148,5 +149,4 @@ class get_course_world_group_ladder extends external_api {
             ),
         ]);
     }
-
 }

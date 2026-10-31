@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\logger;
 
@@ -37,7 +37,6 @@ use block_xp\local\logger\collection_logger;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class global_collection_logger implements collection_logger {
-
     /** @var string The table name. */
     protected $table = 'local_xp_log';
     /** @var moodle_database The DB. */
@@ -90,5 +89,4 @@ class global_collection_logger implements collection_logger {
     public function reset() {
         // Unlikely that this was intentional, so we do nothing.
     }
-
 }

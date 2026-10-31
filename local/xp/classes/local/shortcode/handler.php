@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Shortcode handler.
@@ -28,9 +28,12 @@
 namespace local_xp\local\shortcode;
 
 use block_xp\di;
+use block_xp\local\course_world;
 use block_xp\local\logger\reason_occurrence_indicator;
 use block_xp\local\sql\limit;
 use block_xp\local\utils\user_utils;
+use block_xp\local\utils\world_utils;
+use block_xp\local\world;
 use block_xp\local\xp\state_store_with_reason;
 use local_xp\local\config\default_course_world_config;
 use local_xp\local\reason\drop_collected_reason;
@@ -44,13 +47,12 @@ use local_xp\local\reason\drop_collected_reason;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class handler {
-
     /**
      * Get the world from the context.
      *
      * Also check whether the current user has access to the world.
      *
-     * @param object $env The environment.
+     * @param \context $context The context.
      * @return world|null
      */
     protected static function get_world_from_context(\context $context) {
@@ -78,7 +80,7 @@ class handler {
      * @param array $args The arguments of the code.
      * @param string|null $content The content, if the shortcode wraps content.
      * @param object $env The filter environment (contains context, noclean and originalformat).
-     * @param Closure $next The function to pass the content through to process sub shortcodes.
+     * @param \Closure $next The function to pass the content through to process sub shortcodes.
      * @return string The new content.
      */
     public static function xpdrop($drop, $args, $content, $env, $next) {
@@ -124,7 +126,9 @@ class handler {
         $world = $worldfactory->get_world($drop->get_courseid());
         $perms = $world->get_access_permissions();
         $canmanage = $perms->can_manage();
-        if ($world->get_courseid() != $drop->get_courseid()) {
+        if (!$world instanceof course_world) {
+            return;
+        } else if ($world->get_courseid() != $drop->get_courseid()) {
             return;
         }
 
@@ -133,8 +137,7 @@ class handler {
         $earnallowed = $config->get('enabled') && $drop->is_enabled();
         $canearn = user_utils::can_earn_points($world->get_context(), $USER->id);
         if ($earnallowed && $canearn) {
-            $loggerfactory = di::get('context_collection_logger_factory');
-            $logger = $loggerfactory->get_logger_from_context($world->get_context());
+            $logger = di::get('world_logger_factory')->get_logger_for_world($world);
 
             $reason = new drop_collected_reason();
             $reason->set_object_id($drop->get_id());
@@ -155,7 +158,6 @@ class handler {
                 }
                 $store->increase_with_reason($USER->id, $drop->get_points(), $reason);
             }
-
         }
 
         // Managers are shown something.
@@ -173,7 +175,7 @@ class handler {
      * @param object $args The arguments of the code.
      * @param string|null $content The content, if the shortcode wraps content.
      * @param object $env The filter environment (contains context, noclean and originalformat).
-     * @param Closure $next The function to pass the content through to process sub shortcodes.
+     * @param \Closure $next The function to pass the content through to process sub shortcodes.
      * @return string The new content.
      */
     public static function xpteamladder($shortcode, $args, $content, $env, $next) {
@@ -199,9 +201,13 @@ class handler {
         $world = static::get_world_from_env($env);
         if (!$world) {
             return;
+        } else if (!world_utils::supports_team_leaderboard($world)) {
+            return;
         } else if ($world->get_config()->get('enablegroupladder') == default_course_world_config::GROUP_LADDER_NONE) {
             return;
         }
+
+        $navigator = \block_xp\di::get('world_navigator_factory')->get_navigator_for_world($world);
 
         // Find the groups the user belong to.
         $helper = di::get('grouped_leaderboard_helper');
@@ -221,7 +227,6 @@ class handler {
                     if ($pos !== null) {
                         return [$teamid, $pos];
                     }
-
                 } else if ($carry[1] !== 0) {
                     // When the best team is not already ranked 1, return this team if it's got a better ranking.
                     $pos = $leaderboard->get_position($teamid);
@@ -242,7 +247,6 @@ class handler {
                 $count = max(1, intval($args['top']));
             }
             $limit = new limit($count, 0);
-
         } else {
             // Determine what part of the leaderboard to show and fence it.
             $before = 3;
@@ -254,7 +258,7 @@ class handler {
 
         // Prepare the page.
         if (!$PAGE->has_set_url() && defined('WS_SERVER') && WS_SERVER) {
-            $PAGE->set_url(di::get('url_resolver')->reverse('ladder', ['courseid' => $world->get_courseid()]));
+            $PAGE->set_url($navigator->get_url('ladder'));
         }
 
         // Output the table.
@@ -275,13 +279,12 @@ class handler {
         ob_end_clean();
 
         // Output.
-        $urlresolver = di::get('url_resolver');
         $link = '';
         $withlink = empty($args['hidelink']);
         if ($withlink && $leaderboard->get_count() > $limit->get_count()) {
             $link = \html_writer::div(
                 \html_writer::link(
-                    $urlresolver->reverse('group_ladder', ['courseid' => $world->get_courseid()]),
+                    $navigator->get_url('group_ladder'),
                     get_string('gotofullladder', 'block_xp')
                 ),
                 'xp-link-to-full-ladder'

@@ -316,3 +316,16 @@ $string['privacy:metadata:userflag:userid'] = 'Пользователь';
 $string['keeplogsdesc'] = 'Логи играют важную роль в работе плагина. Они используются для защиты от мошенничества, определения последних полученных наград и других функций. Сокращение срока хранения логов может повлиять на распределение баллов со временем, поэтому изменять этот параметр следует с осторожностью.';
 $string['reason'] = 'Причина';
 
+// CampusFR 2026: translated strings added for the updated release.
+$string['privacy:metadata:oauthtoken'] = 'Коды авторизации и токены OAuth для MCP.';
+$string['privacy:metadata:oauthtoken:clientid'] = 'Идентификатор клиента OAuth.';
+$string['privacy:metadata:oauthtoken:expires'] = 'Срок действия учётных данных OAuth.';
+$string['privacy:metadata:oauthtoken:redirecturi'] = 'URI перенаправления OAuth.';
+$string['privacy:metadata:oauthtoken:revoked'] = 'Отозваны ли учётные данные OAuth.';
+$string['privacy:metadata:oauthtoken:timecreated'] = 'Дата создания учётных данных OAuth.';
+$string['privacy:metadata:oauthtoken:timemodified'] = 'Дата последнего изменения учётных данных OAuth.';
+$string['privacy:metadata:oauthtoken:type'] = 'Тип учётных данных OAuth.';
+$string['privacy:metadata:oauthtoken:userid'] = 'Пользователь, разрешивший использование учётных данных OAuth.';
+$string['privacy:path:oauthtokens'] = 'Разрешения OAuth для MCP';
+$string['taskoauthcleanup'] = 'Очистка токенов OAuth';
+$string['xp:usemcp'] = 'Использовать интеграцию Level Up XP с MCP';

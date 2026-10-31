@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * XP config form.
@@ -31,7 +33,7 @@ require_once($CFG->dirroot . '/blocks/xp/classes/form/itemspertime.php');
 require_once($CFG->dirroot . '/cohort/lib.php');
 require_once($CFG->libdir . '/grouplib.php');
 
-use block_xp\local\config\course_world_config;
+use block_xp\local\utils\world_utils;
 use local_xp\local\config\default_course_world_config;
 
 /**
@@ -43,7 +45,6 @@ use local_xp\local\config\default_course_world_config;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class config extends \block_xp\form\config {
-
     /**
      * Form definition.
      *
@@ -52,56 +53,32 @@ class config extends \block_xp\form\config {
     public function definition() {
         parent::definition();
         $mform = $this->_form;
-        $world = $this->_customdata['world'];
-        $renderer = \block_xp\di::get('renderer');
-        $urlresolver = \block_xp\di::get('url_resolver');
-        $iomad = \block_xp\di::get('iomad_facade');
 
         // Progress bar.
         $el = $mform->createElement('header', 'progressbarhdr', get_string('progressbar', 'block_xp'));
-        $mform->insertElementBefore($el, 'hdrcheating');
+        $mform->insertElementBefore($el, '__generalend');
         unset($el);
         $el = $mform->createElement('select', 'progressbarmode', get_string('progressbarmode', 'local_xp'), [
             default_course_world_config::PROGRESS_BAR_MODE_LEVEL => get_string('progressbarmodelevel', 'local_xp'),
             default_course_world_config::PROGRESS_BAR_MODE_OVERALL => get_string('progressbarmodeoverall', 'local_xp'),
         ]);
-        $mform->insertElementBefore($el, 'hdrcheating');
+        $mform->insertElementBefore($el, '__generalend');
         $mform->addHelpButton('progressbarmode', 'progressbarmode', 'local_xp');
         unset($el);
 
-        // Group ladder.
-        $el = $mform->createElement('header', 'groupladderhdr', get_string('teamleaderboard', 'block_xp'));
-        $mform->insertElementBefore($el, 'hdrcheating');
-        unset($el);
-
-        $el = $mform->createElement('html',
-            \html_writer::div(
-                $renderer->notification_without_close(
-                    strip_tags(
-                        markdown_to_html(
-                            get_string('teamladdersettingsmovednotice',
-                                'local_xp',
-                                [
-                                    'url' => ($urlresolver->reverse('group_ladder', ['courseid' => $world->get_courseid()])
-                                        )->out(false),
-                                ]
-                            )
-                        ),
-                        '<a>'
-                    ),
-                    'info'
-                ),
-                'xp-my-4'
-            )
-        );
-        $mform->insertElementBefore($el, 'hdrcheating');
-        unset($el);
+        $world = $this->_customdata['world'] ?? null;
+        if (!world_utils::supports_local_points_management($world)) {
+            $mform->removeElement('enabled');
+            $mform->addElement('hidden', 'enabled');
+            $mform->setType('enabled', PARAM_BOOL);
+            $mform->setConstant('enabled', 1);
+        }
     }
 
     /**
      * Get the data.
      *
-     * @return stdClass
+     * @return \stdClass
      */
     public function get_data() {
         $data = parent::get_data();
@@ -121,5 +98,4 @@ class config extends \block_xp\form\config {
         $data = (array) $data;
         parent::set_data($data);
     }
-
 }

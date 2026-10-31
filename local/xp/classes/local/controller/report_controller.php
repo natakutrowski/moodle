@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Report controller.
@@ -26,6 +28,7 @@
 namespace local_xp\local\controller;
 
 use block_xp\di;
+use block_xp\local\utils\world_utils;
 use local_xp\local\config\default_course_world_config;
 use local_xp\local\userflag\deletion_service;
 
@@ -38,10 +41,14 @@ use local_xp\local\userflag\deletion_service;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class report_controller extends \block_xp\local\controller\report_controller {
-
     /** @var moodleform The form to add points. */
     protected $addform;
 
+    /**
+     * Define optional parameters.
+     *
+     * @return array
+     */
     protected function define_optional_params() {
         $params = parent::define_optional_params();
         $params[] = ['download', '', PARAM_ALPHA, false];
@@ -66,6 +73,9 @@ class report_controller extends \block_xp\local\controller\report_controller {
         return $form;
     }
 
+    /**
+     * Get download filename.
+     */
     protected function get_download_filename(): string {
         $groupid = $this->is_supporting_groups() ? $this->get_groupid() : null;
         $defaultfilename = 'xp-report-' . $this->world->get_context()->id;
@@ -76,10 +86,16 @@ class report_controller extends \block_xp\local\controller\report_controller {
         return $this->get_param('downloadfilename') ?: $defaultfilename;
     }
 
+    /**
+     * Get table.
+     *
+     * @return \block_xp\output\report_table
+     */
     protected function get_table() {
         if (!$this->table) {
             $teamresolver = null;
-            $withteams = $this->world->get_config()->get('enablegroupladder') != default_course_world_config::GROUP_LADDER_NONE;
+            $withteams = world_utils::supports_team_leaderboard($this->world)
+                && $this->world->get_config()->get('enablegroupladder') != default_course_world_config::GROUP_LADDER_NONE;
             if ($withteams) {
                 $teamresolverfactory = \block_xp\di::get('team_membership_resolver_factory');
                 $teamresolver = $teamresolverfactory->get_course_team_membership_resolver($this->world);
@@ -104,6 +120,11 @@ class report_controller extends \block_xp\local\controller\report_controller {
         return $this->table;
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
         // We must send the table before the output starts.
         $table = $this->get_table();
@@ -113,6 +134,12 @@ class report_controller extends \block_xp\local\controller\report_controller {
         parent::pre_content();
     }
 
+    /**
+     * Delete user data.
+     *
+     * @param int $userid The user ID.
+     * @return void
+     */
     protected function perform_user_deletion(int $userid): void {
         parent::perform_user_deletion($userid);
 
@@ -139,14 +166,14 @@ class report_controller extends \block_xp\local\controller\report_controller {
             }
         }
 
-        $importurl = $this->urlresolver->reverse('import', ['courseid' => $this->courseid]);
+        $importurl = $this->navigator->get_url('import');
         $options['menu'] = array_merge(
             array_slice($options['menu'], 0, $addatkey),
-            [
-                [
+            array_filter([
+                $this->supports_points_change() ? [
                     'label' => get_string('importpoints', 'block_xp'),
                     'href' => $importurl,
-                ],
+                ] : null,
                 [
                     'label' => get_string('exportdata', 'block_xp'),
                     'data-xp-action' => 'open-form',
@@ -157,7 +184,7 @@ class report_controller extends \block_xp\local\controller\report_controller {
                     'data-modal-buttons__save__label' => get_string('export', 'block_xp'),
                     'href' => '#',
                 ],
-            ],
+            ]),
             array_slice($options['menu'], $addatkey),
         );
 
@@ -174,5 +201,4 @@ class report_controller extends \block_xp\local\controller\report_controller {
      */
     protected function send_award_notification($userid, $points, $message) {
     }
-
 }

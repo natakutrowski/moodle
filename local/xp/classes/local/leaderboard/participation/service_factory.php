@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\leaderboard\participation;
 
@@ -31,7 +31,6 @@ use local_xp\local\config\default_course_world_config;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class service_factory {
-
     /** @var context_world_factory */
     protected $worldfactory;
 
@@ -59,5 +58,4 @@ class service_factory {
         }
         return new forced_service();
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\ruletype;
 
@@ -41,26 +41,59 @@ use local_xp\local\reason\section_completion_reason;
 class section_completion implements ruletype, ruletype_with_profile {
     use ruletype_deprecation_filler_trait;
 
+    /**
+     * Get display name.
+     *
+     * @return lang_string
+     */
     public function get_display_name(): lang_string {
         return new lang_string('ruletypesectioncompletion', 'block_xp');
     }
 
+    /**
+     * Get profile.
+     *
+     * @return profile
+     */
     public function get_profile(): profile {
         return (new profile())->set_subject(profile::SUBJECT_SECTION);
     }
 
+    /**
+     * Get short description.
+     *
+     * @return lang_string
+     */
     public function get_short_description(): lang_string {
         return new lang_string('ruletypesectioncompletiondesc', 'block_xp');
     }
 
+    /**
+     * Check action compatibility.
+     *
+     * @param action $action The action.
+     * @return bool
+     */
     public function is_action_compatible(action $action): bool {
         return $action->get_type() === 'cm_completed';
     }
 
+    /**
+     * Check action requirements.
+     *
+     * @param action $action The action.
+     * @return bool
+     */
     public function is_action_satisfying_requirements(action $action): bool {
         return $this->is_section_completed_by_action($action);
     }
 
+    /**
+     * Make reason.
+     *
+     * @param action $action The action.
+     * @return reason
+     */
     public function make_reason(action $action): reason {
         $context = context_course::instance($this->get_course_id($action), IGNORE_MISSING);
         $reason = new section_completion_reason();
@@ -172,5 +205,4 @@ class section_completion implements ruletype, ruletype_with_profile {
 
         return $cmswithcompletioninsection > 0 && $cmswithcompletioninsection <= $cmscompletedinsection;
     }
-
 }

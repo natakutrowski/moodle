@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\rule;
 
@@ -31,7 +31,6 @@ use block_xp\local\ruletype\resolver;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class rule_descriptor {
-
     /** @var resolver The rule type resolver. */
     protected $ruletyperesolver;
     /** @var handler The rule filter handler. */

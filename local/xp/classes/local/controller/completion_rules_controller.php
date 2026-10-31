@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Rules controller.
@@ -30,8 +30,10 @@ namespace local_xp\local\controller;
 use block_xp\di;
 use block_xp\local\controller\page_controller;
 use block_xp\local\controller\rules_scope_trait;
+use block_xp\local\course_world;
 use block_xp\local\routing\url;
 use block_xp\local\rulefilter\rulefilter;
+use block_xp\local\utils\world_utils;
 use context;
 use help_icon;
 
@@ -51,6 +53,11 @@ class completion_rules_controller extends page_controller {
     /** @var string The route name. */
     protected $routename = 'completionrules';
 
+    /**
+     * Define optional parameters.
+     *
+     * @return array
+     */
     protected function define_optional_params() {
         return [
             ['reset', false, PARAM_BOOL, false],
@@ -59,7 +66,16 @@ class completion_rules_controller extends page_controller {
         ];
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
+        if (!world_utils::supports_local_points_management($this->world)) {
+            $this->redirect($this->navigator->get_url('infos'));
+        }
+
         // Reset course rules to defaults.
         if ($this->get_param('reset') && confirm_sesskey()) {
             if ($this->get_param('confirm')) {
@@ -101,7 +117,8 @@ class completion_rules_controller extends page_controller {
         // Confirm is a valid context.
         $context = context::instance_by_id($childcontextid, IGNORE_MISSING);
         $worldcontext = $this->world->get_context();
-        if (!$context || $context->contextlevel != CONTEXT_COURSE ||
+        if (
+            !$context || $context->contextlevel != CONTEXT_COURSE ||
                 !$worldcontext->is_parent_of($context, false)
         ) {
             return null;
@@ -115,15 +132,31 @@ class completion_rules_controller extends page_controller {
 
         return $context;
     }
+    /**
+     * Get page title.
+     *
+     * @return string
+     */
     protected function get_page_html_head_title() {
         return get_string('completionrules', 'block_xp');
     }
 
+    /**
+     * Get page heading.
+     *
+     * @return string
+     */
     protected function get_page_heading() {
         return get_string('completionrules', 'block_xp');
     }
 
+    /**
+     * Check for legacy rules.
+     */
     protected function has_legacy_completion_rules() {
+        if (!$this->world instanceof course_world) {
+            return false;
+        }
         $filtermanager = $this->world->get_filter_manager();
         return $filtermanager->has_filters_using_rules([
             'local_xp\\local\\rule\\activity_completion',
@@ -132,6 +165,11 @@ class completion_rules_controller extends page_controller {
         ]);
     }
 
+    /**
+     * Output page content.
+     *
+     * @return void
+     */
     protected function page_content() {
         $output = $this->get_renderer();
         $childcontext = $this->get_child_context();
@@ -191,5 +229,4 @@ class completion_rules_controller extends page_controller {
             'rulefilters' => $filters,
         ], $this->world);
     }
-
 }

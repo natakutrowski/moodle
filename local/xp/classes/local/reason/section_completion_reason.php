@@ -1,19 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reason;
 
@@ -77,7 +78,7 @@ class section_completion_reason implements
      * @return context|null
      */
     protected function get_context() {
-        return context::instance_by_id($this->get_env_id() ?? 0, IGNORE_MISSING) ?: null;
+        return context::instance_by_id($this->get_env_id() ?? -1, IGNORE_MISSING) ?: null;
     }
 
     /**
@@ -99,7 +100,6 @@ class section_completion_reason implements
         global $CFG;
         require_once($CFG->dirroot . '/course/lib.php');
         try {
-
             return get_fast_modinfo($this->get_course_id());
         } catch (\moodle_exception $e) {
             return null;
@@ -137,10 +137,20 @@ class section_completion_reason implements
         return $this->get_object_id() ?? 0;
     }
 
+    /**
+     * Get signature.
+     *
+     * @return string
+     */
     public function get_signature() {
         return $this->get_course_id() . ':' . $this->get_section_num();
     }
 
+    /**
+     * Get short description.
+     *
+     * @return string
+     */
     public function get_short_description() {
         return get_string('sectioncompleted', 'local_xp');
     }
@@ -160,6 +170,9 @@ class section_completion_reason implements
         return new static($courseid, $sectionnum);
     }
 
+    /**
+     * Create from event.
+     */
     public static function from_event(\local_xp\event\section_completed $e) {
         $context = context_course::instance($e->courseid, IGNORE_MISSING);
         $reason = new static();
@@ -167,5 +180,4 @@ class section_completion_reason implements
         $reason->set_object_id((int) $e->other['sectionnum']);
         return $reason;
     }
-
 }

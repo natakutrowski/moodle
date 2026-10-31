@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Settings maker.
@@ -25,6 +27,9 @@
 
 namespace local_xp\local\setting;
 
+use admin_externalpage;
+use admin_setting;
+use admin_setting_confightmleditor;
 use admin_setting_configmultiselect;
 use admin_setting_configselect;
 use admin_setting_configtext;
@@ -34,8 +39,13 @@ use block_xp\local\config\config;
 use block_xp\local\config\course_world_config;
 use block_xp\local\routing\url_resolver;
 use block_xp\local\setting\environment;
+use block_xp\local\setting\static_setting;
+use html_writer;
 use local_xp\local\config\default_course_world_config;
 use local_xp\local\iomad\facade as iomadfacade;
+use local_xp\local\model\oauth_client;
+use local_xp\local\utils\agent_utils;
+use part_of_admin_tree;
 
 /**
  * Settings maker.
@@ -46,7 +56,6 @@ use local_xp\local\iomad\facade as iomadfacade;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class settings_maker extends \block_xp\local\setting\default_settings_maker {
-
     /** @var iomadfacade IOMAD. */
     protected $iomad;
 
@@ -72,6 +81,24 @@ class settings_maker extends \block_xp\local\setting\default_settings_maker {
      */
     public function get_settings(environment $env) {
         $settings = parent::get_settings($env);
+        $catname = $settings->name;
+
+        $settingspage = new admin_externalpage(
+            'block_xp_admin_mcp_tools',
+            get_string('mcptools', 'block_xp'),
+            $this->urlresolver->reverse('admin/mcptools')->get_compatible_url()
+        );
+        $settingspage->hidden = true;
+        $settings->add($catname, $settingspage);
+
+        $settingspage = new admin_externalpage(
+            'block_xp_admin_oauth_clients',
+            get_string('oauthclients', 'block_xp'),
+            $this->urlresolver->reverse('admin/oauthclients')->get_compatible_url()
+        );
+        $settingspage->hidden = true;
+        $settings->add($catname, $settingspage);
+
         return $settings;
     }
 
@@ -87,9 +114,10 @@ class settings_maker extends \block_xp\local\setting\default_settings_maker {
         foreach ($parentsettings as $setting) {
             // Replace keeplogs to contain other options.
             if ($setting->name == 'keeplogs') {
-                $setting = (new admin_setting_configselect('block_xp/keeplogs',
+                $setting = (new admin_setting_configselect(
+                    'block_xp/keeplogs',
                     get_string('keeplogs', 'block_xp'),
-                    get_string('keeplogsdesc', 'local_xp'),
+                    get_string('keeplogsdesc', 'block_xp'),
                     $this->defaults->get('keeplogs'),
                     [
                         '0' => get_string('forever', 'block_xp'),
@@ -102,6 +130,37 @@ class settings_maker extends \block_xp\local\setting\default_settings_maker {
                     ]
                 ));
             }
+
+            $settings[] = $setting;
+
+            if ($setting->name == 'block_xp_context') {
+                $settings[] = new admin_setting_configselect(
+                    'local_xp/enableglobalworld',
+                    get_string('enableglobalworld', 'block_xp'),
+                    get_string('enableglobalworlddesc', 'block_xp'),
+                    $this->defaults->get('enableglobalworld'),
+                    [
+                        '0' => get_string('no', 'core'),
+                        '1' => get_string('yes', 'core'),
+                    ]
+                );
+            }
+
+            if ($setting->name == 'navbardisplay') {
+                $settings[] = new admin_setting_configselect(
+                    'local_xp/navbarshowoverall',
+                    get_string('navbarshowoverall', 'block_xp'),
+                    get_string('navbarshowoveralldesc', 'block_xp'),
+                    $this->defaults->get('navbarshowoverall'),
+                    [
+                        '0' => get_string('no', 'core'),
+                        '1' => get_string('yes', 'core'),
+                    ]
+                );
+            }
+        }
+
+        foreach ($this->get_ai_settings() as $setting) {
             $settings[] = $setting;
         }
 
@@ -120,12 +179,11 @@ class settings_maker extends \block_xp\local\setting\default_settings_maker {
 
         // We loop over each setting to inject what more when we need.
         foreach ($parentsettings as $setting) {
-
             if ($setting->name == 'identitymode') {
-
                 // Leaderboard isolation.
                 if (di::get('addon')->supports_leaderboard_isolation()) {
-                    $settings[] = (new admin_setting_configselect('local_xp/ladderiso',
+                    $settings[] = (new admin_setting_configselect(
+                        'local_xp/ladderiso',
                         get_string('ladderiso', 'block_xp'),
                         get_string('ladderiso_help', 'block_xp'),
                         $defaults['ladderiso'],
@@ -138,7 +196,8 @@ class settings_maker extends \block_xp\local\setting\default_settings_maker {
 
                 // Leaderboard participation.
                 if (di::get('addon')->supports_leaderboard_participation()) {
-                    $settings[] = new admin_setting_configselect('local_xp/ladderparticipation',
+                    $settings[] = new admin_setting_configselect(
+                        'local_xp/ladderparticipation',
                         get_string('ladderparticipation', 'block_xp'),
                         get_string('ladderparticipation_help', 'block_xp'),
                         $defaults['ladderparticipation'],
@@ -166,16 +225,15 @@ class settings_maker extends \block_xp\local\setting\default_settings_maker {
                         ),
                     ])
                 );
-
             }
 
             if ($setting->name == 'hdrcheatguard') {
-
                 // Progress bar settings.
                 $settings[] = (new admin_setting_heading('local_xp/hdrprogressbar', get_string('progressbar', 'block_xp'), ''));
 
                 // Progress bar mode.
-                $settings[] = (new admin_setting_configselect('local_xp/progressbarmode',
+                $settings[] = (new admin_setting_configselect(
+                    'local_xp/progressbarmode',
                     get_string('progressbarmode', 'local_xp'),
                     get_string('progressbarmode_help', 'local_xp'),
                     $defaults['progressbarmode'],
@@ -204,7 +262,8 @@ class settings_maker extends \block_xp\local\setting\default_settings_maker {
                         'local_xp'
                     );
                 }
-                $settings[] = (new admin_setting_configselect('local_xp/enablegroupladder',
+                $settings[] = (new admin_setting_configselect(
+                    'local_xp/enablegroupladder',
                     get_string('groupladdersource', 'local_xp'),
                     get_string('groupladdersource_help', 'local_xp'),
                     $defaults['enablegroupladder'],
@@ -212,7 +271,8 @@ class settings_maker extends \block_xp\local\setting\default_settings_maker {
                 ));
 
                 // Group ladder identity mode.
-                $settings[] = new admin_setting_configselect('local_xp/groupidentitymode',
+                $settings[] = new admin_setting_configselect(
+                    'local_xp/groupidentitymode',
                     get_string('groupanonymity', 'local_xp'),
                     get_string('groupanonymity_help', 'local_xp'),
                     $defaults['groupidentitymode'],
@@ -223,7 +283,8 @@ class settings_maker extends \block_xp\local\setting\default_settings_maker {
                 );
 
                 // Group ladder order.
-                $settings[] = new admin_setting_configselect('local_xp/grouporderby',
+                $settings[] = new admin_setting_configselect(
+                    'local_xp/grouporderby',
                     get_string('grouporderby', 'local_xp'),
                     get_string('grouporderby_help', 'local_xp'),
                     $defaults['grouporderby'],
@@ -236,7 +297,8 @@ class settings_maker extends \block_xp\local\setting\default_settings_maker {
                 );
 
                 // Group ladder columns.
-                $settings[] = new admin_setting_configmultiselect('local_xp/groupladdercols',
+                $settings[] = new admin_setting_configmultiselect(
+                    'local_xp/groupladdercols',
                     get_string('groupladdercols', 'local_xp'),
                     get_string('groupladdercols_help', 'local_xp'),
                     explode(',', $defaults['groupladdercols']),
@@ -250,9 +312,9 @@ class settings_maker extends \block_xp\local\setting\default_settings_maker {
             $settings[] = $setting;
 
             if ($setting->name == 'timebetweensameactions') {
-
                 // Max actions per time.
-                $settings[] = (new admin_setting_configtext('local_xp/maxpointspertime',
+                $settings[] = (new admin_setting_configtext(
+                    'local_xp/maxpointspertime',
                     get_string('maxpointspertime', 'local_xp'),
                     get_string('maxpointspertime_help', 'local_xp'),
                     $defaults['maxpointspertime'],
@@ -260,18 +322,121 @@ class settings_maker extends \block_xp\local\setting\default_settings_maker {
                 ));
 
                 // Time for max actions.
-                $settings[] = (new admin_setting_configtext('local_xp/timeformaxpoints',
+                $settings[] = (new admin_setting_configtext(
+                    'local_xp/timeformaxpoints',
                     get_string('timeformaxpoints', 'local_xp'),
                     get_string('timeformaxpoints_help', 'local_xp'),
                     $defaults['timeformaxpoints'],
                     PARAM_INT
                 ));
-
             }
-
         }
 
         return $settings;
     }
 
+    /**
+     * Get the AI settings.
+     *
+     * @return \Generator
+     */
+    protected function get_ai_settings() {
+        $setting = new admin_setting_heading(
+            'block_xp/hdrai',
+            get_string('adminaisettings', 'block_xp'),
+            get_string('adminaisettings_desc', 'block_xp')
+        );
+        yield $setting;
+
+        $setting = (new admin_setting_configselect(
+            'local_xp/enablemcp',
+            get_string('enablemcp', 'block_xp'),
+            get_string('enablemcp_desc', 'block_xp'),
+            $this->defaults->get('enablemcp'),
+            [
+                '0' => get_string('no', 'core'),
+                '1' => get_string('yes', 'core'),
+            ]
+        ));
+        yield $setting;
+
+        $setting = (new mcp_risks_setting(
+            'local_xp/mcprisksallowed',
+            get_string('mcprisksallowed', 'block_xp'),
+            get_string(
+                'mcprisksallowed_desc',
+                'block_xp',
+                ['toolslisturl' => $this->urlresolver->reverse('admin/mcptools')->get_compatible_url()]
+            ),
+            $this->defaults->get('mcprisksallowed')
+        ));
+        yield $setting;
+
+        $setting = (new static_setting(
+            'local_xp/mcpurl',
+            get_string('mcpurl', 'block_xp'),
+            get_string('mcpurl_desc', 'block_xp'),
+            function () {
+                return html_writer::tag('pre', di::get('oauth_service')->get_mcp_url()->out(false));
+            }
+        ));
+        yield $setting;
+
+        $setting = (new static_setting(
+            'local_xp/oauthclients',
+            get_string('oauthclients', 'block_xp'),
+            get_string('oauthclients_desc', 'block_xp'),
+            function () {
+                $urlresolver = di::get('url_resolver');
+                return html_writer::link(
+                    $urlresolver->reverse('admin/oauthclients'),
+                    get_string('manageoauthclients', 'block_xp'),
+                );
+            }
+        ));
+        yield $setting;
+
+        $setting = (new admin_setting_configselect(
+            'local_xp/enablechatgpt',
+            get_string('enablechatgpt', 'block_xp'),
+            get_string('enablechatgpt_desc', 'block_xp'),
+            $this->defaults->get('enablechatgpt'),
+            [
+                '0' => get_string('no', 'core'),
+                '1' => get_string('yes', 'core'),
+            ]
+        ));
+        $setting->set_updatedcallback(function () {
+            $domains = agent_utils::get_chatgpt_cimd_domains();
+            $isenabled = (bool) get_config('local_xp', 'enablechatgpt');
+            oauth_client::toggle_cimd_isenabled_by_domains($domains, $isenabled);
+        });
+        yield $setting;
+
+        $setting = (new admin_setting_configselect(
+            'local_xp/enableclaude',
+            get_string('enableclaude', 'block_xp'),
+            get_string('enableclaude_desc', 'block_xp'),
+            $this->defaults->get('enableclaude'),
+            [
+                '0' => get_string('no', 'core'),
+                '1' => get_string('yes', 'core'),
+            ]
+        ));
+        $setting->set_updatedcallback(function () {
+            $domains = agent_utils::get_claude_cimd_domains();
+            $isenabled = (bool) get_config('local_xp', 'enableclaude');
+            oauth_client::toggle_cimd_isenabled_by_domains($domains, $isenabled);
+        });
+        yield $setting;
+
+        $setting = (new admin_setting_confightmleditor(
+            'local_xp/mcpconnectinstructions',
+            get_string('mcpconnectinstructions', 'block_xp'),
+            get_string('mcpconnectinstructions_desc', 'block_xp'),
+            $this->defaults->get('mcpconnectinstructions'),
+            PARAM_RAW
+        ));
+        yield $setting;
+    }
 }

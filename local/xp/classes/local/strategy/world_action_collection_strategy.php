@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\strategy;
 
@@ -39,7 +39,6 @@ use local_xp\local\ruletype\section_completion;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class world_action_collection_strategy extends \block_xp\local\strategy\world_action_collection_strategy {
-
     /**
      * Get the rule limits.
      *

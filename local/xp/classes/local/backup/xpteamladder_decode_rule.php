@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\backup;
 
@@ -33,7 +33,6 @@ require_once($CFG->dirroot . '/backup/util/helper/restore_decode_rule.class.php'
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class xpteamladder_decode_rule extends \restore_decode_rule {
-
     /**
      * Constructor.
      */
@@ -137,5 +136,4 @@ class xpteamladder_decode_rule extends \restore_decode_rule {
         $mappings = (array) $mappings;
         return array_combine(range(1, count($mappings)), $mappings);
     }
-
 }

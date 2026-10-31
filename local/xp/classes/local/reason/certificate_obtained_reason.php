@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reason;
 
@@ -53,7 +53,7 @@ class certificate_obtained_reason implements
      * @return context|null
      */
     protected function get_context() {
-        return context::instance_by_id($this->get_env_id() ?? 0, IGNORE_MISSING) ?: null;
+        return context::instance_by_id($this->get_env_id() ?? -1, IGNORE_MISSING) ?: null;
     }
 
     /**

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\leaderboard;
 
@@ -25,9 +25,13 @@ use block_xp\local\leaderboard\ranker;
 use block_xp\local\sql\limit;
 use block_xp\local\userfilter\user_filter;
 use block_xp\local\utils\user_utils;
+use block_xp\local\xp\levels_info;
+use block_xp\local\xp\rank;
 use block_xp\local\xp\state;
 use block_xp\local\xp\state_rank;
+use block_xp\local\xp\user_state;
 use context_helper;
+use context_system;
 use local_xp\local\xp\levelless_user_state;
 use stdClass;
 
@@ -40,9 +44,12 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class global_leaderboard implements leaderboard {
-
-    /** @var moodle_database The database. */
+    /** @var null|string[] The columns. */
+    protected $columns;
+    /** @var \moodle_database The database. */
     protected $db;
+    /** @var ?levels_info Levels info. */
+    protected $levelsinfo;
     /** @var ranker The ranker. */
     protected $ranker;
     /** @var user_filter The user filter. */
@@ -62,11 +69,15 @@ class global_leaderboard implements leaderboard {
     /**
      * Constructor.
      *
-     * @param ranker $ranker An alternative ranker.
+     * @param ?ranker $ranker An alternative ranker.
+     * @param ?string[] $columns The columns.
+     * @param ?levels_info $levelsinfo The levels info.
      */
-    public function __construct(?ranker $ranker = null) {
+    public function __construct(?ranker $ranker = null, ?array $columns = null, ?levels_info $levelsinfo = null) {
         $this->db = di::get('db');
         $this->ranker = $ranker;
+        $this->columns = $columns;
+        $this->levelsinfo = $levelsinfo;
     }
 
     /**
@@ -89,24 +100,30 @@ class global_leaderboard implements leaderboard {
         [$usersql, $userparams] = $this->get_user_ids_sql('u2.id');
         $params += $userparams;
 
-        // Fetch from all courses that are visible. Filtering by active enrolments would be costly
+        // Fetch from selected courses. Filtering by active enrolments would be costly
         // and inconsistent with the course leaderboards which include all users, irrespective of their
         // enrolment statuses.
         $this->from = "{user} u
                   JOIN (SELECT x2.userid, SUM(x2.xp) AS xp
                           FROM {block_xp} x2
                           JOIN {user} u2 ON u2.id = x2.userid
-                          JOIN {course} c ON c.id = x2.courseid
+                          JOIN {context} cctx
+                            ON cctx.instanceid = x2.courseid AND cctx.contextlevel = :coursecontextlevel
+                          JOIN {local_xp_source} src
+                            ON src.sourcecontextid = cctx.id AND src.contextid = :worldcontextid
                          WHERE u2.deleted = 0
                            AND u2.suspended = 0
-                           AND c.visible = 1
                            AND ($usersql)
                       GROUP BY x2.userid) x
                     ON x.userid = u.id
                   JOIN {context} ctx
                     ON ctx.instanceid = u.id
                    AND ctx.contextlevel = :contextlevel";
-        $params += ['contextlevel' => CONTEXT_USER];
+        $params += [
+            'contextlevel' => CONTEXT_USER,
+            'coursecontextlevel' => CONTEXT_COURSE,
+            'worldcontextid' => context_system::instance()->id,
+        ];
 
         $this->where = "1=1";
         $this->order = "x.xp DESC, u.id ASC";
@@ -119,8 +136,7 @@ class global_leaderboard implements leaderboard {
      * @return array Where keys are column identifiers and values are lang_string objects.
      */
     public function get_columns() {
-        // TODO Support customisation.
-        return [
+        return $this->columns ?? [
             'rank' => new \lang_string('rank', 'block_xp'),
             'fullname' => new \lang_string('participant', 'block_xp'),
             'xp' => new \lang_string('total', 'block_xp'),
@@ -227,7 +243,7 @@ class global_leaderboard implements leaderboard {
      * Get the ranking.
      *
      * @param limit $limit The limit.
-     * @return Traversable
+     * @return \Traversable
      */
     public function get_ranking(limit $limit) {
         $recordset = $this->get_ranking_recordset($limit);
@@ -330,7 +346,10 @@ class global_leaderboard implements leaderboard {
         $user = user_utils::unalias_picture_fields($record, $useridfield);
         context_helper::preload_from_record($record);
         $xp = !empty($record->xp) ? $record->xp : 0;
-        return new levelless_user_state($user, $xp, SITEID);
+        if (!$this->levelsinfo) {
+            return new levelless_user_state($user, $xp);
+        }
+        return new user_state($user, $xp, $this->levelsinfo);
     }
 
     /**
@@ -341,5 +360,4 @@ class global_leaderboard implements leaderboard {
     public function set_user_filter(user_filter $filter) {
         $this->userfilter = $filter;
     }
-
 }

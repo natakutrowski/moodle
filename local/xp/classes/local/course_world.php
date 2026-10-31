@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Course World.
@@ -26,6 +28,7 @@
 namespace local_xp\local;
 
 use block_xp\di;
+use block_xp\local\activity\user_recent_activity_repository;
 use moodle_database;
 use block_xp\local\config\config;
 use block_xp\local\factory\badge_url_resolver_course_world_factory;
@@ -46,7 +49,6 @@ use local_xp\local\xp\user_global_state;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_world extends \block_xp\local\course_world {
-
     /** @var strategy\course_world_collection_strategy */
     protected $strategy;
     /** @var collection_logger */
@@ -61,7 +63,7 @@ class course_world extends \block_xp\local\course_world {
      * @param moodle_database $db The DB.
      * @param int $courseid The course ID.
      * @param collection_target_resolver_from_event $usercolletiontargetresolver The user collection target resolver.
-     * @param badge_url_resolver_course_world_factory $urlresolverfactory The badge URL resolver factory.
+     * @param ?badge_url_resolver_course_world_factory $urlresolverfactory The badge URL resolver factory.
      * @param levels_info_factory $levelsinfofactory The levels info factory.
      */
     public function __construct(
@@ -69,7 +71,7 @@ class course_world extends \block_xp\local\course_world {
         moodle_database $db,
         $courseid,
         collection_target_resolver_from_event $usercolletiontargetresolver,
-        badge_url_resolver_course_world_factory $urlresolverfactory,
+        ?badge_url_resolver_course_world_factory $urlresolverfactory,
         levels_info_factory $levelsinfofactory
     ) {
 
@@ -131,7 +133,6 @@ class course_world extends \block_xp\local\course_world {
      */
     public function get_store() {
         if (!$this->store) {
-
             $userstatefactory = null;
             $levelsinfo = $this->get_levels_info();
 
@@ -152,6 +153,22 @@ class course_world extends \block_xp\local\course_world {
             );
         }
         return $this->store;
+    }
+
+    /**
+     * Get the state store observer.
+     *
+     * @return observer\default_state_store_observer
+     */
+    protected function get_state_store_observer() {
+        if (!$this->statestoreobserver) {
+            $this->statestoreobserver = new observer\default_state_store_observer(
+                $this->context,
+                $this->config,
+                $this->get_level_up_notification_service()
+            );
+        }
+        return $this->statestoreobserver;
     }
 
     /**

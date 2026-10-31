@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Language file.
@@ -310,3 +312,33 @@ $string['unknowngradeitemtype'] = 'Type inconnu ({$a})';
 $string['unknownsectiona'] = 'Section inconnue ({$a})';
 $string['uptoleveln'] = 'Jusqu\'au niveau {$a}';
 $string['visualsintro'] = 'Personnaliser l\'apparence des niveaux, et des points.';
+
+// CampusFR 2026: translated strings added for the updated release.
+$string['copypastedropsnippet'] = 'Copiez et collez l’extrait de code suivant dans un contenu.';
+$string['currencysignoverride_help'] = 'Déposez une image pour choisir un autre symbole.
+
+Nous recommandons une image de 18 pixels de hauteur, au format JPEG, PNG ou SVG.';
+$string['increase'] = 'Augmenter';
+$string['leaderboardnotsetup'] = 'Le classement n’a pas encore été configuré.';
+$string['pointswithsymbol'] = 'Points avec symbole';
+$string['privacy:metadata:oauthtoken'] = 'Codes d’autorisation et jetons OAuth MCP.';
+$string['privacy:metadata:oauthtoken:clientid'] = 'Identifiant du client OAuth.';
+$string['privacy:metadata:oauthtoken:expires'] = 'Date d’expiration de l’identifiant OAuth.';
+$string['privacy:metadata:oauthtoken:redirecturi'] = 'URI de redirection OAuth.';
+$string['privacy:metadata:oauthtoken:revoked'] = 'Indique si l’identifiant OAuth a été révoqué.';
+$string['privacy:metadata:oauthtoken:timecreated'] = 'Date de création de l’identifiant OAuth.';
+$string['privacy:metadata:oauthtoken:timemodified'] = 'Date de dernière modification de l’identifiant OAuth.';
+$string['privacy:metadata:oauthtoken:type'] = 'Type d’identifiant OAuth.';
+$string['privacy:metadata:oauthtoken:userid'] = 'Utilisateur ayant autorisé l’identifiant OAuth.';
+$string['privacy:metadata:prefdataformat'] = 'Format de téléchargement';
+$string['privacy:metadata:userflag'] = 'Enregistre les préférences de participation au classement propres à chaque utilisateur.';
+$string['privacy:metadata:userflag:ladderparticipation'] = 'Indique si l’utilisateur participe au classement.';
+$string['privacy:metadata:userflag:ladderparticipationlocked'] = 'Date à partir de laquelle la préférence de participation peut de nouveau être modifiée.';
+$string['privacy:metadata:userflag:userid'] = 'Utilisateur concerné.';
+$string['privacy:path:oauthtokens'] = 'Autorisations OAuth MCP';
+$string['setastotal'] = 'Définir comme total';
+$string['shortcode:xpdrop'] = 'Intégrer un gain de points dans le contenu.';
+$string['taskoauthcleanup'] = 'Nettoyage des jetons OAuth';
+$string['teamladdersettingsmovednotice'] = 'Les paramètres du classement des équipes ont été déplacés vers la [page du classement des équipes]({$a->url}).';
+$string['xp:usemcp'] = 'Utiliser l’intégration MCP de Level Up XP';
+$string['xpparticipants'] = 'Participants XP';

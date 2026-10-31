@@ -1,36 +1,30 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * External function.
- *
- * @package    local_xp
- * @copyright  2023 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 namespace local_xp\external;
 
 use block_xp\di;
+use block_xp\external\external_description;
 use block_xp\external\external_function_parameters;
 use block_xp\external\external_single_structure;
 use block_xp\external\external_value;
+use block_xp\local\utils\world_utils;
 use local_xp\local\config\default_course_world_config;
-use moodle_exception;
 
 /**
  * External function.
@@ -41,7 +35,6 @@ use moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class get_setup extends external_api {
-
     /**
      * External function parameters.
      *
@@ -49,30 +42,35 @@ class get_setup extends external_api {
      */
     public static function execute_parameters() {
         return new external_function_parameters([
-            'courseid' => new external_value(PARAM_INT),
+            'courseid' => new external_value(PARAM_INT, '', VALUE_DEFAULT),
+            'contextid' => new external_value(PARAM_INT, '', VALUE_DEFAULT),
         ]);
     }
 
     /**
      * External function.
      *
-     * @param int $courseid The course ID.
+     * @param ?int $courseid The course ID.
+     * @param ?int $contextid The context ID.
      * @return object
      */
-    public static function execute($courseid) {
+    public static function execute($courseid = null, $contextid = null) {
         global $USER;
 
-        $params = self::validate_parameters(self::execute_parameters(), compact('courseid'));
+        $params = self::validate_parameters(self::execute_parameters(), compact('courseid', 'contextid'));
         extract($params); // @codingStandardsIgnoreLine
 
         $adminconfig = di::get('config');
-        $worldfactory = di::get('course_world_factory');
-        $currencyfactory = di::get('course_currency_factory');
+        $currencyfactory = di::get('currency_factory');
         $bifinder = di::get('course_world_block_any_instance_finder_in_context');
 
-        $world = $worldfactory->get_world($courseid);
-        $courseid = $world->get_courseid(); // Ensure that we get the real course ID.
-        self::validate_context($world->get_context());
+        if (!empty($contextid)) {
+            $world = di::get('context_world_factory')->get_world_from_context(\context::instance_by_id($contextid));
+        } else {
+            $world = di::get('course_world_factory')->get_world($courseid ?? 0);
+        }
+        $context = $world->get_context();
+        self::validate_context($context);
         di::get('addon')->require_activated();
 
         // Find the block instance, we use the course context because the front page is a course.
@@ -91,36 +89,35 @@ class get_setup extends external_api {
         if (!$perms->can_access() || isguestuser() || !$USER->id) {
             // Early bail if the user cannot see anything.
             return $publicdata;
-        } else if (!$bifinder->has_instance_in_context('xp', $world->get_context())) {
+        } else if (!$bifinder->has_instance_in_context('xp', $context)) {
             // We could not find the block, so let's skip it.
             return $publicdata;
         }
 
         $config = $world->get_config();
-        $currency = $currencyfactory->get_currency($courseid);
+        $currency = $currencyfactory->get_currency_for_world($world);
 
         // Description.
-        // TODO Remove hardcoded indicator and notice name.
-        $indicator = \block_xp\di::get('user_notice_indicator');
-        $introname = 'block_intro_' . $courseid;
+        $prefname = 'block_xp_block_intro_' . $context->id;
         $description = '';
-        if ($perms->can_manage() || !$indicator->user_has_flag($USER->id, $introname)) {
-            $description = self::format_string($config->get('blockdescription'), $world->get_context());
+        if ($perms->can_manage() || !get_user_preferences($prefname, false)) {
+            $description = self::format_string($config->get('blockdescription'), $context);
         }
 
         // Phew, we're done. Note that this is NOT a recursive merge.
         return [
             'block' => [
-                'title' => self::format_string($config->get('blocktitle'), $world->get_context()),
+                'title' => self::format_string($config->get('blocktitle'), $context),
                 'description' => $description,
-                'recentactivity' => $config->get('blockrecentactivity'),
+                'recentactivity' => world_utils::supports_recent_activity($world) ? $config->get('blockrecentactivity') : 0,
                 // TODO Implement better visibility check. E.g. we should look at the block_position instead, if any.
                 'visible' => true,
             ],
             'config' => [
                 'enableinfos' => $config->get('enableinfos'),
                 'enableladder' => $config->get('enableladder'),
-                'enablegroupladder' => $config->get('enablegroupladder') != default_course_world_config::GROUP_LADDER_NONE,
+                'enablegroupladder' => world_utils::supports_team_leaderboard($world)
+                    && $config->get('enablegroupladder') != default_course_world_config::GROUP_LADDER_NONE,
             ],
             'visuals' => [
                 'currency' => self::serialize_currency($currency),
@@ -156,5 +153,4 @@ class get_setup extends external_api {
             ], '', VALUE_OPTIONAL),
         ]);
     }
-
 }

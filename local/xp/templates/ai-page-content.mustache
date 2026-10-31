@@ -1,0 +1,100 @@
+{{!
+    This file is part of Level Up XP+.
+
+    Level Up XP+ is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Level Up XP+ is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+
+    https://levelup.plus
+}}
+{{!
+    @template local_xp/ai-page-content
+
+    AI page content.
+
+    Example context (json):
+    {
+        "chatgptinstructions": "<ol><li>Open settings.</li></ol>",
+        "claudeinstructions": "<ol><li>Open connectors.</li></ol>",
+        "custominstructions": "<p>Open our assistant.</p>",
+        "hasconnections": true,
+        "hascustominstructions": true,
+        "permissions": [
+            {"name": "Read information", "allowed": true},
+            {"name": "Access personal data", "allowed": false}
+        ],
+        "revokeurl": "https://example.com/revoke",
+        "showchatgpt": true,
+        "showclaude": true,
+        "startingprompt": "Help me get started with Level Up XP."
+    }
+}}
+<h4 class="xp-mb-4 xp-font-semibold">{{#str}}aistartingprompt, block_xp{{/str}}</h4>
+<div class="xp-mb-6">
+    <p>{{#str}}aistartingpromptintro, block_xp{{/str}}</p>
+    <blockquote class="xp-mb-0 xp-rounded xp-bg-gray-50 dark:xp-bg-gray-800 xp-p-4 xp-py-2">
+        {{startingprompt}}
+    </blockquote>
+</div>
+
+<h4 class="xp-mb-4 xp-font-semibold">{{#str}}aiconnect, block_xp{{/str}}</h4>
+<div class="xp-mb-6 last-of-type:[&_p]:xp-mb-0">
+    {{^hasanyinstructions}}
+        <p>{{#str}}contactadminforinstructions, block_xp{{/str}}</p>
+    {{/hasanyinstructions}}
+    {{# hascustominstructions }}
+        {{{custominstructions}}}
+    {{/ hascustominstructions }}
+</div>
+
+{{# showchatgpt }}
+<h5 class="">ChatGPT</h5>
+<div class="xp-mb-6 xp-break-all last-of-type:[&_p]:xp-mb-0 [&_ol]:xp-pl-5 [&_li]:xp-mb-2 [&_li_p]:xp-mb-1">
+    {{{chatgptinstructions}}}
+</div>
+{{/ showchatgpt }}
+
+{{# showclaude }}
+<h5 class="">Claude</h5>
+<div class="xp-mb-6 xp-break-all last-of-type:[&_p]:xp-mb-0 [&_ol]:xp-pl-5 [&_li]:xp-mb-2 [&_li_p]:xp-mb-1">
+    {{{claudeinstructions}}}
+</div>
+{{/ showclaude }}
+
+<h4 class="xp-mt-8 xp-mb-4 xp-font-semibold">{{#str}}aipermissions, block_xp{{/str}}</h4>
+<div class="xp-mb-6">
+    <p>{{#str}}aipermissionsintro, block_xp{{/str}}</p>
+    <ul>
+        {{# permissions }}
+        <li>
+            {{# allowed }}<i class="fa fa-check-circle text-success" aria-hidden="true"></i>{{/ allowed }}
+            {{^ allowed }}<i class="fa fa-times-circle text-danger" aria-hidden="true"></i>{{/ allowed }}
+            {{name}} ({{# allowed }}{{#str}}allowed, core_role{{/str}}{{/ allowed }}{{^ allowed }}{{#str}}notallowed, block_xp{{/str}}{{/ allowed }})
+        </li>
+        {{/ permissions }}
+    </ul>
+</div>
+
+<h4 class="xp-mt-8 xp-mb-4 xp-font-semibold">{{#str}}aicurrentaccess, block_xp{{/str}}</h4>
+<div>
+    {{# hasconnections }}
+    <p>{{#str}}aiactiveaccess, block_xp{{/str}}</p>
+    <p><a href="{{revokeurl}}" class="btn btn-secondary" data-confirmation="modal"
+            data-confirmation-type="delete"
+            data-confirmation-content="{{#str}}airevokeallaccessconfirm, block_xp{{/str}}">
+        {{#str}}airevokeallaccess, block_xp{{/str}}
+    </a></p>
+    {{/ hasconnections }}
+    {{^ hasconnections }}
+    <p>{{#str}}ainoactiveaccess, block_xp{{/str}}</p>
+    {{/ hasconnections }}
+</div>

@@ -1,27 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * Mobile renderer.
- *
- * @package    local_xp
- * @copyright  2018 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 namespace local_xp\output;
 
@@ -31,6 +24,8 @@ use block_xp\local\config\course_world_config;
 use block_xp\local\course_world;
 use block_xp\local\utils\external_utils;
 use block_xp\local\world;
+use context_course;
+use context_system;
 use DateTimeImmutable;
 use local_xp\external\external_api;
 use local_xp\external\get_course_group_info;
@@ -51,7 +46,6 @@ use local_xp\local\config\default_course_world_config;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mobile {
-
     /**
      * Init the course options.
      *
@@ -70,13 +64,22 @@ class mobile {
             throw new \moodle_exception('User not allowed.');
         }
 
-        $worldfactory = di::get('course_world_factory');
+        $worldfactory = di::get('context_world_factory');
         $bifinder = di::get('course_world_block_instance_checker');
-        $courseids = di::get('db')->get_fieldset('block_xp_config', 'courseid', ['enabled' => 1]);
+        $courseids = di::get('db')->get_fieldset_select(
+            'block_xp_config',
+            'courseid',
+            'courseid > 0 AND courseid != :siteid AND enabled = 1',
+            ['siteid' => SITEID]
+        );
         return [
             'restrict' => [
                 'courses' => array_filter($courseids, function ($courseid) use ($bifinder, $worldfactory) {
-                    $world = $worldfactory->get_world($courseid);
+                    $context = context_course::instance($courseid, IGNORE_MISSING);
+                    if (!$context) {
+                        return false;
+                    }
+                    $world = $worldfactory->get_world_from_context($context);
                     return $world->get_access_permissions()->can_access()
                         && $bifinder->has_instance_in_context('xp', $world->get_context());
                 }),
@@ -96,14 +99,14 @@ class mobile {
         static::log_init();
 
         $config = di::get('config');
-        if ($config->get('context') != CONTEXT_SYSTEM) {
-            throw new \moodle_exception('Not accessible site-wide.');
+        if ($config->get('context') != CONTEXT_SYSTEM && !$config->get('enableglobalworld')) {
+            throw new \moodle_exception('Not accessible sitewide.');
         } else if (isguestuser() || !$USER->id) {
             throw new \moodle_exception('User not allowed.');
         }
 
-        $worldfactory = di::get('course_world_factory');
-        $world = $worldfactory->get_world(SITEID);
+        $worldfactory = di::get('context_world_factory');
+        $world = $worldfactory->get_world_from_context(context_system::instance());
         if (!$world->get_access_permissions()->can_access()) {
             throw new \moodle_exception('User cannot view the block.');
         }
@@ -112,19 +115,17 @@ class mobile {
     /**
      * Enhance the data to pass to a page template.
      *
-     * @param course_world $world The world.
+     * @param world $world The world.
      * @param array $data The data.
      * @param int $page The page number.
      * @return array
      */
-    protected static function enhance_page_data(course_world $world, $data, $page) {
-        $currencyfactory = di::get('course_currency_factory');
-        $courseid = $world->get_courseid();
+    protected static function enhance_page_data(world $world, $data, $page) {
         return array_merge($data, [
             'contextid' => $world->get_context()->id,
-            'courseid' => $courseid,
+            'courseid' => $world instanceof course_world ? $world->get_courseid() : SITEID,
             'css' => static::get_css_data(),
-            'currency' => external_api::serialize_currency($currencyfactory->get_currency($courseid)),
+            'currency' => external_api::serialize_currency(di::get('currency_factory')->get_currency_for_world($world)),
             'tabs' => static::get_tabs_data($world, $page),
         ]);
     }
@@ -187,13 +188,11 @@ class mobile {
             $data['usesseparategroups'] = $data['groupmode'] == SEPARATEGROUPS;
             $data['enabled'] = true;
 
-            // Select the first group that they can access.
+            // Select the first group that they can access, or fallback on "All participants". That means that
+            // in separare groups, a user without AAG that does not belong to any group will pick "All participants"
+            // and should receive an error when we validate the group access.
             if ($currentgroupid < 0 && !$data['canaccessallgroups']) {
-                if ($data['usesseparategroups']) {
-                    $data['currentgroupid'] = $data['mygroups'][0]['id'];
-                } else {
-                    $data['currentgroupid'] = !empty($data['mygroups']) ? $data['mygroups'][0]['id'] : 0;
-                }
+                $data['currentgroupid'] = !empty($data['mygroups']) ? $data['mygroups'][0]['id'] : 0;
             }
 
             // Set the group name.
@@ -216,7 +215,6 @@ class mobile {
      * @return array
      */
     protected static function get_tabs_data(world $world, $currenttab) {
-        $forwholesite = di::get('config')->get('context') == CONTEXT_SYSTEM;
         $hasinfo = $world->get_config()->get('enableinfos');
         $hasladder = $world->get_config()->get('enableladder');
         $hasgroupladder = $world->get_config()->get('enablegroupladder') != default_course_world_config::GROUP_LADDER_NONE;
@@ -233,28 +231,34 @@ class mobile {
     }
 
     /**
+     * Get world from args.
+     *
+     * @param array $args
+     * @return world
+     */
+    protected static function get_world_from_args(array $args) {
+        $context = isset($args['courseid']) ? context_course::instance($args['courseid']) : context_system::instance();
+        return di::get('context_world_factory')->get_world_from_context($context);
+    }
+
+    /**
      * Group ladder page.
      *
      * @param array $args The arguments.
      * @return array
      */
     public static function group_ladder_page(array $args) {
-        global $USER;
-
         di::get('addon')->require_activated();
         static::log_page_view();
 
-        $courseid = isset($args['courseid']) ? $args['courseid'] : SITEID;
         $page = isset($args['page']) ? $args['page'] : 0;
         $perpage = 50;
-        $userid = $USER->id;
 
-        $worldfactory = di::get('course_world_factory');
+        $world = static::get_world_from_args($args);
         $renderer = di::get('renderer');
-        $world = $worldfactory->get_world($courseid);
 
         // Ladder.
-        $ladder = get_course_world_group_ladder::execute($courseid, $page, $perpage);
+        $ladder = get_course_world_group_ladder::execute(null, $page, $perpage, $world->get_context()->id);
         $ladder['prevpage'] = $ladder['page'] - 1;
         $ladder['nextpage'] = $ladder['page'] + 1;
         $ladder['hasbefore'] = $ladder['page'] > 1;
@@ -300,11 +304,8 @@ class mobile {
         di::get('addon')->require_activated();
         static::log_page_view();
 
-        $courseid = isset($args['courseid']) ? $args['courseid'] : 0;
-
-        $worldfactory = di::get('course_world_factory');
         $renderer = di::get('renderer');
-        $world = $worldfactory->get_world($courseid);
+        $world = static::get_world_from_args($args);
         $config = $world->get_config();
 
         $instructions = $config->get('instructions');
@@ -318,7 +319,7 @@ class mobile {
         }
 
         // Levels info.
-        $levelsinfo = get_levels_info::execute($courseid);
+        $levelsinfo = get_levels_info::execute(null, $world->get_context()->id);
         $alwaysshowname = array_reduce($levelsinfo['levels'], function ($carry, $level) {
             return $carry || !empty($level['name']);
         }, false);
@@ -360,15 +361,13 @@ class mobile {
         di::get('addon')->require_activated();
         static::log_page_view();
 
-        $courseid = isset($args['courseid']) ? $args['courseid'] : SITEID;
         $groupid = isset($args['groupid']) ? $args['groupid'] : -1;
         $page = isset($args['page']) ? $args['page'] : 0;
         $perpage = 50;
         $userid = $USER->id;
 
-        $worldfactory = di::get('course_world_factory');
         $renderer = di::get('renderer');
-        $world = $worldfactory->get_world($courseid);
+        $world = static::get_world_from_args($args);
         $perms = $world->get_access_permissions();
         $optinorout = ((int) $world->get_config()->get('ladderparticipation'))
             !== default_course_world_config::LEADERBOARD_PARTICIPATION_FORCED;
@@ -403,7 +402,7 @@ class mobile {
         $groupid = $groupselector['currentgroupid'];
 
         // Ladder.
-        $ladder = get_course_world_ladder::execute($courseid, $groupid, $page, $perpage);
+        $ladder = get_course_world_ladder::execute(null, $groupid, $page, $perpage, $world->get_context()->id);
         $ladder['prevpage'] = $ladder['page'] - 1;
         $ladder['nextpage'] = $ladder['page'] + 1;
         $ladder['hasbefore'] = $ladder['page'] > 1;
@@ -419,9 +418,9 @@ class mobile {
 
         $leavedata = [];
         if ($optinorout) {
-            $canleave = !$participant->is_state_locked();
-            $lockeduntil = $participant->get_state_locked_until();
-            $showleave = $canleave || !$participant->is_state_locked_until(new \DateTimeImmutable('+2 weeks'));
+            $canleave = !$state->is_state_locked();
+            $lockeduntil = $state->get_state_locked_until();
+            $showleave = $canleave || !$state->is_state_locked_until(new \DateTimeImmutable('+2 weeks'));
             $dateformat = get_string('strftimedayshort', 'core_langconfig');
             $leavedata = array_merge($leavedata, [
                 'showleave' => $showleave,
@@ -472,17 +471,14 @@ class mobile {
         di::get('addon')->require_activated();
         static::log_page_view();
 
-        $courseid = isset($args['courseid']) ? $args['courseid'] : 0;
         $userid = $USER->id;
-
-        $worldfactory = di::get('course_world_factory');
+        $world = static::get_world_from_args($args);
         $renderer = di::get('renderer');
-        $world = $worldfactory->get_world($courseid);
 
         // Permissions are handled in the external function.
-        $setup = get_setup::execute($courseid);
-        $state = get_user_state::execute($courseid, $userid);
-        $activity = get_recent_activity::execute($courseid);
+        $setup = get_setup::execute(null, $world->get_context()->id);
+        $state = get_user_state::execute(null, $userid, $world->get_context()->id);
+        $activity = get_recent_activity::execute(null, $world->get_context()->id);
         $infodata = static::enhance_page_data($world, [
             'activity' => array_map(function ($activity) use ($renderer) {
                 return array_merge($activity, [
@@ -523,5 +519,4 @@ class mobile {
         $config = di::get('config');
         $config->set('mobilelastview', time());
     }
-
 }

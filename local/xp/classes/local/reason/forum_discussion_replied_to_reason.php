@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reason;
 
@@ -49,6 +49,11 @@ class forum_discussion_replied_to_reason extends parent_forum_discussion_replied
         return $this->objectname ?: null;
     }
 
+    /**
+     * Get location name.
+     *
+     * @return string|null
+     */
     public function get_location_name() {
         $context = $this->get_module_context();
         if (!$context) {
@@ -62,6 +67,11 @@ class forum_discussion_replied_to_reason extends parent_forum_discussion_replied
         return format_string($objectname, true, ['context' => $context]);
     }
 
+    /**
+     * Get location URL.
+     *
+     * @return \moodle_url|null
+     */
     public function get_location_url() {
         $context = $this->get_module_context();
         if (!$context) {

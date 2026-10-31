@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * User state course store.
@@ -25,14 +27,17 @@
 
 namespace local_xp\local\xp;
 
+use context_course;
 use context_helper;
+use context_system;
 use moodle_database;
 use stdClass;
 use block_xp\local\xp\levels_info;
+use block_xp\local\xp\state_store_query;
 use block_xp\local\logger\reason_collection_logger;
 use block_xp\local\observer\level_up_state_store_observer;
 use block_xp\local\observer\points_increased_state_store_observer;
-use block_xp\local\utils\user_utils;
+use Closure;
 
 /**
  * User state course store.
@@ -43,7 +48,6 @@ use block_xp\local\utils\user_utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_user_state_store extends \block_xp\local\xp\course_user_state_store {
-
     /** @var Closure The user state factory. */
     protected $userstatefactory;
 
@@ -80,14 +84,42 @@ class course_user_state_store extends \block_xp\local\xp\course_user_state_store
      * @return user_state
      */
     public function make_state_from_record(stdClass $record, $useridfield = 'userid') {
+        $user = $this->make_user_from_record($record, $useridfield);
+        context_helper::preload_from_record($record);
+        $xp = !empty($record->xp) ? $record->xp : 0;
+
         if (!empty($this->userstatefactory)) {
-            $user = user_utils::unalias_picture_fields($record, $useridfield);
-            context_helper::preload_from_record($record);
-            $xp = !empty($record->xp) ? $record->xp : 0;
             $cb = $this->userstatefactory;
-            return $cb($user, $xp);
+            $state = $cb($user, $xp);
+        } else {
+            $state = new user_state($user, $xp, $this->levelsinfo, $this->courseid);
         }
-        return parent::make_state_from_record($record, $useridfield);
+
+        if ($state instanceof user_state) {
+            $state->set_present(isset($record->xp));
+            $state->set_leaderboard_participation_flag(
+                isset($record->ladderparticipation) ? (int) $record->ladderparticipation : null
+            );
+        }
+        return $state;
     }
 
+    /**
+     * Prepare the SQL parts shared by listing and counting states.
+     *
+     * @param state_store_query $query The query.
+     * @return stdClass SQL fields, from, where, params and orderby.
+     */
+    protected function prepare_query(state_store_query $query): stdClass {
+        $sql = parent::prepare_query($query);
+        $context = $this->courseid == SITEID ? context_system::instance() : context_course::instance($this->courseid);
+
+        $sql->fields .= ', uf.ladderparticipation';
+        $sql->from .= " LEFT JOIN {local_xp_user_flag} uf
+                              ON uf.userid = u.id
+                             AND uf.contextid = :ufcontextid";
+        $sql->params['ufcontextid'] = $context->id;
+
+        return $sql;
+    }
 }

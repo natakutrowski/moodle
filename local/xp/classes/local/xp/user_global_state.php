@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * User global state.
@@ -25,8 +27,6 @@
 
 namespace local_xp\local\xp;
 
-use block_xp\local\xp\user_state;
-
 /**
  * User global state.
  *
@@ -38,15 +38,23 @@ use block_xp\local\xp\user_state;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user_global_state extends user_state {
-
+    /**
+     * Get level XP.
+     *
+     * @return int
+     */
     public function get_total_xp_in_level() {
         $levels = $this->levelsinfo->get_levels();
         $lastlevel = array_pop($levels);
         return $lastlevel->get_xp_required();
     }
 
+    /**
+     * Get XP in level.
+     *
+     * @return int
+     */
     public function get_xp_in_level() {
         return min($this->get_total_xp_in_level(), $this->get_xp());
     }
-
 }

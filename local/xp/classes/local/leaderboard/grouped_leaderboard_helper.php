@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Grouped leaderboard helper.
@@ -39,7 +41,6 @@ use local_xp\local\iomad\facade as iomadfacade;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class grouped_leaderboard_helper {
-
     /** @var moodle_database The database. */
     protected $db;
     /** @var iomadfacade IOMAD. */
@@ -69,7 +70,6 @@ class grouped_leaderboard_helper {
 
         if ($source == default_course_world_config::GROUP_LADDER_IOMAD_COMPANIES) {
             $name = get_string('anonymousiomadcompany', 'local_xp');
-
         } else if ($source == default_course_world_config::GROUP_LADDER_IOMAD_DEPARTMENTS) {
             $name = get_string('anonymousiomaddepartment', 'local_xp');
         }
@@ -95,13 +95,10 @@ class grouped_leaderboard_helper {
         if ($source == default_course_world_config::GROUP_LADDER_COURSE_GROUPS) {
             require_once($CFG->libdir . '/grouplib.php');
             return groups_get_user_groups($world->get_courseid(), $user->id)[0];
-
         } else if ($source == default_course_world_config::GROUP_LADDER_COHORTS) {
             return $this->get_user_cohort_ids($user->id);
-
         } else if ($source == default_course_world_config::GROUP_LADDER_IOMAD_COMPANIES) {
             return $this->iomad->exists() ? $this->iomad->get_user_company_ids($user) : [];
-
         } else if ($source == default_course_world_config::GROUP_LADDER_IOMAD_DEPARTMENTS) {
             return $this->iomad->exists() ? $this->iomad->get_user_department_ids($user) : [];
         }

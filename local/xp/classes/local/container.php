@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local;
 
@@ -29,7 +29,6 @@ use block_xp\di;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class container implements \block_xp\local\container {
-
     /** @var array The objects supported by this container. */
     protected static $supports = [
         'action_maker' => true,
@@ -56,6 +55,7 @@ class container implements \block_xp\local\container {
         'course_world_leaderboard_factory_with_config' => true,
         'course_world_navigation_factory' => true,
         'currency' => true,
+        'currency_factory' => true,
         'currency_repository' => true,
         'file_server' => true,
         'drop_repository' => true,
@@ -66,9 +66,15 @@ class container implements \block_xp\local\container {
         'levels_info_factory' => true,
         'levels_info_writer' => true,
         'log_migrators' => true,
+        'mcp_authenticator' => true,
+        'mcp_router' => true,
+        'mcp_tool_registry' => true,
         'renderer' => true,
         'router' => true,
         'routes_config' => true,
+        'oauth_router' => true,
+        'oauth_service' => true,
+        'oauth_url_resolver' => true,
         'reason_resolver' => true,
         'rule_descriptor' => true,
         'rule_dictator' => true,
@@ -83,7 +89,9 @@ class container implements \block_xp\local\container {
         'theme_repository' => true,
         'theme_updater' => true,
         'url_resolver' => true,
-        'usage_reporter' => true,
+        'usage_report_maker' => true,
+        'world_logger_factory' => true,
+        'world_navigator_factory' => true,
         'world_rule_manager_factory' => true,
 
         leaderboard\participation\service_factory::class => 'leaderboard_participation_service_factory',
@@ -97,7 +105,7 @@ class container implements \block_xp\local\container {
 
     /** @var object The collection target resolver. */
     private $usercollectiontargetresolver;
-    /** @var course_config_factory The course config factory. */
+    /** @var factory\course_config_factory The course config factory. */
     private $courseconfigfactory;
 
     /**
@@ -130,7 +138,7 @@ class container implements \block_xp\local\container {
     /**
      * Get the action maker.
      *
-     * @return action\maker
+     * @return \block_xp\local\action\maker_from_event
      */
     protected function get_action_maker() {
         return new action\event_action_maker();
@@ -178,12 +186,13 @@ class container implements \block_xp\local\container {
      * @return \block_xp\local\xp\badge_url_resolver
      */
     protected function get_badge_url_resolver() {
-        return new \local_xp\local\xp\badge_url_resolver_stack([
-            $this->subcontainer->get('badge_url_resolver'),
-            new \local_xp\local\xp\theme_badge_url_resolver(
+        return new \block_xp\local\xp\badge_url_resolver_stack([
+            new \block_xp\local\xp\file_storage_badge_url_resolver(\context_system::instance(), 'block_xp', 'defaultbadges', 0),
+            new xp\theme_badge_url_resolver(
                 $this->get('theme_repository'),
                 $this->get('config')->get('badgetheme')
             ),
+            $this->get('badge_url_resolver_stock'),
         ]);
     }
 
@@ -193,10 +202,12 @@ class container implements \block_xp\local\container {
      * @return \block_xp\local\factory\badge_url_resolver_course_world_factory
      */
     protected function get_badge_url_resolver_course_world_factory() {
-        return new factory\badge_url_resolver_course_world_factory(
+        $resolver = new factory\badge_url_resolver_course_world_factory(
             $this->get('badge_url_resolver'),
             $this->get('theme_repository')
         );
+        $resolver->set_stock_resolver($this->get('badge_url_resolver_stock'));
+        return $resolver;
     }
 
     /**
@@ -242,7 +253,7 @@ class container implements \block_xp\local\container {
     /**
      * Collection strategy.
      *
-     * @return collection_strategy
+     * @return \block_xp\local\strategy\collection_strategy
      */
     protected function get_collection_strategy() {
         $st = new \local_xp\local\strategy\collection_strategy(
@@ -258,7 +269,7 @@ class container implements \block_xp\local\container {
     /**
      * Get the global config object.
      *
-     * @return config
+     * @return \block_xp\local\config\config
      */
     protected function get_config() {
         return new \block_xp\local\config\config_stack([
@@ -280,7 +291,7 @@ class container implements \block_xp\local\container {
     /**
      * Get global config about locked settings.
      *
-     * @return config
+     * @return \block_xp\local\config\config
      */
     protected function get_config_locked() {
         return new \block_xp\local\config\config_stack([
@@ -297,6 +308,7 @@ class container implements \block_xp\local\container {
      * Context collection logger factory.
      *
      * @return factory\context_collection_logger_factory
+     * @deprecated Since XP 21, use world_logger_factory instead.
      */
     protected function get_context_collection_logger_factory() {
         $factory = new factory\context_collection_logger_factory($this->get('db'));
@@ -312,9 +324,11 @@ class container implements \block_xp\local\container {
      * @return \block_xp\local\factory\context_world_factory
      */
     protected function get_context_world_factory() {
-        $factory = new \block_xp\local\factory\default_context_world_factory($this->get('config'));
-        $factory->set_course_world_factory($this->get('course_world_factory'));
-        return $factory;
+        return new factory\context_world_factory(
+            $this->get('config'),
+            $this->subcontainer->get('context_world_factory'),
+            $this->get_course_config_factory()
+        );
     }
 
     /**
@@ -348,7 +362,8 @@ class container implements \block_xp\local\container {
     /**
      * Get the course currency factory.
      *
-     * @return course_currency_factory
+     * @return factory\course_currency_factory
+     * @deprecated Since XP 21, use currency_factory instead.
      */
     protected function get_course_currency_factory() {
         return new \local_xp\local\factory\course_currency_factory(
@@ -360,7 +375,7 @@ class container implements \block_xp\local\container {
     /**
      * Get the course world grouped leaderboard factory.
      *
-     * @return course_world_group_leaderboard_factory
+     * @return factory\course_world_grouped_leaderboard_factory
      */
     protected function get_course_world_grouped_leaderboard_factory() {
         return new \local_xp\local\factory\default_course_world_grouped_leaderboard_factory(
@@ -405,11 +420,11 @@ class container implements \block_xp\local\container {
             $db,
             $this->get_course_config_factory(),
             $this->get_user_collection_target_resolver(),
-            $this->get('badge_url_resolver_course_world_factory'),
+            null, // We used to pass the badge_url_resolver_course_world_factory.
             null, // We used to pass the course collection logger factory, it is superceded by the other logger.
             $this->get('levels_info_factory')
         );
-        $factory->set_context_collection_logger_factory(di::get('context_collection_logger_factory'));
+        $factory->set_logger_factory(di::get('world_logger_factory'));
         return $factory;
     }
 
@@ -417,6 +432,7 @@ class container implements \block_xp\local\container {
      * Get the course world navigation factory.
      *
      * @return factory\course_world_navigation_factory
+     * @deprecated Since XP 21, use navigator instead.
      */
     protected function get_course_world_navigation_factory() {
         return new \local_xp\local\factory\course_world_navigation_factory(
@@ -433,11 +449,23 @@ class container implements \block_xp\local\container {
     /**
      * Get the default currency.
      *
-     * @return currency
+     * @return currency\currency
      */
     protected function get_currency() {
         return new \local_xp\local\currency\default_currency(
             new \local_xp\local\currency\admin_sign_url_resolver()
+        );
+    }
+
+    /**
+     * Get the currency factory.
+     *
+     * @return factory\currency_factory
+     */
+    protected function get_currency_factory() {
+        return new factory\currency_factory(
+            $this->get('context_world_factory'),
+            $this->get('currency')
         );
     }
 
@@ -476,7 +504,7 @@ class container implements \block_xp\local\container {
     /**
      * Get the grouped leaderboard helper.
      *
-     * @return grouped_leaderboard_helper
+     * @return leaderboard\grouped_leaderboard_helper
      */
     protected function get_grouped_leaderboard_helper() {
         return new \local_xp\local\leaderboard\grouped_leaderboard_helper(
@@ -488,7 +516,7 @@ class container implements \block_xp\local\container {
     /**
      * Get the IOMAD facade.
      *
-     * @return local_xp\local\iomad\facade
+     * @return iomad\facade
      */
     protected function get_iomad_facade() {
         return new \local_xp\local\iomad\facade($this->get('db'));
@@ -522,12 +550,13 @@ class container implements \block_xp\local\container {
     /**
      * Get the levels info factory.
      *
-     * @return factory\levels_info_factory
+     * @return factory\levels_factory
      */
     protected function get_levels_info_factory() {
-        return new factory\levels_factory($this->get('config'),
+        return new factory\levels_factory(
+            $this->get('config'),
             $this->get('badge_url_resolver'),
-            $this->get('badge_url_resolver_course_world_factory')
+            di::get('badge_url_resolver_world_factory')
         );
     }
 
@@ -553,9 +582,50 @@ class container implements \block_xp\local\container {
     }
 
     /**
+     * Get the MCP authenticator.
+     *
+     * @return mcp\authenticator
+     */
+    protected function get_mcp_authenticator() {
+        return new mcp\oauth_authenticator($this->get('oauth_service'));
+    }
+
+    /**
+     * Get the MCP tool registry.
+     *
+     * @return mcp\tool_registry.
+     */
+    protected function get_mcp_tool_registry() {
+        $registry = new mcp\tool_registry();
+        $allowedrisks = (int) $this->get('config')->get('mcprisksallowed');
+
+        // Delete and communications are governed by the write risk.
+        $allowedrisks &= ~(mcp\tool_definition::RISK_DELETE | mcp\tool_definition::RISK_COMMS);
+        if ($allowedrisks & mcp\tool_definition::RISK_WRITE) {
+            $allowedrisks |= mcp\tool_definition::RISK_DELETE | mcp\tool_definition::RISK_COMMS;
+        }
+        $registry->set_allowed_risks($allowedrisks);
+        return $registry;
+    }
+
+    /**
+     * Get the MCP router.
+     *
+     * @return routing\mcp_router
+     */
+    protected function get_mcp_router() {
+        return new routing\mcp_router(
+            new \block_xp\local\routing\default_url_resolver(
+                new \moodle_url('/local/xp/mcp.php'),
+                new routing\mcp_routes_config()
+            )
+        );
+    }
+
+    /**
      * Get renderer.
      *
-     * @return renderer_base
+     * @return \renderer_base
      */
     protected function get_renderer() {
         global $PAGE;
@@ -587,9 +657,39 @@ class container implements \block_xp\local\container {
     }
 
     /**
+     * Get the OAuth router.
+     *
+     * @return routing\router
+     */
+    protected function get_oauth_router() {
+        return new routing\oauth_router($this->get('oauth_url_resolver'));
+    }
+
+    /**
+     * Get the OAuth service.
+     *
+     * @return oauth\service
+     */
+    protected function get_oauth_service() {
+        return new oauth\service($this->get('db'), $this->get('oauth_url_resolver'));
+    }
+
+    /**
+     * Get the OAuth router.
+     *
+     * @return routing\router
+     */
+    protected function get_oauth_url_resolver() {
+        return new \block_xp\local\routing\default_url_resolver(
+            new \moodle_url('/blocks/xp/oauth.php'),
+            new routing\oauth_routes_config()
+        );
+    }
+
+    /**
      * Get the routes config.
      *
-     * @return routes_config
+     * @return \block_xp\local\routing\routes_config
      */
     protected function get_routes_config() {
         return new \local_xp\local\routing\routes_config(
@@ -619,7 +719,7 @@ class container implements \block_xp\local\container {
     /**
      * Get the rule event lister.
      *
-     * @return event_lister
+     * @return \block_xp\local\rule\event_lister
      */
     protected function get_rule_event_lister() {
         // Feature toggle off for now, by default users do not have the permission to earn anything
@@ -671,7 +771,7 @@ class container implements \block_xp\local\container {
     /**
      * Get the settings maker.
      *
-     * @return settings_maker
+     * @return setting\settings_maker
      */
     protected function get_settings_maker() {
         return new \local_xp\local\setting\settings_maker(
@@ -688,7 +788,7 @@ class container implements \block_xp\local\container {
     /**
      * Get the tasks definition maker.
      *
-     * @return tasks_definition_maker
+     * @return task\tasks_definition_maker
      * @deprecated Overridding block_xp tasks is not advised.
      */
     protected function get_tasks_definition_maker() {
@@ -727,7 +827,7 @@ class container implements \block_xp\local\container {
     /**
      * Get URL resolver.
      *
-     * @return url_resolver
+     * @return \block_xp\local\routing\url_resolver
      */
     protected function get_url_resolver() {
         return new \block_xp\local\routing\default_url_resolver(
@@ -737,13 +837,12 @@ class container implements \block_xp\local\container {
     }
 
     /**
-     * Get usage reporter.
+     * Get usage report maker.
      *
-     * @return plugin\usage_reporter
+     * @return plugin\usage_report_maker
      */
-    protected function get_usage_reporter() {
-        $config = $this->get('config');
-        return new \block_xp\local\plugin\usage_reporter($config, new plugin\usage_report_maker($this->get('db'), $config));
+    protected function get_usage_report_maker() {
+        return new plugin\usage_report_maker($this->get('db'), $this->get('config'));
     }
 
     /**
@@ -768,6 +867,24 @@ class container implements \block_xp\local\container {
     }
 
     /**
+     * Get the world logger factory.
+     *
+     * @return factory\world_logger_factory
+     */
+    protected function get_world_logger_factory() {
+        return new factory\world_logger_factory($this->get('config'));
+    }
+
+    /**
+     * Get the world navigator factory.
+     *
+     * @return factory\world_navigator_factory
+     */
+    protected function get_world_navigator_factory() {
+        return new factory\world_navigator_factory($this->get('url_resolver'));
+    }
+
+    /**
      * Get the world rule manager factory.
      *
      * @return \block_xp\local\factory\world_rule_manager_factory
@@ -785,5 +902,4 @@ class container implements \block_xp\local\container {
     public function has($id) {
         return array_key_exists($id, static::$supports);
     }
-
 }

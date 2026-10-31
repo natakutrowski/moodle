@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Course world collection strategy.
@@ -31,7 +33,7 @@ use DateTime;
 use block_xp\local\config\config;
 use block_xp\local\logger\reason_collection_logger;
 use block_xp\local\logger\reason_occurrence_indicator;
-use block_xp\local\notification\course_level_up_notification_service;
+use block_xp\local\notification\level_up_notification_service;
 use block_xp\local\reason\reason;
 use block_xp\local\strategy\action_collection_strategy;
 use block_xp\local\strategy\event_collection_strategy;
@@ -53,7 +55,6 @@ use local_xp\local\rule\subject;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_world_collection_strategy implements action_collection_strategy, event_collection_strategy {
-
     /** @var context The context. */
     protected $context;
     /** @var config The config. */
@@ -62,7 +63,7 @@ class course_world_collection_strategy implements action_collection_strategy, ev
     protected $store;
     /** @var calculator The calculator. */
     protected $calculator;
-    /** @var course_level_up_notification_service The notification service. */
+    /** @var level_up_notification_service The notification service. */
     protected $levelupnotifificationservice;
     /** @var collection_target_resolver_from_event Target resolver. */
     protected $targetresolver;
@@ -83,6 +84,9 @@ class course_world_collection_strategy implements action_collection_strategy, ev
     /** @var \local_xp\local\reason\maker_from_event */
     protected $reasonmaker;
 
+    /**
+     * Constructor.
+     */
     public function __construct(
         context $context,
         config $config,
@@ -91,7 +95,7 @@ class course_world_collection_strategy implements action_collection_strategy, ev
         reason_collection_logger $logger,
         reason_occurrence_indicator $reasonoccurrenceindicator,
         collection_counts_indicator $collectioncountsindicator,
-        course_level_up_notification_service $levelupnotifificationservice,
+        level_up_notification_service $levelupnotifificationservice,
         collection_target_resolver_from_event $targetresolver,
         reason_collection_counts_indicator $reasoncollectioncountsindicator
     ) {
@@ -197,14 +201,17 @@ class course_world_collection_strategy implements action_collection_strategy, ev
         }
     }
 
+    /**
+     * Check capture eligibility.
+     */
     protected function can_capture($userid, reason $reason, config $config) {
         $reasonoccurrenceindicator = $this->get_reason_occurrence_indicator_for_events();
 
         // There are some events we only want to see once! So they are not bound to the cheat guard.
-        if ($reason instanceof \local_xp\local\reason\activity_completion_reason
+        if (
+            $reason instanceof \local_xp\local\reason\activity_completion_reason
                 || $reason instanceof \local_xp\local\reason\section_completion_reason
         ) {
-
             if ($reasonoccurrenceindicator->has_reason_happened_since($userid, $reason, new DateTime('@0'))) {
                 return false;
             }
@@ -238,6 +245,9 @@ class course_world_collection_strategy implements action_collection_strategy, ev
         return true;
     }
 
+    /**
+     * Check earning eligibility.
+     */
     protected function can_earn_points($userid, $points, config $config, reason $reason) {
 
         // Check whether the cheat guard applies to this reason at all.
@@ -361,24 +371,20 @@ class course_world_collection_strategy implements action_collection_strategy, ev
             // different to completion events for instance, where a module can marked as complete
             // and incomplete many times when students mark it themselves.
             return true;
-
         } else if ($reason instanceof \local_xp\local\reason\activity_completion_reason) {
             // We skip the cheat guard for activity completion because we're already filtering out
             // whether they happened more than once or not. And we don't want to actions/points cap
             // to affect whether students are rewarded for this.
             return true;
-
         } else if ($reason instanceof \local_xp\local\reason\course_completed_reason) {
             // We skip the cheat guard for course completion because we don't want to actions/points cap
             // to affect whether students are rewarded for this.
             return true;
-
         } else if ($reason instanceof \local_xp\local\reason\section_completion_reason) {
             // We skip the cheat guard for section completion because we're already filtering out
             // whether they happened more than once or not. And we don't want to actions/points cap
             // to affect whether students are rewarded for this.
             return true;
-
         } else if ($reason instanceof \local_xp\local\reason\manual_reason) {
             // Manual rewards should never be get here, but if they did we would never apply the
             // cheat guard on them.
@@ -405,5 +411,4 @@ class course_world_collection_strategy implements action_collection_strategy, ev
     public function set_event_cheatguard_reader(event_cheatguard_reader $cheatguardreader) {
         $this->eventcheatguardreader = $cheatguardreader;
     }
-
 }

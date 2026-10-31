@@ -1,19 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reason;
 
@@ -27,7 +28,6 @@ namespace local_xp\local\reason;
  * @deprecated Since XP+ 20, use \block_xp\local\reason\reason_rule_trait instead.
  */
 trait reason_rule_trait {
-
     /** @var int The rule ID. */
     protected $ruleid;
 
@@ -48,5 +48,4 @@ trait reason_rule_trait {
     public function set_rule_id(?int $id) {
         $this->ruleid = $id;
     }
-
 }

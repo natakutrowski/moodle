@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Local XP upgrade.
@@ -39,7 +41,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     // to tables will be added as normal database steps.
 
     if ($oldversion < 2017080101) {
-
         // Define table local_xp_log to be created.
         $table = new xmldb_table('local_xp_log');
 
@@ -72,7 +73,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2017080102) {
-
         // Define table local_xp_config to be created.
         $table = new xmldb_table('local_xp_config');
 
@@ -100,7 +100,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2017080103) {
-
         // Define table local_xp_theme to be created.
         $table = new xmldb_table('local_xp_theme');
 
@@ -127,7 +126,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2017080104) {
-
         // We unset the length for which logs are kept, to force the admin to set it again.
         // The local plugin needs logs to be kept for a longer time.
         unset_config('keeplogs', 'block_xp');
@@ -137,7 +135,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2018092501) {
-
         // Define field enablegroupladder to be added to local_xp_config.
         $table = new xmldb_table('local_xp_config');
         $field = new xmldb_field('enablegroupladder', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'badgetheme');
@@ -152,7 +149,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2019020300) {
-
         // Define field progressbarmode to be added to local_xp_config.
         $table = new xmldb_table('local_xp_config');
         $field = new xmldb_field('progressbarmode', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'enablegroupladder');
@@ -167,7 +163,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2019043000) {
-
         // Define field groupidentitymode to be added to local_xp_config.
         $table = new xmldb_table('local_xp_config');
         $field = new xmldb_field('groupidentitymode', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1', 'enablegroupladder');
@@ -182,7 +177,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2019061000) {
-
         // Define field groupladdercols to be added to local_xp_config.
         $table = new xmldb_table('local_xp_config');
         $field = new xmldb_field('groupladdercols', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, 'xp', 'progressbarmode');
@@ -197,7 +191,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2019061001) {
-
         // Define field grouporderby to be added to local_xp_config.
         $table = new xmldb_table('local_xp_config');
         $field = new xmldb_field('grouporderby', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1', 'groupladdercols');
@@ -212,7 +205,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022021118) {
-
         // Define table local_xp_drops to be created.
         $table = new xmldb_table('local_xp_drops');
 
@@ -239,7 +231,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022021119) {
-
         // Define field enabled to be added to local_xp_drops.
         $table = new xmldb_table('local_xp_drops');
         $field = new xmldb_field('enabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1', 'points');
@@ -254,7 +245,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022021120) {
-
         // Define field secret to be added to local_xp_drops.
         $table = new xmldb_table('local_xp_drops');
         $field = new xmldb_field('secret', XMLDB_TYPE_CHAR, '12', null, XMLDB_NOTNULL, null, null, 'enabled');
@@ -269,7 +259,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022090111) {
-
         // Define field currencytheme to be added to local_xp_config.
         $table = new xmldb_table('local_xp_config');
         $field = new xmldb_field('currencytheme', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, null, 'currencystate');
@@ -284,7 +273,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2024042100) {
-
         // Define field ruleid to be added to local_xp_log.
         $table = new xmldb_table('local_xp_log');
         $field = new xmldb_field('ruleid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'time');
@@ -299,7 +287,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2024042101) {
-
         // Define index ctxrule (not unique) to be added to local_xp_log.
         $table = new xmldb_table('local_xp_log');
         $index = new xmldb_index('ctxrule', XMLDB_INDEX_NOTUNIQUE, ['contextid', 'ruleid']);
@@ -314,7 +301,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2024082501) {
-
         // Define field ladderiso to be added to local_xp_config.
         $table = new xmldb_table('local_xp_config');
         $field = new xmldb_field('ladderiso', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'badgetheme');
@@ -329,7 +315,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2025032801) {
-
         // Define field ladderparticipation to be added to local_xp_config.
         $table = new xmldb_table('local_xp_config');
         $field = new xmldb_field('ladderparticipation', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'ladderiso');
@@ -344,7 +329,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2025032802) {
-
         // Define table local_xp_user_flag to be created.
         $table = new xmldb_table('local_xp_user_flag');
 
@@ -371,7 +355,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026031900) {
-
         // Schedule the logs migrator task.
         $task = new \block_xp\task\logs_migrator_adhoc();
         $task->set_component('block_xp');
@@ -382,7 +365,6 @@ function xmldb_local_xp_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026041100) {
-
         // Define table local_xp_rule to be created.
         $table = new xmldb_table('local_xp_rule');
 
@@ -407,6 +389,107 @@ function xmldb_local_xp_upgrade($oldversion) {
 
         // Xp savepoint reached.
         upgrade_plugin_savepoint(true, 2026041100, 'local', 'xp');
+    }
+
+    if ($oldversion < 2026081401) {
+        // Define table local_xp_oauth_client to be created.
+        $table = new xmldb_table('local_xp_oauth_client');
+
+        // Adding fields to table local_xp_oauth_client.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('clientid', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('clientsecret', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_field('type', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('displayname', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('rawlogourl', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('logofilename', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_field('redirecturis', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+        $table->add_field('isenabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('isvalid', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('invalidhint', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_field('lastmetadatacheck', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table local_xp_oauth_client.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('usermodified', XMLDB_KEY_FOREIGN, ['usermodified'], 'user', ['id']);
+
+        // Adding indexes to table local_xp_oauth_client.
+        $table->add_index('clientid', XMLDB_INDEX_UNIQUE, ['clientid']);
+
+        // Conditionally launch create table for local_xp_oauth_client.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Xp savepoint reached.
+        upgrade_plugin_savepoint(true, 2026081401, 'local', 'xp');
+    }
+
+    if ($oldversion < 2026081402) {
+        // Define table local_xp_oauth_token to be created.
+        $table = new xmldb_table('local_xp_oauth_token');
+
+        // Adding fields to table local_xp_oauth_token.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('type', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('tokenhash', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('familyhash', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('clientid', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('redirecturi', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+        $table->add_field('codechallenge', XMLDB_TYPE_CHAR, '128', null, null, null, null);
+        $table->add_field('expires', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('revoked', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table local_xp_oauth_token.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('usermodified', XMLDB_KEY_FOREIGN, ['usermodified'], 'user', ['id']);
+
+        // Adding indexes to table local_xp_oauth_token.
+        $table->add_index('tokenhash', XMLDB_INDEX_UNIQUE, ['tokenhash']);
+        $table->add_index('familyhash', XMLDB_INDEX_NOTUNIQUE, ['familyhash']);
+        $table->add_index('userid', XMLDB_INDEX_NOTUNIQUE, ['userid']);
+        $table->add_index('type', XMLDB_INDEX_NOTUNIQUE, ['type']);
+        $table->add_index('expires', XMLDB_INDEX_NOTUNIQUE, ['expires']);
+
+        // Conditionally launch create table for local_xp_oauth_token.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Xp savepoint reached.
+        upgrade_plugin_savepoint(true, 2026081402, 'local', 'xp');
+    }
+
+    if ($oldversion < 2026082301) {
+        // Define table local_xp_source to be created.
+        $table = new xmldb_table('local_xp_source');
+
+        // Adding fields to table local_xp_source.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('contextid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('sourcecontextid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table local_xp_source.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Adding indexes to table local_xp_source.
+        $table->add_index('context', XMLDB_INDEX_NOTUNIQUE, ['contextid']);
+        $table->add_index('contextsource', XMLDB_INDEX_UNIQUE, ['contextid', 'sourcecontextid']);
+
+        // Conditionally launch create table for local_xp_source.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Xp savepoint reached.
+        upgrade_plugin_savepoint(true, 2026082301, 'local', 'xp');
     }
 
     return true;

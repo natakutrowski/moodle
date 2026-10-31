@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Cheatguard reader.
@@ -43,7 +43,6 @@ class event_cheatguard_reader implements
     collection_counts_indicator,
     reason_collection_counts_indicator,
     reason_occurrence_indicator {
-
     /** @var context_collection_logger_extended */
     protected $logger;
 
@@ -56,26 +55,64 @@ class event_cheatguard_reader implements
         $this->logger = $logger;
     }
 
+    /**
+     * Count recent collections.
+     *
+     * @param int $id The ID.
+     * @param DateTime $since The time.
+     * @return int
+     */
     public function count_collections_since($id, DateTime $since) {
         // Only count from the event rules.
         return $this->logger->count_collections_since_in_event_rules($id, $since);
     }
 
+    /**
+     * Count recent collections by reason.
+     *
+     * @param int $id The ID.
+     * @param reason $reason The reason.
+     * @param DateTime $since The time.
+     * @return int
+     */
     public function count_collections_with_reason_since($id, reason $reason, DateTime $since) {
         // Simply pipe this through, the reasons from event rules should not overlap due reason declaring a rule ID.
         return $this->logger->count_collections_with_reason_since($id, $reason, $since);
     }
 
+    /**
+     * Get recently collected points.
+     *
+     * @param int $id The ID.
+     * @param DateTime $since The time.
+     * @return int
+     */
     public function get_collected_points_since($id, DateTime $since) {
         // Only count from the event rules.
         return $this->logger->get_collected_points_since_in_event_rules($id, $since);
     }
 
+    /**
+     * Get recent points by reason.
+     *
+     * @param int $id The ID.
+     * @param reason $reason The reason.
+     * @param DateTime $since The time.
+     * @return int
+     */
     public function get_points_collected_with_reason_since($id, reason $reason, DateTime $since) {
         // Simply pipe this through, the reasons from event rules should not overlap due reason declaring a rule ID.
         return $this->logger->get_points_collected_with_reason_since($id, $reason, $since);
     }
 
+    /**
+     * Check recent reason occurrence.
+     *
+     * @param int $id The ID.
+     * @param reason $reason The reason.
+     * @param DateTime $since The time.
+     * @return bool
+     */
     public function has_reason_happened_since($id, reason $reason, DateTime $since) {
         // This deserves a bit of an explaination. So, when we introduced the completion rules, they were logged
         // into the local_xp_log table, and were given a ruleid. The logs without a ruleid indicate that they were
@@ -90,5 +127,4 @@ class event_cheatguard_reader implements
         }
         return $this->logger->has_reason_happened_since($id, $reason, $since);
     }
-
 }

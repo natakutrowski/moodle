@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Handler.
@@ -38,7 +38,6 @@ use block_xp\local\rulefilter\rulefilter;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class handler extends \block_xp\local\rulefilter\default_handler {
-
     /**
      * Get the filter's name.
      *
@@ -66,5 +65,4 @@ class handler extends \block_xp\local\rulefilter\default_handler {
         }
         return $instance ?? parent::load_filter($name);
     }
-
 }

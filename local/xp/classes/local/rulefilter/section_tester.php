@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Tester.
@@ -39,7 +39,6 @@ use block_xp\local\action\tester\action_tester;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class section_tester implements action_tester {
-
     /** @var int The section number. */
     protected $sectionnum = 0;
 
@@ -52,6 +51,12 @@ class section_tester implements action_tester {
         $this->sectionnum = (int) $sectionnum;
     }
 
+    /**
+     * Check action constraints.
+     *
+     * @param action $action The action.
+     * @return bool
+     */
     public function is_action_passing_constraints(action $action): bool {
         $context = $action->get_context();
         if (!$context instanceof \context_module) {
@@ -73,5 +78,4 @@ class section_tester implements action_tester {
 
         return ((int) $cm->sectionnum) === $this->sectionnum;
     }
-
 }

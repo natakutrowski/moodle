@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\form;
 
@@ -27,7 +27,6 @@ namespace local_xp\form;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cheatguard extends \block_xp\form\cheatguard {
-
     /**
      * Form definition.
      *
@@ -44,7 +43,8 @@ class cheatguard extends \block_xp\form\cheatguard {
 
         // Re-implement those to extend the units allowed.
         $mform->removeElement('maxactionspertime');
-        $el = $mform->createElement('block_xp_form_itemspertime',
+        $el = $mform->createElement(
+            'block_xp_form_itemspertime',
             'maxactionspertime',
             get_string('maxactionspertime', 'block_xp'),
             [
@@ -57,7 +57,8 @@ class cheatguard extends \block_xp\form\cheatguard {
         $mform->addHelpButton('maxactionspertime', 'maxactionspertime', 'block_xp');
 
         $mform->removeElement('timebetweensameactions');
-        $el = $mform->createElement('block_xp_form_duration',
+        $el = $mform->createElement(
+            'block_xp_form_duration',
             'timebetweensameactions',
             get_string('timebetweensameactions', 'block_xp'),
             [
@@ -94,7 +95,6 @@ class cheatguard extends \block_xp\form\cheatguard {
         if (!isset($data->maxpointspertime) || !is_array($data->maxpointspertime)) {
             $data->maxpointspertime = 0;
             $data->timeformaxpoints = 0;
-
         } else {
             $data->timeformaxpoints = (int) $data->maxpointspertime['time'];
             $data->maxpointspertime = (int) $data->maxpointspertime['points'];
@@ -129,5 +129,4 @@ class cheatguard extends \block_xp\form\cheatguard {
 
         parent::set_data($data);
     }
-
 }

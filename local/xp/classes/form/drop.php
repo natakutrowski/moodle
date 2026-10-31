@@ -1,23 +1,27 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 namespace local_xp\form;
 
 use block_xp\di;
 use block_xp\form\dynamic_world_trait;
+use block_xp\local\course_world;
+use block_xp\local\utils\world_utils;
 use core_form\dynamic_form;
 use moodle_url;
 
@@ -30,10 +34,29 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class drop extends dynamic_form {
-    use dynamic_world_trait;
+    use dynamic_world_trait {
+        check_access_for_dynamic_submission as protected trait_check_access_for_dynamic_submission;
+    }
 
+    /** @var string */
     protected $routename = 'drops';
 
+    /**
+     * Check permissions.
+     */
+    protected function check_access_for_dynamic_submission(): void {
+        $this->trait_check_access_for_dynamic_submission();
+
+        if (!world_utils::supports_local_points_management($this->get_world())) {
+            throw new \moodle_exception('errorfeaturenotenabled', 'block_xp');
+        } else if (!$this->get_world() instanceof course_world) {
+            throw new \coding_exception('Not supported.');
+        }
+    }
+
+    /**
+     * Get drop record.
+     */
     protected function get_drop_record() {
         $db = di::get('db');
         $id = $this->optional_param('id', -1, PARAM_INT);
@@ -44,9 +67,14 @@ class drop extends dynamic_form {
         return (object) ['courseid' => $courseid];
     }
 
+    /**
+     * Process the form submission.
+     *
+     * @return mixed
+     */
     public function process_dynamic_submission() {
         $db = di::get('db');
-        $urlresolver = di::get('url_resolver');
+        $navigator = di::get('world_navigator_factory')->get_navigator_for_world($this->get_world());
         $data = $this->get_data();
         $record = $this->get_drop_record();
         $iscreating = empty($record->id);
@@ -56,7 +84,6 @@ class drop extends dynamic_form {
             $record->points = $data->points;
             $record->enabled = $data->enabled;
             $db->update_record('local_xp_drops', $record);
-
         } else {
             do {
                 $secret = substr(bin2hex(random_bytes(128)), 0, 7);
@@ -68,7 +95,7 @@ class drop extends dynamic_form {
             $record->id = $db->insert_record('local_xp_drops', $record);
         }
 
-        $listurl = $urlresolver->reverse('drops', ['courseid' => $this->get_world()->get_courseid()]);
+        $listurl = $navigator->get_url('drops');
         $redirecturl = new moodle_url($listurl);
         if ($iscreating) {
             $redirecturl = new moodle_url($listurl, ['setupid' => $record->id]);
@@ -77,6 +104,9 @@ class drop extends dynamic_form {
         return ['id' => $record->id, 'redirecturl' => $redirecturl->out_as_local_url()];
     }
 
+    /**
+     * Set form data.
+     */
     public function set_data_for_dynamic_submission(): void {
         $droprecord = $this->get_drop_record();
 
@@ -140,5 +170,4 @@ class drop extends dynamic_form {
         }
         return $errors;
     }
-
 }

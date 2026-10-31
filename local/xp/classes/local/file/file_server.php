@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * File server.
@@ -36,7 +38,6 @@ use context;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class file_server extends \block_xp\local\file\file_server implements \block_xp\local\file\component_file_server {
-
     /**
      * Serve a file.
      *
@@ -55,7 +56,6 @@ class file_server extends \block_xp\local\file\file_server implements \block_xp\
 
         // Check context consistency.
         if ($filearea == 'currency') {
-
             // Note that we no longer check whether the context is consistent with the "For whole site"
             // setting because it is possible to access a course instance in "For whole site" mode and
             // vice-versa, and we ran into situations where the plugin looked buggy because the currency
@@ -63,7 +63,6 @@ class file_server extends \block_xp\local\file\file_server implements \block_xp\
             if ($context->contextlevel !== CONTEXT_SYSTEM && $context->contextlevel !== CONTEXT_COURSE) {
                 return false;
             }
-
         } else if ($filearea == 'defaultcurrency') {
             if ($context->contextlevel !== CONTEXT_SYSTEM) {
                 return false;
@@ -83,11 +82,27 @@ class file_server extends \block_xp\local\file\file_server implements \block_xp\
             }
         }
 
+        if ($filearea == 'oauthclient') {
+            if ($context->contextlevel !== CONTEXT_SYSTEM) {
+                return false;
+            }
+
+            $itemid = array_shift($args);
+            $filename = array_shift($args);
+            $filepath = '/';
+
+            $file = $fs->get_file($context->id, 'local_xp', $filearea, $itemid, $filepath, $filename);
+            if (!$file || strpos($file->get_mimetype(), 'image/') !== 0) {
+                return false;
+            }
+
+            $forcedownload = false;
+        }
+
         if (!$file) {
             return false;
         }
 
-        send_stored_file($file);
+        send_stored_file($file, null, 0, $forcedownload);
     }
-
 }

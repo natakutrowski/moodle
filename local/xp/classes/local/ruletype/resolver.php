@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Resolver.
@@ -39,7 +39,6 @@ use core_component;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class resolver extends \block_xp\local\ruletype\default_resolver {
-
     /**
      * Get type by name.
      *
@@ -83,5 +82,4 @@ class resolver extends \block_xp\local\ruletype\default_resolver {
         $list = array_filter($list, [$this, 'is_valid_class']);
         return array_unique(array_merge($parentlist, $list));
     }
-
 }

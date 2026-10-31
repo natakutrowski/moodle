@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * External function.
@@ -30,7 +32,10 @@ use block_xp\external\external_function_parameters;
 use block_xp\external\external_single_structure;
 use block_xp\external\external_value;
 use block_xp\local\utils\user_utils;
+use block_xp\local\utils\world_utils;
 use block_xp\local\xp\state_store_with_reason;
+use context_course;
+use context_system;
 use local_xp\local\reason\manual_reason;
 use moodle_exception;
 
@@ -43,7 +48,6 @@ use moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class award_points extends external_api {
-
     /**
      * External function parameters.
      *
@@ -73,12 +77,20 @@ class award_points extends external_api {
         $userid = $params['userid'];
         $points = $params['points'];
 
-        $world = di::get('course_world_factory')->get_world($courseid);
+        $world = di::get('context_world_factory')->get_world_from_context(
+            $courseid ? context_course::instance($courseid) : context_system::instance()
+        );
         self::validate_context($world->get_context());
         di::get('addon')->require_activated();
         $world->get_access_permissions()->require_manage();
 
-        if (!user_utils::can_earn_points($world->get_context(), $userid)) {
+        if (!world_utils::supports_local_points_management($world)) {
+            throw new moodle_exception('errorfeaturenotenabled', 'block_xp');
+        }
+
+        if (!user_utils::is_valid_target($world->get_context(), $userid)) {
+            throw new moodle_exception('invaliduser', 'core_error');
+        } else if (!user_utils::can_earn_points($world->get_context(), $userid)) {
             throw new moodle_exception('cannotearnpoints', 'block_xp');
         } else if ($points <= 0) {
             throw new moodle_exception('invaliddata', 'core_error');
@@ -104,5 +116,4 @@ class award_points extends external_api {
             'xp' => new external_value(PARAM_INT),
         ]);
     }
-
 }

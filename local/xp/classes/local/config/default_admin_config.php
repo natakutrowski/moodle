@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Default admin config.
@@ -38,7 +40,6 @@ use block_xp\local\config\static_config;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class default_admin_config extends immutable_config {
-
     /**
      * Constructor.
      */
@@ -49,7 +50,6 @@ class default_admin_config extends immutable_config {
             // over block_xp's config, need to be explicitely removed from di::get('config').
             // For instance, 'keeplogs' has a new default, but as local_xp does not define it,
             // we need to remove it from local_xp's defaults when creating the global config object.
-            'enablepromoincourses' => false,
             'keeplogs' => 180,
 
             // Other settings.
@@ -57,6 +57,8 @@ class default_admin_config extends immutable_config {
             'currencytheme' => '',
             'maxpointspertime' => 0,
             'timeformaxpoints' => 0,
+            'enableglobalworld' => 0,
+            'navbarshowoverall' => 0,
 
             'ladderiso' => default_course_world_config::LEADERBOARD_ISO_DEFAULT,
             'ladderparticipation' => default_course_world_config::LEADERBOARD_PARTICIPATION_FORCED,
@@ -68,10 +70,18 @@ class default_admin_config extends immutable_config {
 
             'progressbarmode' => default_course_world_config::PROGRESS_BAR_MODE_LEVEL,
 
+            // MCP-settings.
+            'enablemcp' => 1,
+            'mcprisksallowed' => 0b0001, // Read.
+            'enablechatgpt' => 1,
+            'enableclaude' => 1,
+            'mcpconnectinstructions' => '',
+            'mcpcorsorigins' => '', // New-line separated list of allowed origins for MCP (and OAuth).
+            'oauthcimddomains' => "", // New-line separated list of allowed CIMD domains.
+
             // Last call a mobile init function, and last view of a page.
             'mobilelastinit' => 0,
             'mobilelastview' => 0,
         ]));
     }
-
 }

@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Course user leaderboard.
@@ -38,7 +40,6 @@ use block_xp\local\xp\levels_info;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_user_leaderboard extends \local_xp\local\leaderboard\course_user_leaderboard {
-
     /** @var int The company ID. */
     protected $companyid;
 
@@ -70,6 +71,12 @@ class course_user_leaderboard extends \local_xp\local\leaderboard\course_user_le
         $this->companyid = (int) $companyid;
     }
 
+    /**
+     * Get user IDs SQL.
+     *
+     * @param string $useridalias The user ID alias.
+     * @return array
+     */
     protected function get_user_ids_sql($useridalias) {
         [$psql, $pparams] = parent::get_user_ids_sql($useridalias);
 
@@ -83,5 +90,4 @@ class course_user_leaderboard extends \local_xp\local\leaderboard\course_user_le
 
         return [$finalsql, $finalparams];
     }
-
 }

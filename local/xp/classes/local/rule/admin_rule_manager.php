@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\rule;
 
@@ -29,7 +29,6 @@ use block_xp\local\rule\instance;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_rule_manager extends \block_xp\local\rule\admin_rule_manager {
-
     /**
      * Delete an admin default rule.
      *
@@ -85,15 +84,36 @@ class admin_rule_manager extends \block_xp\local\rule\admin_rule_manager {
     }
 
     /**
+     * Process a rule update.
+     *
+     * @param \stdClass $rulerecord
+     * @param \stdClass $data
+     */
+    protected function process_rule_update(\stdClass $rulerecord, \stdClass $data): void {
+        $tx = $this->db->start_delegated_transaction();
+        parent::process_rule_update($rulerecord, $data);
+        world_rule_manager::process_local_rule_update($this->db, $rulerecord, $data);
+        $tx->allow_commit();
+    }
+
+    /**
      * Reset all worlds to defaults.
      *
      * @return void
      */
     public function reset_all_worlds_to_defaults(): void {
         $tx = $this->db->start_delegated_transaction();
+
+        $sql = 'contextid > 0';
+        $params = [];
+        if (!$this->issitewide) {
+            $sql = 'contextid IN (SELECT id FROM {context} WHERE contextlevel = ?)';
+            $params = [CONTEXT_COURSE];
+        }
+
         $this->db->execute("DELETE FROM {local_xp_rule}
                              WHERE ruleid
-                                IN (SELECT id FROM {block_xp_rule} WHERE contextid > 0)");
+                                IN (SELECT id FROM {block_xp_rule} WHERE $sql)", $params);
         parent::reset_all_worlds_to_defaults();
         $tx->allow_commit();
     }

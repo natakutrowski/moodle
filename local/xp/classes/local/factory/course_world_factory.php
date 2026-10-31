@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Main factory.
@@ -25,6 +27,7 @@
 
 namespace local_xp\local\factory;
 
+use block_xp\local\course_world;
 use moodle_database;
 use block_xp\local\factory\badge_url_resolver_course_world_factory;
 use block_xp\local\factory\context_collection_logger_factory;
@@ -40,10 +43,9 @@ use local_xp\local\strategy\collection_target_resolver_from_event;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_world_factory implements \block_xp\local\factory\course_world_factory {
-
     /** @var moodle_database The DB. */
     protected $db;
-    /** @var coure_config_factory The config factory. */
+    /** @var course_config_factory The config factory. */
     protected $configfactory;
     /** @var bool For the whole site? */
     protected $forwholesite = false;
@@ -51,7 +53,7 @@ class course_world_factory implements \block_xp\local\factory\course_world_facto
     protected $worlds = [];
     /** @var collection_target_resolver_from_event The target resolver. */
     protected $usercolletiontargetresolver;
-    /** @var course_collection_logger_factory|context_collection_logger_factory The collection logger factory. */
+    /** @var course_collection_logger_factory|context_collection_logger_factory|world_logger_factory The logger factory. */
     protected $collectionloggerfactory;
     /** @var levels_info_factory The levels info factory. */
     protected $levelsinfofactory;
@@ -65,8 +67,8 @@ class course_world_factory implements \block_xp\local\factory\course_world_facto
      * @param moodle_database $db The DB.
      * @param course_config_factory $configfactory The factory.
      * @param collection_target_resolver_from_event $usercolletiontargetresolver The collection target resolver.
-     * @param badge_url_resolver_course_world_factory $urlresolverfactory The badge URL resolver factory.
-     * @param course_collection_logger_factory $collectionloggerfactory Argument no longer expected, but kept for compatibility.
+     * @param ?badge_url_resolver_course_world_factory $urlresolverfactory The badge URL resolver factory.
+     * @param ?course_collection_logger_factory $collectionloggerfactory Argument no longer expected, but kept for compatibility.
      * @param levels_info_factory $levelsinfofactory The levels info factory.
      */
     public function __construct(
@@ -74,7 +76,7 @@ class course_world_factory implements \block_xp\local\factory\course_world_facto
         moodle_database $db,
         course_config_factory $configfactory,
         collection_target_resolver_from_event $usercolletiontargetresolver,
-        badge_url_resolver_course_world_factory $urlresolverfactory,
+        ?badge_url_resolver_course_world_factory $urlresolverfactory,
         $collectionloggerfactory,
         levels_info_factory $levelsinfofactory
     ) {
@@ -94,7 +96,7 @@ class course_world_factory implements \block_xp\local\factory\course_world_facto
      * Get the world.
      *
      * @param int $courseid Course ID.
-     * @return block_xp\local\course_world
+     * @return course_world
      */
     public function get_world($courseid) {
 
@@ -113,10 +115,12 @@ class course_world_factory implements \block_xp\local\factory\course_world_facto
                 $this->db,
                 $courseid,
                 $this->usercolletiontargetresolver,
-                $this->urlresolverfactory,
+                null,
                 $this->levelsinfofactory
             );
-            if ($this->collectionloggerfactory instanceof context_collection_logger_factory) {
+            if ($this->collectionloggerfactory instanceof \block_xp\local\factory\world_logger_factory) {
+                $world->set_collection_logger($this->collectionloggerfactory->get_logger_for_world($world));
+            } else if ($this->collectionloggerfactory instanceof context_collection_logger_factory) {
                 $world->set_collection_logger($this->collectionloggerfactory->get_logger_from_context($world->get_context()));
             } else if ($this->collectionloggerfactory instanceof course_collection_logger_factory) {
                 $world->set_collection_logger($this->collectionloggerfactory->get_collection_logger($courseid));
@@ -130,9 +134,18 @@ class course_world_factory implements \block_xp\local\factory\course_world_facto
      * Set the collection logger factory.
      *
      * @param context_collection_logger_factory $factory The factory.
+     * @deprecated Since XP 21, use set_logger_factory instead.
      */
     public function set_context_collection_logger_factory(context_collection_logger_factory $factory) {
         $this->collectionloggerfactory = $factory;
     }
 
+    /**
+     * Set the logger factory.
+     *
+     * @param object $factory The factory.
+     */
+    public function set_logger_factory($factory) {
+        $this->collectionloggerfactory = $factory;
+    }
 }

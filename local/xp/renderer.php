@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Local renderer.
@@ -26,7 +28,7 @@
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/blocks/xp/renderer.php');
 
-use block_xp\local\course_world;
+use block_xp\local\world;
 use block_xp\local\xp\state;
 use local_xp\local\config\default_course_world_config;
 use local_xp\local\factory\course_currency_factory;
@@ -42,12 +44,15 @@ use local_xp\local\currency\currency;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_xp_renderer extends block_xp_renderer {
-
-    /** @var course_currency_factory */
-    protected $currencyfactory;
     /** @var object */
     protected $currencyrendercache;
 
+    /**
+     * Render currency.
+     *
+     * @param currency $currency The currency.
+     * @return string
+     */
     public function currency(currency $currency) {
         $sign = $currency->get_sign();
         $classes = 'sign';
@@ -55,7 +60,6 @@ class local_xp_renderer extends block_xp_renderer {
         if ($signurl = $currency->get_sign_url()) {
             $classes .= ' sign-img';
             $sign = html_writer::empty_tag('img', ['src' => $signurl, 'alt' => $sign]);
-
         } else if ($currency->use_sign_as_superscript()) {
             $classes .= ' sign-sup';
         }
@@ -82,30 +86,28 @@ class local_xp_renderer extends block_xp_renderer {
      * We can't inject the factory here or we have circular dependency issues.
      *
      * @return course_currency_factory
+     * @deprecated Since XP 21, use currency_factory instead.
      */
     protected function get_course_currency_factory() {
-        if (!$this->currencyfactory) {
-            $this->currencyfactory = \block_xp\di::get('course_currency_factory');
-        }
-        return $this->currencyfactory;
+        return \block_xp\di::get('course_currency_factory');
     }
 
     /**
      * Get the context of the navbar widget.
      *
-     * @param course_world $world The world.
+     * @param world $world The world.
      * @param state $state The user's state.
      * @return array
      */
-    protected function get_navbar_widget_context(course_world $world, state $state) {
+    protected function get_navbar_widget_context(world $world, state $state) {
         $data = parent::get_navbar_widget_context($world, $state);
 
-        $urlresolver = \block_xp\di::get('url_resolver');
+        $navigator = \block_xp\di::get('world_navigator_factory')->get_navigator_for_world($world);
         $worldconfig = $world->get_config();
 
         $teamleaderboardurl = null;
         if ($worldconfig->get('enablegroupladder') != default_course_world_config::GROUP_LADDER_NONE) {
-            $teamleaderboardurl = $urlresolver->reverse('group_ladder', ['courseid' => $world->get_courseid()]);
+            $teamleaderboardurl = $navigator->get_url('group_ladder');
         }
 
         return array_merge($data, [
@@ -251,11 +253,15 @@ class local_xp_renderer extends block_xp_renderer {
         echo html_writer::end_tag('div');
     }
 
+    /**
+     * Render XP.
+     *
+     * @param int $points The points.
+     * @param currency|null $currency The currency.
+     * @return string
+     */
     public function xp($points, ?currency $currency = null) {
-        if (!$currency) {
-            $courseid = $this->page->course->id;
-            $currency = $this->get_course_currency_factory()->get_currency($courseid);
-        }
+        $currency ??= \block_xp\di::get('currency_factory')->get_currency_from_context($this->page->context);
         $o = '';
         $o .= html_writer::start_tag('span', ['class' => 'block_xp-xp']);
         $o .= html_writer::tag('span', $this->xp_human($points), ['class' => 'pts']);
@@ -264,13 +270,16 @@ class local_xp_renderer extends block_xp_renderer {
         return $o;
     }
 
-    public function xp_preview($points, $courseid = null) {
-        if (!$courseid) {
-            $currency = \block_xp\di::get('currency');
-        } else {
-            $currency = $this->get_course_currency_factory()->get_currency($courseid);
-        }
-        return html_writer::div($this->xp($points, $currency), 'xp-bg-gray-100 xp-px-2 xp-py-1 xp-rounded');
+    /**
+     * Render XP preview.
+     *
+     * @param int $points The points.
+     * @param int|null $unused It was, no longer be used.
+     * @param currency|null $currency The currency, overriding the course ID or admin default.
+     * @return string
+     */
+    public function xp_preview($points, $unused = null, ?currency $currency = null) {
+        $currency ??= \block_xp\di::get('currency');
+        return html_writer::div($this->xp($points, $currency), 'xp-bg-gray-100 dark:xp-bg-gray-800 xp-px-2 xp-py-1 xp-rounded');
     }
-
 }

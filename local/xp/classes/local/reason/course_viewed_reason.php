@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reason;
 
@@ -29,13 +29,21 @@ use local_xp\local\utils\context_utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_viewed_reason extends \block_xp\local\reason\course_viewed_reason implements reason_with_location {
-
+    /**
+     * Get location name.
+     *
+     * @return string|null
+     */
     public function get_location_name() {
         return context_utils::get_course_name_short($this->get_env_id());
     }
 
+    /**
+     * Get location URL.
+     *
+     * @return \moodle_url|null
+     */
     public function get_location_url() {
         return context_utils::get_url($this->get_env_id());
     }
-
 }

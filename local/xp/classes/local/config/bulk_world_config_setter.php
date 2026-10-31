@@ -14,11 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\config;
 
 use block_xp\di;
+use block_xp\local\config\config;
 use block_xp\local\config\config_stack;
 use block_xp\local\config\table_setter_config;
 
@@ -31,7 +32,11 @@ use block_xp\local\config\table_setter_config;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class bulk_world_config_setter extends \block_xp\local\config\bulk_world_config_setter {
-
+    /**
+     * Create default config.
+     *
+     * @return config
+     */
     protected function create_defaults() {
         return new config_stack([
             new \local_xp\local\config\default_admin_config(),
@@ -40,17 +45,34 @@ class bulk_world_config_setter extends \block_xp\local\config\bulk_world_config_
         ]);
     }
 
+    /**
+     * Create target config.
+     *
+     * @return config
+     */
     protected function create_target() {
+        $issitewide = di::get('config')->get('context') == CONTEXT_SYSTEM;
+        $sql = 'courseid > 0';
+        $params = [];
+        if (!$issitewide) {
+            $sql = 'courseid > 0 AND courseid != :siteid';
+            $params = ['siteid' => SITEID];
+        }
+
         return new config_stack([
-            new table_setter_config(di::get('db'), 'local_xp_config', 'courseid > 0', []),
+            new table_setter_config(di::get('db'), 'local_xp_config', $sql, $params),
             parent::create_target(),
         ]);
     }
 
+    /**
+     * Get excluded config keys.
+     *
+     * @return array
+     */
     protected function get_excluded_keys_from_admin_defaults() {
         return array_merge(parent::get_excluded_keys_from_admin_defaults(), [
             'currencytheme', 'currencystate', 'badgetheme',
         ]);
     }
-
 }

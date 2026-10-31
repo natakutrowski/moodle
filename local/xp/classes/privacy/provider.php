@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Data provider.
@@ -58,7 +60,8 @@ class provider implements
      */
     public static function _get_metadata(collection $collection) { // @codingStandardsIgnoreLine
 
-        $collection->add_database_table('local_xp_log',
+        $collection->add_database_table(
+            'local_xp_log',
             [
                 'userid' => 'privacy:metadata:log:userid',
                 'type' => 'privacy:metadata:log:type',
@@ -69,13 +72,29 @@ class provider implements
             'privacy:metadata:log'
         );
 
-        $collection->add_database_table('local_xp_user_flag',
+        $collection->add_database_table(
+            'local_xp_user_flag',
             [
                 'userid' => 'privacy:metadata:userflag:userid',
                 'ladderparticipation' => 'privacy:metadata:userflag:ladderparticipation',
                 'ladderparticipationlocked' => 'privacy:metadata:userflag:ladderparticipationlocked',
             ],
             'privacy:metadata:userflag'
+        );
+
+        $collection->add_database_table(
+            'local_xp_oauth_token',
+            [
+                'userid' => 'privacy:metadata:oauthtoken:userid',
+                'type' => 'privacy:metadata:oauthtoken:type',
+                'clientid' => 'privacy:metadata:oauthtoken:clientid',
+                'redirecturi' => 'privacy:metadata:oauthtoken:redirecturi',
+                'expires' => 'privacy:metadata:oauthtoken:expires',
+                'timecreated' => 'privacy:metadata:oauthtoken:timecreated',
+                'timemodified' => 'privacy:metadata:oauthtoken:timemodified',
+                'revoked' => 'privacy:metadata:oauthtoken:revoked',
+            ],
+            'privacy:metadata:oauthtoken'
         );
 
         return $collection;
@@ -100,6 +119,10 @@ class provider implements
               FROM {local_xp_user_flag} f
              WHERE f.userid = :userid";
         $contextlist->add_from_sql($sql, ['userid' => $userid]);
+
+        if (\block_xp\di::get('db')->record_exists('local_xp_oauth_token', ['userid' => $userid])) {
+            $contextlist->add_system_context();
+        }
     }
 
     /**
@@ -111,6 +134,9 @@ class provider implements
         $context = $userlist->get_context();
         $userlist->add_from_sql('userid', 'SELECT userid FROM {local_xp_log} WHERE contextid = ?', [$context->id]);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {local_xp_user_flag} WHERE contextid = ?', [$context->id]);
+        if ($context instanceof \context_system) {
+            $userlist->add_from_sql('userid', 'SELECT userid FROM {local_xp_oauth_token}', []);
+        }
     }
 
     /**
@@ -160,7 +186,6 @@ class provider implements
         $logs = [];
         $lastcontextid = null;
         foreach ($recordset as $record) {
-
             if ($lastcontextid && $lastcontextid != $record->contextid) {
                 $flushlogs($lastcontextid, $logs);
                 $logs = [];
@@ -211,6 +236,33 @@ class provider implements
             ]);
         }
         $recordset->close();
+
+        if (in_array(SYSCONTEXTID, $contextlist->get_contextids())) {
+            $records = $db->get_records(
+                'local_xp_oauth_token',
+                ['userid' => $user->id],
+                'timecreated ASC',
+                'id, type, clientid, redirecturi, expires, timecreated, timemodified, revoked'
+            );
+            $tokens = [];
+            foreach ($records as $record) {
+                $tokens[] = (object) [
+                    'type' => $record->type,
+                    'clientid' => $record->clientid,
+                    'redirecturi' => $record->redirecturi,
+                    'expires' => transform::datetime($record->expires),
+                    'timecreated' => transform::datetime($record->timecreated),
+                    'timemodified' => transform::datetime($record->timemodified),
+                    'revoked' => (bool) $record->revoked,
+                ];
+            }
+            if ($tokens) {
+                writer::with_context(\context_system::instance())->export_data(
+                    array_merge($rootpath, [get_string('privacy:path:oauthtokens', 'local_xp')]),
+                    (object) ['data' => $tokens]
+                );
+            }
+        }
     }
 
     /**
@@ -222,6 +274,9 @@ class provider implements
         $db = \block_xp\di::get('db');
         $db->delete_records('local_xp_log', ['contextid' => $context->id]);
         $db->delete_records('local_xp_user_flag', ['contextid' => $context->id]);
+        if ($context instanceof \context_system) {
+            $db->delete_records('local_xp_oauth_token');
+        }
     }
 
     /**
@@ -239,6 +294,9 @@ class provider implements
         $params = ['userid' => $userid] + $inparams;
         $db->delete_records_select('local_xp_log', $sql, $params);
         $db->delete_records_select('local_xp_user_flag', $sql, $params);
+        if (in_array(SYSCONTEXTID, $contextlist->get_contextids())) {
+            $db->delete_records('local_xp_oauth_token', ['userid' => $userid]);
+        }
     }
 
     /**
@@ -253,6 +311,8 @@ class provider implements
         $params = ['contextid' => $userlist->get_context()->id] + $inparams;
         $db->delete_records_select('local_xp_log', $sql, $params);
         $db->delete_records_select('local_xp_user_flag', $sql, $params);
+        if ($userlist->get_context() instanceof \context_system) {
+            $db->delete_records_select('local_xp_oauth_token', "userid $insql", $inparams);
+        }
     }
-
 }

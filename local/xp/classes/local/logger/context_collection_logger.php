@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Collection logger.
@@ -60,7 +62,6 @@ class context_collection_logger implements
     reason_occurance_indicator,
     reason_occurrence_indicator,
     user_recent_activity_repository {
-
     /** @var moodle_database */
     protected $db;
     /** @var string */
@@ -70,12 +71,22 @@ class context_collection_logger implements
     /** @var make_from_type_and_signature */
     protected $reasonmaker;
 
+    /**
+     * Constructor.
+     */
     public function __construct(moodle_database $db, context $context, maker_from_type_and_signature $reasonmaker) {
         $this->db = $db;
         $this->context = $context;
         $this->reasonmaker = $reasonmaker;
     }
 
+    /**
+     * Count recent collections.
+     *
+     * @param int $id The ID.
+     * @param DateTime $since The time.
+     * @return int
+     */
     public function count_collections_since($userid, DateTime $since) {
         return $this->db->count_records_select(
             $this->table,
@@ -88,6 +99,14 @@ class context_collection_logger implements
         );
     }
 
+    /**
+     * Count recent collections by reason.
+     *
+     * @param int $id The ID.
+     * @param reason $reason The reason.
+     * @param DateTime $since The time.
+     * @return int
+     */
     public function count_collections_with_reason_since($userid, reason $reason, DateTime $since) {
         return $this->db->count_records_select(
             $this->table,
@@ -101,6 +120,12 @@ class context_collection_logger implements
         );
     }
 
+    /**
+     * Delete old logs.
+     *
+     * @param \DateTime $dt The date.
+     * @return void
+     */
     public function delete_older_than(DateTime $dt) {
         $this->db->delete_records_select(
             $this->table,
@@ -112,6 +137,13 @@ class context_collection_logger implements
         );
     }
 
+    /**
+     * Get recently collected points.
+     *
+     * @param int $id The ID.
+     * @param DateTime $since The time.
+     * @return int
+     */
     public function get_collected_points_since($userid, DateTime $since) {
         return $this->db->get_field_select(
             $this->table,
@@ -125,6 +157,14 @@ class context_collection_logger implements
         );
     }
 
+    /**
+     * Get recent points by reason.
+     *
+     * @param int $id The ID.
+     * @param reason $reason The reason.
+     * @param DateTime $since The time.
+     * @return int
+     */
     public function get_points_collected_with_reason_since($userid, reason $reason, DateTime $since) {
         return $this->db->get_field_select(
             $this->table,
@@ -139,6 +179,13 @@ class context_collection_logger implements
         );
     }
 
+    /**
+     * Get recent user activity.
+     *
+     * @param int $userid The user ID.
+     * @param int $count The count.
+     * @return activity[]
+     */
     public function get_user_recent_activity($userid, $count = 0) {
         $results = $this->db->get_records_select($this->table, 'contextid = :contextid AND userid = :userid AND points > 0', [
             'contextid' => $this->context->id,
@@ -160,6 +207,14 @@ class context_collection_logger implements
         }, $results);
     }
 
+    /**
+     * Check recent reason occurrence.
+     *
+     * @param int $id The ID.
+     * @param reason $reason The reason.
+     * @param DateTime $since The time.
+     * @return bool
+     */
     public function has_reason_happened_since($userid, reason $reason, DateTime $since) {
         return $this->db->record_exists_select(
             $this->table,
@@ -173,6 +228,15 @@ class context_collection_logger implements
         );
     }
 
+    /**
+     * Log collection.
+     *
+     * @param int $id The ID.
+     * @param int $points The points.
+     * @param string $signature The signature.
+     * @param DateTime|null $time The time.
+     * @return void
+     */
     public function log($userid, $points, $signature, ?DateTime $time = null) {
         $record = (object) [
             'contextid' => $this->context->id,
@@ -270,5 +334,4 @@ class context_collection_logger implements
             ]
         );
     }
-
 }

@@ -1,0 +1,66 @@
+{{!
+    This file is part of Level Up XP+.
+
+    Level Up XP+ is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Level Up XP+ is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Level Up XP+. If not, see <https://www.gnu.org/licenses/>.
+
+    See <https://levelup.plus>.
+}}
+{{!
+    @template local_xp/modal-source-courses-selector
+
+    Search and select source courses for a global world.
+
+    Example context (json):
+    {}
+}}
+{{< core/modal }}
+    {{$title}}{{#str}}addcourses, block_xp{{/str}}{{/title}}
+    {{$body}}
+        <div class="block_xp">
+            <label for="local-xp-source-courses-{{uniqid}}" class="xp-block xp-mb-2">{{#str}}searchcourses, core{{/str}}</label>
+            <input
+                id="local-xp-source-courses-{{uniqid}}"
+                type="text"
+                class="form-control search-term-course"
+                placeholder="{{#str}}entersearchterm, block_xp{{/str}}"
+            >
+            <div class="search-status xp-sr-only" role="status" aria-atomic="true"></div>
+            <div class="xp-mt-4">
+                <div class="xp-mb-0 alert alert-info results-empty" style="display: none">
+                    {{#str}}noresults, core{{/str}}
+                </div>
+                <div class="xp-mb-0 alert alert-warning searching-results" style="display: none">
+                    {{#str}}loadinghelp, core{{/str}}
+                </div>
+                <div style="overflow: auto; max-height: 300px">
+                    <table class="table table-striped table-sm search-results" role="presentation"
+                        style="display: none; width: 100%; margin: 0">
+                        <tbody>
+                            <tr class="resource-template">
+                                <td>
+                                    <div class="resource-name"></div>
+                                    <small class="dimmed resource-subname"></small>
+                                </td>
+                                <td style="text-align: right; vertical-align: middle">
+                                    <button type="button" class="btn btn-secondary btn-sm">{{#str}}add, core{{/str}}</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {{/body}}
+    {{$footer}}{{/footer}}
+{{/ core/modal }}

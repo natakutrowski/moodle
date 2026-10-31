@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Log table.
@@ -50,7 +52,6 @@ use pix_icon;
  * @deprecated Since XP 20, use logs_table instead.
  */
 class log_table extends table_sql {
-
     /** @var string The key of the user ID column. */
     public $useridfield = 'userid';
 
@@ -116,6 +117,9 @@ class log_table extends table_sql {
         $this->collapsible(false);
     }
 
+    /**
+     * Initialise SQL.
+     */
     protected function init_sql() {
         $context = $this->context;
         $groupid = $this->groupid;
@@ -179,10 +183,8 @@ class log_table extends table_sql {
 
         // Identity fields.
         if ($isdownloading) {
-
             // Additional identity fields.
             if (has_capability('moodle/site:viewuseridentity', $this->context)) {
-
                 // Defining which fields are to be hidden.
                 $forwholesite = di::get('config')->get('context') == CONTEXT_SYSTEM;
                 $hiddenidentityfields = explode(',', $CFG->hiddenuserfields);
@@ -232,51 +234,7 @@ class log_table extends table_sql {
             return ['1=1', []];
         }
 
-        $term = trim($filterset->get_filter('term')->current());
-        if (empty($term)) {
-            return ['1=1', []];
-        }
-
-        $wheres = [];
-        $params = [];
-
-        $nameoptions = [
-            ['firstname' => $term],
-            ['lastname' => $term],
-        ];
-        $nameparts = explode(' ', $term);
-        if (count($nameparts) > 1) {
-            for ($i = 0; $i < count($nameparts) - 1; $i++) {
-                $nameoptions[] = [
-                    'firstname' => implode(' ', array_slice($nameparts, 0, $i + 1)),
-                    'lastname' => implode(' ', array_slice($nameparts, $i + 1)),
-                ];
-            }
-        }
-        foreach ($nameoptions as $i => $option) {
-            $subparams = [];
-            $subsql = [];
-            if (!empty($option['firstname'])) {
-                $paramname = 'usertermfn' . $i;
-                $subsql[] = $this->db->sql_like("u.firstname", ':' . $paramname, false, false);
-                $subparams[$paramname] = $this->db->sql_like_escape($option['firstname']) . '%';
-            }
-            if (!empty($option['lastname'])) {
-                $paramname = 'usertermln' . $i;
-                $subsql[] = $this->db->sql_like("u.lastname", ':' . $paramname, false, false);
-                $subparams[$paramname] = $this->db->sql_like_escape($option['lastname']) . '%';
-            }
-            if (!empty($subsql)) {
-                $wheres[] = '(' . implode(' AND ', $subsql) . ')';
-                $params = array_merge($params, $subparams);
-            }
-        }
-
-        if (empty($wheres)) {
-            return ['1=1', []];
-        }
-
-        return ['((' . implode(') OR (', $wheres) . '))', $params];
+        return user_utils::get_filter_user_by_term_sql($filterset->get_filter('term')->current());
     }
 
     /**

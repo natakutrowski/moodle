@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Rules controller.
@@ -28,8 +30,9 @@ namespace local_xp\local\controller;
 use block_xp_filter;
 use block_xp\local\controller\page_controller;
 use block_xp\local\controller\rules_controller;
+use block_xp\local\course_world;
 use block_xp\local\routing\url;
-use html_writer;
+use block_xp\local\utils\world_utils;
 
 /**
  * Rules controller class.
@@ -40,14 +43,18 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class grade_rules_controller extends page_controller {
-
     /** @var string The nav name. */
     protected $navname = 'rules';
     /** @var string The route name. */
     protected $routename = 'graderules';
-    /** @var \block_xp\local\course_filter_manager The filter manager. */
+    /** @var \block_xp\local\xp\course_filter_manager The filter manager. */
     protected $filtermanager;
 
+    /**
+     * Define optional parameters.
+     *
+     * @return array
+     */
     protected function define_optional_params() {
         return [
             ['reset', false, PARAM_BOOL, false],
@@ -55,11 +62,26 @@ class grade_rules_controller extends page_controller {
         ];
     }
 
+    /**
+     * Handle post-login.
+     *
+     * @return void
+     */
     protected function post_login() {
         parent::post_login();
+        if (!world_utils::supports_local_points_management($this->world)) {
+            $this->redirect($this->navigator->get_url('infos'));
+        } else if (!$this->world instanceof course_world) {
+            $this->redirect($this->navigator->get_url('infos'));
+        }
         $this->filtermanager = $this->world->get_filter_manager();
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
 
         // Reset course rules to defaults.
@@ -75,22 +97,34 @@ class grade_rules_controller extends page_controller {
             require_sesskey();
             $this->handle_save();
             $this->redirect(null, get_string('changessaved'));
-
         } else if (!empty($_POST['cancel'])) {
             $this->redirect();
         }
     }
 
+    /**
+     * Handle save.
+     */
     protected function handle_save() {
         $category = block_xp_filter::CATEGORY_GRADES;
         $filters = isset($_POST['gradefilters']) ? $_POST['gradefilters'] : [];
         rules_controller::save_rules_filters($this->world, $filters, $this->filtermanager->get_user_filters($category), $category);
     }
 
+    /**
+     * Get page title.
+     *
+     * @return string
+     */
     protected function get_page_html_head_title() {
         return get_string('graderules', 'block_xp');
     }
 
+    /**
+     * Get page heading.
+     *
+     * @return string
+     */
     protected function get_page_heading() {
         return get_string('graderules', 'block_xp');
     }
@@ -144,6 +178,11 @@ class grade_rules_controller extends page_controller {
         ]);
     }
 
+    /**
+     * Output page content.
+     *
+     * @return void
+     */
     protected function page_content() {
         $output = $this->get_renderer();
 
@@ -173,7 +212,9 @@ class grade_rules_controller extends page_controller {
         $this->page_danger_zone_content();
     }
 
+    /**
+     * Output danger zone.
+     */
     protected function page_danger_zone_content() {
     }
-
 }

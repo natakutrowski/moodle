@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reportbuilder\entities;
 
@@ -35,15 +35,31 @@ use lang_string;
  */
 class xp extends base {
     use pre_404_compat_trait;
+    use pre_502_compat_trait;
 
+    /**
+     * Get default tables.
+     *
+     * @return string[]
+     */
     protected function get_default_tables(): array {
         return ['block_xp'];
     }
 
+    /**
+     * Get default entity title.
+     *
+     * @return lang_string
+     */
     protected function get_default_entity_title(): lang_string {
         return new lang_string('pluginname', 'block_xp');
     }
 
+    /**
+     * Initialise the entity.
+     *
+     * @return base
+     */
     public function initialise(): base {
         $worldfactory = di::get('course_world_factory');
         $coursecurrencyfactory = di::get('course_currency_factory');
@@ -120,5 +136,4 @@ class xp extends base {
 
         return $this;
     }
-
 }

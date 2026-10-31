@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Filter.
@@ -40,7 +40,6 @@ use core_text;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cmname_tester implements action_tester {
-
     /** Method equals. */
     const METHOD_EQUALS = cmname::METHOD_EQUALS;
     /** Method contains. */
@@ -62,6 +61,12 @@ class cmname_tester implements action_tester {
         $this->str = core_text::strtolower(trim((string) $str));
     }
 
+    /**
+     * Check action constraints.
+     *
+     * @param action $action The action.
+     * @return bool
+     */
     public function is_action_passing_constraints(action $action): bool {
         if ($this->str === '') {
             return false;
@@ -95,5 +100,4 @@ class cmname_tester implements action_tester {
         }
         return core_text::strpos($name, $this->str) !== false;
     }
-
 }

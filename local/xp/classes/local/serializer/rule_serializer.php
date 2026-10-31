@@ -14,11 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\serializer;
 
-use block_xp\local\rulefilter\handler;
 use local_xp\local\rule\rule_with_limit;
 
 /**
@@ -30,7 +29,6 @@ use local_xp\local\rule\rule_with_limit;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class rule_serializer extends \block_xp\local\serializer\rule_serializer {
-
     /** @var \block_xp\local\serializer\serializer The limit spec serializer. */
     protected $limitspecserializer;
 
@@ -52,8 +50,6 @@ class rule_serializer extends \block_xp\local\serializer\rule_serializer {
      * @return array
      */
     public function serialize($instance) {
-        global $CFG;
-
         $data = parent::serialize($instance);
         $data['limit'] = null;
         $data['repeatlimit'] = null;
@@ -64,16 +60,6 @@ class rule_serializer extends \block_xp\local\serializer\rule_serializer {
             $repeatlimit = $instance->get_repeat_limit();
             $data['limit'] = $limit ? $this->limitspecserializer->serialize($limit) : null;
             $data['repeatlimit'] = $repeatlimit ? $this->limitspecserializer->serialize($repeatlimit) : null;
-        }
-
-        // Older Moodle versions do not support null values in place of arrays.
-        if ($CFG->branch < 403) {
-            if ($data['limit'] === null) {
-                unset($data['limit']);
-            }
-            if ($data['repeatlimit'] === null) {
-                unset($data['repeatlimit']);
-            }
         }
 
         return $data;

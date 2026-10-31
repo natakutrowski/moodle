@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\controller;
 
@@ -30,7 +30,6 @@ use block_xp\local\ruletype\ruletype;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class action_rules_controller extends \block_xp\local\controller\action_rules_controller {
-
     /**
      * Get the rule types.
      *

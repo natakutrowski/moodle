@@ -14,11 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\rule;
 
+use block_xp\di;
 use block_xp\local\rule\instance;
+use block_xp\local\ruletype\limit_spec;
+use block_xp\local\ruletype\ruletype;
+use block_xp\local\ruletype\ruletype_with_limit;
 
 /**
  * World rule manager.
@@ -29,7 +33,6 @@ use block_xp\local\rule\instance;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class world_rule_manager extends \block_xp\local\rule\world_rule_manager {
-
     /**
      * Delete a rule.
      *
@@ -55,7 +58,7 @@ class world_rule_manager extends \block_xp\local\rule\world_rule_manager {
                                 IN (SELECT id FROM {block_xp_rule} WHERE contextid = :contextid)", [
             'contextid' => $storecontext->id,
         ]);
-        parent::delete_all_rules($storecontext);
+        parent::delete_all_rules();
         $tx->allow_commit();
     }
 
@@ -133,5 +136,108 @@ class world_rule_manager extends \block_xp\local\rule\world_rule_manager {
      */
     protected function make_instance(\stdClass $record): instance {
         return new static_instance($record);
+    }
+
+    /**
+     * Process a rule update.
+     *
+     * @param \stdClass $rulerecord
+     * @param \stdClass $data
+     */
+    protected function process_rule_update(\stdClass $rulerecord, \stdClass $data): void {
+        $tx = $this->db->start_delegated_transaction();
+        parent::process_rule_update($rulerecord, $data);
+        static::process_local_rule_update($this->db, $rulerecord, $data);
+        $tx->allow_commit();
+    }
+
+    /**
+     * Update a local rule.
+     *
+     * @param \stdClass $rulerecord
+     * @param \stdClass $data
+     */
+    public static function process_local_rule_update(\moodle_database $db, \stdClass $rulerecord, \stdClass $data): void {
+        $ruleid = $rulerecord->id;
+        $ruletype = di::get('rule_type_resolver')->get_type($rulerecord->type);
+        if (!$ruletype instanceof ruletype_with_limit) {
+            $db->delete_records('local_xp_rule', ['ruleid' => $ruleid]);
+            return;
+        }
+
+        // Apply submitted values to the form.
+        $record = $db->get_record('local_xp_rule', ['ruleid' => $ruleid]) ?: (object) ['ruleid' => $ruleid];
+        $fields = ['limitmax', 'limitwindow', 'repeatscope', 'repeatwindow'];
+        foreach ($fields as $field) {
+            if (isset($data->{$field})) {
+                $record->{$field} = $data->{$field};
+            } else {
+                $record->{$field} = null;
+            }
+        }
+
+        // If all is the same as the default value, we just delete to avoid having lingering data.
+        if ($ruletype instanceof ruletype_with_limit) {
+            if (static::is_same_as_ruletype_defaults($record, $ruletype)) {
+                $db->delete_records('local_xp_rule', ['ruleid' => $ruleid]);
+                return;
+            }
+        }
+
+        // Save the record.
+        if (empty($record->id)) {
+            $record->id = $db->insert_record('local_xp_rule', $record);
+        } else {
+            $db->update_record('local_xp_rule', $record);
+        }
+    }
+
+    /**
+     * Whether same as rule type defaults.
+     *
+     * @param \stdClass $record
+     * @param ruletype $ruletype
+     * @return bool
+     */
+    protected static function is_same_as_ruletype_defaults($record, $ruletype) {
+        if (!$ruletype instanceof ruletype_with_limit) {
+            return true;
+        }
+        return static::is_same_as_default_limits($record, $ruletype->get_default_limit(), $ruletype->get_default_repeat_limit());
+    }
+
+    /**
+     * Whether same as default limits.
+     *
+     * @param \stdClass $record
+     * @param limit_spec $defaultlimit
+     * @param limit_spec $defaultrepeatlimit
+     * @return bool
+     */
+    public static function is_same_as_default_limits($record, limit_spec $defaultlimit, limit_spec $defaultrepeatlimit) {
+        $record->limitmax ??= null;
+        $record->limitwindow ??= null;
+        $record->repeatscope ??= null;
+        $record->repeatwindow ??= null;
+
+        // When both are null, we're using default. Time windows are not relevant when the primary value is null.
+        if ($record->limitmax === null && $record->repeatscope === null) {
+            return true;
+        }
+
+        $defaultmax = $defaultlimit->get_max();
+        $defaultscope = $defaultrepeatlimit->get_scope();
+
+        $samelimit = $record->limitmax === null || $record->limitmax == $defaultmax;
+        $samewindow = $record->limitmax === null || $record->limitwindow === null
+            || $record->limitwindow == $defaultlimit->get_time_window();
+
+        $samerepeatscope = $record->repeatscope === null || $record->repeatscope == $defaultrepeatlimit->get_scope();
+        $samerepeatwindow = $record->repeatscope === null || $record->repeatwindow === null
+            || $record->repeatwindow == $defaultrepeatlimit->get_time_window();
+
+        // When max is 0, time window is irrelevant. And when scope is NONE, window is irrelevant too.
+        return (($samelimit && ($defaultmax === 0 || $samewindow))
+            && ($samerepeatscope && ($defaultscope === limit_spec::SCOPE_NONE || $samerepeatwindow)));
     }
 }

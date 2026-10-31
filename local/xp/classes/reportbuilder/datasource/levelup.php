@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\reportbuilder\datasource;
 
@@ -39,7 +39,11 @@ use local_xp\local\reportbuilder\entities\xp;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class levelup extends datasource {
-
+    /**
+     * Get default columns.
+     *
+     * @return string[]
+     */
     public function get_default_columns(): array {
         return [
             'user:fullnamewithpicturelink',
@@ -49,14 +53,29 @@ class levelup extends datasource {
         ];
     }
 
+    /**
+     * Get default filters.
+     *
+     * @return string[]
+     */
     public function get_default_filters(): array {
         return [];
     }
 
+    /**
+     * Get default conditions.
+     *
+     * @return string[]
+     */
     public function get_default_conditions(): array {
         return [];
     }
 
+    /**
+     * Get default column sorting.
+     *
+     * @return int[]
+     */
     public function get_default_column_sorting(): array {
         return [
             'xp:pointswithsymbol' => SORT_DESC,
@@ -64,10 +83,18 @@ class levelup extends datasource {
         ];
     }
 
+    /**
+     * Get name.
+     *
+     * @return string
+     */
     public static function get_name(): string {
         return get_string('xpparticipants', 'local_xp');
     }
 
+    /**
+     * Initialise datasource.
+     */
     protected function initialise(): void {
         $incourse = di::get('config')->get('context') == CONTEXT_COURSE;
 
@@ -145,9 +172,13 @@ class levelup extends datasource {
         $this->add_all_from_entities();
     }
 
+    /**
+     * Check availability.
+     *
+     * @return bool
+     */
     public static function is_available(): bool {
         return di::get('addon')->is_activated()
             && di::get('addon')->supports_report_builder();
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\form;
 
@@ -33,8 +33,12 @@ use moodle_url;
 class table_download extends dynamic_form {
     use dynamic_world_trait;
 
+    /** @var string */
     protected $routename = 'report';
 
+    /**
+     * Define the form.
+     */
     protected function definition() {
         $mform = $this->_form;
 
@@ -57,6 +61,9 @@ class table_download extends dynamic_form {
         $mform->setType('pageurl', PARAM_LOCALURL);
     }
 
+    /**
+     * Set form data.
+     */
     public function set_data_for_dynamic_submission(): void {
         $pageurl = new moodle_url($this->optional_param('pageurl', '', PARAM_LOCALURL));
         $this->set_data((object) [
@@ -67,6 +74,11 @@ class table_download extends dynamic_form {
         ]);
     }
 
+    /**
+     * Process the form submission.
+     *
+     * @return mixed
+     */
     public function process_dynamic_submission() {
         if ($data = $this->get_data()) {
             set_user_preference('local_xp_dataformat', $data->dataformat);
@@ -79,6 +91,13 @@ class table_download extends dynamic_form {
         }
     }
 
+    /**
+     * Validation.
+     *
+     * @param array $data The data.
+     * @param array $files The files.
+     * @return array
+     */
     public function validation($data, $files) {
         $errors = [];
         if (empty($data['dataformat'])) {
@@ -86,5 +105,4 @@ class table_download extends dynamic_form {
         }
         return $errors;
     }
-
 }

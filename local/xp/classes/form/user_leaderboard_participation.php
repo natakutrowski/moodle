@@ -14,16 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\form;
 
 use block_xp\di;
 use block_xp\form\dynamic_world_trait;
+use block_xp\local\permission\access_report_permissions;
+use block_xp\local\utils\user_utils;
 use core_form\dynamic_form;
 use DateTimeImmutable;
 use local_xp\local\leaderboard\participation\service;
 use local_xp\local\leaderboard\participation\state;
+use required_capability_exception;
 
 /**
  * Form.
@@ -36,6 +39,7 @@ use local_xp\local\leaderboard\participation\state;
 class user_leaderboard_participation extends dynamic_form {
     use dynamic_world_trait;
 
+    /** @var string The route name. */
     protected $routename = 'report';
 
     /** @var ?service */
@@ -43,6 +47,11 @@ class user_leaderboard_participation extends dynamic_form {
     /** @var ?state */
     protected $state;
 
+    /**
+     * Get participation service.
+     *
+     * @return service
+     */
     protected function get_participation_service(): service {
         if (!$this->service) {
             $this->service = di::get(\local_xp\local\leaderboard\participation\service_factory::class)
@@ -51,6 +60,11 @@ class user_leaderboard_participation extends dynamic_form {
         return $this->service;
     }
 
+    /**
+     * Get participation state.
+     *
+     * @return state
+     */
     protected function get_participation_state(): state {
         if (!$this->state) {
             $this->state = $this->get_participation_service()->get_state($this->optional_param('userid', 0, PARAM_INT));
@@ -58,17 +72,33 @@ class user_leaderboard_participation extends dynamic_form {
         return $this->state;
     }
 
-    #[\Override]
+    /**
+     * Check access.
+     *
+     * @return void
+     */
     protected function check_access_for_dynamic_submission(): void {
-        $perms = $this->get_world()->get_access_permissions();
+        $world = $this->get_world();
+        $perms = $world->get_access_permissions();
         $perms->require_manage();
 
+        // Changing participation is only available through the report, so we also require the report permissions.
+        if (!$perms instanceof access_report_permissions) {
+            throw new required_capability_exception($world->get_context(), 'block/xp:viewreport', 'nopermissions', '');
+        }
+        $perms->require_access_report();
+
         $userid = $this->optional_param('userid', 0, PARAM_INT);
-        if (!\core_user::is_real_user($userid, true) || isguestuser($userid)) {
+        if (!user_utils::is_valid_target($world->get_context(), $userid)) {
             throw new \moodle_exception('invaliddata', 'core_error');
         }
     }
 
+    /**
+     * Process the form submission.
+     *
+     * @return void
+     */
     public function process_dynamic_submission() {
         $data = $this->get_data();
         $userid = (int) $data->userid;
@@ -90,6 +120,11 @@ class user_leaderboard_participation extends dynamic_form {
         $service->lock_state($userid, $lockuntil);
     }
 
+    /**
+     * Set data for dynamic submission.
+     *
+     * @return void
+     */
     public function set_data_for_dynamic_submission(): void {
         $userid = $this->optional_param('userid', 0, PARAM_INT);
         $state = $this->get_participation_state();
@@ -126,7 +161,8 @@ class user_leaderboard_participation extends dynamic_form {
         // Managers cannot change the lock time when the admin has locked the participation status.
         $configlocked = \block_xp\di::get('config_locked');
         if (!$configlocked->has('ladderparticipation') || !$configlocked->get('ladderparticipation')) {
-            $mform->addElement('date_time_selector',
+            $mform->addElement(
+                'date_time_selector',
                 'ladderparticipationlocked',
                 get_string('userladderparticipationlocked', 'block_xp'),
                 ['optional' => true,
@@ -136,5 +172,4 @@ class user_leaderboard_participation extends dynamic_form {
             $mform->addHelpButton('ladderparticipationlocked', 'userladderparticipationlocked', 'block_xp');
         }
     }
-
 }

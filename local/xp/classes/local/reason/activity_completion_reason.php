@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reason;
 
@@ -71,6 +71,9 @@ class activity_completion_reason implements
         }
     }
 
+    /**
+     * Get activity ID.
+     */
     protected function get_cm_id(): int {
         $ctx = $this->get_context();
         return $ctx ? (int) $ctx->instanceid : 0;
@@ -82,7 +85,7 @@ class activity_completion_reason implements
      * @return context|null
      */
     protected function get_context() {
-        return context::instance_by_id($this->get_env_id() ?? 0, IGNORE_MISSING) ?: null;
+        return context::instance_by_id($this->get_env_id() ?? -1, IGNORE_MISSING) ?: null;
     }
 
     /**
@@ -110,6 +113,11 @@ class activity_completion_reason implements
         return $this->get_cm_id() . ':' . $this->state;
     }
 
+    /**
+     * Get short description.
+     *
+     * @return string
+     */
     public function get_short_description() {
         return get_string('activitycompleted', 'local_xp');
     }
@@ -153,5 +161,4 @@ class activity_completion_reason implements
         $cmid = $e->get_context()->instanceid;
         return new static($cmid, $state);
     }
-
 }

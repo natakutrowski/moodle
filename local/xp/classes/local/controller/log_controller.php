@@ -14,13 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\controller;
 
 use block_xp\di;
 use block_xp\local\routing\url;
 use block_xp\local\rule\instance;
+use block_xp\local\rule\instance_with_source;
+use block_xp\local\utils\world_utils;
 use local_xp\local\config\default_course_world_config;
 use local_xp\output\logs_table;
 
@@ -33,7 +35,6 @@ use local_xp\output\logs_table;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class log_controller extends \block_xp\local\controller\log_controller {
-
     /** @var logs_table The log table. */
     protected $table;
     /** @var int|null The rule ID. */
@@ -41,6 +42,11 @@ class log_controller extends \block_xp\local\controller\log_controller {
     /** @var instance|null The rule. */
     protected $rule = null;
 
+    /**
+     * Define optional parameters.
+     *
+     * @return array
+     */
     protected function define_optional_params() {
         $params = parent::define_optional_params();
         $params[] = ['ruleid', null, PARAM_INT];
@@ -49,6 +55,9 @@ class log_controller extends \block_xp\local\controller\log_controller {
         return $params;
     }
 
+    /**
+     * Get download filename.
+     */
     protected function get_download_filename(): string {
         $userid = $this->get_user_id();
         $ruleid = $this->get_rule_id();
@@ -68,6 +77,45 @@ class log_controller extends \block_xp\local\controller\log_controller {
     }
 
     /**
+     * Get the rule IDs to filter by.
+     *
+     * @return int[]
+     */
+    protected function get_filter_by_rule_ids(): array {
+        $ruleid = $this->get_rule_id();
+        if (!$ruleid) {
+            return [];
+        }
+
+        $ruleids = [$ruleid];
+        $rule = $this->get_rule();
+        if ($rule instanceof instance_with_source && $rule->get_source_rule_id()) {
+            $ruleids[] = $rule->get_source_rule_id();
+        } else if (!$rule) {
+            // Find out if a local rule uses this ID as source ID, then filter for both.
+            $manager = di::get('world_rule_manager_factory')->get_rule_manager($this->world);
+            foreach ($manager->get_rules() as $candidate) {
+                if ($candidate instanceof instance_with_source && $candidate->get_source_rule_id() === $ruleid) {
+                    $ruleids[] = $candidate->get_id();
+                    break;
+                }
+            }
+        }
+
+        return $ruleids;
+    }
+
+    /**
+     * Get the rule.
+     *
+     * @return instance|null
+     */
+    protected function get_rule(): ?instance {
+        $this->get_rule_id();
+        return $this->rule;
+    }
+
+    /**
      * Get the rule ID.
      *
      * @return int When falsy, no rule.
@@ -79,42 +127,52 @@ class log_controller extends \block_xp\local\controller\log_controller {
                 $ruleid = 0;
             }
 
+            // We don't validate whether the rule was found or not because it is not possible to
+            // abuse the rule ID to extrafiltrate information that wasn't already visible.
             $manager = di::get('world_rule_manager_factory')->get_rule_manager($this->world);
-            $rule = $manager->get_rule($ruleid);
-            if (!$rule) {
-                $ruleid = 0;
-            }
-
-            $this->rule = $rule;
+            $this->rule = $ruleid ? $manager->get_rule($ruleid) : null;
             $this->ruleid = $ruleid;
         }
         return $this->ruleid;
     }
 
+    /**
+     * Get table.
+     *
+     * @return \block_xp\output\logs_table
+     */
     protected function get_table() {
         if (!$this->table) {
             $teamresolver = null;
-            $withteams = $this->world->get_config()->get('enablegroupladder') != default_course_world_config::GROUP_LADDER_NONE;
+            $withteams = world_utils::supports_team_leaderboard($this->world)
+                && $this->world->get_config()->get('enablegroupladder') != default_course_world_config::GROUP_LADDER_NONE;
             if ($withteams) {
                 $teamresolverfactory = \block_xp\di::get('team_membership_resolver_factory');
                 $teamresolver = $teamresolverfactory->get_course_team_membership_resolver($this->world);
             }
             $table = new logs_table(
                 $this->world,
-                di::get('reason_from_log_entry_factory'),
+                null,
                 $this->get_groupid(),
                 [$this->get_param('download'), $this->get_download_filename()],
                 $teamresolver,
                 $this->get_user_id()
             );
             $table->define_baseurl($this->pageurl->get_compatible_url());
-            $table->set_filter_by_rule_id($this->get_rule_id());
+            $table->set_filter_by_rule_ids($this->get_filter_by_rule_ids());
             $table->set_filterset($this->get_filterset());
+            $logger = di::get('world_logger_factory')->get_logger_for_world($this->world);
+            $table->set_collection_logger($logger);
             $this->table = $table;
         }
         return $this->table;
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
 
         // We must send the table before the output starts.
@@ -126,6 +184,11 @@ class log_controller extends \block_xp\local\controller\log_controller {
         parent::pre_content();
     }
 
+    /**
+     * Get dismissable filters.
+     *
+     * @return array|null
+     */
     protected function get_dismissable_filters() {
         $filters = parent::get_dismissable_filters();
         $ruleid = $this->get_rule_id();
@@ -135,17 +198,27 @@ class log_controller extends \block_xp\local\controller\log_controller {
 
         $rulelessurl = new url($this->pageurl);
         $rulelessurl->remove_params('ruleid');
-        $rule = $this->rule;
-        $filters[] = [
-            'label' => get_string('resultsfilteredforrulen',
+        $label = get_string('resultsfilteredforarule', 'block_xp');
+        $rule = $this->get_rule();
+        if ($rule) {
+            $label = get_string(
+                'resultsfilteredforrulen',
                 'block_xp',
-                $rule ? di::get('rule_descriptor')->get_full_description($rule) : get_string('unknown', 'block_xp')
-            ),
+                di::get('rule_descriptor')->get_full_description($rule)
+            );
+        }
+        $filters[] = [
+            'label' => $label,
             'removeurl' => $rulelessurl,
         ];
         return $filters;
     }
 
+    /**
+     * Get page menu items.
+     *
+     * @return array
+     */
     protected function get_page_menu_items() {
         return array_merge(parent::get_page_menu_items(), [
             [
@@ -160,5 +233,4 @@ class log_controller extends \block_xp\local\controller\log_controller {
             ],
         ]);
     }
-
 }

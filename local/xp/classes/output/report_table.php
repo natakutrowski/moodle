@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Local XP report table.
@@ -27,16 +29,23 @@ namespace local_xp\output;
 
 use action_menu_link;
 use block_xp\di;
+use block_xp\local\utils\world_utils;
 use coding_exception;
+use html_writer;
 use moodle_database;
-use moodle_url;
 use pix_icon;
 use renderer_base;
-use block_xp\local\course_world;
-use block_xp\local\xp\course_state_store;
+use block_xp\local\world;
+use block_xp\local\world\world_with_features;
+use block_xp\local\xp\state;
+use block_xp\local\xp\state_store_with_query;
+use block_xp\local\xp\state_with_user;
 use context_system;
 use local_xp\local\config\default_course_world_config;
 use local_xp\local\team\team_membership_resolver;
+use local_xp\local\world\global_world;
+use local_xp\local\xp\state_with_leaderboard_participation;
+use local_xp\local\xp\state_with_source_count;
 
 /**
  * Local XP report table class.
@@ -47,7 +56,6 @@ use local_xp\local\team\team_membership_resolver;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class report_table extends \block_xp\output\report_table {
-
     /** @var string Download format. */
     private $downloadformat;
     /** @var string Download filename. */
@@ -61,18 +69,18 @@ class report_table extends \block_xp\output\report_table {
      * Constructor.
      *
      * @param moodle_database $db The DB.
-     * @param course_world $world The world.
+     * @param world $world The world.
      * @param renderer_base $renderer The renderer.
-     * @param course_state_store $store The store.
+     * @param state_store_with_query $store The store.
      * @param int $groupid The group ID.
      * @param string|null|array $downloadformat The download format, when array a tuple with format and filename.
      * @param team_membership_resolver|null $teamresolver The team resolver.
      */
     public function __construct(
         moodle_database $db,
-        course_world $world,
+        world $world,
         renderer_base $renderer,
-        course_state_store $store,
+        state_store_with_query $store,
         $groupid,
         $downloadformat = null,
         ?team_membership_resolver $teamresolver = null
@@ -96,25 +104,12 @@ class report_table extends \block_xp\output\report_table {
      * @return void
      */
     protected function init() {
-        $this->is_downloading($this->downloadformat, $this->downloadfilename ?: 'xp_report_' . $this->world->get_courseid());
+        $this->is_downloading($this->downloadformat, $this->downloadfilename ?: 'xp_report_' . $this->world->get_context()->id);
         parent::init();
         $this->no_sorting('team');
+        $this->no_sorting('sources');
         $this->is_downloadable(true);
         $this->show_download_buttons_at([]);
-    }
-
-    /**
-     * Initialise the SQL bits.
-     *
-     * @return void
-     */
-    protected function init_sql() {
-        parent::init_sql();
-
-        $this->sql->fields .= ', uf.ladderparticipation';
-        $this->sql->from .= "LEFT JOIN {local_xp_user_flag} uf
-                                    ON (uf.userid = u.id AND uf.contextid = :ufcontextid)";
-        $this->sql->params['ufcontextid'] = $this->world->get_context()->id;
     }
 
     /**
@@ -129,7 +124,6 @@ class report_table extends \block_xp\output\report_table {
         $cols = $origcols;
 
         if ($this->is_downloading()) {
-
             // Name fields.
             $cols = array_intersect_key($origcols, [
                 'fullname' => true,
@@ -141,7 +135,6 @@ class report_table extends \block_xp\output\report_table {
 
             // Additional identity fields.
             if (has_capability('moodle/site:viewuseridentity', $this->world->get_context())) {
-
                 // Defining which fields are to be hidden.
                 $forwholesite = di::get('config')->get('context') == CONTEXT_SYSTEM;
                 $hiddenidentityfields = explode(',', $CFG->hiddenuserfields);
@@ -174,27 +167,32 @@ class report_table extends \block_xp\output\report_table {
             }
         }
 
-        if (!$this->teamresolver) {
+        if (!$this->teamresolver && !$this->world instanceof global_world) {
             return $cols;
         }
 
         return array_reduce(array_keys($cols), function ($carry, $col) use ($cols) {
             $header = $cols[$col];
-            if ($col === 'lvl') {
+            if ($col === 'lvl' && $this->teamresolver) {
                 $carry['team'] = get_string('team', 'local_xp');
             }
-            return array_merge($carry, [$col => $header]);
+            $carry[$col] = $header;
+            if ($col === 'xp' && $this->world instanceof global_world) {
+                $carry['sources'] = get_string('sources', 'block_xp');
+            }
+            return $carry;
         }, []);
     }
 
     /**
      * Get the actions for row.
      *
-     * @param stdClass $row Table row.
+     * @param state_with_user $state The state.
      * @return action_menu_link[] List of actions.
      */
-    protected function get_row_actions($row) {
-        $actions = parent::get_row_actions($row);
+    protected function get_row_actions($state) {
+        $actions = parent::get_row_actions($state);
+        $supportspointchanges = world_utils::supports_local_points_management($this->world);
 
         $leaderboardentry = null;
         if ($this->ladderparticipation !== default_course_world_config::LEADERBOARD_PARTICIPATION_FORCED) {
@@ -207,14 +205,14 @@ class report_table extends \block_xp\output\report_table {
                     'data-xp-action' => 'open-form',
                     'data-form-class' => 'local_xp\form\user_leaderboard_participation',
                     'data-form-args__contextid' => $this->world->get_context()->id,
-                    'data-form-args__userid' => $row->id,
-                    'data-modal-title' => fullname($row),
+                    'data-form-args__userid' => $state->get_id(),
+                    'data-modal-title' => fullname($state->get_user()),
                 ]
             );
         }
 
         $actions = array_merge(array_filter([
-            new action_menu_link(
+            $supportspointchanges ? new action_menu_link(
                 $this->baseurl,
                 new pix_icon('t/add', get_string('add', 'core')),
                 get_string('awardpoints', 'local_xp'),
@@ -223,11 +221,11 @@ class report_table extends \block_xp\output\report_table {
                     'data-xp-action' => 'open-form',
                     'data-form-class' => 'local_xp\form\user_xp_add',
                     'data-form-args__contextid' => $this->world->get_context()->id,
-                    'data-form-args__userid' => $row->id,
+                    'data-form-args__userid' => $state->get_id(),
                     'data-modal-save-button-text' => get_string('confirm', 'core'),
-                    'data-modal-title' => fullname($row),
+                    'data-modal-title' => fullname($state->get_user()),
                 ]
-            ),
+            ) : null,
             $leaderboardentry,
         ]), $actions);
 
@@ -237,27 +235,31 @@ class report_table extends \block_xp\output\report_table {
     /**
      * Formats the column.
      *
-     * @param stdClass $row Table row.
+     * @param state_with_user $state The state.
      * @return string Output produced.
      */
-    public function col_fullname($row) {
-        $o = parent::col_fullname($row);
+    public function col_fullname($state) {
+        $o = parent::col_fullname($state);
 
-        if (!$this->is_downloading()
+        if (
+            !$this->is_downloading()
                 && $this->ladderparticipation !== default_course_world_config::LEADERBOARD_PARTICIPATION_FORCED
+                && $state instanceof state_with_leaderboard_participation
         ) {
             $mode = $this->ladderparticipation;
-            $ladderparticipation = $row->ladderparticipation !== null ? (int) $row->ladderparticipation : null;
+            $ladderparticipation = $state->get_leaderboard_participation_flag();
             if ($mode === default_course_world_config::LEADERBOARD_PARTICIPATION_OPTIN && $ladderparticipation === 1) {
-                $o .= \html_writer::div(get_string('ranked', 'block_xp'), 'xp-ml-2 xp-inline-block xp-font-bold xp-bg-gray-200 '
-                        . 'xp-text-gray-700 xp-text-xs xp-rounded xp-px-1 xp-py-0.5', [
+                $o .= \html_writer::div(get_string('ranked', 'block_xp'), 'xp-ml-2 xp-inline-block xp-font-bold '
+                        . 'xp-bg-gray-200 dark:xp-bg-gray-700 '
+                        . 'xp-text-gray-700 dark:xp-text-gray-100 xp-text-xs xp-rounded xp-px-1 xp-py-0.5', [
                     'data-toggle' => 'tooltip',
                     'data-bs-toggle' => 'tooltip',
                     'title' => get_string('participatesinleaderboard', 'block_xp'),
                 ]);
             } else if ($mode === default_course_world_config::LEADERBOARD_PARTICIPATION_OPTOUT && $ladderparticipation === 0) {
-                $o .= \html_writer::div(get_string('notranked', 'block_xp'), 'xp-ml-2 xp-inline-block xp-font-bold xp-bg-gray-200 '
-                        . 'xp-text-gray-700 xp-text-xs xp-rounded xp-px-1 xp-py-0.5', [
+                $o .= \html_writer::div(get_string('notranked', 'block_xp'), 'xp-ml-2 xp-inline-block xp-font-bold '
+                        . 'xp-bg-gray-200 dark:xp-bg-gray-700 '
+                        . 'xp-text-gray-700 dark:xp-text-gray-100 xp-text-xs xp-rounded xp-px-1 xp-py-0.5', [
                     'data-toggle' => 'tooltip',
                     'data-bs-toggle' => 'tooltip',
                     'title' => get_string('participatesnotinleaderboard', 'block_xp'),
@@ -271,39 +273,39 @@ class report_table extends \block_xp\output\report_table {
     /**
      * Formats the column level.
      *
-     * @param stdClass $row Table row.
+     * @param state $state The state.
      * @return string Output produced.
      */
-    protected function col_lvl($row) {
+    protected function col_lvl($state) {
         if ($this->is_downloading()) {
-            return $row->state->get_level()->get_level();
+            return $state->get_level()->get_level();
         }
-        return parent::col_lvl($row);
+        return parent::col_lvl($state);
     }
 
     /**
      * Formats the column progress.
      *
-     * @param stdClass $row Table row.
+     * @param state $state The state.
      * @return string Output produced.
      */
-    protected function col_progress($row) {
+    protected function col_progress($state) {
         if ($this->is_downloading()) {
-            $state = $row->state;
             return sprintf("%d / %d", $state->get_xp_in_level(), $state->get_total_xp_in_level());
         }
-        return parent::col_progress($row);
+        return parent::col_progress($state);
     }
 
     /**
      * Formats the column.
      *
-     * @param stdClass $row Table row.
+     * @param state $state The state.
      * @return string Output produced.
      */
-    protected function col_ranked($row) {
+    protected function col_ranked($state) {
         $mode = $this->ladderparticipation;
-        $ladderparticipation = $row->ladderparticipation !== null ? (int) $row->ladderparticipation : null;
+        $ladderparticipation = $state instanceof state_with_leaderboard_participation
+            ? $state->get_leaderboard_participation_flag() : null;
         $yes = get_string('yes', 'core');
         $no = get_string('no', 'core');
 
@@ -318,29 +320,58 @@ class report_table extends \block_xp\output\report_table {
     /**
      * Formats the column.
      *
-     * @param stdClass $row Table row.
+     * @param state $state The state.
      * @return string Output produced.
      */
-    protected function col_team($row) {
+    protected function col_team($state) {
         if (!$this->teamresolver) {
             return '';
         }
         return implode(', ', array_map(function ($team) {
-            return $team->get_name();
-        }, $this->teamresolver->get_teams_of_member($row->id)));
+            // Team names may have already been processed and escaped by format_string().
+            return $this->escape($team->get_name(), true);
+        }, $this->teamresolver->get_teams_of_member($state->get_id())));
     }
 
     /**
      * Formats the column total.
      *
-     * @param stdClass $row Table row.
+     * @param state $state The state.
      * @return string Output produced.
      */
-    protected function col_xp($row) {
+    protected function col_xp($state) {
         if ($this->is_downloading()) {
-            return $row->state->get_xp();
+            return $state->get_xp();
         }
-        return parent::col_xp($row);
+        return parent::col_xp($state);
+    }
+
+    /**
+     * Formats the sources column.
+     *
+     * @param state_with_source_count $state The state.
+     * @return string Output produced.
+     */
+    protected function col_sources($state) {
+        $count = (string) $state->get_source_count();
+        if ($this->is_downloading()) {
+            return $count;
+        }
+        return html_writer::link($this->urlresolver->reverse('user_sources', [
+            'courseid' => SITEID,
+            'userid' => $state->get_id(),
+        ]), $count);
+    }
+
+    /**
+     * Format user fields without a dedicated column method.
+     *
+     * @param string $column The column name.
+     * @param state_with_user $state The state.
+     * @return string
+     */
+    public function other_cols($column, $state) {
+        return $this->escape($state->get_user()->{$column} ?? null);
     }
 
     /**

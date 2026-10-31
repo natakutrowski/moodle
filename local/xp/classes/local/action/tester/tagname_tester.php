@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\action\tester;
 
@@ -31,7 +31,6 @@ use local_xp\local\utils\tag_utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tagname_tester implements action_tester {
-
     /** @var array[] Tuples of [component, itemtype].*/
     protected $areas = [];
     /** @var string Tag name normalised using the core tag library. */
@@ -48,11 +47,16 @@ class tagname_tester implements action_tester {
         $this->areas = $areas;
     }
 
+    /**
+     * Check action constraints.
+     *
+     * @param action $action The action.
+     * @return bool
+     */
     public function is_action_passing_constraints(action $action): bool {
         if ($this->tagname === '') {
             return false;
         }
         return tag_utils::is_tag_used($this->tagname, $action->get_context(), $this->areas);
     }
-
 }

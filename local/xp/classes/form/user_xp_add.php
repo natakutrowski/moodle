@@ -14,22 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
-
-/**
- * Add user points.
- *
- * @package    local_xp
- * @copyright  2020 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// See <https://levelup.plus>.
 
 namespace local_xp\form;
 
 use block_xp\di;
 use block_xp\form\dynamic_world_trait;
+use block_xp\local\permission\access_report_permissions;
+use block_xp\local\utils\user_utils;
+use block_xp\local\utils\world_utils;
+use block_xp\local\world\world_with_features;
 use core_form\dynamic_form;
+use required_capability_exception;
 
 /**
  * Add user points form.
@@ -42,25 +38,63 @@ use core_form\dynamic_form;
 class user_xp_add extends dynamic_form {
     use dynamic_world_trait;
 
+    /** @var string */
     protected $routename = 'report';
 
     /**
      * Get the state.
      *
-     * This will throw an exception if the state does not already exist for the user.
-     *
      * @return \block_xp\local\xp\state
      */
     protected function get_state() {
-        $userid = $this->optional_param('userid', 0, PARAM_INT);
-        return $this->get_world()->get_store()->get_state($userid);
+        return $this->get_world()->get_store()->get_state($this->get_target_user_id());
     }
 
+    /**
+     * Get the target user id.
+     *
+     * @return int
+     */
+    protected function get_target_user_id(): int {
+        return $this->optional_param('userid', 0, PARAM_INT);
+    }
+
+    /**
+     * Check access.
+     *
+     * @return void
+     */
+    protected function check_access_for_dynamic_submission(): void {
+        $world = $this->get_world();
+        $perms = $world->get_access_permissions();
+        $perms->require_manage();
+
+        if (!world_utils::supports_local_points_management($world)) {
+            throw new \moodle_exception('errorfeaturenotenabled', 'block_xp');
+        }
+
+        // Adding points is only available through the report, so we also require the report permissions.
+        if (!$perms instanceof access_report_permissions) {
+            throw new required_capability_exception($this->world->get_context(), 'block/xp:viewreport', 'nopermissions', '');
+        }
+        $perms->require_access_report();
+
+        // We also check that the user is a valid target for receiving points.
+        if (!user_utils::is_valid_target($this->get_world()->get_context(), $this->get_target_user_id())) {
+            throw new \moodle_exception('invaliduser', 'core_error');
+        }
+    }
+
+    /**
+     * Process the form submission.
+     *
+     * @return mixed
+     */
     public function process_dynamic_submission() {
         global $USER;
 
-        $this->get_state(); // Acts as validation.
-        $userid = $this->optional_param('userid', 0, PARAM_INT);
+        $state = $this->get_state();
+        $userid = $state->get_id();
         $data = $this->get_data();
 
         $store = $this->get_world()->get_store();
@@ -78,11 +112,13 @@ class user_xp_add extends dynamic_form {
         }
     }
 
+    /**
+     * Set form data.
+     */
     public function set_data_for_dynamic_submission(): void {
-        $userid = $this->optional_param('userid', 0, PARAM_INT);
-        $state = $this->world->get_store()->get_state($userid);
+        $state = $this->get_state();
         $this->set_data([
-            'userid' => $userid,
+            'userid' => $state->get_id(),
             'total' => $state->get_xp(),
         ]);
     }
@@ -144,5 +180,4 @@ class user_xp_add extends dynamic_form {
 
         return $errors;
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Drops controller.
@@ -31,6 +31,7 @@ use action_link;
 use block_xp\di;
 use block_xp\local\controller\page_controller;
 use block_xp\local\routing\url;
+use block_xp\local\utils\world_utils;
 use core_plugin_manager;
 use html_writer;
 use local_xp\form\drop;
@@ -46,7 +47,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class drops_controller extends page_controller {
-
     /** @var string The nav name. */
     protected $navname = 'rules';
     /** @var string The route name. */
@@ -58,6 +58,11 @@ class drops_controller extends page_controller {
     /** @var moodleform The form. */
     protected $form;
 
+    /**
+     * Define optional parameters.
+     *
+     * @return array
+     */
     protected function define_optional_params() {
         return [
             ['dropid', null, PARAM_INT],
@@ -80,8 +85,15 @@ class drops_controller extends page_controller {
         return (object) ['courseid' => $this->courseid];
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
-        parent::pre_content();
+        if (!world_utils::supports_local_points_management($this->world)) {
+            $this->redirect($this->navigator->get_url('infos'));
+        }
 
         $pluginman = core_plugin_manager::instance();
         $plugininfo = $pluginman->get_plugin_info('filter_shortcodes');
@@ -106,13 +118,17 @@ class drops_controller extends page_controller {
                     $listurl->param('setupid', $record->id);
                 }
                 $this->redirect($listurl);
-
             } else if ($form->is_cancelled()) {
                 $this->redirect($listurl);
             }
         }
     }
 
+    /**
+     * Output page content.
+     *
+     * @return void
+     */
     protected function page_content() {
         global $PAGE;
 
@@ -175,7 +191,6 @@ class drops_controller extends page_controller {
                 'url' => $pluginurl->out(false),
                 'shortcodesdocsurl' => $shortcodesurl->out(false),
             ])), 'warning');
-
         } else {
             echo $this->get_table()->out(20, true);
         }
@@ -210,10 +225,20 @@ class drops_controller extends page_controller {
         return $record;
     }
 
+    /**
+     * Get page title.
+     *
+     * @return string
+     */
     protected function get_page_html_head_title() {
         return get_string('drops', 'local_xp');
     }
 
+    /**
+     * Get page heading.
+     *
+     * @return string
+     */
     protected function get_page_heading() {
         return get_string('drops', 'local_xp');
     }
@@ -247,5 +272,4 @@ class drops_controller extends page_controller {
         }
         return $this->form;
     }
-
 }

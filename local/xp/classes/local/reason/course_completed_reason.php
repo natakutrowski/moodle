@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reason;
 
@@ -68,7 +68,7 @@ class course_completed_reason implements
      * @return context|null
      */
     protected function get_context() {
-        return context::instance_by_id($this->get_env_id() ?? 0, IGNORE_MISSING);
+        return context::instance_by_id($this->get_env_id() ?? -1, IGNORE_MISSING);
     }
 
     /**
@@ -89,6 +89,11 @@ class course_completed_reason implements
         return context_utils::get_url($this->get_context());
     }
 
+    /**
+     * Get short description.
+     *
+     * @return string
+     */
     public function get_short_description() {
         return get_string('eventcoursecompleted', 'core_completion');
     }
@@ -131,5 +136,4 @@ class course_completed_reason implements
     public static function from_event(\core\event\course_completed $e) {
         return new static($e->courseid);
     }
-
 }

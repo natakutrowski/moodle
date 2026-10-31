@@ -1,35 +1,30 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * External function.
- *
- * @package    local_xp
- * @copyright  2023 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 namespace local_xp\external;
 
 use block_xp\di;
+use block_xp\external\external_description;
 use block_xp\external\external_function_parameters;
 use block_xp\external\external_multiple_structure;
 use block_xp\external\external_single_structure;
 use block_xp\external\external_value;
+use block_xp\local\course_world;
 use block_xp\local\division\all_division;
 use block_xp\local\division\group_division;
 use block_xp\local\iterator\map_iterator;
@@ -46,7 +41,6 @@ use moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class get_course_world_ladder extends external_api {
-
     /**
      * External function parameters.
      *
@@ -54,33 +48,38 @@ class get_course_world_ladder extends external_api {
      */
     public static function execute_parameters() {
         return new external_function_parameters([
-            'courseid' => new external_value(PARAM_INT),
+            'courseid' => new external_value(PARAM_INT, '', VALUE_DEFAULT),
             'groupid' => new external_value(PARAM_INT, '', VALUE_DEFAULT, 0),
             'page' => new external_value(PARAM_INT, '', VALUE_DEFAULT, 0),
             'perpage' => new external_value(PARAM_INT, '', VALUE_DEFAULT, 50),
+            'contextid' => new external_value(PARAM_INT, '', VALUE_DEFAULT),
         ]);
     }
 
     /**
      * External function.
      *
-     * @param int $courseid The course ID.
+     * @param ?int $courseid The course ID.
      * @param int $groupid The group ID.
      * @param int $page The page number.
      * @param int $perpage The number of items per page.
+     * @param ?int $contextid The context ID.
      * @return object
      */
-    public static function execute($courseid, $groupid, $page, $perpage) {
+    public static function execute($courseid = null, $groupid = 0, $page = 0, $perpage = 50, $contextid = null) {
         global $USER;
-        $params = self::validate_parameters(self::execute_parameters(),
-            compact('courseid', 'groupid', 'page', 'perpage')
+        $params = self::validate_parameters(
+            self::execute_parameters(),
+            compact('courseid', 'groupid', 'page', 'perpage', 'contextid')
         );
         extract($params); // @codingStandardsIgnoreLine
 
-        $worldfactory = di::get('course_world_factory');
-        $world = $worldfactory->get_world($courseid);
+        if (!empty($contextid)) {
+            $world = di::get('context_world_factory')->get_world_from_context(\context::instance_by_id($contextid));
+        } else {
+            $world = di::get('course_world_factory')->get_world($courseid ?? 0);
+        }
         $config = $world->get_config();
-        $courseid = $world->get_courseid(); // Ensure that we get the real course ID.
         $userid = $USER->id;
         self::validate_context($world->get_context());
         di::get('addon')->require_activated();
@@ -102,11 +101,13 @@ class get_course_world_ladder extends external_api {
             throw new moodle_exception('nopermissions', '', '', 'not_participating');
         }
 
-        $division = null;
-
         // Division can be picked in default mode.
-        if ((int) $config->get('ladderiso') === default_course_world_config::LEADERBOARD_ISO_DEFAULT) {
-            self::require_group_access($userid, $courseid, $groupid);
+        $division = null;
+        if (
+            $world instanceof course_world
+                && (int) $config->get('ladderiso') === default_course_world_config::LEADERBOARD_ISO_DEFAULT
+        ) {
+            self::require_group_access($userid, $world->get_courseid(), $groupid);
             $division = $groupid ? new group_division($groupid) : new all_division();
         }
 
@@ -180,5 +181,4 @@ class get_course_world_ladder extends external_api {
             'neighbours' => new external_value(PARAM_INT),
         ]);
     }
-
 }

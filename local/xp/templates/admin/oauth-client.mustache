@@ -1,0 +1,140 @@
+{{!
+    This file is part of Level Up XP+.
+
+    Level Up XP+ is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Level Up XP+ is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+
+    https://levelup.plus
+}}
+{{!
+    @template local_xp/admin/oauth-client
+
+    OAuth client details.
+
+    Example context (json):
+    {
+        "id": 1,
+        "clientid": "https://example.com/client.json",
+        "clientsecret": "secret",
+        "type": 1,
+        "displayname": "Example client",
+        "rawlogourl": "https://example.com/logo.svg",
+        "logofilename": "logo.svg",
+        "logofileurl": "https://example.test/pluginfile.php/1/local_xp/oauthclient/1/logo.svg",
+        "redirecturis": "https://example.com/callback",
+        "redirecturisaslist": [
+            "https://example.com/callback"
+        ],
+        "isenabled": true,
+        "isvalid": true,
+        "invalidhint": null,
+        "lastmetadatacheck": 1782316800,
+        "lastmetadatacheckformatted": "24 June 2026, 8:00 PM",
+        "usermodified": 2,
+        "userfullname": "Admin User",
+        "timecreated": 1782316800,
+        "timecreatedformatted": "24 June 2026, 8:00 PM",
+        "timemodified": 1782316800,
+        "timemodifiedformatted": "24 June 2026, 8:00 PM",
+        "typename": "CIMD"
+    }
+}}
+<dl class="[&_dd]:xp-mb-2 [&_dd]:xp-break-all [&_dt]:xp-font-normal [&_dt]:xp-text-gray-500 dark:[&_dt]:xp-text-gray-400 [&_pre]:xp-mb-0">
+    <dt>{{#str}} name, core {{/str}}</dt>
+    <dd>{{ displayname }}</dd>
+
+    <dt>{{#str}} clientid, block_xp {{/str}}</dt>
+    <dd>
+        <pre>{{ clientid }}</pre>
+    </dd>
+
+    {{# clientsecret }}
+    <dt>{{#str}} issuerclientsecret, tool_oauth2 {{/str}}</dt>
+    <dd>
+        <details>
+            <summary>{{#str}} reveal, block_xp {{/str}}</summary>
+            <pre>{{ clientsecret }}</pre>
+        </details>
+    </dd>
+    {{/ clientsecret }}
+
+    <dt>{{#str}} type, block_xp {{/str}}</dt>
+    <dd>{{ typename }}</dd>
+
+
+    {{# isvalid }}
+    <dt>{{#str}} enabled, core_admin {{/str}}</dt>
+    <dd>{{# isenabled }}{{#str}} yes, core {{/str}}{{/ isenabled }}{{^ isenabled }}{{#str}} no, core {{/str}}{{/ isenabled }}</dd>
+    {{/ isvalid }}
+    {{^ isvalid }}
+    <dt>{{#str}} valid, block_xp {{/str}}</dt>
+    <dd>{{#str}} no, core {{/str}}{{# invalidhint }} — {{ invalidhint }}{{/ invalidhint }}
+    </dd>
+    {{/ isvalid }}
+
+    <dt>{{#str}} redirecturls, block_xp {{/str}}</dt>
+    <dd>
+        {{# hasredirecturis }}
+            <ul >
+                {{# redirecturisarray }}<li>{{.}}</li>{{/ redirecturisarray }}
+            </ul>
+        {{/ hasredirecturis }}
+        {{^ hasredirecturis }}-{{/ hasredirecturis }}
+    </dd>
+
+    {{# istypemanual }}
+    <dt>{{#str}} authorisationurl, block_xp {{/str}}</dt>
+    <dd>
+        {{ oauthauthorizeurl }}
+    </dd>
+
+    <dt>{{#str}} tokenurl, block_xp {{/str}}</dt>
+    <dd>
+        {{ oauthtokenurl }}
+    </dd>
+    {{/ istypemanual }}
+
+    <dt>{{#str}} pkcerequired, block_xp {{/str}}</dt>
+    <dd>
+        {{# oauthpkcerequired }}{{# str}} yes, core {{/str}}{{/ oauthpkcerequired}}
+        {{^ oauthpkcerequired }}{{# str}} no, core {{/str}}{{/ oauthpkcerequired}}
+    </dd>
+
+    <dt>{{#str}} logo, core_admin {{/str}}</dt>
+    <dd>
+        {{# logofilename }}
+            {{# logofileurl }}<a href="{{ logofileurl }}" target="_blank" rel="noreferrer">{{ logofilename }}</a>{{/ logofileurl }}
+            {{^ logofileurl }}{{ logofilename }}{{/ logofileurl }}
+        {{/ logofilename }}
+        {{^ logofilename }}-{{/ logofilename }}
+    </dd>
+
+    {{# rawlogourl }}
+    <dt>{{#str}} rawlogourl, block_xp {{/str}}</dt>
+    <dd>{{ rawlogourl }}</dd>
+    {{/ rawlogourl }}
+
+    {{# istypecimd }}
+    <dt>{{#str}} lastmetadatacheck, block_xp {{/str}}</dt>
+    <dd>{{ lastmetadatacheckformatted }}</dd>
+    {{/ istypecimd }}
+
+    <dt>{{#str}} usermodified, core_reportbuilder {{/str}}</dt>
+    <dd>{{# userfullname }}{{ userfullname }} ({{ usermodified }}){{/ userfullname }}{{^ userfullname }}{{ usermodified }}{{/ userfullname }}</dd>
+
+    <dt>{{#str}} timecreated, core_reportbuilder {{/str}}</dt>
+    <dd>{{ timecreatedformatted }}</dd>
+
+    <dt>{{#str}} timemodified, core_reportbuilder {{/str}}</dt>
+    <dd>{{ timemodifiedformatted }}</dd>
+</dl>

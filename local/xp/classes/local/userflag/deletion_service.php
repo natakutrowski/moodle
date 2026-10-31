@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\userflag;
 
@@ -27,7 +27,6 @@ namespace local_xp\local\userflag;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class deletion_service {
-
     /** @var \moodle_database */
     protected $db;
 
@@ -47,5 +46,4 @@ class deletion_service {
     public function delete_for_user_in_context(int $userid, int $contextid) {
         $this->db->delete_records('local_xp_user_flag', ['contextid' => $contextid, 'userid' => $userid]);
     }
-
 }

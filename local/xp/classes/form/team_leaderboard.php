@@ -14,12 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\form;
 
 use block_xp\form\dynamic_world_trait;
 use block_xp\local\config\course_world_config;
+use block_xp\local\utils\form_utils;
+use block_xp\local\utils\world_utils;
 use core_form\dynamic_form;
 use local_xp\local\config\default_course_world_config;
 
@@ -32,16 +34,41 @@ use local_xp\local\config\default_course_world_config;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class team_leaderboard extends dynamic_form {
-    use dynamic_world_trait;
+    use dynamic_world_trait {
+        check_access_for_dynamic_submission as protected trait_check_access_for_dynamic_submission;
+    }
 
+    /** @var string */
     protected $routename = 'group_ladder';
 
+    /**
+     * Check access.
+     *
+     * @return void
+     */
+    protected function check_access_for_dynamic_submission(): void {
+        $this->trait_check_access_for_dynamic_submission();
+        $world = $this->get_world();
+
+        if (!world_utils::supports_team_leaderboard($world)) {
+            throw new \moodle_exception('errorfeaturenotenabled', 'block_xp');
+        }
+    }
+
+    /**
+     * Process the form submission.
+     *
+     * @return mixed
+     */
     public function process_dynamic_submission() {
         $config = $this->get_world()->get_config();
         $data = $this->get_data();
         $config->set_many((array) $data);
     }
 
+    /**
+     * Set form data.
+     */
     public function set_data_for_dynamic_submission(): void {
         $config = $this->get_world()->get_config();
         $this->set_data([
@@ -108,7 +135,8 @@ class team_leaderboard extends dynamic_form {
             'xp' => get_string('grouppoints', 'local_xp'),
             'progress' => get_string('progress', 'block_xp'),
         ];
-        $el = $mform->createElement('select',
+        $el = $mform->createElement(
+            'select',
             'groupladdercols',
             get_string('groupladdercols', 'local_xp'),
             $options,
@@ -122,9 +150,19 @@ class team_leaderboard extends dynamic_form {
     }
 
     /**
+     * Definition after data.
+     *
+     * @return void
+     */
+    public function after_definition() {
+        parent::after_definition();
+        form_utils::freeze_config_locked_fields($this->_form);
+    }
+
+    /**
      * Get the data.
      *
-     * @return stdClass
+     * @return \stdClass
      */
     public function get_data() {
         $data = parent::get_data();
@@ -158,5 +196,4 @@ class team_leaderboard extends dynamic_form {
 
         parent::set_data($data);
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reason;
 
@@ -38,7 +38,6 @@ use local_xp\local\utils\context_utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class event_reason extends \block_xp\local\reason\event_reason implements reason_with_location, reason_with_short_description {
-
     /**
      * @var string
      * @deprecated Since XP+ 20
@@ -84,7 +83,7 @@ class event_reason extends \block_xp\local\reason\event_reason implements reason
      * @return context|null
      */
     protected function get_context() {
-        return context::instance_by_id($this->get_env_id() ?? 0, IGNORE_MISSING) ?: null;
+        return context::instance_by_id($this->get_env_id() ?? -1, IGNORE_MISSING) ?: null;
     }
 
     /**
@@ -149,5 +148,4 @@ class event_reason extends \block_xp\local\reason\event_reason implements reason
         [$name, $ctx, $obj, $relid] = explode(':', $signature);
         return new static($name, (int) $ctx, $obj ?: null, $relid ?: null);
     }
-
 }

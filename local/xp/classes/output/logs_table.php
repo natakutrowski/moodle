@@ -14,23 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\output;
 
 use block_xp\di;
 use block_xp\local\course_world;
+use block_xp\local\world;
 use block_xp\local\factory\reason_from_log_entry_factory;
-use block_xp\local\reason\reason_with_short_description;
+use block_xp\local\logger\collection_logger_query;
+use block_xp\local\logger\log;
+use block_xp\local\navigation\navigator;
 use block_xp\local\ruletype\resolver as ruletype_resolver;
 use block_xp\local\routing\url;
+use block_xp\local\routing\url_resolver;
+use block_xp\local\serializer\rule_serializer;
+use context;
 use context_system;
 use coding_exception;
 use html_writer;
+use local_xp\local\logger\log_with_rule;
 use local_xp\local\reason\reason_with_location;
-use local_xp\local\rule\static_instance;
+use local_xp\local\rule\rule_descriptor;
+use local_xp\local\rulefilter\handler as filter_handler;
 use local_xp\local\team\team_membership_resolver;
-use stdClass;
+use local_xp\local\utils\context_utils;
+use local_xp\local\world\global_world;
 
 /**
  * Logs table class.
@@ -41,7 +50,6 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class logs_table extends \block_xp\output\logs_table {
-
     /** @var rule_serializer Rule serializer. */
     protected $ruleserializer;
     /** @var ruletype_resolver Rule type resolver. */
@@ -54,28 +62,28 @@ class logs_table extends \block_xp\output\logs_table {
     protected $teamresolver;
     /** @var url_resolver URL resolver. */
     protected $urlresolver;
+    /** @var navigator URL resolver. */
+    protected $navigator;
     /** @var array Array of team objects indexed by user ID. */
     protected $teamscache = [];
     /** @var int Filter by rule ID, falsy means not filtering. */
     protected $filterbyruleid;
-    /** @var array Array of rule columns. */
-    protected $rulecolumns = ['id', 'contextid', 'childcontextid', 'points', 'type', 'filter',
-        'filtercourseid', 'filtercmid', 'filterint1', 'filterchar1'];
-    protected $localrulecolumns = ['limitmax', 'limitwindow', 'repeatwindow', 'repeatscope'];
+    /** @var int[] Filter by rule IDs, empty means not filtering. */
+    protected $filterbyruleids = [];
 
     /**
      * Constructor.
      *
-     * @param course_world $world The world.
-     * @param reason_from_log_entry_factory $reasonfactory The reason factory.
+     * @param world $world The world.
+     * @param ?reason_from_log_entry_factory $reasonfactory The reason factory.
      * @param int $groupid The group ID.
      * @param string|null|array $downloadformat The download format, or a tuple with format and filename.
      * @param team_membership_resolver|null $teamresolver The team resolver.
      * @param int|null $userid The user ID to filter by.
      */
     public function __construct(
-        course_world $world,
-        reason_from_log_entry_factory $reasonfactory,
+        world $world,
+        ?reason_from_log_entry_factory $reasonfactory,
         $groupid,
         $downloadformat = null,
         ?team_membership_resolver $teamresolver = null,
@@ -87,6 +95,7 @@ class logs_table extends \block_xp\output\logs_table {
         $this->ruletyperesolver = di::get('rule_type_resolver');
         $this->ruledescriptor = di::get('rule_descriptor');
         $this->urlresolver = di::get('url_resolver');
+        $this->navigator = di::get('world_navigator_factory')->get_navigator_for_world($world);
 
         // Download support - must be set before parent::init() runs so generate_columns_definition gets correct columns.
         $downloadfilename = 'xp_log_' . $world->get_context()->id;
@@ -99,10 +108,15 @@ class logs_table extends \block_xp\output\logs_table {
 
         parent::__construct($world, $reasonfactory, $groupid, $userid);
 
+        $this->no_sorting('email');
+        $this->no_sorting('idnumber');
+        $this->no_sorting('username');
         $this->no_sorting('location');
         $this->no_sorting('location_url');
         $this->no_sorting('reason');
         $this->no_sorting('rule');
+        $this->no_sorting('source');
+        $this->no_sorting('source_url');
         $this->no_sorting('team');
     }
 
@@ -151,6 +165,12 @@ class logs_table extends \block_xp\output\logs_table {
         }
 
         $cols['points'] = get_string('reward', 'block_xp');
+        if (!$this->world instanceof course_world) {
+            $cols['source'] = get_string('source', 'block_xp');
+            if ($isdownloading) {
+                $cols['source_url'] = get_string('sourceurl', 'block_xp');
+            }
+        }
         $cols['reason'] = get_string('reason', 'block_xp');
         $cols['location'] = !$isdownloading ? '' : get_string('reasonlocation', 'local_xp');
         if ($isdownloading) {
@@ -162,52 +182,35 @@ class logs_table extends \block_xp\output\logs_table {
     }
 
     /**
-     * Init SQL.
+     * Make the query from the table filters and sorting preferences.
      *
-     * @return void
+     * @return collection_logger_query
      */
-    protected function init_sql() {
-        parent::init_sql();
-
-        $this->sql->fields .= ', u.email, u.idnumber, u.username';
-
-        // Rules could technically be linked to a deleted context, but in theory this is very unlikely to
-        // happen because the context defines the world, and if the context is deleted all associated with
-        // the context should be deleted, including the rule, the logs, etc. The same applies to childcontext.
-        $this->sql->from .= ' LEFT JOIN {block_xp_rule} r ON r.id = x.ruleid';
-        $this->sql->from .= ' LEFT JOIN {local_xp_rule} lr ON lr.ruleid = r.id';
-        $this->sql->from .= ' LEFT JOIN {context} ctx ON ctx.id = r.contextid';
-        $this->sql->from .= ' LEFT JOIN {context} childctx ON childctx.id = r.childcontextid';
-
-        $this->sql->fields .= ', ' . implode(', ', array_map(function ($col) {
-            return 'r.' . $col . ' AS rule_' . $col;
-        }, $this->rulecolumns));
-        $this->sql->fields .= ', ' . implode(', ', array_map(function ($col) {
-            return 'lr.' . $col . ' AS rule_' . $col;
-        }, $this->localrulecolumns));
-        $this->sql->fields .= ', ctx.id AS rule_contextid, childctx.id AS rule_childcontextid';
-
-        if ($this->filterbyruleid) {
-            $this->sql->where .= ' AND x.ruleid = :ruleid';
-            $this->sql->params = array_merge($this->sql->params, ['ruleid' => $this->filterbyruleid]);
+    protected function make_query(): collection_logger_query {
+        $query = parent::make_query();
+        if ($this->filterbyruleids) {
+            $query->set_rule_ids($this->filterbyruleids);
+        } else if ($this->filterbyruleid) {
+            $query->set_rule_id($this->filterbyruleid);
         }
+        return $query;
     }
 
     /**
      * Reason location.
      *
-     * @param stdClass $row The row.
+     * @param log $log The log.
      * @return string
      */
-    protected function col_location($row) {
-        $reason = $this->reasonfactory->get_reason_from_log_entry($row->reason, $row);
+    protected function col_location($log) {
+        $reason = $log->get_reason();
         if ($reason instanceof reason_with_location) {
             $name = $reason->get_location_name();
             $url = $reason->get_location_url();
             if (!$name) {
                 return '';
             }
-            $name = !$this->is_downloading() ? s($name) : $name;
+            $name = $this->escape($name);
             if ($url && !$this->is_downloading()) {
                 return html_writer::link($url, $name);
             }
@@ -219,14 +222,14 @@ class logs_table extends \block_xp\output\logs_table {
     /**
      * Reason location URL.
      *
-     * @param stdClass $row The row.
+     * @param log $log The log.
      * @return string
      */
-    protected function col_location_url($row) {
-        $reason = $this->reasonfactory->get_reason_from_log_entry($row->reason, $row);
+    protected function col_location_url($log) {
+        $reason = $log->get_reason();
         if ($reason instanceof reason_with_location) {
             $url = $reason->get_location_url();
-            return $url ? $url->out(false) : '';
+            return $url ? $this->escape($url->out(false)) : '';
         }
         return '';
     }
@@ -234,39 +237,34 @@ class logs_table extends \block_xp\output\logs_table {
     /**
      * Reason.
      *
-     * @param stdClass $row The row.
+     * @param log $log The log.
      * @return string
      */
-    protected function col_reason($row) {
-        $reason = $this->reasonfactory->get_reason_from_log_entry($row->reason, $row);
-        if ($reason instanceof reason_with_short_description) {
-            $desc = $reason->get_short_description();
-        } else {
-            $desc = '';
-        }
+    protected function col_reason($log) {
+        $desc = parent::col_reason($log);
         if ($this->is_downloading()) {
             return $desc;
         }
-        return html_writer::tag('span', s($desc));
+        return html_writer::tag('span', $desc);
     }
 
     /**
      * Column.
      *
-     * @param stdClass $row The row.
+     * @param log $log The log.
      * @return string
      */
-    protected function col_rule($row) {
-        if (empty($row->ruleid)) {
+    protected function col_rule($log) {
+        if (!$log instanceof log_with_rule || !$log->get_rule_id()) {
             $label = '';
             $url = '';
-            $reason = $this->reasonfactory->get_reason_from_log_entry($row->reason, $row);
+            $reason = $log->get_reason();
             if ($reason instanceof \block_xp\local\reason\event_reason) {
                 $label = get_string('eventsrules', 'block_xp');
-                $url = $this->urlresolver->reverse('rules', ['courseid' => $this->world->get_courseid()]);
+                $url = $this->navigator->get_url('rules');
             } else if ($reason instanceof \local_xp\local\reason\graded_reason) {
                 $label = get_string('graderules', 'block_xp');
-                $url = $this->urlresolver->reverse('graderules', ['courseid' => $this->world->get_courseid()]);
+                $url = $this->navigator->get_url('graderules');
             }
 
             if (!$label) {
@@ -274,45 +272,43 @@ class logs_table extends \block_xp\output\logs_table {
             }
 
             if (!$this->is_downloading()) {
-                return html_writer::link($url, s($label));
+                return html_writer::link($url, $this->escape($label));
             }
-            return s($label);
+            return $this->escape($label);
         }
 
-        $rulerecord = (object) [];
-        foreach (array_merge($this->rulecolumns, $this->localrulecolumns) as $col) {
-            $rulerecord->{$col} = $row->{"rule_{$col}"} ?? null;
-        }
-
-        // The rule no longer exists, or its context is missing.
-        if (empty($rulerecord->id) || empty($rulerecord->contextid)) {
+        $rule = $log->get_rule();
+        // The rule no longer exists.
+        if (!$rule) {
             if ($this->is_downloading()) {
                 return get_string('deleted', 'core');
             }
             return html_writer::tag('em', get_string('deleted', 'core'));
         }
 
-        $rule = new static_instance($rulerecord);
         $label = $this->ruledescriptor->get_type_name($rule);
         $sublabel = $this->ruledescriptor->get_description($rule);
 
         if ($this->is_downloading()) {
-            return $label . ' - ' . $sublabel;
+            return $this->escape($label . ' - ' . $sublabel);
         }
 
         $filterbyrule = '';
-        if (!$this->filterbyruleid) {
+        if (!$this->filterbyruleid && !$this->filterbyruleids) {
             $filterbyrule = $this->renderer->action_icon(
-                new url($this->baseurl, ['ruleid' => $rulerecord->id]),
+                new url($this->baseurl, ['ruleid' => $rule->get_id()]),
                 new \pix_icon('i/search', get_string('filterbyrule', 'block_xp'))
             );
         }
 
-        $viewurl = $this->urlresolver->reverse('actionrules', ['courseid' => $this->world->get_courseid()]);
-        $labelhtml = html_writer::div(html_writer::link($viewurl, s($label)), 'xp-truncate', [
+        $labelhtml = $this->escape($label);
+        if (!$this->world instanceof global_world) {
+            $labelhtml = html_writer::link($this->navigator->get_url('actionrules'), $labelhtml);
+        }
+        $labelhtml = html_writer::div($labelhtml, 'xp-truncate', [
             'title' => $label,
         ]);
-        $sublabelhtml = html_writer::div(s($sublabel), 'xp-truncate xp-text-sm', [
+        $sublabelhtml = html_writer::div($this->escape($sublabel), 'xp-truncate xp-text-sm', [
             'title' => $sublabel,
         ]);
         $texthtml = html_writer::div($labelhtml . $sublabelhtml, 'xp-flex xp-flex-col xp-overflow-hidden xp-max-w-[24ch]');
@@ -324,46 +320,81 @@ class logs_table extends \block_xp\output\logs_table {
     }
 
     /**
-     * Team column.
+     * Source column.
      *
-     * @param stdClass $row The row.
+     * @param log $log The log.
      * @return string
      */
-    protected function col_team($row) {
+    protected function col_source($log) {
+        $context = context::instance_by_id($log->get_context_id(), IGNORE_MISSING);
+        if (!$context || $context->contextlevel != CONTEXT_COURSE) {
+            return '';
+        }
+
+        $name = context_utils::get_course_name_short($context);
+        $name = $this->escape(html_entity_decode($name ?? '', ENT_COMPAT));
+        if ($this->is_downloading()) {
+            return $name;
+        }
+        return html_writer::link(context_utils::get_url($context), $name);
+    }
+
+    /**
+     * Source URL column.
+     *
+     * @param log $log The log.
+     * @return string
+     */
+    protected function col_source_url($log) {
+        $context = context::instance_by_id($log->get_context_id(), IGNORE_MISSING);
+        if (!$context || $context->contextlevel != CONTEXT_COURSE) {
+            return '';
+        }
+
+        $url = context_utils::get_url($context);
+        return $url ? $this->escape($url->out(false)) : '';
+    }
+
+    /**
+     * Team column.
+     *
+     * @param log $log The log.
+     * @return string
+     */
+    protected function col_team($log) {
         if (!$this->teamresolver) {
             return '';
         }
 
-        if (!isset($this->teamscache[$row->userid])) {
-            $this->teamscache[$row->userid] = $this->teamresolver->get_teams_of_member($row->userid);
+        $userid = $log->get_user_id();
+        if (!isset($this->teamscache[$userid])) {
+            $this->teamscache[$userid] = $this->teamresolver->get_teams_of_member($userid);
         }
 
         return implode(', ', array_map(function ($team) {
-            return $team->get_name();
-        }, $this->teamscache[$row->userid]));
+            return $this->escape($team->get_name(), true);
+        }, $this->teamscache[$userid]));
     }
 
     /**
      * Timerecorded column.
      *
-     * @param stdClass $row The row.
+     * @param log $log The log.
      * @return string
      */
-    protected function col_timerecorded($row) {
-        return userdate($row->timerecorded, get_string('strftimedatetimeshort', 'langconfig'));
+    protected function col_timerecorded($log) {
+        return userdate($log->get_time_recorded()->getTimestamp(), get_string('strftimedatetimeshort', 'core_langconfig'));
     }
 
     /**
-     * Points column.
+     * Render user identity columns.
      *
-     * @param stdClass $row The row.
+     * @param string $column The column.
+     * @param log $log The log.
      * @return string
      */
-    protected function col_points($row) {
-        if ($this->is_downloading()) {
-            return $row->points;
-        }
-        return $this->renderer->xp($row->points);
+    public function other_cols($column, $log) {
+        return $this->escape($log->get_user()->{$column} ?? null);
     }
 
     /**
@@ -388,5 +419,17 @@ class logs_table extends \block_xp\output\logs_table {
      */
     public function set_filter_by_rule_id(?int $ruleid) {
         $this->filterbyruleid = $ruleid;
+        $this->filterbyruleids = [];
+    }
+
+    /**
+     * Set the filter by rule IDs.
+     *
+     * @param int[] $ruleids The rule IDs, or an empty array to remove the filter.
+     * @return void
+     */
+    public function set_filter_by_rule_ids(array $ruleids) {
+        $this->filterbyruleid = null;
+        $this->filterbyruleids = $ruleids;
     }
 }

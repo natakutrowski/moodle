@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Group ladder controller.
@@ -26,6 +28,8 @@
 namespace local_xp\local\controller;
 
 use block_xp\local\utils\text_utils;
+use block_xp\local\utils\world_utils;
+use block_xp\local\world\world_with_features;
 use help_icon;
 use moodle_exception;
 use local_xp\local\config\default_course_world_config;
@@ -40,7 +44,6 @@ use local_xp\local\shortcode\handler;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class group_ladder_controller extends \block_xp\local\controller\page_controller {
-
     /** @var bool */
     protected $requiremanage = false;
     /** @var bool */
@@ -50,6 +53,11 @@ class group_ladder_controller extends \block_xp\local\controller\page_controller
     /** @var string */
     protected $navname = 'ladder';
 
+    /**
+     * Define optional parameters.
+     *
+     * @return array
+     */
     protected function define_optional_params() {
         return [
             ['download', '', PARAM_ALPHA, false],
@@ -57,10 +65,20 @@ class group_ladder_controller extends \block_xp\local\controller\page_controller
         ];
     }
 
+    /**
+     * Check viewer visibility.
+     *
+     * @return bool
+     */
     protected function is_visible_to_viewers() {
         return $this->world->get_config()->get('enablegroupladder') != default_course_world_config::GROUP_LADDER_NONE;
     }
 
+    /**
+     * Set up page.
+     *
+     * @return void
+     */
     protected function page_setup() {
         global $PAGE;
         parent::page_setup();
@@ -68,8 +86,15 @@ class group_ladder_controller extends \block_xp\local\controller\page_controller
         $PAGE->add_body_class('block_xp-group-ladder');
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
-        parent::pre_content();
+        if (!world_utils::supports_team_leaderboard($this->world)) {
+            $this->redirect($this->navigator->get_url('infos'));
+        }
 
         // We must send the table before the output starts.
         $table = $this->get_table();
@@ -80,21 +105,33 @@ class group_ladder_controller extends \block_xp\local\controller\page_controller
         }
     }
 
+    /**
+     * Get download filename.
+     */
     protected function get_download_filename(): string {
         return $this->get_param('downloadfilename') ?: 'xp-team-leaderboard-' . $this->world->get_context()->id;
     }
 
+    /**
+     * Get highlighted IDs.
+     */
     protected function get_highlighted_ids() {
         global $USER;
         $helper = \block_xp\di::get('grouped_leaderboard_helper');
         return $helper->get_user_group_ids($USER, $this->world);
     }
 
+    /**
+     * Get leaderboard.
+     */
     protected function get_leaderboard() {
         $factory = \block_xp\di::get('course_world_grouped_leaderboard_factory');
         return $factory->get_course_grouped_leaderboard($this->world);
     }
 
+    /**
+     * Get table.
+     */
     protected function get_table() {
         global $USER;
         $table = new \local_xp\output\group_leaderboard_table(
@@ -115,14 +152,29 @@ class group_ladder_controller extends \block_xp\local\controller\page_controller
         return $table;
     }
 
+    /**
+     * Get page title.
+     *
+     * @return string
+     */
     protected function get_page_html_head_title() {
         return get_string('teamleaderboard', 'block_xp');
     }
 
+    /**
+     * Get page heading.
+     *
+     * @return string
+     */
     protected function get_page_heading() {
         return get_string('teamleaderboard', 'block_xp');
     }
 
+    /**
+     * Output page content.
+     *
+     * @return void
+     */
     protected function page_content() {
         global $PAGE;
         $output = $this->get_renderer();

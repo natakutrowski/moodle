@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Pre 4.4 compat.
@@ -70,6 +70,5 @@ if ($CFG->branch >= 404) {
             }
             return $this->defaultaliases;
         }
-
     }
 }

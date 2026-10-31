@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reason;
 
@@ -29,7 +29,6 @@ use block_xp\local\reason\reason;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface reason_with_location extends reason {
-
     /**
      * Get the location name.
      *
@@ -43,5 +42,4 @@ interface reason_with_location extends reason {
      * @return \moodle_url|null
      */
     public function get_location_url();
-
 }

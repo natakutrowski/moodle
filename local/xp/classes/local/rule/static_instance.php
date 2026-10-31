@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\rule;
 
@@ -29,7 +29,6 @@ use block_xp\local\ruletype\limit_spec;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class static_instance extends \block_xp\local\rule\static_instance implements rule_with_limit {
-
     /**
      * Get the limit.
      *
@@ -77,5 +76,4 @@ class static_instance extends \block_xp\local\rule\static_instance implements ru
         $window = $this->record->repeatwindow ?? limit_spec::WINDOW_NONE;
         return new limit_spec(1, (int) $window, $scope);
     }
-
 }

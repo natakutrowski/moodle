@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\output;
 
@@ -33,19 +33,29 @@ use local_xp\local\config\default_course_world_config;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class leaderboard_table extends \block_xp\output\leaderboard_table {
-
     /** @var int A LEADERBOARD_PARTICIPATION_* constant. */
     protected $ladderparticipation;
 
+    /**
+     * Initialise table.
+     *
+     * @return void
+     */
     protected function init(): void {
         $ladderparticipation = $this->config->has('ladderparticipation') ? $this->config->get('ladderparticipation') : null;
         $this->ladderparticipation = (int) ($ladderparticipation ?? default_course_world_config::LEADERBOARD_PARTICIPATION_FORCED);
         parent::init();
     }
 
+    /**
+     * Generate column definitions.
+     *
+     * @return array
+     */
     protected function generate_columns_definition(): array {
         $columns = parent::generate_columns_definition();
-        if ($this->ladderparticipation !== default_course_world_config::LEADERBOARD_PARTICIPATION_FORCED
+        if (
+            $this->ladderparticipation !== default_course_world_config::LEADERBOARD_PARTICIPATION_FORCED
                 && !isset($columns['actions'])
         ) {
             $columns['actions'] = '';
@@ -53,13 +63,19 @@ class leaderboard_table extends \block_xp\output\leaderboard_table {
         return $columns;
     }
 
+    /**
+     * Get row actions.
+     *
+     * @param stdClass $row The row.
+     * @return action_menu_link[]
+     */
     protected function get_row_actions($row) {
         $actions = parent::get_row_actions($row);
 
-        if ($this->ladderparticipation !== default_course_world_config::LEADERBOARD_PARTICIPATION_FORCED
+        if (
+            $this->ladderparticipation !== default_course_world_config::LEADERBOARD_PARTICIPATION_FORCED
                 && $this->userid == $row->state->get_id()
         ) {
-
             $state = di::get(\local_xp\local\leaderboard\participation\service_factory::class)
                 ->get_for_context($this->context)
                 ->get_state($this->userid);
@@ -85,6 +101,12 @@ class leaderboard_table extends \block_xp\output\leaderboard_table {
         return $actions;
     }
 
+    /**
+     * Render the fullname column.
+     *
+     * @param object $row The row.
+     * @return string
+     */
     public function col_fullname($row) {
         if ($this->is_downloading()) {
             return $row->state instanceof state_with_subject ? $row->state->get_name() : '?';
@@ -92,6 +114,12 @@ class leaderboard_table extends \block_xp\output\leaderboard_table {
         return parent::col_fullname($row);
     }
 
+    /**
+     * Render the level column.
+     *
+     * @param stdClass $row The row.
+     * @return string
+     */
     public function col_lvl($row) {
         if ($this->is_downloading()) {
             return $row->state->get_level()->get_level();
@@ -99,6 +127,12 @@ class leaderboard_table extends \block_xp\output\leaderboard_table {
         return parent::col_lvl($row);
     }
 
+    /**
+     * Render the progress column.
+     *
+     * @param stdClass $row The row.
+     * @return string
+     */
     public function col_progress($row) {
         if ($this->is_downloading()) {
             $state = $row->state;
@@ -107,6 +141,12 @@ class leaderboard_table extends \block_xp\output\leaderboard_table {
         return parent::col_progress($row);
     }
 
+    /**
+     * Render the rank column.
+     *
+     * @param stdClass $row The row.
+     * @return string
+     */
     public function col_rank($row) {
         if ($this->is_downloading()) {
             $prefix = '';
@@ -118,6 +158,12 @@ class leaderboard_table extends \block_xp\output\leaderboard_table {
         return parent::col_rank($row);
     }
 
+    /**
+     * Render the XP column.
+     *
+     * @param stdClass $row The row.
+     * @return string
+     */
     public function col_xp($row) {
         if ($this->is_downloading()) {
             return $row->state->get_xp();
@@ -157,5 +203,4 @@ class leaderboard_table extends \block_xp\output\leaderboard_table {
         $this->out(-1337, false);   // Page size is irrelevant when downloading.
         die();
     }
-
 }

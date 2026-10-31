@@ -14,7 +14,7 @@
     You should have received a copy of the GNU General Public License
     along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 
-    https://levelup.plus
+    See <https://levelup.plus>.
 }}
 {{!
     @template local_xp/leaderboard-not-participating
@@ -25,7 +25,7 @@
     {
     }
 }}
-<div class="xp-grow xp-flex xp-flex-col xp-items-center xp-justify-center xp-border-dashed xp-border-gray-200 xp-border-2 xp-rounded-lg xp-p-4 xp-py-6">
+<div class="xp-grow xp-flex xp-flex-col xp-items-center xp-justify-center xp-border-dashed xp-border-gray-200 dark:xp-border-gray-700 xp-border-2 xp-rounded-lg xp-p-4 xp-py-6">
     <div class="xp-text-center">
         <h3 class="xp-mb-6">{{#str}} notparticipating, block_xp {{/str}}</h3>
         <p class="xp-m-0 xp-max-w-prose">
@@ -46,7 +46,7 @@
         </p>
         {{^ canjoin }}
             {{# joindateformatted }}
-                <p class="xp-text-sm xp-text-gray-500">{{#str}} canjoinfromdatex, block_xp, {{ joindateformatted }} {{/str}}</p>
+                <p class="xp-text-sm xp-text-gray-500 dark:xp-text-gray-400">{{#str}} canjoinfromdatex, block_xp, {{ joindateformatted }} {{/str}}</p>
             {{/ joindateformatted }}
         {{/ canjoin }}
     </div>

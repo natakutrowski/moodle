@@ -1,6 +1,65 @@
 Changelog
 =========
 
+v21.0
+-----
+
+New features
+
+- Overall level: Combine points from multiple courses into an overall level and leaderboard
+- AI: Connect XP to an AI assistant such as ChatGPT or Claude
+- Choose which courses contribute to the overall level and leaderboard
+- Display the overall level in the navigation bar
+- Access the overall level and leaderboard in the Moodle app
+- Managers can view each user's overall points and logs, with a breakdown by course
+- The block can display the overall level on user profiles
+- Admins can choose which AI agents can connect to XP
+- Admins can choose which tools are available to AI agents
+- The obtain certificate action now supports Moodle Workplace certificates
+
+Quality of life
+
+- Support for dark mode
+
+Bug fixes
+
+- Built-in currency symbols were not applied as admin defaults
+- The block applies stricter privacy checks on user profiles
+- Logs from admin default rules no longer show the rule as deleted
+- Navigating to the logs from a default action rule showed empty results
+- The rule filter in the logs sometimes omitted entries associated with default rules
+- Report access is now required to import points
+- Report access is now required to change a user's leaderboard participation
+- Other minor fixes and improvements
+
+Technical changes
+
+- Compatibility with Moodle 5.3
+- Raised minimum required version to Moodle 4.5
+
+Read the [upgrade notes](https://docs.levelup.plus/xp/docs/upgrade-notes/upgrading-to-v21) and our [release blog post](https://www.levelup.plus/blog/xp-release-21/) to learn more.
+
+v20.1
+-----
+
+Bug fixes
+
+- In separate-groups mode, users without access to all groups could default to all participants
+- Mobile group leaderboards handle users with no group and reject inaccessible groups
+- User targets are validated when adding or importing points, changing leaderboard participation and retrieving user states
+- Report access is required to give points manually
+- Level popup messages are treated as plain text
+- Level badges could be removed when settings were saved by another manager
+- Some log entries without a context could display a developer notice
+- Team leaderboard anonymity appeared editable when locked
+- Joining a leaderboard from the Mobile app could raise an exception
+- Mobile leaderboards could be unavailable when participation was optional
+- The action rules screen could raise an exception
+
+Technical changes
+
+- Various internal and code style improvements
+
 v20.0
 -----
 

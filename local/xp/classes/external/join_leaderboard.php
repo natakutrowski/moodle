@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\external;
 
@@ -33,7 +33,6 @@ use moodle_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class join_leaderboard extends external_api {
-
     /**
      * External function parameters.
      *
@@ -65,7 +64,7 @@ class join_leaderboard extends external_api {
         $service = di::get(\local_xp\local\leaderboard\participation\service_factory::class)
             ->get_for_context($world->get_context());
         $state = $service->get_state($USER->id);
-        if ($state->is_state_locked() || $$state->is_participating()) {
+        if ($state->is_state_locked() || $state->is_participating()) {
             throw new \moodle_exception('invaliddata', 'core_error');
         }
 
@@ -83,5 +82,4 @@ class join_leaderboard extends external_api {
             'success' => new external_value(PARAM_BOOL),
         ]);
     }
-
 }

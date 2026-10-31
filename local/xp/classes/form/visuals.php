@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Visuals.
@@ -26,6 +28,8 @@
 namespace local_xp\form;
 defined('MOODLE_INTERNAL') || die();
 
+use block_xp\local\xp\badged_level;
+use block_xp\local\xp\levels_info_writer;
 use html_writer;
 use local_xp\local\currency\default_currency;
 use local_xp\local\currency\theme_sign_url_resolver;
@@ -42,10 +46,11 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class visuals extends moodleform {
-
+    /**
+     * Define the form.
+     */
     public function definition() {
         $mform = $this->_form;
-        $renderer = \block_xp\di::get('renderer');
         $updater = \block_xp\di::get('theme_updater');
         $repository = \block_xp\di::get('theme_repository');
         $currencyrepository = \block_xp\di::get('currency_repository');
@@ -69,7 +74,8 @@ class visuals extends moodleform {
         $mform->addElement('select', 'currencytheme', get_string('currencysign', 'block_xp'), $currencies);
         $mform->addHelpButton('currencytheme', 'currencysign', 'block_xp');
 
-        $mform->addElement('filemanager',
+        $mform->addElement(
+            'filemanager',
             'currency',
             get_string('currencysignoverride', 'local_xp'),
             null,
@@ -89,6 +95,7 @@ class visuals extends moodleform {
         $renderer = \block_xp\di::get('renderer');
         $repository = \block_xp\di::get('theme_repository');
         $currencyrepository = \block_xp\di::get('currency_repository');
+        $badgeresolver = \block_xp\di::get('badge_url_resolver_stock');
 
         $themedata = array_reduce($repository->get_themes(), function ($carry, $theme) use ($renderer, $repository) {
             $urlresolver = new \local_xp\local\xp\theme_badge_url_resolver($repository, $theme->code);
@@ -107,8 +114,13 @@ class visuals extends moodleform {
         }, [[
             'value' => '',
             'annotation' => html_writer::div(
-                html_writer::div($renderer->small_level_badge(new \block_xp\local\xp\described_level(1, 0, '')))
-                    . html_writer::div($renderer->small_level_badge(new \block_xp\local\xp\described_level(99, 0, ''))),
+                html_writer::div($renderer->small_level_badge(new badged_level(1, 0, '', $badgeresolver)))
+                    . html_writer::div($renderer->small_level_badge(new badged_level(
+                        levels_info_writer::MAX_LEVEL,
+                        0,
+                        '',
+                        $badgeresolver
+                    ))),
                 'xp-flex xp-items-center xp-space-x-1'
             ),
         ], ]);
@@ -135,5 +147,4 @@ class visuals extends moodleform {
         echo $renderer->json_script($currencydata, $jsonid);
         $PAGE->requires->js_call_amd('local_xp/select-annotator', 'initWithJson', ['id_currencytheme', '#' . $jsonid]);
     }
-
 }

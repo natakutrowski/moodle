@@ -1,36 +1,28 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * Block.
- *
- * @package    local_xp
- * @copyright  2018 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 namespace local_xp\local\block;
 
-use action_link;
 use lang_string;
-use pix_icon;
 use stdClass;
-use block_xp\local\course_world;
 use block_xp\local\config\course_world_config;
+use block_xp\local\world;
+use core_user;
 use local_xp\local\config\default_course_world_config;
 use local_xp\local\xp\level_with_popup_message;
 
@@ -43,7 +35,6 @@ use local_xp\local\xp\level_with_popup_message;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_block extends \block_xp\local\block\course_block {
-
     /**
      * Applicable formats.
      *
@@ -51,11 +42,39 @@ class course_block extends \block_xp\local\block\course_block {
      */
     public function applicable_formats() {
         $formats = parent::applicable_formats();
-        $mode = \block_xp\di::get('config')->get('context');
-        if ($mode == CONTEXT_SYSTEM) {
+        $config = \block_xp\di::get('config');
+        if ($config->get('context') == CONTEXT_SYSTEM) {
             $formats += ['user-profile' => true];
+        } else if ($config->get('enableglobalworld')) {
+            $formats += ['my' => true, 'site' => true, 'user-profile' => true];
         }
         return $formats;
+    }
+
+    /**
+     * Whether we can show the user states.
+     *
+     * @param world $world
+     * @param null|int $userid
+     * @return bool
+     */
+    protected function can_show_user_state(world $world, $userid): bool {
+        if (!$userid || !core_user::is_real_user($userid, false)) {
+            return false;
+        }
+
+        $config = $world->get_config();
+        if (!$config->get('enableladder')) {
+            return false;
+        } else if ($config->get('identitymode') != course_world_config::IDENTITY_ON) {
+            return false;
+        }
+
+        $state = \block_xp\di::get(\local_xp\local\leaderboard\participation\service_factory::class)
+            ->get_for_context($world->get_context())
+            ->get_state($userid);
+
+        return $state->is_participating();
     }
 
     /**
@@ -73,7 +92,7 @@ class course_block extends \block_xp\local\block\course_block {
         }
 
         // Confirm that we can view the block, and that the target user can view it too.
-        $world = $this->get_world($this->page->course->id);
+        $world = $this->get_world_for_page();
         $theycanview = $world->get_access_permissions()->can_access($userid);
         $icanview = $world->get_access_permissions()->can_access($USER->id);
         $icanedit = $world->get_access_permissions()->can_manage($USER->id);
@@ -84,15 +103,13 @@ class course_block extends \block_xp\local\block\course_block {
         }
 
         $renderer = \block_xp\di::get('renderer');
-        $urlresolver = \block_xp\di::get('url_resolver');
         $state = $world->get_store()->get_state($userid);
-        $courseid = $world->get_courseid();
         $config = $world->get_config();
 
         // Navigation.
         $actions = [];
         if ($userid == $USER->id) {
-            $actions = $this->get_block_navigation($world);
+            $actions = $this->get_block_navigation_for_world($world);
         }
 
         // Widget.
@@ -122,12 +139,13 @@ class course_block extends \block_xp\local\block\course_block {
         // Can we show the information of other users? For now, let's assume that if the block
         // is visible on one's profile and that the ladder is enabled, and names not hidden, then
         // we can display other's information.
-        $world = $this->get_world($this->page->course->id);
+        $world = $this->get_world_for_page();
         $canshow = $world->get_config()->get('enableladder')
-            && $world->get_config()->get('identitymode') != course_world_config::IDENTITY_OFF;
+            && $world->get_config()->get('identitymode') == course_world_config::IDENTITY_ON;
 
         // Do not display the block when it's not set as.
-        $ispercourse = \block_xp\di::get('config')->get('context') == CONTEXT_COURSE;
+        $iscourseonly = \block_xp\di::get('config')->get('context') == CONTEXT_COURSE
+            && !\block_xp\di::get('config')->get('enableglobalworld');
 
         // Detect whether we are on the system profile page, or the course profile page.
         $onsiteprofile = $this->page->pagetype == 'user-profile';
@@ -136,7 +154,7 @@ class course_block extends \block_xp\local\block\course_block {
             && $this->page->docspath == 'user/profile'
             && preg_match('/(^|\s)path-user(\s|$)/', $this->page->bodyclasses);
 
-        if ($canshow && ((!$ispercourse && $onsiteprofile) || $oncourseprofile)) {
+        if ($canshow && ((!$iscourseonly && $onsiteprofile) || $oncourseprofile)) {
             $userid = null;
 
             if ($onsiteprofile) {
@@ -152,10 +170,9 @@ class course_block extends \block_xp\local\block\course_block {
                 $this->content = new stdClass();
                 $this->content->text = '';
                 $this->content->footer = '';
-                $this->content->text = $this->get_content_for_profile($userid);
+                $this->content->text = $this->can_show_user_state($world, $userid) ? $this->get_content_for_profile($userid) : '';
                 return $this->content;
             }
-
         }
 
         // Normal behaviour of showing the current user's block.
@@ -163,57 +180,10 @@ class course_block extends \block_xp\local\block\course_block {
     }
 
     /**
-     * Get the block navigation.
-     *
-     * @param course_world $world The world.
-     * @return action_link[]
-     */
-    protected function get_block_navigation(course_world $world) {
-        $courseid = $world->get_courseid();
-        $urlresolver = \block_xp\di::get('url_resolver');
-        $config = $world->get_config();
-        $adminconfig = \block_xp\di::get('config');
-
-        $urlsmatch = function ($u1, $u2) {
-            return $u1->out(false) == $u2->out(false);
-        };
-
-        $actions = parent::get_block_navigation($world);
-
-        // Add the group ladder when the ladder is not already present.
-        if ($config->get('enablegroupladder') != default_course_world_config::GROUP_LADDER_NONE) {
-
-            $ladderurl = $urlresolver->reverse('ladder', ['courseid' => $courseid]);
-            $infourl = $urlresolver->reverse('infos', ['courseid' => $courseid]);
-            $foundladder = false;
-            $foundinfo = false;
-
-            $candidates = $actions;
-            foreach ($candidates as $index => $candidate) {
-                $foundladder = $foundladder === false ? ($urlsmatch($ladderurl, $candidate->url) ? $index : false) : $foundladder;
-                $foundinfo = $foundinfo === false ? ($urlsmatch($infourl, $candidate->url) ? $index : false) : $foundinfo;
-            }
-
-            if ($foundladder === false) {
-                $link = new action_link(
-                    $urlresolver->reverse('group_ladder', ['courseid' => $courseid]),
-                    get_string('navladder', 'block_xp'),
-                    null,
-                    null,
-                    new pix_icon('i/ladder', '', 'block_xp')
-                );
-                array_splice($actions, ($foundinfo !== false ? $foundinfo + 1 : 0), 0, [$link]);
-            }
-
-        }
-        return $actions;
-    }
-
-    /**
      * Get popup notification props.
      *
      * @param object $renderer The renderer.
-     * @param \block_xp\local\course_world $world The world.
+     * @param \block_xp\local\world $world The world.
      * @param \block_xp\local\xp\level $level The level.
      * @param \block_xp\local\xp\level $prevlevel The previous level.
      */
@@ -228,9 +198,9 @@ class course_block extends \block_xp\local\block\course_block {
     /**
      * Get the widget.
      *
-     * @param \block_xp\local\course_world $world The world.
+     * @param \block_xp\local\world $world The world.
      * @param \block_xp\local\xp\state $state The user's state.
-     * @return \block_xp\local\output\xp_widget The widget.
+     * @return \block_xp\output\xp_widget The widget.
      */
     protected function get_widget($world, $state) {
         $widget = parent::get_widget($world, $state);
@@ -243,5 +213,4 @@ class course_block extends \block_xp\local\block\course_block {
 
         return $widget;
     }
-
 }

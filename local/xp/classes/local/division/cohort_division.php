@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\division;
 
@@ -31,7 +31,6 @@ use local_xp\local\userfilter\cohort_members;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cohort_division implements division {
-
     /** @var int The cohort ID. */
     protected $cohortid;
 
@@ -44,16 +43,30 @@ class cohort_division implements division {
         $this->cohortid = (int) $cohortid;
     }
 
+    /**
+     * Get the ID.
+     *
+     * @return int
+     */
     public function get_id() {
         return $this->cohortid;
     }
 
+    /**
+     * Get the name.
+     *
+     * @return string
+     */
     public function get_name(): string {
         return '';
     }
 
+    /**
+     * Get the user filter.
+     *
+     * @return user_filter
+     */
     public function get_user_filter(): user_filter {
         return new cohort_members([$this->cohortid]);
     }
-
 }

@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Ladder controller.
@@ -39,10 +41,14 @@ use local_xp\local\config\default_course_world_config;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class ladder_controller extends \block_xp\local\controller\ladder_controller {
-
     /** @var bool */
     protected $isdefaultiso = true;
 
+    /**
+     * Define optional parameters.
+     *
+     * @return array
+     */
     protected function define_optional_params() {
         $params = parent::define_optional_params();
         $params[] = ['download', '', PARAM_ALPHA, false];
@@ -50,6 +56,11 @@ class ladder_controller extends \block_xp\local\controller\ladder_controller {
         return $params;
     }
 
+    /**
+     * Handle post-login.
+     *
+     * @return void
+     */
     protected function post_login() {
         parent::post_login();
 
@@ -57,10 +68,20 @@ class ladder_controller extends \block_xp\local\controller\ladder_controller {
         $this->isdefaultiso = $ladderiso === default_course_world_config::LEADERBOARD_ISO_DEFAULT;
     }
 
+    /**
+     * Check group support.
+     *
+     * @return bool
+     */
     protected function is_supporting_groups() {
         return $this->isdefaultiso;
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
         $iomad = \block_xp\di::get('iomad_facade');
         if ($iomad->exists()) {
@@ -78,10 +99,18 @@ class ladder_controller extends \block_xp\local\controller\ladder_controller {
         }
     }
 
+    /**
+     * Get division.
+     *
+     * @return division|null
+     */
     protected function get_division(): ?division {
         return $this->isdefaultiso ? parent::get_division() : null;
     }
 
+    /**
+     * Get download filename.
+     */
     protected function get_download_filename(): string {
         $filename = $this->get_param('downloadfilename');
         if ($filename) {
@@ -123,6 +152,11 @@ class ladder_controller extends \block_xp\local\controller\ladder_controller {
         return $table;
     }
 
+    /**
+     * Output group menu.
+     *
+     * @return string
+     */
     protected function print_group_menu() {
         if (!$this->is_supporting_groups()) {
             return;
@@ -151,6 +185,9 @@ class ladder_controller extends \block_xp\local\controller\ladder_controller {
         ]);
     }
 
+    /**
+     * Output ranking.
+     */
     protected function page_ranking() {
         global $USER;
 
@@ -179,5 +216,4 @@ class ladder_controller extends \block_xp\local\controller\ladder_controller {
 
         parent::page_ranking();
     }
-
 }

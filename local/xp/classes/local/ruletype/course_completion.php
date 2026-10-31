@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\ruletype;
 
@@ -39,28 +39,60 @@ use local_xp\local\reason\course_completed_reason;
 class course_completion implements ruletype, ruletype_with_profile {
     use ruletype_deprecation_filler_trait;
 
+    /**
+     * Get display name.
+     *
+     * @return lang_string
+     */
     public function get_display_name(): lang_string {
         return new lang_string('ruletypecoursecompletion', 'block_xp');
     }
 
+    /**
+     * Get profile.
+     *
+     * @return profile
+     */
     public function get_profile(): profile {
         return (new profile())->set_subject(profile::SUBJECT_COURSE);
     }
 
+    /**
+     * Get short description.
+     *
+     * @return lang_string
+     */
     public function get_short_description(): lang_string {
         return new lang_string('ruletypecoursecompletiondesc', 'block_xp');
     }
 
+    /**
+     * Check action compatibility.
+     *
+     * @param action $action The action.
+     * @return bool
+     */
     public function is_action_compatible(action $action): bool {
         return $action->get_type() === 'course_completed';
     }
 
+    /**
+     * Check action requirements.
+     *
+     * @param action $action The action.
+     * @return bool
+     */
     public function is_action_satisfying_requirements(action $action): bool {
         return true;
     }
 
+    /**
+     * Make reason.
+     *
+     * @param action $action The action.
+     * @return reason
+     */
     public function make_reason(action $action): reason {
         return course_completed_reason::from_context($action->get_context());
     }
-
 }

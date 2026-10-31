@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Admin visuals controller.
@@ -26,7 +28,9 @@
 namespace local_xp\local\controller;
 
 use block_xp\di;
+use block_xp\local\config\config;
 use block_xp\local\world;
+use context;
 use context_system;
 use html_writer;
 use local_xp\local\config\default_course_world_config;
@@ -40,7 +44,6 @@ use local_xp\local\config\default_course_world_config;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_visuals_controller extends \block_xp\local\controller\admin_visuals_controller {
-
     /** @var config The admin config. */
     protected $adminconfig;
 
@@ -69,7 +72,7 @@ class admin_visuals_controller extends \block_xp\local\controller\admin_visuals_
     /**
      * Define the form.
      *
-     * @return moodleform
+     * @return \moodleform
      */
     protected function define_form() {
         return new \local_xp\form\visuals($this->pageurl->out(false), [
@@ -87,7 +90,8 @@ class admin_visuals_controller extends \block_xp\local\controller\admin_visuals_
         $data = parent::get_initial_form_data();
 
         $draftitemid = file_get_submitted_draft_itemid('currency');
-        file_prepare_draft_area($draftitemid,
+        file_prepare_draft_area(
+            $draftitemid,
             $this->get_currency_filemanager_context()->id,
             'local_xp',
             'defaultcurrency',
@@ -101,6 +105,11 @@ class admin_visuals_controller extends \block_xp\local\controller\admin_visuals_
         return $data;
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
         $this->adminconfig = \block_xp\di::get('config');
         parent::pre_content();
@@ -108,6 +117,11 @@ class admin_visuals_controller extends \block_xp\local\controller\admin_visuals_
         $form->init_page_requirements();
     }
 
+    /**
+     * Reset world defaults.
+     *
+     * @param world $world The world.
+     */
     protected function reset_world_to_defaults(world $world) {
         parent::reset_world_to_defaults($world);
 
@@ -125,12 +139,13 @@ class admin_visuals_controller extends \block_xp\local\controller\admin_visuals_
     /**
      * Save the form data.
      *
-     * @param stdClass $data The form data.
+     * @param \stdClass $data The form data.
      * @return void
      */
     protected function save_form_data($data) {
         parent::save_form_data($data);
-        file_save_draft_area_files($data->currency,
+        file_save_draft_area_files(
+            $data->currency,
             $this->get_currency_filemanager_context()->id,
             'local_xp',
             'defaultcurrency',
@@ -148,9 +163,7 @@ class admin_visuals_controller extends \block_xp\local\controller\admin_visuals_
      */
     protected function preview() {
         $output = $this->get_renderer();
-        echo html_writer::div($output->xp_preview(rand(20, 9999)), 'xp-mb-4');
+        echo html_writer::div($output->xp_preview(rand(20, 9999), null, di::get('currency')), 'xp-mb-4');
         parent::preview();
     }
-
-
 }

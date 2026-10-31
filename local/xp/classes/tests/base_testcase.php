@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\tests;
 
@@ -30,7 +30,6 @@ use ReflectionClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class base_testcase extends \block_xp\tests\base_testcase {
-
     /** @var bool */
     private static $fixtureautoloadregistered = false;
 
@@ -80,6 +79,9 @@ abstract class base_testcase extends \block_xp\tests\base_testcase {
         }
     }
 
+    /**
+     * Reset container.
+     */
     protected function reset_container() {
         \block_xp\di::set_container(new \local_xp\local\container());
     }
@@ -94,5 +96,4 @@ abstract class base_testcase extends \block_xp\tests\base_testcase {
             'local_xp\\tests\\mocks\\' => '/local/xp/tests/mocks/',
         ];
     }
-
 }

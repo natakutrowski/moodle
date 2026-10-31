@@ -1,34 +1,27 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * Badge URL resolver course world factory.
- *
- * @package    local_xp
- * @copyright  2017 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 namespace local_xp\local\factory;
 
-use block_xp\local\course_world;
+use block_xp\local\world;
 use block_xp\local\xp\badge_url_resolver;
+use block_xp\local\xp\badge_url_resolver_stack;
 use local_xp\local\theme\theme_repository;
-use local_xp\local\xp\badge_url_resolver_stack;
 use local_xp\local\xp\theme_badge_url_resolver;
 
 /**
@@ -40,7 +33,6 @@ use local_xp\local\xp\theme_badge_url_resolver;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class badge_url_resolver_course_world_factory extends \block_xp\local\factory\default_badge_url_resolver_course_world_factory {
-
     /** @var theme_repository The repository. */
     protected $repo;
 
@@ -58,22 +50,21 @@ class badge_url_resolver_course_world_factory extends \block_xp\local\factory\de
     /**
      * Get the URL resolver.
      *
-     * @param course_world $world The world.
-     * @return block_xp\local\xp\badge_url_resolver
+     * @param world $world The world.
+     * @return badge_url_resolver
      */
-    public function get_url_resolver(course_world $world) {
-        $defaultresolver = parent::get_url_resolver($world);
+    public function get_url_resolver_for_world(world $world) {
         $config = $world->get_config();
         $themecode = $config->get('badgetheme');
 
         if (empty($themecode)) {
-            return $defaultresolver;
+            return $this->make_world_resolver($world);
         }
 
-        return new badge_url_resolver_stack([
-            $defaultresolver,
+        return new badge_url_resolver_stack(array_filter([
+            $this->make_world_resolver($world, false),
             new theme_badge_url_resolver($this->repo, $themecode),
-        ]);
+            $this->stockresolver,
+        ]));
     }
-
 }

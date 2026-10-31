@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * User resolver.
@@ -25,6 +27,7 @@
 
 namespace local_xp\local\provider;
 
+use context;
 use core_user;
 use moodle_database;
 use block_xp\local\utils\user_utils;
@@ -41,9 +44,10 @@ use block_xp\local\utils\user_utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user_resolver {
-
     /** @var moodle_database $db The database. */
     protected $db;
+    /** @var context|null The context. */
+    protected $context;
     /** @var array The user fields to fetch. */
     protected $fields;
 
@@ -51,16 +55,18 @@ class user_resolver {
      * Constructor.
      *
      * @param moodle_database $db The database.
+     * @param context|null $context The context.
      */
-    public function __construct(moodle_database $db) {
+    public function __construct(moodle_database $db, ?context $context = null) {
         $this->db = $db;
+        $this->context = $context;
         $this->fields = user_utils::picture_fields();
     }
 
     /**
      * Resolve a user.
      *
-     * @param string|number $data Arbitrary data to resolve the user with.
+     * @param string|int $data Arbitrary data to resolve the user with.
      * @return object|null User object containing enough fields for display purposes.
      */
     public function resolve($data) {
@@ -85,7 +91,10 @@ class user_resolver {
             $user = core_user::get_user_by_username($data, $fields);
         }
 
-        return $user ? $user : null;
-    }
+        if (!$user || ($this->context && !user_utils::is_valid_target($this->context, $user->id))) {
+            return null;
+        }
 
+        return $user;
+    }
 }

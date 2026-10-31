@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\userfilter;
 
@@ -32,7 +32,6 @@ use moodle_database;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class leaderboard_participants implements user_filter {
-
     /** @var int */
     protected $contextid;
     /** @var moodle_database */
@@ -43,8 +42,8 @@ class leaderboard_participants implements user_filter {
     /**
      * Constructor.
      *
-     * @param array $cohortids The cohort IDs.
-     * @param bool $exclude Whether to exclude, instead of include.
+     * @param int $contextid The contextx ID.
+     * @param int $mode A participation mode constant.
      */
     public function __construct(int $contextid, int $mode = default_course_world_config::LEADERBOARD_PARTICIPATION_FORCED) {
         $this->db = di::get('db');
@@ -66,7 +65,6 @@ class leaderboard_participants implements user_filter {
                                            AND ladderparticipation = 1)", [
                 'lpctxid' => $this->contextid,
             ]];
-
         } else if ($this->mode === default_course_world_config::LEADERBOARD_PARTICIPATION_OPTOUT) {
             // Optional opt-out, if the flag does not exist either missing or different value, we select.
             return ["{$useridalias} NOT IN (SELECT userid
@@ -79,5 +77,4 @@ class leaderboard_participants implements user_filter {
 
         return ['1=1', []];
     }
-
 }

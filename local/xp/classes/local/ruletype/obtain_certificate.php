@@ -14,13 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\ruletype;
 
 use block_xp\local\action\action;
 use block_xp\local\availability\availability_info;
 use block_xp\local\availability\has_availability_info;
+use block_xp\local\availability\static_info;
 use block_xp\local\icon\fa_icon;
 use block_xp\local\icon\icon;
 use block_xp\local\icon\with_iconography;
@@ -56,34 +57,80 @@ class obtain_certificate implements
     with_iconography {
     use ruletype_deprecation_filler_trait;
 
+    /**
+     * Get availability info.
+     *
+     * @return availability_info
+     */
     public function get_availability_info(): availability_info {
-        return new plugin_required_info('mod_customcert', 'Custom certificate', 2025041400, 'v5.0');
+        $customcert = new plugin_required_info('mod_customcert', 'Custom certificate', 2025041400, 'v5.0');
+        $coursecertificate = new plugin_required_info('mod_coursecertificate', 'Course certificate', 2024100800, 'v4.4.4');
+        $isavailable = $customcert->is_available() || $coursecertificate->is_available();
+        return new static_info(
+            $isavailable,
+            $isavailable ? [] : array_merge($customcert->get_reasons(), $coursecertificate->get_reasons())
+        );
     }
 
+    /**
+     * Get default limit.
+     *
+     * @return limit_spec
+     */
     public function get_default_limit(): limit_spec {
         return new limit_spec(0);
     }
 
+    /**
+     * Get default repeat limit.
+     *
+     * @return limit_spec
+     */
     public function get_default_repeat_limit(): limit_spec {
         return new limit_spec(1, limit_spec::WINDOW_NONE, limit_spec::SCOPE_ENV);
     }
 
+    /**
+     * Get display name.
+     *
+     * @return lang_string
+     */
     public function get_display_name(): lang_string {
         return new lang_string('ruletypeobtaincertificate', 'block_xp');
     }
 
+    /**
+     * Get education goal.
+     *
+     * @return string
+     */
     public function get_education_goal(): string {
         return self::GOAL_ASSESS;
     }
 
+    /**
+     * Get icon.
+     *
+     * @return icon|null
+     */
     public function get_icon(): ?icon {
         return new fa_icon('certificate');
     }
 
+    /**
+     * Get profile.
+     *
+     * @return profile
+     */
     public function get_profile(): profile {
-        return (new cm_profile('customcert'));
+        return (new cm_profile())->set_cm_types(['customcert', 'coursecertificate']);
     }
 
+    /**
+     * Get repeat limit options.
+     *
+     * @return repeat_option[]
+     */
     public function get_repeat_limit_options(): array {
         return [
             (new repeat_option(limit_spec::SCOPE_ENV))
@@ -91,18 +138,41 @@ class obtain_certificate implements
         ];
     }
 
+    /**
+     * Get short description.
+     *
+     * @return lang_string
+     */
     public function get_short_description(): lang_string {
         return new lang_string('ruletypeobtaincertificatedesc', 'block_xp');
     }
 
+    /**
+     * Check action compatibility.
+     *
+     * @param action $action The action.
+     * @return bool
+     */
     public function is_action_compatible(action $action): bool {
         return $action instanceof certificate_issued;
     }
 
+    /**
+     * Check action requirements.
+     *
+     * @param action $action The action.
+     * @return bool
+     */
     public function is_action_satisfying_requirements(action $action): bool {
         return true;
     }
 
+    /**
+     * Make reason.
+     *
+     * @param action $action The action.
+     * @return reason
+     */
     public function make_reason(action $action): reason {
         if (!$action instanceof certificate_issued) {
             throw new \coding_exception('Incompatible action.');
@@ -112,5 +182,4 @@ class obtain_certificate implements
         $reason->set_object_id((int) $action->get_issue_id());
         return $reason;
     }
-
 }

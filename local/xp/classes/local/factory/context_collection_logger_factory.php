@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\factory;
 
@@ -28,11 +28,16 @@ use local_xp\local\logger\context_collection_logger_extended;
  * @copyright  2024 Frédéric Massart
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated Since XP+ 21, use block_xp\local\factory\world_logger_factory instead.
  */
 class context_collection_logger_factory extends \block_xp\local\factory\default_context_collection_logger_factory {
-
+    /**
+     * Create collection logger.
+     *
+     * @param \context $context The context.
+     * @return collection_logger
+     */
     protected function instantiate_collection_logger(\context $context): collection_logger {
         return new context_collection_logger_extended($this->db, (int) $context->id);
     }
-
 }

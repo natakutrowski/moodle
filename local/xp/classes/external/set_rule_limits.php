@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\external;
 
@@ -24,9 +24,9 @@ use block_xp\external\external_function_parameters;
 use block_xp\external\external_single_structure;
 use block_xp\external\external_value;
 use block_xp\local\ruletype\ruletype_with_limit;
+use block_xp\local\utils\world_utils;
 use context;
 use context_system;
-use local_xp\form\rule as rule_form;
 
 /**
  * Set rule limits.
@@ -37,7 +37,6 @@ use local_xp\form\rule as rule_form;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class set_rule_limits extends external_api {
-
     /**
      * Parameters.
      *
@@ -73,9 +72,6 @@ class set_rule_limits extends external_api {
         // Fetch the rule and check permissions.
         $rule = $db->get_record('block_xp_rule', ['id' => $ruleid], '*', MUST_EXIST);
         $world = self::require_manage_permissions_and_get_world((int) $rule->contextid);
-        if ($world) {
-            di::get('world_rule_manager_factory')->get_rule_manager($world)->detach();
-        }
 
         // Validate the rule type.
         $typeresolver = di::get('rule_type_resolver');
@@ -84,26 +80,17 @@ class set_rule_limits extends external_api {
             throw new \moodle_exception('invaliddata', 'core_error');
         }
 
-        // Fetch the local rule.
-        $record = $db->get_record('local_xp_rule', ['ruleid' => $ruleid]);
-        if (!$record) {
-            $record = (object) [
-                'ruleid' => $ruleid,
-            ];
-        }
-
-        // Apply the limits.
+        $data = (object) [];
         foreach (['limitmax', 'limitwindow', 'repeatscope', 'repeatwindow'] as $field) {
-            $record->{$field} = $limits[$field] ?? null;
+            $data->{$field} = $limits[$field] ?? null;
         }
 
-        // If the limits are the same as the default, we delete the local rule.
-        if (rule_form::is_same_as_default($record, $ruletype->get_default_limit(), $ruletype->get_default_repeat_limit())) {
-            $db->delete_records('local_xp_rule', ['ruleid' => $ruleid]);
-        } else if (empty($record->id)) {
-            $record->id = $db->insert_record('local_xp_rule', $record);
+        if ($world) {
+            $manager = di::get('world_rule_manager_factory')->get_rule_manager($world);
+            $manager->update_rule($ruleid, $data);
         } else {
-            $db->update_record('local_xp_rule', $record);
+            $manager = di::get('admin_rule_manager');
+            $manager->update_rule($ruleid, $data);
         }
 
         return [
@@ -140,6 +127,12 @@ class set_rule_limits extends external_api {
         $world = $worldfactory->get_world_from_context(context::instance_by_id($contextid));
         self::validate_context($world->get_context());
         $world->get_access_permissions()->require_manage();
+
+        // Check that the world supports this.
+        if (!world_utils::supports_local_points_management($world)) {
+            throw new \moodle_exception('errorfeaturenotenabled', 'block_xp');
+        }
+
         return $world;
     }
 }

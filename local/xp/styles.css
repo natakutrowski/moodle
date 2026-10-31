@@ -7,6 +7,7 @@
     margin: 0 3px;
     padding: 0;
     vertical-align: middle;
+    border-radius: 0;
 }
 .block_xp-level-progress .sign-img img {
     margin-top: 1px;
@@ -23,6 +24,7 @@
 
 /** Hide accepted file types from points symbol filemanager. **/
 .block_xp #fitem_id_currency fieldset [name=currency] + p,
+.block_xp #fitem_id_currency fieldset .filetypes-descriptions-intro,
 .block_xp #fitem_id_currency fieldset .form-filetypes-descriptions {
     display: none;
 }

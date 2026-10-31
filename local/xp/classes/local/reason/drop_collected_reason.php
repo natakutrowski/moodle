@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reason;
 
@@ -66,11 +66,21 @@ class drop_collected_reason implements reason, reason_with_location, reason_with
         return $this->drop ?: null;
     }
 
+    /**
+     * Get location name.
+     *
+     * @return string|null
+     */
     public function get_location_name() {
         $drop = $this->get_drop();
         return $drop->name ?? null;
     }
 
+    /**
+     * Get location URL.
+     *
+     * @return \moodle_url|null
+     */
     public function get_location_url() {
         $drop = $this->get_drop();
         if (!$drop) {
@@ -81,6 +91,11 @@ class drop_collected_reason implements reason, reason_with_location, reason_with
         return $url;
     }
 
+    /**
+     * Get short description.
+     *
+     * @return string
+     */
     public function get_short_description() {
         return get_string('dropcollected', 'local_xp');
     }
@@ -109,5 +124,4 @@ class drop_collected_reason implements reason, reason_with_location, reason_with
     public static function from_signature($signature) {
         return new static((int) $signature);
     }
-
 }

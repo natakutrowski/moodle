@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Leaderboard table.
@@ -48,7 +50,6 @@ use local_xp\local\xp\levelless_group_state;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class group_leaderboard_table extends flexible_table {
-
     /** @var limit An SQL limit to 'fence' the leaderboard. */
     protected $fence;
     /** @var leaderboard The leaderboard. */
@@ -120,7 +121,6 @@ class group_leaderboard_table extends flexible_table {
         if (empty($this->fence)) {
             $this->pagesize($pagesize, $this->leaderboard->get_count());
             $limit = new limit($pagesize, (int) $this->get_page_start());
-
         } else {
             $this->pagesize($this->fence->get_count(), $this->fence->get_count());
             $limit = $this->fence;
@@ -161,7 +161,6 @@ class group_leaderboard_table extends flexible_table {
         if ($state instanceof state_with_subject) {
             $o = $this->col_grouppic($row);
             $o .= $state->get_name();
-
         } else if ($state instanceof levelless_group_state) {
             $group = $state->get_group();
             $o = $this->col_grouppic($row);
@@ -224,7 +223,6 @@ class group_leaderboard_table extends flexible_table {
         if ($row->state instanceof state_with_subject) {
             $pic = $row->state->get_picture();
             $pic = $pic ? $this->xpoutput->team_picture($pic) : null;
-
         } else if ($row->state instanceof levelless_group_state) {
             $pic = $this->xpoutput->group_picture($row->state->get_group());
         }
@@ -264,5 +262,4 @@ class group_leaderboard_table extends flexible_table {
         echo \html_writer::start_tag('div', ['class' => 'no-overflow']);
         echo \html_writer::start_tag('table', $this->attributes);
     }
-
 }

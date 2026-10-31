@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Form.
@@ -41,7 +41,6 @@ use local_xp\local\config\default_course_world_config;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class leaderboard extends \block_xp\form\leaderboard {
-
     /**
      * Form definition.
      *
@@ -55,12 +54,13 @@ class leaderboard extends \block_xp\form\leaderboard {
         if ($mform->elementExists('ladderiso')) {
             $mform->removeElement('ladderiso');
         }
+        $ladderisoel = null;
         if (di::get('addon')->supports_leaderboard_isolation()) {
             $ladderisoel = $mform->createElement('select', 'ladderiso', get_string('ladderiso', 'block_xp'), [
                 default_course_world_config::LEADERBOARD_ISO_DEFAULT => get_string('ladderisodefault', 'block_xp'),
                 default_course_world_config::LEADERBOARD_ISO_COHORTS => get_string('ladderisocohorts', 'block_xp'),
             ]);
-        } else {
+        } else if (di::get('addon')->is_promo_allowed()) {
             $els = [];
             $els[] = $mform->createElement('select', 'choices', '', [
                 get_string('ladderisodefault', 'block_xp'),
@@ -71,16 +71,20 @@ class leaderboard extends \block_xp\form\leaderboard {
             });
             $ladderisoel = $mform->createElement('group', 'ladderiso', get_string('ladderiso', 'block_xp'), $els);
         }
-        $mform->insertElementBefore($ladderisoel, 'identitymode');
-        $mform->addHelpButton('ladderiso', 'ladderiso', 'block_xp');
-        unset($ladderisoel);
+        if ($ladderisoel) {
+            $mform->insertElementBefore($ladderisoel, 'identitymode');
+            $mform->addHelpButton('ladderiso', 'ladderiso', 'block_xp');
+            unset($ladderisoel);
+        }
 
         // Leaderboard participation.
         if ($mform->elementExists('ladderparticipation')) {
             $mform->removeElement('ladderparticipation');
         }
+        $ladderparticipationel = null;
         if (di::get('addon')->supports_leaderboard_participation()) {
-            $ladderparticipationel = $mform->createElement('select',
+            $ladderparticipationel = $mform->createElement(
+                'select',
                 'ladderparticipation',
                 get_string('ladderparticipation', 'block_xp'),
                 [
@@ -92,7 +96,7 @@ class leaderboard extends \block_xp\form\leaderboard {
                         get_string('ladderparticipationoptin', 'block_xp'),
                 ]
             );
-        } else {
+        } else if (di::get('addon')->is_promo_allowed()) {
             $els = [];
             $els[] = $mform->createElement('select', 'choices', '', [
                 get_string('ladderparticipationforced', 'block_xp'),
@@ -102,24 +106,29 @@ class leaderboard extends \block_xp\form\leaderboard {
             $els[] = $mform->createElement(staticfield::name(), 'addonrequired', '', function () {
                 return di::get('renderer')->render_from_template('local_xp/xp-premium-tag', []);
             });
-            $ladderparticipationel = $mform->createElement('group',
+            $ladderparticipationel = $mform->createElement(
+                'group',
                 'ladderparticipation',
                 get_string('ladderparticipation', 'block_xp'),
                 $els
             );
         }
-        $mform->insertElementBefore($ladderparticipationel, 'identitymode');
-        $mform->addHelpButton('ladderparticipation', 'ladderparticipation', 'block_xp');
-        unset($ladderparticipationel);
+        if ($ladderparticipationel) {
+            $mform->insertElementBefore($ladderparticipationel, 'identitymode');
+            $mform->addHelpButton('ladderparticipation', 'ladderparticipation', 'block_xp');
+            unset($ladderparticipationel);
+        }
 
         if (di::get('addon')->supports_leaderboard_participation()) {
-            $el = $mform->createElement('advcheckbox',
+            $el = $mform->createElement(
+                'advcheckbox',
                 'ladderparticipationreset',
                 get_string('resetladderparticiptionofeveryone', 'block_xp')
             );
             $mform->insertElementBefore($el, 'identitymode');
             $mform->addHelpButton('ladderparticipationreset', 'ladderparticipationreset', 'block_xp');
-            $mform->hideIf('ladderparticipationreset',
+            $mform->hideIf(
+                'ladderparticipationreset',
                 'ladderparticipation',
                 'eq',
                 default_course_world_config::LEADERBOARD_PARTICIPATION_FORCED
@@ -140,6 +149,11 @@ class leaderboard extends \block_xp\form\leaderboard {
         $mform->addHelpButton('identitymode', 'anonymity', 'block_xp');
     }
 
+    /**
+     * Process the form submission.
+     *
+     * @return mixed
+     */
     public function process_dynamic_submission() {
         parent::process_dynamic_submission();
 
@@ -148,6 +162,11 @@ class leaderboard extends \block_xp\form\leaderboard {
         }
     }
 
+    /**
+     * Get data.
+     *
+     * @return stdClass|null
+     */
     public function get_data() {
         $data = parent::get_data();
         // Remove fake config value.
@@ -176,5 +195,4 @@ class leaderboard extends \block_xp\form\leaderboard {
         $data = parent::get_data();
         return !empty($data->ladderparticipationreset);
     }
-
 }

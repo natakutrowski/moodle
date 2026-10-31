@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\rulefilter;
 
@@ -38,14 +38,25 @@ use local_xp\local\utils\tag_utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cmtag implements has_availability_info, rulefilter {
-
     /** @var array Tag areas. */
     protected $areas = [['core', 'course_modules']];
 
+    /**
+     * Get action tester.
+     *
+     * @param context $effectivecontext The context.
+     * @param object $config The config.
+     * @return action_tester
+     */
     public function get_action_tester(context $effectivecontext, object $config): action_tester {
         return new tagname_tester((string) ($config->char1 ?? ''), $this->areas);
     }
 
+    /**
+     * Get availability info.
+     *
+     * @return availability_info
+     */
     public function get_availability_info(): availability_info {
         global $CFG;
         if (empty($CFG->usetags)) {
@@ -54,14 +65,31 @@ class cmtag implements has_availability_info, rulefilter {
         return new static_info(true);
     }
 
+    /**
+     * Get compatible context levels.
+     *
+     * @return int[]
+     */
     public function get_compatible_context_levels(): array {
         return [CONTEXT_SYSTEM, CONTEXT_COURSE];
     }
 
+    /**
+     * Get display name.
+     *
+     * @return lang_string
+     */
     public function get_display_name(): lang_string {
         return new lang_string('rulefiltercmtag', 'block_xp');
     }
 
+    /**
+     * Get config label.
+     *
+     * @param object $config The config.
+     * @param context|null $effectivecontext The context.
+     * @return string
+     */
     public function get_label_for_config(object $config, ?context $effectivecontext = null): string {
         $name = trim((string) ($config->char1 ?? ''));
         if ($name === '') {
@@ -76,16 +104,30 @@ class cmtag implements has_availability_info, rulefilter {
         return $label;
     }
 
+    /**
+     * Get short description.
+     *
+     * @return lang_string
+     */
     public function get_short_description(): lang_string {
         return new lang_string('rulefiltercmtagdesc', 'block_xp');
     }
 
+    /**
+     * Check admin compatibility.
+     *
+     * @return bool
+     */
     public function is_compatible_with_admin(): bool {
         return true;
     }
 
+    /**
+     * Check whether multiple are allowed.
+     *
+     * @return bool
+     */
     public function is_multiple_allowed(): bool {
         return true;
     }
-
 }

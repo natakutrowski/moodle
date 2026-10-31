@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reason;
 
@@ -64,6 +64,9 @@ class graded_reason implements reason, reason_with_location, reason_with_short_d
         }
     }
 
+    /**
+     * Get grade item.
+     */
     protected function get_grade_item() {
         global $CFG;
         require_once($CFG->libdir . '/gradelib.php');
@@ -103,6 +106,11 @@ class graded_reason implements reason, reason_with_location, reason_with_short_d
         ]);
     }
 
+    /**
+     * Get short description.
+     *
+     * @return string
+     */
     public function get_short_description() {
         return get_string('gradereceived', 'local_xp');
     }
@@ -146,5 +154,4 @@ class graded_reason implements reason, reason_with_location, reason_with_short_d
         $reason->set_parent_id($e->relateduserid);
         return $reason;
     }
-
 }

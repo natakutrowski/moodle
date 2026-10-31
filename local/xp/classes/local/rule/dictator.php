@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\rule;
 
@@ -30,7 +30,6 @@ use block_xp\local\rule\instance;
  * @deprecated Since XP 20, the dictatorship was overthrown.
  */
 class dictator extends \block_xp\local\rule\the_dictator {
-
     /**
      * Fetch rules in context.
      *
@@ -59,5 +58,4 @@ class dictator extends \block_xp\local\rule\the_dictator {
             return new static_instance($record);
         }, $records));
     }
-
 }

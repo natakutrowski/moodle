@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Local external.
@@ -45,6 +47,7 @@ use block_xp\local\config\block_config;
 use block_xp\local\config\config_stack;
 use block_xp\local\config\filtered_config;
 use block_xp\local\config\mapped_config;
+use block_xp\local\group\group_policy;
 use block_xp\local\utils\external_utils;
 use block_xp\local\xp\anonymised_state;
 use block_xp\local\xp\level;
@@ -67,7 +70,6 @@ use local_xp\local\xp\levelless_group_state;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class external_api extends \block_xp\external\external_api {
-
     /**
      * Reduces a tree of grade items in a flat list.
      *
@@ -274,13 +276,9 @@ class external_api extends \block_xp\external\external_api {
      * @return void
      */
     public static function require_group_access($userid, $courseid, $groupid) {
-        $groupmode = groups_get_course_groupmode(get_course($courseid, false));
-        if ($groupmode == SEPARATEGROUPS) {
-            $context = context_course::instance($courseid);
-            $aag = has_capability('moodle/site:accessallgroups', $context, $userid);
-            if (!$aag && (!$groupid || !groups_is_member($groupid, $userid))) {
-                throw new moodle_exception('nopermissions', '', '', 'access_group');
-            }
+        $grouppolicy = group_policy::from_course_id($courseid);
+        if (!$grouppolicy->can_select_group($groupid, $userid)) {
+            throw new moodle_exception('nopermissions', '', '', 'access_group');
         }
     }
 
@@ -485,5 +483,4 @@ class external_api extends \block_xp\external\external_api {
 
         return new external_single_structure($params, '', VALUE_REQUIRED);
     }
-
 }

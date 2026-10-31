@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Level-less group state.
@@ -42,7 +44,6 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class levelless_group_state extends levelless_state implements renderable {
-
     /** @var stdClass The group object. */
     protected $group;
 
@@ -58,11 +59,21 @@ class levelless_group_state extends levelless_state implements renderable {
         $this->group = $group;
     }
 
+    /**
+     * Get name.
+     *
+     * @return string
+     */
     public function get_name() {
         $group = $this->get_group();
         return external_utils::format_string($group->name, context_course::instance($group->courseid)->id);
     }
 
+    /**
+     * Get picture.
+     *
+     * @return moodle_url|null
+     */
     public function get_picture() {
         $pic = $this->get_group_picture_url();
         return empty($pic) ? null : $pic;
@@ -110,5 +121,4 @@ class levelless_group_state extends levelless_state implements renderable {
         $grouppictureurl->param('rev', $group->picture);
         return $grouppictureurl;
     }
-
 }

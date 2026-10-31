@@ -1,27 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * Visuals controller.
- *
- * @package    local_xp
- * @copyright  2017 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 namespace local_xp\local\controller;
 
@@ -29,6 +22,7 @@ use block_xp\di;
 use context_system;
 use html_writer;
 use local_xp\local\config\default_course_world_config;
+use stdClass;
 
 /**
  * Visuals controller class.
@@ -39,11 +33,10 @@ use local_xp\local\config\default_course_world_config;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class visuals_controller extends \block_xp\local\controller\visuals_controller {
-
     /**
      * Get manager context.
      *
-     * @return context
+     * @return \context
      */
     final protected function get_currency_filemanager_context() {
         return $this->world->get_context();
@@ -65,7 +58,7 @@ class visuals_controller extends \block_xp\local\controller\visuals_controller {
     /**
      * Define the form.
      *
-     * @return moodleform
+     * @return \moodleform
      */
     protected function define_form() {
         return new \local_xp\form\visuals($this->pageurl->out(false), [
@@ -100,7 +93,8 @@ class visuals_controller extends \block_xp\local\controller\visuals_controller {
         $config = $this->world->get_config();
 
         if ($config->get('currencystate') == default_course_world_config::CURRENCY_USE_DEFAULT) {
-            file_prepare_draft_area($draftitemid,
+            file_prepare_draft_area(
+                $draftitemid,
                 context_system::instance()->id,
                 'local_xp',
                 'defaultcurrency',
@@ -108,7 +102,8 @@ class visuals_controller extends \block_xp\local\controller\visuals_controller {
                 $this->get_currency_filemanager_options()
             );
         } else {
-            file_prepare_draft_area($draftitemid,
+            file_prepare_draft_area(
+                $draftitemid,
                 $this->get_currency_filemanager_context()->id,
                 'local_xp',
                 'currency',
@@ -153,7 +148,8 @@ class visuals_controller extends \block_xp\local\controller\visuals_controller {
         $config = $this->world->get_config();
 
         // Save the area.
-        file_save_draft_area_files($data->currency,
+        file_save_draft_area_files(
+            $data->currency,
             $this->get_currency_filemanager_context()->id,
             'local_xp',
             'currency',
@@ -175,8 +171,8 @@ class visuals_controller extends \block_xp\local\controller\visuals_controller {
      */
     protected function preview() {
         $output = $this->get_renderer();
-        echo html_writer::div($output->xp_preview(rand(20, 9999), $this->courseid), 'xp-mb-4');
+        $currency = di::get('currency_factory')->get_currency_for_world($this->world);
+        echo html_writer::div($output->xp_preview(rand(20, 9999), null, $currency), 'xp-mb-4');
         parent::preview();
     }
-
 }

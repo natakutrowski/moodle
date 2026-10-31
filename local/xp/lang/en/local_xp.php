@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Language file.
@@ -157,11 +159,21 @@ $string['privacy:metadata:log:signature'] = 'Some event data';
 $string['privacy:metadata:log:time'] = 'The date at which it happened';
 $string['privacy:metadata:log:type'] = 'The event type';
 $string['privacy:metadata:log:userid'] = 'The user who gained the points';
+$string['privacy:metadata:oauthtoken'] = 'MCP OAuth authorisation codes and tokens.';
+$string['privacy:metadata:oauthtoken:clientid'] = 'The OAuth client identifier.';
+$string['privacy:metadata:oauthtoken:expires'] = 'When the OAuth credential expires.';
+$string['privacy:metadata:oauthtoken:redirecturi'] = 'The OAuth redirect URI.';
+$string['privacy:metadata:oauthtoken:revoked'] = 'Whether the OAuth credential has been revoked.';
+$string['privacy:metadata:oauthtoken:timecreated'] = 'When the OAuth credential was created.';
+$string['privacy:metadata:oauthtoken:timemodified'] = 'When the OAuth credential was last modified.';
+$string['privacy:metadata:oauthtoken:type'] = 'The OAuth credential type.';
+$string['privacy:metadata:oauthtoken:userid'] = 'The user who authorised the OAuth credential.';
 $string['privacy:metadata:prefdataformat'] = 'Download format';
 $string['privacy:metadata:userflag'] = 'Stores per-user leaderboard participation preferences';
 $string['privacy:metadata:userflag:ladderparticipation'] = 'Whether the user participates in the leaderboard';
 $string['privacy:metadata:userflag:ladderparticipationlocked'] = 'When the participation preference can be changed again';
 $string['privacy:metadata:userflag:userid'] = 'The user';
+$string['privacy:path:oauthtokens'] = 'MCP OAuth grants';
 $string['progressbarmode'] = 'Display progress towards';
 $string['progressbarmode_help'] = '
 When set to _The next level_, the progress bar displays the progress of the user towards the next level.
@@ -276,11 +288,23 @@ $string['unabletoidentifyuser'] = 'Unable to identify user.';
 $string['unknowngradeitemtype'] = 'Unknown type ({$a})';
 $string['uptoleveln'] = 'Up to level {$a}';
 $string['team'] = 'Team';
+$string['taskoauthcleanup'] = 'OAuth token cleanup';
 $string['themestandard'] = 'Standard';
 $string['theyleftthefollowingmessage'] = 'They left the following message:';
 $string['timeformaxpoints'] = 'Time frame for max. points';
 $string['timeformaxpoints_help'] = 'The time frame (in seconds) during which the user cannot receive more than a certain amount of points.';
 $string['xpparticipants'] = 'XP participants';
+$string['privacy:metadata:oauthtoken'] = 'MCP OAuth authorisation codes and tokens.';
+$string['privacy:metadata:oauthtoken:clientid'] = 'The OAuth client identifier.';
+$string['privacy:metadata:oauthtoken:expires'] = 'When the OAuth credential expires.';
+$string['privacy:metadata:oauthtoken:redirecturi'] = 'The OAuth redirect URI.';
+$string['privacy:metadata:oauthtoken:revoked'] = 'Whether the OAuth credential has been revoked.';
+$string['privacy:metadata:oauthtoken:timecreated'] = 'When the OAuth credential was created.';
+$string['privacy:metadata:oauthtoken:timemodified'] = 'When the OAuth credential was last modified.';
+$string['privacy:metadata:oauthtoken:type'] = 'The OAuth credential type.';
+$string['privacy:metadata:oauthtoken:userid'] = 'The user who authorised the OAuth credential.';
+$string['privacy:path:oauthtokens'] = 'MCP OAuth grants';
+$string['xp:usemcp'] = 'Use the Level Up XP MCP integration';
 
 // Deprecated since v1.7.
 $string['enablegroupladder'] = 'Enable group ladder';

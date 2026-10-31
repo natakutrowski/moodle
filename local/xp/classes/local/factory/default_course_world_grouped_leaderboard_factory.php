@@ -1,27 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * Default course world grouped leaderboard factory.
- *
- * @package    local_xp
- * @copyright  2019 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 namespace local_xp\local\factory;
 
@@ -41,6 +34,7 @@ use local_xp\local\iomad\department_leaderboard;
 use local_xp\local\iomad\facade as iomadfacade;
 use local_xp\local\leaderboard\cohort_leaderboard;
 use local_xp\local\leaderboard\course_group_leaderboard;
+use local_xp\local\leaderboard\grouped_leaderboard_helper;
 use local_xp\local\team\team_membership_resolver;
 
 /**
@@ -54,7 +48,6 @@ use local_xp\local\team\team_membership_resolver;
 class default_course_world_grouped_leaderboard_factory implements
     course_world_grouped_leaderboard_factory,
     course_world_team_membership_resolver_factory {
-
     /** @var moodle_database The DB. */
     protected $db;
     /** @var iomadfacade IOMAD. */
@@ -154,15 +147,13 @@ class default_course_world_grouped_leaderboard_factory implements
 
         if ($source == default_course_world_config::GROUP_LADDER_COURSE_GROUPS) {
             $leaderboard = new course_group_leaderboard($this->db, $courseid, $columns, $levelsinfo, $orderby);
-
         } else if ($source == default_course_world_config::GROUP_LADDER_COHORTS) {
             $leaderboard = new cohort_leaderboard($this->db, $courseid, [], $columns, $levelsinfo, $orderby);
-
         } else if ($source == default_course_world_config::GROUP_LADDER_IOMAD_COMPANIES) {
             $leaderboard = new company_leaderboard($this->db, $courseid, $this->iomadfacade, [], $columns, $levelsinfo, $orderby);
-
         } else if ($source == default_course_world_config::GROUP_LADDER_IOMAD_DEPARTMENTS) {
-            $leaderboard = new department_leaderboard($this->db,
+            $leaderboard = new department_leaderboard(
+                $this->db,
                 $courseid,
                 $this->iomadfacade,
                 $this->iomadfacade->get_viewing_companyid(),
@@ -171,7 +162,6 @@ class default_course_world_grouped_leaderboard_factory implements
                 $levelsinfo,
                 $orderby
             );
-
         } else {
             $leaderboard = new empty_leaderboard($columns);
         }
@@ -202,5 +192,4 @@ class default_course_world_grouped_leaderboard_factory implements
 
         return $leaderboard;
     }
-
 }

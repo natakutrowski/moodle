@@ -1,18 +1,20 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Level Up XP+.
 //
-// Moodle is free software: you can redistribute it and/or modify
+// Level Up XP+ is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
+// Level Up XP+ is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
+//
+// See <https://levelup.plus>.
 
 /**
  * Import controller.
@@ -34,6 +36,7 @@ use html_writer;
 use block_xp\di;
 use block_xp\local\controller\page_controller;
 use block_xp\local\routing\url;
+use block_xp\local\utils\world_utils;
 use block_xp\local\xp\state_store_with_reason;
 use local_xp\local\reason\manual_reason;
 use local_xp\local\provider\user_resolver;
@@ -49,7 +52,6 @@ use single_button;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class import_controller extends page_controller {
-
     /** @var object */
     protected $confirmform;
     /** @var object */
@@ -59,6 +61,11 @@ class import_controller extends page_controller {
     /** @var string */
     protected $routename = 'import';
 
+    /**
+     * Define optional parameters.
+     *
+     * @return array
+     */
     protected function define_optional_params() {
         return [
             ['iid', null, PARAM_INT],
@@ -69,6 +76,27 @@ class import_controller extends page_controller {
         ];
     }
 
+    /**
+     * Check permissions.
+     *
+     * @return void
+     */
+    protected function permissions_checks() {
+        parent::permissions_checks();
+
+        // We require access to the report. A user without access to the report should not be able to identify
+        // users beyond the name displayed in the leaderboard, which could be anonymised. Uploading a CSV could
+        // allow users to identify users by giving them a set amount of points.
+        $accessperms = $this->world->get_access_permissions();
+        if (!($accessperms instanceof \block_xp\local\permission\access_report_permissions)) {
+            throw new \coding_exception('Access permissions object requires report permissions.');
+        }
+        $accessperms->require_access_report();
+    }
+
+    /**
+     * Get form.
+     */
     protected function get_form() {
         if (!$this->form) {
             $iid = csv_import_reader::get_new_iid('local_xp_import');
@@ -84,29 +112,54 @@ class import_controller extends page_controller {
         return $this->form;
     }
 
+    /**
+     * Get provider.
+     *
+     * @param csv_import_reader $cir
+     * @param int $action
+     */
     protected function get_provider($cir, $action) {
         global $USER;
         $action = (int) $action;
-        return new \local_xp\local\provider\csv_user_state_store_points_provider($cir,
-            new user_resolver(di::get('db')),
+        return new \local_xp\local\provider\csv_user_state_store_points_provider(
+            $cir,
+            new user_resolver(di::get('db'), $this->world->get_context()),
             $action,
             $action === user_state_store_points::ACTION_INCREASE ? manual_reason::from_user($USER) : null
         );
     }
 
+    /**
+     * Get page title.
+     *
+     * @return string
+     */
     protected function get_page_html_head_title() {
         return get_string('importpoints', 'block_xp');
     }
 
+    /**
+     * Get page heading.
+     *
+     * @return string
+     */
     protected function get_page_heading() {
         return get_string('importpoints', 'block_xp');
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
+        if (!world_utils::supports_local_points_management($this->world)) {
+            $this->redirect($this->navigator->get_url('infos'));
+        }
+
         $form = $this->get_form();
         if ($form->is_cancelled()) {
-            return redirect($this->urlresolver->reverse('report', ['courseid' => $this->courseid]));
-
+            return redirect($this->navigator->get_url('report'));
         } else if ($data = $form->get_data()) {
             $previewurl = new url($this->pageurl, [
                 'iid' => $data->iid,
@@ -118,6 +171,11 @@ class import_controller extends page_controller {
         }
     }
 
+    /**
+     * Format errors list.
+     *
+     * @param array $errors
+     */
     protected function get_ul_errors_list_from_array($errors) {
         return html_writer::tag(
             'ul',
@@ -126,6 +184,9 @@ class import_controller extends page_controller {
         );
     }
 
+    /**
+     * Output import content.
+     */
     protected function page_content_import() {
         global $USER;
 
@@ -173,7 +234,6 @@ class import_controller extends page_controller {
                     $store->set($usp->get_id(), $usp->get_points());
                 }
                 $successful++;
-
             } else if ($usp->get_action() === user_state_store_points::ACTION_INCREASE) {
                 if ($supportsreason && $usp->get_reason()) {
                     $store->increase_with_reason($usp->get_id(), $usp->get_points(), $usp->get_reason());
@@ -186,7 +246,6 @@ class import_controller extends page_controller {
                     $notifier->notify($usp->get_id(), $usp->get_points(), $usp->get_message());
                 }
             }
-
         }
 
         $cir->cleanup();
@@ -205,12 +264,15 @@ class import_controller extends page_controller {
         }
 
         echo $output->single_button(
-            $this->urlresolver->reverse('report', ['courseid' => $this->courseid])->get_compatible_url(),
+            $this->navigator->get_url('report')->get_compatible_url(),
             get_string('continue', 'core'),
             'get'
         );
     }
 
+    /**
+     * Output preview content.
+     */
     protected function page_content_preview() {
         $output = $this->get_renderer();
         $iid = $this->get_param('iid');
@@ -219,10 +281,9 @@ class import_controller extends page_controller {
 
         echo $output->heading(get_string('importpreview', 'local_xp'), 3);
 
-        $reason = null;
         $store = $this->world->get_store();
         $cir = new csv_import_reader($iid, 'local_xp_import');
-        $provider = $this->get_provider($cir, $action, $reason);
+        $provider = $this->get_provider($cir, $action);
 
         $rows = [];
         $i = 0;
@@ -297,6 +358,11 @@ class import_controller extends page_controller {
         ));
     }
 
+    /**
+     * Output page content.
+     *
+     * @return void
+     */
     protected function page_content() {
         $output = $this->get_renderer();
 
@@ -325,5 +391,4 @@ class import_controller extends page_controller {
 
         $form->display();
     }
-
 }

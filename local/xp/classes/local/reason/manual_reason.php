@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP+.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace local_xp\local\reason;
 
@@ -57,6 +57,11 @@ class manual_reason implements reason, reason_with_short_description, reason_wit
         return $this->get_object_id() ?? 0;
     }
 
+    /**
+     * Get short description.
+     *
+     * @return string
+     */
     public function get_short_description() {
         return get_string('manuallyawarded', 'local_xp');
     }
@@ -90,5 +95,4 @@ class manual_reason implements reason, reason_with_short_description, reason_wit
         $reason->set_object_id((int) $user->id);
         return $reason;
     }
-
 }
