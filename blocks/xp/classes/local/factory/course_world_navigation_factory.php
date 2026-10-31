@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Course world navigation factory interface.
@@ -36,9 +36,9 @@ use block_xp\local\course_world;
  * @copyright  2017 Frédéric Massart
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated Since XP 21, use navigator instead.
  */
 interface course_world_navigation_factory {
-
     /**
      * Get the navigation.
      *
@@ -55,5 +55,4 @@ interface course_world_navigation_factory {
      * @return array
      */
     public function get_course_navigation(course_world $world);
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_xp\local\rule;
 
@@ -26,8 +26,7 @@ namespace block_xp\local\rule;
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class static_instance implements instance {
-
+class static_instance implements instance_with_source {
     /** @var object The record. */
     protected $record;
     /** @var \context The context. */
@@ -44,10 +43,29 @@ class static_instance implements instance {
         $this->record = $record;
     }
 
+    /**
+     * Get ID.
+     *
+     * @return int
+     */
     public function get_id(): int {
         return $this->record->id;
     }
 
+    /**
+     * Get the source rule ID.
+     *
+     * @return int|null
+     */
+    public function get_source_rule_id(): ?int {
+        return isset($this->record->sourceruleid) ? (int) $this->record->sourceruleid : null;
+    }
+
+    /**
+     * Get context.
+     *
+     * @return \context
+     */
     public function get_context(): \context {
         if (!isset($this->context)) {
             // An empty context ID means a default rule, report it as the system context.
@@ -60,6 +78,11 @@ class static_instance implements instance {
         return $this->context;
     }
 
+    /**
+     * Get child context.
+     *
+     * @return \context|null
+     */
     public function get_child_context(): ?\context {
         if (!$this->record->childcontextid) {
             return null;
@@ -73,18 +96,38 @@ class static_instance implements instance {
         return $this->childcontext ?: null;
     }
 
+    /**
+     * Get points.
+     *
+     * @return int
+     */
     public function get_points(): int {
         return $this->record->points;
     }
 
+    /**
+     * Get type name.
+     *
+     * @return string
+     */
     public function get_type_name(): string {
         return $this->record->type;
     }
 
+    /**
+     * Get filter name.
+     *
+     * @return string
+     */
     public function get_filter_name(): string {
         return $this->record->filter;
     }
 
+    /**
+     * Get filter config.
+     *
+     * @return object
+     */
     public function get_filter_config(): object {
         return (object) [
             'courseid' => $this->record->filtercourseid,
@@ -93,5 +136,4 @@ class static_instance implements instance {
             'char1' => $this->record->filterchar1,
         ];
     }
-
 }

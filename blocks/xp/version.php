@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Version file.
@@ -26,9 +26,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version    = 2026042001;
-$plugin->requires   = 2022112800;   // Moodle 4.1.0.
+$plugin->version    = 2026100301;
+$plugin->requires   = 2024100700;   // Moodle 4.5.0.
 $plugin->component  = 'block_xp';
 $plugin->maturity   = MATURITY_STABLE;
-$plugin->release    = '20.0';
-$plugin->supported  = [401, 502];
+$plugin->release    = '21.0a';
+$plugin->supported  = [405, 503];

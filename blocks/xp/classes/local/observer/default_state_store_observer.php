@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * State store observer.
@@ -29,7 +29,7 @@ namespace block_xp\local\observer;
 
 use context;
 use block_xp\local\config\config;
-use block_xp\local\notification\course_level_up_notification_service;
+use block_xp\local\notification\level_up_notification_service;
 use block_xp\local\xp\level;
 use block_xp\local\xp\state_store;
 
@@ -42,12 +42,11 @@ use block_xp\local\xp\state_store;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class default_state_store_observer implements level_up_state_store_observer, points_increased_state_store_observer {
-
     /** @var context The context. */
     protected $context;
     /** @var config The world config. */
     protected $config;
-    /** @var course_level_up_notification_service The notification service. */
+    /** @var level_up_notification_service The notification service. */
     protected $notificationservice;
 
     /**
@@ -55,9 +54,9 @@ class default_state_store_observer implements level_up_state_store_observer, poi
      *
      * @param context $context The context.
      * @param config $config The world config.
-     * @param course_level_up_notification_service $notificationservice The notification service.
+     * @param level_up_notification_service $notificationservice The notification service.
      */
-    public function __construct(context $context, config $config, course_level_up_notification_service $notificationservice) {
+    public function __construct(context $context, config $config, level_up_notification_service $notificationservice) {
         $this->context = $context;
         $this->config = $config;
         $this->notificationservice = $notificationservice;
@@ -83,7 +82,6 @@ class default_state_store_observer implements level_up_state_store_observer, poi
 
         // Process for each level.
         for ($i = $lowestlevel; $i <= $highestlevel; $i++) {
-
             // Trigger the event.
             $params = [
                 'context' => $this->context,
@@ -135,5 +133,4 @@ class default_state_store_observer implements level_up_state_store_observer, poi
             $this->notificationservice->notify($id, $level);
         }
     }
-
 }

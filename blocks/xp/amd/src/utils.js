@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Utils.
@@ -23,6 +23,8 @@
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+import * as Ajax from 'core/ajax';
 
 /**
  * Copy to clipboard.
@@ -117,4 +119,15 @@ function setAtDepth(obj, keys, value) {
     currentObj[lastKey] = value;
 
     return obj;
+}
+
+/**
+ * Ajax call shorthand.
+ *
+ * @param {String} method The method.
+ * @param {Object} args The arguments.
+ * @returns {Promise}
+ */
+export function ws(method, args) {
+    return Ajax.call([{methodname: method, args: args}])[0];
 }

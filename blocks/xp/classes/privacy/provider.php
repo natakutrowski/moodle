@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Data provider.
@@ -88,8 +88,9 @@ class provider implements
         $collection->add_user_preference('block_xp_notices', 'privacy:metadata:prefnotices');
         $collection->add_user_preference('block_xp-generic-ladder-pagesize', 'privacy:metadata:prefladderpagesize');
         $collection->add_user_preference('block_xp-generic-promo-page-seen', 'privacy:metadata:prefseenpromo');
-        $collection->add_user_preference('block_xp-notice-block_intro_%d', 'privacy:metadata:prefintro');
+        $collection->add_user_preference('block_xp_block_intro_%d', 'privacy:metadata:prefintro');
         $collection->add_user_preference('block_xp_notify_level_up_%d', 'privacy:metadata:preflevelup');
+        $collection->add_user_preference('block_xp_notify_ctx_level_up_%d', 'privacy:metadata:preflevelup');
 
         return $collection;
     }
@@ -224,7 +225,6 @@ class provider implements
         $logs = [];
         $lastcourseid = null;
         foreach ($recordset as $record) {
-
             if ($lastcourseid && $lastcourseid != $record->courseid) {
                 $flushlogs($lastcourseid, $logs);
                 $logs = [];
@@ -271,7 +271,6 @@ class provider implements
         $logs = [];
         $lastcontextid = null;
         foreach ($recordset as $record) {
-
             if ($lastcontextid && $lastcontextid != $record->contextid) {
                 $flushlogs($lastcontextid, $logs);
                 $logs = [];
@@ -420,10 +419,13 @@ class provider implements
         $db = \block_xp\di::get('db');
         $sql = $db->sql_like('name', ':name');
         $db->delete_records_select('user_preferences', $sql, [
-            'name' => 'block_xp-notice-block_intro_' . $courseid,
+            'name' => 'block_xp_block_intro_' . $context->id,
         ]);
         $db->delete_records_select('user_preferences', $sql, [
             'name' => 'block_xp_notify_level_up_' . $courseid,
+        ]);
+        $db->delete_records_select('user_preferences', $sql, [
+            'name' => 'block_xp_notify_ctx_level_up_' . $context->id,
         ]);
     }
 
@@ -466,11 +468,15 @@ class provider implements
         $likesql = $db->sql_like('name', ':name');
         $sql = "$likesql AND userid = :userid";
         $db->delete_records_select('user_preferences', $sql, [
-            'name' => 'block_xp-notice-block_intro_' . $courseid,
+            'name' => 'block_xp_block_intro_' . $context->id,
             'userid' => $userid,
         ]);
         $db->delete_records_select('user_preferences', $sql, [
             'name' => 'block_xp_notify_level_up_' . $courseid,
+            'userid' => $userid,
+        ]);
+        $db->delete_records_select('user_preferences', $sql, [
+            'name' => 'block_xp_notify_ctx_level_up_' . $context->id,
             'userid' => $userid,
         ]);
     }
@@ -505,7 +511,7 @@ class provider implements
      * Get all the preferences of a user.
      *
      * @param int $userid The user ID
-     * @return stdClass[] Contain properties name, value and description.
+     * @return \stdClass[] Contain properties name, value and description.
      */
     protected static function get_preferences_for_user($userid) {
         $prefs = [];
@@ -517,22 +523,20 @@ class provider implements
             if ($name === 'block_xp_notices') {
                 $desc = get_string('privacy:metadata:prefnotices', 'block_xp');
                 $value = transform::yesno($value);
-
             } else if ($name === 'block_xp-generic-promo-page-seen') {
                 $desc = get_string('privacy:metadata:prefseenpromo', 'block_xp');
                 $value = transform::datetime($value);
-
             } else if ($name === 'block_xp-generic-ladder-pagesize') {
                 $desc = get_string('privacy:metadata:prefladderpagesize', 'block_xp');
-
-            } else if (strpos($name, 'block_xp-notice-block_intro_') === 0) {
+            } else if (strpos($name, 'block_xp_block_intro_') === 0) {
                 $desc = get_string('privacy:metadata:prefintro', 'block_xp');
                 $value = transform::yesno($value);
-
             } else if (strpos($name, 'block_xp_notify_level_up_') === 0) {
                 $desc = get_string('privacy:metadata:preflevelup', 'block_xp');
                 $value = transform::yesno($value);
-
+            } else if (strpos($name, 'block_xp_notify_ctx_level_up_') === 0) {
+                $desc = get_string('privacy:metadata:preflevelup', 'block_xp');
+                $value = transform::yesno($value);
             } else {
                 continue;
             }

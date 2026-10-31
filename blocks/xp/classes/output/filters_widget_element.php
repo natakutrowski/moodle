@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Filters widget group renderable.
@@ -39,7 +39,6 @@ use renderable;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class filters_widget_element implements renderable {
-
     /** @var string The description. */
     public $description;
     /** @var help_icon The help icon. */
@@ -53,9 +52,9 @@ class filters_widget_element implements renderable {
      * Constructor.
      *
      * @param renderable $widget The widget, or any renderable really.
-     * @param string $title The element's title.
-     * @param string $description The description.
-     * @param help_icon $helpicon The help.
+     * @param ?string $title The element's title.
+     * @param ?string $description The description.
+     * @param ?help_icon $helpicon The help.
      */
     public function __construct(renderable $widget, $title = null, $description = null, ?help_icon $helpicon = null) {
         $this->widget = $widget;
@@ -63,5 +62,4 @@ class filters_widget_element implements renderable {
         $this->description = $description;
         $this->helpicon = $helpicon;
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Admin filter manager.
@@ -30,6 +30,7 @@ namespace block_xp\local\xp;
 use moodle_database;
 use block_xp\di;
 use block_xp\local\config\course_world_config;
+use block_xp\local\course_world;
 use coding_exception;
 
 /**
@@ -41,7 +42,6 @@ use coding_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_filter_manager {
-
     /** Key under which we check if the filters were customised. */
     const CUSTOMISED_CONFIG_KEY = 'admin_filter_manager:customised';
 
@@ -100,7 +100,8 @@ class admin_filter_manager {
             return $this->get_default_filters($category);
         }
 
-        $results = $this->db->get_recordset('block_xp_filters',
+        $results = $this->db->get_recordset(
+            'block_xp_filters',
             ['courseid' => 0, 'category' => $category],
             'sortorder ASC, id ASC'
         );
@@ -153,7 +154,8 @@ class admin_filter_manager {
      * @return bool
      */
     protected function is_only_using_legacy_default_event_filters() {
-        $results = $this->db->get_recordset('block_xp_filters',
+        $results = $this->db->get_recordset(
+            'block_xp_filters',
             ['courseid' => 0, 'category' => \block_xp_filter::CATEGORY_EVENTS],
             'sortorder ASC, id ASC'
         );
@@ -214,15 +216,19 @@ class admin_filter_manager {
         }
         $courseworldfactory = di::get('course_world_factory');
 
-        // This is dangerously hardcoded, byt let's use this for now to detect all instances to work on.
-        $sql = 'courseid > 0 AND defaultfilters != :defaultfilters';
+        // This is dangerously hardcoded, but let's use this for now to detect all instances to work on.
+        $sql = 'courseid > 0 AND courseid != :siteid AND defaultfilters != :defaultfilters';
         $courseids = $this->db->get_fieldset_select('block_xp_config', 'courseid', $sql, [
+            'siteid' => SITEID,
             'defaultfilters' => course_world_config::DEFAULT_FILTERS_MISSING,
         ]);
 
         // This is slow, but that's sort of the cleanest way.
         foreach ($courseids as $courseid) {
             $world = $courseworldfactory->get_world($courseid);
+            if (!$world instanceof course_world) {
+                continue;
+            }
             $world->reset_filters_to_defaults();
         }
     }

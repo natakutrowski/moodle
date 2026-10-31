@@ -14,16 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
-
-/**
- * External function.
- *
- * @package    block_xp
- * @copyright  2023 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// See <https://levelup.plus>.
 
 namespace block_xp\external;
 
@@ -38,7 +29,6 @@ use block_xp\di;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mark_popup_notification_seen extends external_api {
-
     /**
      * External function parameters.
      *
@@ -46,31 +36,35 @@ class mark_popup_notification_seen extends external_api {
      */
     public static function execute_parameters() {
         return new external_function_parameters([
-            'courseid' => new external_value(PARAM_INT),
+            'contextid' => new external_value(PARAM_INT, '', VALUE_DEFAULT),
+            'courseid' => new external_value(PARAM_INT, 'Deprecated parameter.', VALUE_DEFAULT),
             'level' => new external_value(PARAM_INT),
         ]);
     }
 
     /**
-     * Search courses.
+     * Exwecute.
      *
-     * The only reason this exists is to include the frontpage in the search.
-     *
-     * @param int $courseid The course ID.
+     * @param ?int $contextid The context ID.
+     * @param ?int $courseid The course ID.
      * @param int $level The level.
      * @return bool
      */
-    public static function execute($courseid, $level) {
-        global $SITE, $USER;
+    public static function execute($contextid, $courseid, $level) {
+        global $USER;
 
-        $params = self::validate_parameters(self::execute_parameters(), compact('courseid', 'level'));
+        $params = self::validate_parameters(self::execute_parameters(), compact('contextid', 'courseid', 'level'));
+        $contextid = $params['contextid'];
         $courseid = $params['courseid'];
         $level = $params['level'];
 
-        // Pre-checks.
-        $worldfactory = di::get('course_world_factory');
-        $world = $worldfactory->get_world($courseid);
-        $courseid = $world->get_courseid(); // Ensure that we get the real course ID.
+        if (!empty($contextid)) {
+            $world = di::get('context_world_factory')->get_world_from_context(\context::instance_by_id($contextid));
+        } else if (!empty($courseid)) {
+            $world = di::get('course_world_factory')->get_world($courseid);
+        } else {
+            throw new \moodle_exception('invaliddata', 'core_error');
+        }
         self::validate_context($world->get_context());
 
         // Permission checks.
@@ -78,7 +72,7 @@ class mark_popup_notification_seen extends external_api {
         $perms->require_access();
 
         $userlevel = $world->get_store()->get_state($USER->id)->get_level()->get_level();
-        $service = $world->get_level_up_notification_service();
+        $service = di::get('world_level_up_notification_service_factory')->get_for_world($world);
         $service->mark_as_notified($USER->id, $level);
 
         // Special case to remove 0 when we are at the same level.
@@ -97,5 +91,4 @@ class mark_popup_notification_seen extends external_api {
     public static function execute_returns() {
         return new external_value(PARAM_BOOL);
     }
-
 }

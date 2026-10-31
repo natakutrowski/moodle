@@ -14,16 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
-
-/**
- * Config controller.
- *
- * @package    block_xp
- * @copyright  2017 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// See <https://levelup.plus>.
 
 namespace block_xp\local\controller;
 
@@ -38,17 +29,16 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class config_controller extends page_controller {
-
     /** @var string The route name. */
     protected $routename = 'config';
-    /** @var moodleform The form. */
+    /** @var \moodleform The form. */
     private $form;
 
     /**
      * Define the form.
      *
      * @param bool $unused No longer used.
-     * @return moodleform
+     * @return \moodleform
      */
     protected function define_form($unused = false) {
         return new \block_xp\form\config($this->pageurl->out(false), $this->define_form_customdata());
@@ -61,7 +51,7 @@ class config_controller extends page_controller {
      */
     protected function define_form_customdata() {
         return [
-            'promourl' => $this->urlresolver->reverse('promo', ['courseid' => $this->courseid]),
+            'promourl' => $this->navigator->get_url('promo'),
             'world' => $this->world,
         ];
     }
@@ -71,7 +61,7 @@ class config_controller extends page_controller {
      *
      * Private so that we do not override this one.
      *
-     * @return moodleform
+     * @return \moodleform
      */
     private function get_form() {
         if (!$this->form) {
@@ -80,6 +70,11 @@ class config_controller extends page_controller {
         return $this->form;
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
         $config = $this->world->get_config();
         $form = $this->get_form();
@@ -90,25 +85,44 @@ class config_controller extends page_controller {
             // Save the config.
             $config->set_many($data);
 
-            // TODO Display a message.
             $this->redirect();
         }
     }
 
+    /**
+     * Get page title.
+     *
+     * @return string
+     */
     protected function get_page_html_head_title() {
         return get_string('coursesettings', 'block_xp');
     }
 
+    /**
+     * Get page heading.
+     *
+     * @return string
+     */
     protected function get_page_heading() {
         return get_string('coursesettings', 'block_xp');
     }
 
+    /**
+     * Output page content.
+     *
+     * @return void
+     */
     protected function page_content() {
         $form = $this->get_form();
         $form->display();
         $this->page_note();
     }
 
+    /**
+     * Output note.
+     *
+     * @return void
+     */
     protected function page_note() {
         $configlocked = \block_xp\di::get('config_locked');
         $thoselocked = array_filter($configlocked->get_all());
@@ -116,5 +130,4 @@ class config_controller extends page_controller {
             echo html_writer::tag('p', html_writer::tag('small', get_string('notesomesettingslocked', 'block_xp')));
         }
     }
-
 }

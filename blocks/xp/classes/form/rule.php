@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_xp\form;
 
@@ -22,6 +22,7 @@ use block_xp\di;
 use block_xp\local\ruletype\limit_spec;
 use block_xp\local\ruletype\ruletype;
 use block_xp\local\ruletype\ruletype_with_limit;
+use block_xp\local\utils\world_utils;
 use block_xp\local\world;
 use context;
 use context_system;
@@ -37,7 +38,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class rule extends dynamic_form {
-
     /** @var object The rule record. */
     protected $rule;
     /** @var ruletype The rule type. */
@@ -73,6 +73,11 @@ class rule extends dynamic_form {
         return $this->ruletype;
     }
 
+    /**
+     * Get context.
+     *
+     * @return context
+     */
     protected function get_context_for_dynamic_submission(): context {
         if ($this->is_default_rule()) {
             return context_system::instance();
@@ -122,6 +127,9 @@ class rule extends dynamic_form {
         return $this->world;
     }
 
+    /**
+     * Check access.
+     */
     final protected function check_access_for_dynamic_submission(): void {
         if ($this->is_default_rule()) {
             require_capability('moodle/site:config', \context_system::instance());
@@ -130,6 +138,10 @@ class rule extends dynamic_form {
 
         $perms = $this->get_world()->get_access_permissions();
         $perms->require_manage();
+
+        if (!world_utils::supports_local_points_management($this->get_world())) {
+            throw new \moodle_exception('errorfeaturenotenabled', 'block_xp');
+        }
     }
 
     /**
@@ -141,6 +153,11 @@ class rule extends dynamic_form {
         return empty($this->get_rule()->contextid);
     }
 
+    /**
+     * Process the form submission.
+     *
+     * @return mixed
+     */
     final public function process_dynamic_submission() {
         $data = $this->get_data();
         if (!$data) {
@@ -160,16 +177,28 @@ class rule extends dynamic_form {
     protected function save_data(\stdClass $data): void {
         $rule = $this->get_rule();
         $rule->points = $data->points;
-        di::get('db')->update_record('block_xp_rule', $rule);
+
+        if (!$this->is_default_rule()) {
+            $manager = di::get('world_rule_manager_factory')->get_rule_manager($this->get_world());
+            $manager->update_rule($rule->id, $data);
+            return;
+        }
+
+        di::get('admin_rule_manager')->update_rule($rule->id, $data);
     }
 
+    /**
+     * Set form data.
+     */
     final public function set_data_for_dynamic_submission(): void {
         $this->set_data($this->get_default_data());
-        if (!$this->is_default_rule()) {
-            di::get('world_rule_manager_factory')->get_rule_manager($this->get_world())->detach();
-        }
     }
 
+    /**
+     * Get page URL.
+     *
+     * @return moodle_url
+     */
     protected function get_page_url_for_dynamic_submission(): moodle_url {
         $urlresolver = di::get('url_resolver');
         if ($this->is_default_rule()) {
@@ -186,7 +215,7 @@ class rule extends dynamic_form {
             $anchorname = $rule->type;
         }
 
-        $url = $urlresolver->reverse($urlname, ['courseid' => $world->get_courseid()]);
+        $url = di::get('world_navigator_factory')->get_navigator_for_world($world)->get_url($urlname);
         $url->set_anchor($anchorname);
 
         return $url;
@@ -221,7 +250,7 @@ class rule extends dynamic_form {
         }
 
         $labelsuffix = '';
-        if (!di::get('addon')->is_activated() && di::get('config')->get('enablepromoincourses')) {
+        if (!di::get('addon')->is_activated() && di::get('addon')->is_promo_allowed()) {
             $labelsuffix = ' ' . di::get('renderer')->render_from_template('block_xp/addon-tag', []);
         }
 
@@ -268,7 +297,7 @@ class rule extends dynamic_form {
         }
 
         if (!di::get('addon')->is_activated()) {
-            if (!di::get('config')->get('enablepromoincourses')) {
+            if (!di::get('addon')->is_promo_allowed()) {
                 $mform->removeElement('limitgroup');
                 $mform->removeElement('repeatgroup');
             } else {
@@ -361,6 +390,13 @@ class rule extends dynamic_form {
         return $this->get_ruletype() instanceof ruletype_with_limit;
     }
 
+    /**
+     * Validation.
+     *
+     * @param array $data The data.
+     * @param array $files The files.
+     * @return array
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
@@ -370,5 +406,4 @@ class rule extends dynamic_form {
 
         return $errors;
     }
-
 }

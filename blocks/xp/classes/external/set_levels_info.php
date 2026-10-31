@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * External function.
@@ -40,7 +40,6 @@ use core_text;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class set_levels_info extends external_api {
-
     /**
      * External function parameters.
      *
@@ -48,7 +47,8 @@ class set_levels_info extends external_api {
      */
     public static function execute_parameters() {
         return new external_function_parameters([
-            'courseid' => new external_value(PARAM_INT),
+            'contextid' => new external_value(PARAM_INT, '', VALUE_DEFAULT),
+            'courseid' => new external_value(PARAM_INT, 'Deprecated parameter', VALUE_DEFAULT),
             'levels' => new external_multiple_structure(new external_single_structure([
                 'level' => new external_value(PARAM_INT),
                 'xprequired' => new external_value(PARAM_INT),
@@ -81,19 +81,24 @@ class set_levels_info extends external_api {
     /**
      * External function.
      *
-     * @param int $courseid The course ID.
+     * @param ?int $contextid The context ID.
+     * @param ?int $courseid The course ID.
      * @param array $levels The levels.
      * @param array $algo The algo.
      * @return object
      */
-    public static function execute($courseid, $levels, $algo) {
-        global $USER;
-        $params = self::validate_parameters(self::execute_parameters(), compact('courseid', 'levels', 'algo'));
+    public static function execute($contextid, $courseid, $levels, $algo) {
+        $params = self::validate_parameters(self::execute_parameters(), compact('contextid', 'courseid', 'levels', 'algo'));
+        $contextid = $params['contextid'];
+        $courseid = $params['courseid'];
 
-        // Pre-checks.
-        $worldfactory = di::get('course_world_factory');
-        $world = $worldfactory->get_world($courseid);
-        $courseid = $world->get_courseid(); // Ensure that we get the real course ID.
+        if (!empty($contextid)) {
+            $world = di::get('context_world_factory')->get_world_from_context(\context::instance_by_id($contextid));
+        } else if (!empty($courseid)) {
+            $world = di::get('course_world_factory')->get_world($courseid);
+        } else {
+            throw new \moodle_exception('invaliddata', 'core_error');
+        }
         self::validate_context($world->get_context());
 
         // Permission checks.
@@ -137,7 +142,6 @@ class set_levels_info extends external_api {
         // Pseudo validation, we basically ignore errors.
         if (count($levels) < 2 || count($levels) > 99) {
             $levelsinfo = algo_levels_info::make_from_defaults();
-
         } else {
             $lastpts = null;
             $levelsdata = array_reduce(array_keys($levels), function ($carry, $key) use ($levels, &$lastpts) {
@@ -181,5 +185,4 @@ class set_levels_info extends external_api {
 
         return $levelsinfo;
     }
-
 }

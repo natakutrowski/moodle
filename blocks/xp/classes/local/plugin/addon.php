@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Addon.
@@ -40,7 +40,6 @@ use block_xp\task\post_deactivation_adhoc;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class addon {
-
     /**
      * Get the expected release version.
      *
@@ -141,12 +140,30 @@ class addon {
     }
 
     /**
+     * Whether any promo is allowed.
+     *
+     * @return bool
+     */
+    public function is_promo_allowed(): bool {
+        return (bool) \block_xp\di::get('config')->get('enablepromoincourses');
+    }
+
+    /**
      * Require the plugin to be activated.
      */
     public function require_activated() {
         if (!$this->is_activated()) {
             throw new \moodle_exception('addonnotactivated', 'block_xp');
         }
+    }
+
+    /**
+     * Whether AI is supported by the add-on.
+     *
+     * @return bool
+     */
+    public function supports_ai(): bool {
+        return false;
     }
 
     /**
@@ -261,5 +278,4 @@ class addon {
         }
         return true;
     }
-
 }

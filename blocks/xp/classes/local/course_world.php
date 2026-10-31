@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Course World.
@@ -38,6 +38,9 @@ use block_xp\local\config\course_world_config;
 use block_xp\local\factory\badge_url_resolver_course_world_factory;
 use block_xp\local\factory\levels_info_factory;
 use block_xp\local\logger\collection_logger;
+use block_xp\local\notification\level_up_notification_service;
+use block_xp\local\xp\algo_levels_info;
+use block_xp\local\xp\levels_info;
 
 /**
  * Course World.
@@ -48,7 +51,6 @@ use block_xp\local\logger\collection_logger;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_world implements world {
-
     /** @var config The config. */
     protected $config;
     /** @var context The context. */
@@ -69,7 +71,9 @@ class course_world implements world {
     protected $strategy;
     /** @var course_filter_manager The filter manager. */
     protected $filtermanager;
-    /** @var badge_url_resolver_course_world_factory The badge URL resolver factory. */
+    /** @var level_up_notification_service The filter manager. */
+    protected $levelupnotifservice;
+    /** @var ?badge_url_resolver_course_world_factory The badge URL resolver factory. */
     protected $urlresolverfactory;
     /** @var object Observer object cache. */
     protected $statestoreobserver;
@@ -82,14 +86,14 @@ class course_world implements world {
      * @param config $config The course config.
      * @param moodle_database $db The DB.
      * @param int $courseid The course ID.
-     * @param badge_url_resolver_course_world_factory $urlresolverfactory The badge URL resolver factory.
+     * @param badge_url_resolver_course_world_factory|null $urlresolverfactory The badge URL resolver factory.
      * @param levels_info_factory|null $levelsinfofactory The levels info factory.
      */
     public function __construct(
         config $config,
         moodle_database $db,
         $courseid,
-        badge_url_resolver_course_world_factory $urlresolverfactory,
+        ?badge_url_resolver_course_world_factory $urlresolverfactory = null,
         ?levels_info_factory $levelsinfofactory = null
     ) {
         $this->config = $config;
@@ -98,7 +102,6 @@ class course_world implements world {
         $this->levelsinfofactory = $levelsinfofactory;
         $this->urlresolverfactory = $urlresolverfactory;
 
-        // TODO We should move the context out of here, and inject the permissions instead.
         if ($courseid == SITEID) {
             $this->context = context_system::instance();
         } else {
@@ -108,14 +111,29 @@ class course_world implements world {
         $this->perms = new \block_xp\local\permission\context_permissions($this->context);
     }
 
+    /**
+     * Get access permissions.
+     *
+     * @return \block_xp\local\permission\access_permissions
+     */
     public function get_access_permissions() {
         return $this->perms;
     }
 
+    /**
+     * Get config.
+     *
+     * @return \block_xp\local\config\config
+     */
     public function get_config() {
         return $this->config;
     }
 
+    /**
+     * Get collection strategy.
+     *
+     * @return \block_xp\local\strategy\collection_strategy
+     */
     public function get_collection_strategy() {
         if (!$this->strategy) {
             $this->strategy = new \block_xp\local\strategy\course_world_collection_strategy(
@@ -172,40 +190,32 @@ class course_world implements world {
             if ($state == course_world_config::DEFAULT_FILTERS_NOOP) {
                 // Early bail.
                 return $this->filtermanager;
-
             } else if ($state == course_world_config::DEFAULT_FILTERS_MISSING) {
                 // The default filters were not applied yet.
                 $this->filtermanager->import_default_filters();
                 $config->set('defaultfilters', course_world_config::DEFAULT_FILTERS_NOOP);
-
             } else if ($state == course_world_config::DEFAULT_FILTERS_STATIC) {
                 // We are in a legacy state, convert.
                 $this->filtermanager->convert_static_filters_to_regular();
                 $config->set('defaultfilters', course_world_config::DEFAULT_FILTERS_NOOP);
             }
-
         }
         return $this->filtermanager;
     }
 
+    /**
+     * Get levels info.
+     *
+     * @return levels_info
+     */
     public function get_levels_info() {
         if (!$this->levelsinfo) {
-
-            // We must apply this check in case an older version of XP+ is used with this.
             if ($this->levelsinfofactory) {
                 $this->levelsinfo = $this->levelsinfofactory->get_world_levels_info($this);
-
             } else {
-                $resolver = $this->urlresolverfactory->get_url_resolver($this);
-                $config = $this->get_config();
-                $data = json_decode($config->get('levelsdata'), true);
-                if (!$data) {
-                    $this->levelsinfo = \block_xp\local\xp\algo_levels_info::make_from_defaults($resolver);
-                } else {
-                    $this->levelsinfo = new \block_xp\local\xp\algo_levels_info($data, $resolver);
-                }
+                // Fallback to avoid breaking API, but no longer supported.
+                $this->levelsinfo = algo_levels_info::make_from_defaults();
             }
-
         }
         return $this->levelsinfo;
     }
@@ -213,11 +223,13 @@ class course_world implements world {
     /**
      * Get level up notification service.
      *
-     * @return notification\course_level_up_notification_service
+     * @return notification\level_up_notification_service
      */
     public function get_level_up_notification_service() {
-        // TODO We could put that somewhere else.
-        return new \block_xp\local\notification\course_level_up_notification_service($this->courseid);
+        if (!$this->levelupnotifservice) {
+            $this->levelupnotifservice = di::get('world_level_up_notification_service_factory')->get_for_world($this);
+        }
+        return $this->levelupnotifservice;
     }
 
     /**
@@ -245,7 +257,8 @@ class course_world implements world {
      */
     protected function get_state_store_observer() {
         if (!$this->statestoreobserver) {
-            $this->statestoreobserver = new \block_xp\local\observer\default_state_store_observer($this->context,
+            $this->statestoreobserver = new \block_xp\local\observer\default_state_store_observer(
+                $this->context,
                 $this->config,
                 $this->get_level_up_notification_service()
             );
@@ -253,6 +266,11 @@ class course_world implements world {
         return $this->statestoreobserver;
     }
 
+    /**
+     * Get store.
+     *
+     * @return \block_xp\local\xp\course_user_state_store
+     */
     public function get_store() {
         if (!$this->store) {
             $this->store = new \block_xp\local\xp\course_user_state_store(
@@ -333,5 +351,4 @@ class course_world implements world {
     public function set_collection_logger(collection_logger $logger) {
         $this->logger = $logger;
     }
-
 }

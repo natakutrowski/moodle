@@ -14,11 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_xp\external;
 
 use block_xp\di;
+use block_xp\local\utils\world_utils;
 use context;
 use context_system;
 
@@ -31,7 +32,6 @@ use context_system;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class delete_rule extends external_api {
-
     /**
      * External function parameters.
      *
@@ -58,7 +58,6 @@ class delete_rule extends external_api {
         $world = self::require_manage_permissions_and_get_world((int) $rule->contextid);
         if ($world) {
             $manager = di::get('world_rule_manager_factory')->get_rule_manager($world);
-            $manager->detach();
             $manager->delete_rule($id);
         } else {
             di::get('admin_rule_manager')->delete_rule($id);
@@ -84,6 +83,11 @@ class delete_rule extends external_api {
         $world = $worldfactory->get_world_from_context(context::instance_by_id($contextid));
         self::validate_context($world->get_context());
         $world->get_access_permissions()->require_manage();
+
+        if (!world_utils::supports_local_points_management($world)) {
+            throw new \moodle_exception('errorfeaturenotenabled', 'block_xp');
+        }
+
         return $world;
     }
 
@@ -95,5 +99,4 @@ class delete_rule extends external_api {
     public static function execute_returns() {
         return new external_value(PARAM_BOOL);
     }
-
 }

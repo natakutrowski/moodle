@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * User state.
@@ -40,14 +40,15 @@ use stdClass;
  * @author     Frédéric Massart <fred@branchup.tech>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class user_state implements renderable, state, state_with_subject, state_with_user {
-
+class user_state implements renderable, state, state_with_presence, state_with_subject, state_with_user {
     /** @var int The course ID. */
     protected $courseid;
     /** @var stdClass The user object. */
     protected $user;
     /** @var int The user's XP. */
     protected $xp;
+    /** @var bool Whether the state has a stored record. */
+    protected $present = true;
     /** @var levels_info The levels info. */
     protected $levelsinfo;
     /** @var level The level. */
@@ -69,10 +70,20 @@ class user_state implements renderable, state, state_with_subject, state_with_us
         $this->courseid = !empty($courseid) ? $courseid : SITEID;
     }
 
+    /**
+     * Get ID.
+     *
+     * @return int
+     */
     public function get_id() {
         return $this->user->id;
     }
 
+    /**
+     * Get level.
+     *
+     * @return level
+     */
     public function get_level() {
         if (!$this->level) {
             $this->level = $this->levelsinfo->get_level_from_xp($this->xp);
@@ -80,6 +91,11 @@ class user_state implements renderable, state, state_with_subject, state_with_us
         return $this->level;
     }
 
+    /**
+     * Get link.
+     *
+     * @return moodle_url|null
+     */
     public function get_link() {
         $userid = $this->user->id;
         $profileurl = new moodle_url('/user/profile.php', ['id' => $userid]);
@@ -89,14 +105,29 @@ class user_state implements renderable, state, state_with_subject, state_with_us
         return $profileurl;
     }
 
+    /**
+     * Get name.
+     *
+     * @return string
+     */
     public function get_name() {
         return fullname($this->user);
     }
 
+    /**
+     * Get picture.
+     *
+     * @return moodle_url|null
+     */
     public function get_picture() {
         return user_utils::user_picture($this->user);
     }
 
+    /**
+     * Get level ratio.
+     *
+     * @return float
+     */
     public function get_ratio_in_level() {
         $total = $this->get_total_xp_in_level();
         if ($total <= 0) {
@@ -105,6 +136,11 @@ class user_state implements renderable, state, state_with_subject, state_with_us
         return $this->get_xp_in_level() / $total;
     }
 
+    /**
+     * Get level XP.
+     *
+     * @return int
+     */
     public function get_total_xp_in_level() {
         $nextlevel = $this->get_next_level();
         if (!$nextlevel) {
@@ -124,12 +160,40 @@ class user_state implements renderable, state, state_with_subject, state_with_us
         return $this->user;
     }
 
+    /**
+     * Get XP.
+     *
+     * @return int
+     */
     public function get_xp() {
         return $this->xp;
     }
 
+    /**
+     * Get XP in level.
+     *
+     * @return int
+     */
     public function get_xp_in_level() {
         return $this->xp - $this->get_level()->get_xp_required();
+    }
+
+    /**
+     * Whether the state has a stored record.
+     *
+     * @return bool False when the state is implied.
+     */
+    public function is_present(): bool {
+        return $this->present;
+    }
+
+    /**
+     * Set whether the state has a stored record.
+     *
+     * @param bool $present Whether the state is present.
+     */
+    public function set_present(bool $present): void {
+        $this->present = $present;
     }
 
     /**
@@ -152,5 +216,4 @@ class user_state implements renderable, state, state_with_subject, state_with_us
         }
         return $this->nextlevel;
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Rules controller.
@@ -29,10 +29,11 @@ namespace block_xp\local\controller;
 
 use block_xp\di;
 use block_xp\local\course_world;
-use html_writer;
 use moodle_exception;
 use block_xp\local\routing\url;
+use block_xp\local\utils\world_utils;
 use block_xp_filter;
+use renderable;
 
 /**
  * Rules controller class.
@@ -43,18 +44,20 @@ use block_xp_filter;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class rules_controller extends page_controller {
-
     /** @var string The nav name. */
     protected $navname = 'rules';
     /** @var string The route name. */
     protected $routename = 'rules';
-    /** @var \block_xp\local\course_filter_manager The filter manager. */
+    /** @var \block_xp\local\xp\course_filter_manager The filter manager. */
     protected $filtermanager;
     /** @var array User filters. */
     protected $userfilters;
-    /** @var array Whether to show legacy headings. */
-    protected $legacyheadings;
 
+    /**
+     * Define optional parameters.
+     *
+     * @return array
+     */
     protected function define_optional_params() {
         return [
             ['reset', false, PARAM_BOOL, false],
@@ -62,13 +65,27 @@ class rules_controller extends page_controller {
         ];
     }
 
+    /**
+     * Handle post-login.
+     *
+     * @return void
+     */
     protected function post_login() {
         parent::post_login();
+        if (!world_utils::supports_local_points_management($this->world)) {
+            $this->redirect($this->navigator->get_url('infos'));
+        } else if (!$this->world instanceof course_world) {
+            $this->redirect($this->navigator->get_url('infos'));
+        }
         $this->filtermanager = $this->world->get_filter_manager();
         $this->userfilters = $this->filtermanager->get_user_filters();
-        $this->legacyheadings = di::get('addon')->is_activated() && di::get('addon')->is_older_than(2023100402);
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
 
         // Reset course rules to defaults.
@@ -84,25 +101,47 @@ class rules_controller extends page_controller {
             require_sesskey();
             $this->handle_save();
             $this->redirect(null, get_string('changessaved'));
-
         } else if (!empty($_POST['cancel'])) {
             $this->redirect();
         }
     }
 
+    /**
+     * Handle save.
+     *
+     * @return void
+     */
     protected function handle_save() {
         $filters = isset($_POST['filters']) ? $_POST['filters'] : [];
         $this->userfilters = $this->save_filters($filters, $this->userfilters);
     }
 
+    /**
+     * Save filters.
+     *
+     * @param array $filters The filters.
+     * @param array $existingfilters The existing filters.
+     * @param int|null $category The category.
+     * @return array
+     */
     protected function save_filters($filters, $existingfilters, $category = null) {
-        static::save_rules_filters($this->world, $filters, $existingfilters, $category);
+        return static::save_rules_filters($this->world, $filters, $existingfilters, $category);
     }
 
+    /**
+     * Get page title.
+     *
+     * @return string
+     */
     protected function get_page_html_head_title() {
         return get_string('eventsrules', 'block_xp');
     }
 
+    /**
+     * Get page heading.
+     *
+     * @return string
+     */
     protected function get_page_heading() {
         return get_string('eventsrules', 'block_xp');
     }
@@ -157,10 +196,7 @@ class rules_controller extends page_controller {
                 $this->get_default_filter(),
                 $this->get_available_rules(),
                 $this->userfilters
-            ),
-            $this->legacyheadings ? get_string('eventsrules', 'block_xp') : null,
-            null,
-            $this->legacyheadings ? new \help_icon('eventsrules', 'block_xp') : null
+            )
         );
     }
 
@@ -173,6 +209,11 @@ class rules_controller extends page_controller {
         return new \block_xp\output\filters_widget_group([$this->get_events_widget_element()]);
     }
 
+    /**
+     * Output page content.
+     *
+     * @return void
+     */
     protected function page_content() {
         global $PAGE;
         $output = $this->get_renderer();
@@ -194,9 +235,19 @@ class rules_controller extends page_controller {
         echo $output->rules_page_loading_check_success();
     }
 
+    /**
+     * Output XP+ promotion.
+     *
+     * @return void
+     */
     protected function page_plus_promo_content() {
     }
 
+    /**
+     * Output advanced heading.
+     *
+     * @return void
+     */
     protected function page_advanced_heading() {
         global $PAGE;
         $output = $this->get_renderer();
@@ -223,16 +274,22 @@ class rules_controller extends page_controller {
         ]);
     }
 
+    /**
+     * Output rules.
+     *
+     * @return void
+     */
     protected function page_rules_content() {
         $output = $this->get_renderer();
-
-        if (!$this->legacyheadings) {
-            $this->page_advanced_heading();
-        }
-
+        $this->page_advanced_heading();
         echo $output->render($this->get_widget_group());
     }
 
+    /**
+     * Output danger zone.
+     *
+     * @return void
+     */
     protected function page_danger_zone_content() {
     }
 
@@ -243,6 +300,7 @@ class rules_controller extends page_controller {
      * @param array $filters The filters to save.
      * @param array $existingfilters The list of existing filters.
      * @param int|null $category The category of filters.
+     * @return array
      */
     public static function save_rules_filters(course_world $world, $filters, $existingfilters, $category = null) {
         $courseid = $world->get_courseid();

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Levels controller.
@@ -30,6 +30,7 @@ namespace block_xp\local\controller;
 use block_xp\di;
 use block_xp\local\routing\url;
 use block_xp\local\serializer\url_serializer;
+use block_xp\local\xp\levels_info_writer;
 
 /**
  * Levels controller class.
@@ -40,10 +41,14 @@ use block_xp\local\serializer\url_serializer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class levels_controller extends page_controller {
-
     /** @var string The route name. */
     protected $routename = 'levels';
 
+    /**
+     * Define optional parameters.
+     *
+     * @return array
+     */
     protected function define_optional_params() {
         return [
             ['reset', false, PARAM_BOOL, false],
@@ -51,46 +56,69 @@ class levels_controller extends page_controller {
         ];
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
         parent::pre_content();
 
         // Reset levels to defaults.
         if ($this->get_param('reset') && confirm_sesskey()) {
             if ($this->get_param('confirm')) {
-                $this->world->get_config()->set('levelsdata', '');
+                di::get('levels_info_writer')->reset_world($this->world);
                 $this->redirect(new url($this->pageurl));
             }
         }
     }
 
+    /**
+     * Get page title.
+     *
+     * @return string
+     */
     protected function get_page_html_head_title() {
         return get_string('levels', 'block_xp');
     }
 
+    /**
+     * Get page heading.
+     *
+     * @return string
+     */
     protected function get_page_heading() {
         return get_string('levels', 'block_xp');
     }
 
+    /**
+     * Get React module.
+     *
+     * @return array
+     */
     protected function get_react_module() {
         global $USER;
 
         $world = $this->world;
-        $courseid = $world->get_courseid();
 
         $urlserializer = new url_serializer();
-        $badgeurlresolver = di::get('badge_url_resolver_course_world_factory')->get_url_resolver($world);
-        $defaultbadges = array_reduce(range(1, 20), function ($carry, $level) use ($badgeurlresolver, $urlserializer) {
-            $url = $badgeurlresolver->get_url_for_level($level);
-            $carry[$level] = $urlserializer->serialize($url);
-            return $carry;
-        }, []);
+        $badgeurlresolver = di::get('badge_url_resolver_world_factory')->get_url_resolver_for_world($world);
+        $defaultbadges = array_reduce(
+            range(1, levels_info_writer::MAX_LEVEL),
+            function ($carry, $level) use ($badgeurlresolver, $urlserializer) {
+                $url = $badgeurlresolver->get_url_for_level($level);
+                $carry[$level] = $urlserializer->serialize($url);
+                return $carry;
+            },
+            []
+        );
 
         $levelsinfo = di::get('levels_info_factory')->get_world_levels_info($this->world);
         $serializer = di::get('serializer_factory')->get_levels_info_serializer();
         return [
             'block_xp/ui-levels-lazy',
             [
-                'courseId' => $courseid,
+                'contextId' => $world->get_context()->id,
                 'levelsInfo' => $serializer->serialize($levelsinfo),
                 'resetToDefaultsUrl' => $this->get_reset_url()->out(false),
                 'defaultBadgeUrls' => $defaultbadges,
@@ -99,10 +127,20 @@ class levels_controller extends page_controller {
         ];
     }
 
+    /**
+     * Get reset URL.
+     *
+     * @return url
+     */
     protected function get_reset_url() {
         return new url($this->pageurl, ['reset' => 1, 'sesskey' => sesskey()]);
     }
 
+    /**
+     * Output page content.
+     *
+     * @return void
+     */
     protected function page_content() {
         $output = $this->get_renderer();
 
@@ -122,7 +160,11 @@ class levels_controller extends page_controller {
         $this->page_danger_zone_content();
     }
 
+    /**
+     * Output danger zone.
+     *
+     * @return void
+     */
     protected function page_danger_zone_content() {
     }
-
 }

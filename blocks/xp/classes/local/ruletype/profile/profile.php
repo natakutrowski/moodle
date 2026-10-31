@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_xp\local\ruletype\profile;
 
@@ -27,7 +27,6 @@ namespace block_xp\local\ruletype\profile;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class profile {
-
     /** Subject course module. */
     const SUBJECT_CM = 'cm';
     /** Subject section. */
@@ -37,8 +36,8 @@ class profile {
 
     /** @var string|null The subject. */
     protected $subject;
-    /** @var string|null The course module type. */
-    protected $cmtype;
+    /** @var string[] The course module types. */
+    protected $cmtypes = [];
     /** @var bool Whether completion must be enabled. */
     protected $requirescompletionenabled = false;
 
@@ -54,12 +53,21 @@ class profile {
     }
 
     /**
-     * Get the course module type.
+     * Get the first course module type.
      *
      * @return string|null The module frankenstyle name, e.g. 'forum', 'quiz'.
      */
     public function get_cm_type(): ?string {
-        return $this->cmtype;
+        return $this->cmtypes[0] ?? null;
+    }
+
+    /**
+     * Get the course module types.
+     *
+     * @return string[] The module names, or an empty array for any type.
+     */
+    public function get_cm_types(): array {
+        return $this->cmtypes;
     }
 
     /**
@@ -80,7 +88,17 @@ class profile {
      * @return self
      */
     public function set_cm_type(?string $cmtype): self {
-        $this->cmtype = $cmtype;
+        return $this->set_cm_types($cmtype ? [$cmtype] : []);
+    }
+
+    /**
+     * Set the course module types.
+     *
+     * @param string[] $cmtypes The module names, or an empty array for any type.
+     * @return self
+     */
+    public function set_cm_types(array $cmtypes): self {
+        $this->cmtypes = array_values($cmtypes);
         return $this;
     }
 

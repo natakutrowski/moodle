@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Course world collection strategy.
@@ -32,7 +32,7 @@ use context;
 use block_xp\local\config\config;
 use block_xp\local\logger\collection_logger;
 use block_xp\local\logger\reason_collection_logger;
-use block_xp\local\notification\course_level_up_notification_service;
+use block_xp\local\notification\level_up_notification_service;
 use block_xp\local\reason\event_reason;
 use block_xp\local\xp\course_filter_manager;
 use block_xp\local\xp\course_user_state_store;
@@ -46,7 +46,6 @@ use block_xp\local\xp\course_user_state_store;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_world_collection_strategy implements action_collection_strategy, event_collection_strategy {
-
     /** @var context The context. */
     protected $context;
     /** @var config The config. */
@@ -57,7 +56,7 @@ class course_world_collection_strategy implements action_collection_strategy, ev
     protected $filtermanager;
     /** @var collection_logger The logger. */
     protected $logger;
-    /** @var course_level_up_notification_service The notification service. */
+    /** @var level_up_notification_service The notification service. */
     protected $levelupnotifificationservice;
     /** @var action_collection_strategy The action collection strategy. */
     protected $actioncollectionstrategy;
@@ -70,7 +69,7 @@ class course_world_collection_strategy implements action_collection_strategy, ev
      * @param course_user_state_store $store The store.
      * @param course_filter_manager $filtermanager The filter manager.
      * @param collection_logger $logger The logger.
-     * @param course_level_up_notification_service $levelupnotifificationservice The notification service.
+     * @param level_up_notification_service $levelupnotifificationservice The notification service.
      */
     public function __construct(
         context $context,
@@ -78,7 +77,7 @@ class course_world_collection_strategy implements action_collection_strategy, ev
         course_user_state_store $store,
         course_filter_manager $filtermanager,
         collection_logger $logger,
-        course_level_up_notification_service $levelupnotifificationservice
+        level_up_notification_service $levelupnotifificationservice
     ) {
         $this->context = $context;
         $this->config = $config;
@@ -255,5 +254,4 @@ class course_world_collection_strategy implements action_collection_strategy, ev
     public function set_action_collection_strategy(action_collection_strategy $strategy) {
         $this->actioncollectionstrategy = $strategy;
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Block XP renderer.
@@ -27,6 +27,7 @@
 use block_xp\di;
 use block_xp\local\course_world;
 use block_xp\local\activity\activity;
+use block_xp\local\utils\text_utils;
 use block_xp\local\utils\user_utils;
 use block_xp\local\world;
 use block_xp\local\xp\level;
@@ -43,7 +44,6 @@ use block_xp\output\xp_widget;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_xp_renderer extends plugin_renderer_base {
-
     /** Notice flag. */
     const NOTICE_FLAG_QUEST = 'block_xp_notice_quest';
 
@@ -199,9 +199,10 @@ class block_xp_renderer extends plugin_renderer_base {
      */
     public function heading_with_divider($text, $options = []) {
         $options = array_merge(['level' => 3], $options);
-        return html_writer::tag('div',
+        return html_writer::tag(
+            'div',
             $this->heading($text, $options['level'], 'xp-m-0'),
-            ['class' => 'xp-mb-6 xp-mt-8 xp-border-0 xp-border-solid xp-border-t xp-border-gray-100 xp-pt-8']
+            ['class' => 'xp-mb-6 xp-mt-8 xp-border-0 xp-border-solid xp-border-t dark:xp-border-gray-800 xp-pt-8']
         );
     }
 
@@ -285,7 +286,7 @@ class block_xp_renderer extends plugin_renderer_base {
         if (empty($name)) {
             return '';
         }
-        return html_writer::tag('div', $name, ['class' => 'level-name']);
+        return html_writer::tag('div', s($name), ['class' => 'level-name']);
     }
 
 
@@ -325,7 +326,7 @@ class block_xp_renderer extends plugin_renderer_base {
             $o .= $this->xp($level->get_xp_required());
             $o .= html_writer::end_div();
             $o .= html_writer::start_div('block_xp-level-desc');
-            $o .= $desc;
+            $o .= s($desc);
             $o .= html_writer::end_div();
             $o .= html_writer::end_div();
             $o .= html_writer::end_div();
@@ -345,9 +346,9 @@ class block_xp_renderer extends plugin_renderer_base {
 
         $o .= html_writer::start_div('xp-grid xp-gap-2 xp-grid-cols-6 sm:xp-grid-cols-10');
         foreach ($levels as $level) {
-            $o .= html_writer::start_div('xp-relative xp-bg-gray-100 xp-rounded xp-p-1');
+            $o .= html_writer::start_div('xp-relative xp-bg-gray-100 dark:xp-bg-gray-800 xp-rounded xp-p-1');
             $o .= html_writer::div('' . $level->get_level(), 'xp-whitespace-nowrap xp-text-center xp-mb-1 xp-absolute'
-                . ' xp-top-0.5 xp-left-0.5 xp-text-2xs xp-text-gray-500');
+                . ' xp-top-0.5 xp-left-0.5 xp-text-2xs xp-text-gray-500 dark:xp-text-gray-400');
             $o .= $this->small_level_badge($level);
             $o .= html_writer::end_div();
         }
@@ -368,28 +369,26 @@ class block_xp_renderer extends plugin_renderer_base {
 
         if (!$world->get_access_permissions()->can_manage()) {
             return $o;
+        } else if (!di::get('addon')->is_promo_allowed()) {
+            return $o;
         }
 
+        $mode = (int) di::get('config')->get('promoctamode');
         $notice = null;
-        $candidates = [
-            [
+        $candidates = array_values(array_filter([
+            $mode >= 8 ? [
                 static::NOTICE_FLAG_QUEST,
-                function () {
-                    $questurl = new moodle_url('https://www.levelup.plus/quest?ref=xp_notice');
-                    return strip_tags(markdown_to_html(get_string('questpromonotice', 'block_xp', (object) [
+                function () use ($mode) {
+                    $questurl = new moodle_url('https://docs.levelup.plus/quest/docs', ['ref' => 'xp_notice']);
+                    if ($mode >= 16) {
+                        $questurl = new moodle_url('https://www.levelup.plus/quest', ['ref' => 'xp_notice']);
+                    }
+                    return text_utils::markdown_light(get_string('questpromonotice', 'block_xp', (object) [
                         'questurl' => $questurl->out(false),
-                    ])), '<a><em><strong>');
+                    ]));
                 },
-            ], [
-                $this->noticesflag,
-                function () {
-                    $moodleorgurl = new moodle_url('https://moodle.org/plugins/block_xp');
-                    return get_string('likenotice', 'block_xp', (object) [
-                        'moodleorg' => $moodleorgurl->out(),
-                    ]);
-                },
-            ],
-        ];
+            ] : null,
+        ]));
         foreach ($candidates as $candidate) {
             if (!get_user_preferences($candidate[0], false)) {
                 $notice = $candidate;
@@ -400,37 +399,18 @@ class block_xp_renderer extends plugin_renderer_base {
         if ($notice) {
             [$flag, $textfn] = $notice;
 
-            if ($CFG->branch >= 403) {
-                $this->page->requires->js_amd_inline("require(['core_user/repository'], function(UserRepo) {
-                    const flag = '$flag';
-                    const n = document.querySelector('.block-xp-rocks');
-                    if (!n) return;
-                    n.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        UserRepo.setUserPreference(flag, true);
-                        const notice = document.querySelector('.block-xp-notices');
-                        if (!notice) return;
-                        notice.style.display = 'none';
-                    });
-                });");
-
-            } else {
-                require_once($CFG->libdir . '/ajax/ajaxlib.php');
-                user_preference_allow_ajax_update($flag, PARAM_BOOL);
-
-                $this->page->requires->js_amd_inline("require([], function() {
-                    const flag = '$flag';
-                    const n = document.querySelector('.block-xp-rocks');
-                    if (!n) return;
-                    n.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        M.util.set_user_preference(flag, 1);
-                        const notice = document.querySelector('.block-xp-notices');
-                        if (!notice) return;
-                        notice.style.display = 'none';
-                    });
-                });");
-            }
+            $this->page->requires->js_amd_inline("require(['core_user/repository'], function(UserRepo) {
+                const flag = '$flag';
+                const n = document.querySelector('.block-xp-rocks');
+                if (!n) return;
+                n.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    UserRepo.setUserPreference(flag, true);
+                    const notice = document.querySelector('.block-xp-notices');
+                    if (!notice) return;
+                    notice.style.display = 'none';
+                });
+            });");
 
             $icon = new pix_icon('t/close', get_string('dismissnotice', 'block_xp'), 'block_xp');
             $actionicon = $this->action_icon(new moodle_url($this->page->url), $icon, null, ['class' => 'block-xp-rocks']);
@@ -440,7 +420,8 @@ class block_xp_renderer extends plugin_renderer_base {
             $text .= html_writer::div($actionicon, 'xp-grow-0 dismiss-action');
             $text .= html_writer::end_div();
 
-            $o .= html_writer::div($this->notification_without_close($text, 'success'),
+            $o .= html_writer::div(
+                $this->notification_without_close($text, 'success'),
                 'block_xp-dismissable-notice block-xp-notices'
             );
         }
@@ -459,14 +440,7 @@ class block_xp_renderer extends plugin_renderer_base {
      * @deprecated Since Level Up XP 3.12, use tab_navigation instead.
      */
     public function course_world_navigation(course_world $world, $page) {
-        debugging('The method course_world_navigation is deprecated, please use tab_navigation instead.', DEBUG_DEVELOPER);
-        $factory = \block_xp\di::get('course_world_navigation_factory');
-        $links = $factory->get_course_navigation($world);
-        // If there is only one page, then that is the page we are on.
-        if (count($links) <= 1) {
-            return '';
-        }
-        return $this->tab_navigation($links, $page);
+        return '';
     }
 
     /**
@@ -484,22 +458,22 @@ class block_xp_renderer extends plugin_renderer_base {
     /**
      * Get the context of the navbar widget.
      *
-     * @param course_world $world The world.
+     * @param world $world The world.
      * @param state $state The user's state.
      * @return array
      */
-    protected function get_navbar_widget_context(course_world $world, state $state) {
-        $urlresolver = \block_xp\di::get('url_resolver');
+    protected function get_navbar_widget_context(world $world, state $state) {
+        $navigator = di::get('world_navigator_factory')->get_navigator_for_world($world);
         $worldconfig = $world->get_config();
 
         $infopageurl = null;
         if ($worldconfig->get('enableinfos')) {
-            $infopageurl = $urlresolver->reverse('infos', ['courseid' => $world->get_courseid()]);
+            $infopageurl = $navigator->get_url('infos');
         }
 
         $leaderboardurl = null;
         if ($worldconfig->get('enableladder')) {
-            $leaderboardurl = $urlresolver->reverse('ladder', ['courseid' => $world->get_courseid()]);
+            $leaderboardurl = $navigator->get_url('ladder');
         }
 
         $validurls = array_filter([$infopageurl, $leaderboardurl]);
@@ -545,11 +519,11 @@ class block_xp_renderer extends plugin_renderer_base {
     /**
      * Navbar widget.
      *
-     * @param course_world $world The world.
+     * @param world $world The world.
      * @param state $state The user's state.
      * @return string
      */
-    public function navbar_widget(course_world $world, state $state) {
+    public function navbar_widget(world $world, state $state) {
         return $this->render_from_template('block_xp/navbar-widget', $this->get_navbar_widget_context($world, $state));
     }
 
@@ -571,7 +545,6 @@ class block_xp_renderer extends plugin_renderer_base {
      */
     public function notification_without_close($message, $type) {
         if (class_exists('core\output\notification')) {
-
             // Of course, it would be too easy if they didn't add and change constants
             // between two releases... Who reads the upgrade.txt, seriously?
             if (defined('core\output\notification::NOTIFY_INFO')) {
@@ -722,7 +695,8 @@ class block_xp_renderer extends plugin_renderer_base {
             $content .= html_writer::start_div('xp-flex xp-min-h-10 xp-group');
 
             $content .= html_writer::start_div('xp-flex-none xp-h-10 xp-flex xp-items-center');
-            $content .= $this->render(new pix_icon('i/dragdrop',
+            $content .= $this->render(new pix_icon(
+                'i/dragdrop',
                 get_string('moverule', 'block_xp'),
                 '',
                 ['class' => 'iconsmall filter-move']
@@ -731,7 +705,8 @@ class block_xp_renderer extends plugin_renderer_base {
 
             $content .= html_writer::start_div('xp-flex-1 xp-overflow-hidden xp-min-h-full xp-flex'
                 . ' xp-items-center xp-leading-tight');
-            $content .= get_string('awardaxpwhen',
+            $content .= get_string(
+                'awardaxpwhen',
                 'block_xp',
                 html_writer::empty_tag('input', [
                     'type' => 'text',
@@ -758,7 +733,6 @@ class block_xp_renderer extends plugin_renderer_base {
                     'value' => $filter->get_sortorder(),
                     'name' => $basename . '[sortorder]', ]);
             $basename .= '[rule]';
-
         } else {
             $o .= html_writer::tag('p', get_string('awardaxpwhen', 'block_xp', $filter->get_points()));
         }
@@ -785,7 +759,8 @@ class block_xp_renderer extends plugin_renderer_base {
             $content .= html_writer::start_div('xp-flex xp-min-h-10');
 
             $content .= html_writer::start_div('xp-flex-none xp-h-10 xp-flex xp-items-center');
-            $content .= $this->render(new pix_icon('i/dragdrop',
+            $content .= $this->render(new pix_icon(
+                'i/dragdrop',
                 get_string('movecondition', 'block_xp'),
                 '',
                 ['class' => 'iconsmall rule-move']
@@ -830,7 +805,8 @@ class block_xp_renderer extends plugin_renderer_base {
             $content .= html_writer::start_div('xp-flex xp-min-h-10');
 
             $content .= html_writer::start_div('xp-flex-none xp-h-10 xp-flex xp-items-center');
-            $content .= $this->render(new pix_icon('i/dragdrop',
+            $content .= $this->render(new pix_icon(
+                'i/dragdrop',
                 get_string('movecondition', 'block_xp'),
                 '',
                 ['class' => 'iconsmall rule-move']
@@ -860,7 +836,8 @@ class block_xp_renderer extends plugin_renderer_base {
         }
         if ($iseditable) {
             $o .= html_writer::start_tag('li', ['class' => 'rule-add']);
-            $o .= $this->action_link('#',
+            $o .= $this->action_link(
+                '#',
                 get_string('addacondition', 'block_xp'),
                 null,
                 null,
@@ -892,42 +869,29 @@ class block_xp_renderer extends plugin_renderer_base {
     /**
      * Render a dismissable notice.
      *
-     * Yes, we cannot use CSS IDs in there because they are stripped out... turns out they
-     * are considered dangerous. Oh well, we use a class instead. Not pretty, but it works...
-     *
      * @param renderable $notice The notice.
      * @return string
      */
     public function render_dismissable_notice(renderable $notice) {
-        $id = html_writer::random_id();
-
-        // Tell the indicator that it should be expecing this notice.
-        $indicator = \block_xp\di::get('user_notice_indicator');
-        if ($indicator instanceof \block_xp\local\indicator\user_indicator_with_acceptance) {
-            $indicator->set_acceptable_user_flag($notice->name);
+        if (!$notice instanceof \block_xp\output\dismissable_notice) {
+            return '';
         }
 
-        $url = \block_xp\di::get('ajax_url_resolver')->reverse('notice/dismiss', ['name' => $notice->name]);
-        $this->page->requires->js_init_call(<<<EOT
-            Y.one('.$id .dismiss-action a').on('click', function(e) {
-                e.preventDefault();
-                Y.one('.$id').hide();
-                var url = '$url';
-                var cfg = {
-                    method: 'POST'
-                };
-                Y.io(url, cfg);
+        $id = html_writer::random_id();
+        $prefname = json_encode($notice->name);
+        $notification = new \core\output\notification($notice->message, $notice->type);
+        $notification->set_extra_classes([$id]);
+        $notification->set_announce(false);
+
+        $this->page->requires->js_amd_inline("
+            require(['jquery', 'core_user/repository'], function(jQuery, UserRepo) {
+                jQuery('.$id').one('close.bs.alert', function() {
+                    UserRepo.setUserPreference($prefname, '1');
+                });
             });
-EOT
-        );
+        ");
 
-        $icon = new pix_icon('t/close', get_string('dismissnotice', 'block_xp'), 'block_xp');
-        $actionicon = $this->action_icon('#', $icon, null);
-        $text = html_writer::div($actionicon, 'dismiss-action') . $notice->message;
-
-        return html_writer::div($this->notification_without_close($text, $notice->type),
-            'block_xp-dismissable-notice ' . $id
-        );
+        return $this->render($notification);
     }
 
     /**
@@ -968,7 +932,8 @@ EOT
         $addlink = '';
         if ($widget->editable) {
             $addlink = html_writer::start_tag('li', ['class' => 'filter-add']);
-            $addlink .= $this->action_link('#',
+            $addlink .= $this->action_link(
+                '#',
                 get_string('addarule', 'block_xp'),
                 null,
                 null,
@@ -1103,9 +1068,9 @@ EOT
         $o .= html_writer::start_div('block_xp-react', ['id' => $id]);
         $o .= html_writer::start_div('block_xp-react-loading');
         $o .= html_writer::start_div('xp-grid xp-grid-cols-2 xp-gap-4 xp-animate-pulse');
-        $o .= html_writeR::div('', 'xp-col-span-2 xp-bg-gray-100 xp-rounded xp-h-4');
-        $o .= html_writeR::div('', 'xp-bg-gray-100 xp-rounded xp-h-4');
-        $o .= html_writeR::div('', 'xp-bg-gray-100 xp-rounded xp-h-4');
+        $o .= html_writeR::div('', 'xp-col-span-2 xp-bg-gray-100 dark:xp-bg-gray-600 xp-rounded xp-h-4');
+        $o .= html_writeR::div('', 'xp-bg-gray-100 dark:xp-bg-gray-600 xp-rounded xp-h-4');
+        $o .= html_writeR::div('', 'xp-bg-gray-100 dark:xp-bg-gray-600 xp-rounded xp-h-4');
         $o .= html_writer::end_div();
         $o .= html_writer::end_div();
         $o .= html_writer::end_div();
@@ -1133,8 +1098,9 @@ EOT
         $worldprops = $props['world'] ?? null;
 
         if ($world) {
+            $navigator = di::get('world_navigator_factory')->get_navigator_for_world($world);
             $courseid = (int) ($world instanceof course_world ? $world->get_courseid() : $this->page->course->id);
-            $addonpromourl = $urlresolver->reverse('promo', ['courseid' => $courseid]);
+            $addonpromourl = $navigator->get_url('promo');
             $worldprops = [
                 'contextid' => (int) $world->get_context()->id,
                 'contextlevel' => (int) $world->get_context()->contextlevel,
@@ -1147,7 +1113,7 @@ EOT
             'world' => $worldprops,
             'addon' => [
                 'activated' => di::get('addon')->is_activated(),
-                'enablepromo' => $world ? (bool) di::get('config')->get('enablepromoincourses') : true,
+                'enablepromo' => di::get('addon')->is_promo_allowed(),
                 'promourl' => $addonpromourl->out(false),
             ],
         ]);
@@ -1188,7 +1154,7 @@ EOT
     /**
      * Rules page loading check init.
      *
-     * @return html
+     * @return string HTML
      */
     public function rules_page_loading_check_init() {
         return $this->render_from_template('block_xp/rules-page-loading-error', []);
@@ -1197,7 +1163,7 @@ EOT
     /**
      * Rules page loading check success.
      *
-     * @return html
+     * @return string HTML
      */
     public function rules_page_loading_check_success() {
         return $this->render_from_template('block_xp/rules-page-loading-success', []);
@@ -1240,10 +1206,17 @@ EOT
                 $url = $firstchild['url'];
                 $link = array_merge($link, ['url' => $url]);
             }
-            return new tabobject($link['id'], $link['url'], $link['text'], clean_param($link['text'], PARAM_NOTAGS));
+            $text = $link['text'];
+            if (!empty($link['icon'])) {
+                $text = $this->render($link['icon']) . $text;
+            }
+            if (!empty($link['needsattention'])) {
+                $text .= $this->new_dot();
+            }
+            return new tabobject($link['id'], $link['url'], $text, clean_param($link['text'], PARAM_NOTAGS));
         }, array_filter($items, function ($item) {
-            // Remove the items that define children but do not have any.
-            return !isset($item['children']) || !empty($item['children']);
+            // Remove the items without a URL that define children but do not have any.
+            return !empty($item['url']) || !isset($item['children']) || !empty($item['children']);
         }));
         return html_writer::div($this->tabtree($tabs, $activenode), 'block_xp-page-nav');
     }
@@ -1341,7 +1314,7 @@ EOT
      * @param bool $bright Whether the highlight should be "bright".
      */
     public function xp_highlight($amount, $bright = true) {
-        $colourclass = $bright ? 'xp-bg-yellow-200' : 'xp-bg-gray-200';
+        $colourclass = $bright ? 'xp-bg-yellow-200 dark:xp-text-gray-900' : 'xp-bg-gray-200 dark:xp-bg-gray-600';
         return html_writer::tag(
             'span',
             html_writer::tag('span', $this->xp($amount), [
@@ -1382,5 +1355,4 @@ EOT
         $o .= html_writer::end_tag('nav');
         return $o;
     }
-
 }

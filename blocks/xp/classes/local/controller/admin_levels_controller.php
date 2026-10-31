@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Admin levels controller.
@@ -31,6 +31,7 @@ use block_xp\di;
 use block_xp\local\config\config;
 use block_xp\local\routing\url;
 use block_xp\local\serializer\url_serializer;
+use block_xp\local\xp\levels_info_writer;
 use html_writer;
 
 /**
@@ -42,7 +43,6 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_levels_controller extends admin_route_controller {
-
     /** @var config The config. */
     protected $config;
     /** @var moodleform The form. */
@@ -50,6 +50,11 @@ class admin_levels_controller extends admin_route_controller {
     /** @var string Admin section name. */
     protected $sectionname = 'block_xp_default_levels';
 
+    /**
+     * Define optional parameters.
+     *
+     * @return array
+     */
     protected function define_optional_params() {
         return [
             ['reset', false, PARAM_BOOL, false],
@@ -57,24 +62,38 @@ class admin_levels_controller extends admin_route_controller {
         ];
     }
 
+    /**
+     * Handle post-login.
+     *
+     * @return void
+     */
     protected function post_login() {
         parent::post_login();
         $this->config = \block_xp\di::get('config');
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
         parent::pre_content();
 
         // Reset levels to defaults.
         if ($this->get_param('reset') && confirm_sesskey()) {
             if ($this->get_param('confirm')) {
-                // We should probably move this to the levels_info_writer, although it only knows about config.
-                di::get('db')->set_field_select('block_xp_config', 'levelsdata', '', 'courseid > 0', []);
+                di::get('levels_info_writer')->reset_all_courses();
                 $this->redirect(new url($this->pageurl), get_string('allcoursesreset', 'block_xp'));
             }
         }
     }
 
+    /**
+     * Get content.
+     *
+     * @return void
+     */
     protected function content() {
         $output = $this->get_renderer();
         $forwholesite = di::get('config')->get('context') == CONTEXT_SYSTEM;
@@ -100,7 +119,8 @@ class admin_levels_controller extends admin_route_controller {
             echo $output->heading_with_divider(get_string('dangerzone', 'block_xp'));
             echo html_writer::tag('p', markdown_to_html(get_string('resetallcoursestodefaultsintro', 'block_xp')));
             $url = new url($this->pageurl, ['reset' => 1, 'sesskey' => sesskey()]);
-            echo html_writer::tag('p',
+            echo html_writer::tag(
+                'p',
                 $output->render($output->make_single_button(
                     $url->get_compatible_url(),
                     get_string('resetallcoursestodefaults', 'block_xp'),
@@ -110,14 +130,23 @@ class admin_levels_controller extends admin_route_controller {
         }
     }
 
+    /**
+     * Get React module.
+     *
+     * @return array
+     */
     protected function get_react_module() {
         $urlserializer = new url_serializer();
         $badgeurlresolver = di::get('badge_url_resolver');
-        $defaultbadges = array_reduce(range(1, 20), function ($carry, $level) use ($badgeurlresolver, $urlserializer) {
-            $url = $badgeurlresolver->get_url_for_level($level);
-            $carry[$level] = $urlserializer->serialize($url);
-            return $carry;
-        }, []);
+        $defaultbadges = array_reduce(
+            range(1, levels_info_writer::MAX_LEVEL),
+            function ($carry, $level) use ($badgeurlresolver, $urlserializer) {
+                $url = $badgeurlresolver->get_url_for_level($level);
+                $carry[$level] = $urlserializer->serialize($url);
+                return $carry;
+            },
+            []
+        );
 
         $levelsinfo = di::get('levels_info_factory')->get_default_levels_info();
         $serializer = di::get('serializer_factory')->get_levels_info_serializer();

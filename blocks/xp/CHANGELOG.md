@@ -1,6 +1,63 @@
 Changelog
 =========
 
+v21.0
+-----
+
+New features
+
+- Support for dark mode
+
+Quality of life
+
+- Increased the maximum number of levels from 99 to 100
+- The colours of the default badges for levels 1-100 are yummier
+- Participant searches accept first and last names in either order and tolerate extra spaces
+
+Bug fixes
+
+- The block is no longer displayed in invalid locations after settings change
+- The site home can no longer be used as an XP instance in per-course mode
+- Prevented incorrect level-up notifications after points were reset or reduced
+- Opening an action rule without making changes no longer disconnects the course from admin defaults
+- The cheat guard no longer accepts ineffective or unsupported values
+
+Technical changes
+
+- Compatibility with Moodle 5.3
+- Raised minimum required version to Moodle 4.5
+- Accessing the report and logs now also requires either the `view` or `manage` permission
+- Default level badges now use SVG images with embedded numbers
+- Technical changes to support AI MCP and overall level in XP+
+
+Read the [upgrade notes](https://docs.levelup.plus/xp/docs/upgrade-notes/upgrading-to-v21) and our [release blog post](https://www.levelup.plus/blog/xp-release-21/) to learn more.
+
+v20.1
+-----
+
+New features
+
+- Administrators can receive notifications when XP or XP+ updates are available
+
+Quality of life
+
+- The XP+ information page has been redesigned
+- XP+ is mentioned more selectively throughout the plugin
+
+Bug fixes
+
+- In separate-groups mode, users without access to all groups could default to all participants
+- User targets are validated when adding points, filtering logs and deleting report data
+- Level names, descriptions and popup messages are consistently treated as plain text
+- Searching for the site home could display a developer notice
+- Some legacy Level Up Quest log entries could omit their related item
+- Information popovers for action rule limits display correctly
+- Minor interface text and translation fixes
+
+Technical changes
+
+- Various internal and code style improvements
+
 v20.0
 -----
 

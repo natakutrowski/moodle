@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Dependency container.
@@ -41,7 +41,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class default_container implements container {
-
     /** @var array The objects supported by this container. */
     protected static $supports = [
         'action_maker' => true,
@@ -50,10 +49,13 @@ class default_container implements container {
         'ajax_base_url' => true,
         'ajax_router' => true,
         'ajax_url_resolver' => true,
+        'api_client' => true,
         'backup_content_manager' => true,
         'badge_manager' => true,
         'badge_url_resolver' => true,
         'badge_url_resolver_course_world_factory' => true,
+        'badge_url_resolver_stock' => true,
+        'badge_url_resolver_world_factory' => true,
         'base_url' => true,
         'block_class' => true,
         'block_count_cache' => true,
@@ -82,7 +84,10 @@ class default_container implements container {
         'levels_info_factory' => true,
         'levels_info_writer' => true,
         'log_migrators' => true,
+        'mcp_router' => true,
+        'navbar_world_factory' => true,
         'observer_rules_maker' => true,
+        'oauth_router' => true,
         'reason_from_log_entry_factory' => true,
         'reason_resolver' => true,
         'renderer' => true,
@@ -100,9 +105,14 @@ class default_container implements container {
         'shortcodes_definition_maker' => true,
         'tasks_definition_maker' => true,
         'url_resolver' => true,
+        'update_checker' => true,
+        'usage_report_maker' => true,
         'usage_reporter' => true,
         'user_generic_indicator' => true,
         'user_notice_indicator' => true,
+        'world_level_up_notification_service_factory' => true,
+        'world_logger_factory' => true,
+        'world_navigator_factory' => true,
         'world_rule_manager_factory' => true,
     ];
 
@@ -156,7 +166,8 @@ class default_container implements container {
     /**
      * Get the router.
      *
-     * @return router
+     * @return routing\router
+     * @deprecated Since XP 21, use external functions instead.
      */
     protected function get_ajax_base_url() {
         return new moodle_url('/blocks/xp/ajax.php');
@@ -165,7 +176,8 @@ class default_container implements container {
     /**
      * Get the router.
      *
-     * @return router
+     * @return routing\router
+     * @deprecated Since XP 21, use external functions instead.
      */
     protected function get_ajax_router() {
         return new \block_xp\local\routing\router(
@@ -177,6 +189,7 @@ class default_container implements container {
      * Get the routes config.
      *
      * @return routing\routes_config
+     * @deprecated Since XP 21, use external functions instead.
      */
     protected function get_ajax_routes_config() {
         return new \block_xp\local\routing\ajax_routes_config();
@@ -185,13 +198,23 @@ class default_container implements container {
     /**
      * Get URL resolver.
      *
-     * @return url_resolver
+     * @return routing\url_resolver
+     * @deprecated Since XP 21, use external functions instead.
      */
     protected function get_ajax_url_resolver() {
         return new \block_xp\local\routing\default_url_resolver(
             $this->get('ajax_base_url'),
             $this->get_ajax_routes_config()
         );
+    }
+
+    /**
+     * Get API client.
+     *
+     * @return http\api_client
+     */
+    protected function get_api_client() {
+        return new http\api_client(di::get('config')->get('apiroot'));
     }
 
     /**
@@ -218,7 +241,10 @@ class default_container implements container {
      * @return xp\badge_url_resolver
      */
     protected function get_badge_url_resolver() {
-        return new \block_xp\local\xp\file_storage_badge_url_resolver(\context_system::instance(), 'block_xp', 'defaultbadges', 0);
+        return new xp\badge_url_resolver_stack([
+            new xp\file_storage_badge_url_resolver(\context_system::instance(), 'block_xp', 'defaultbadges', 0),
+            $this->get('badge_url_resolver_stock'),
+        ]);
     }
 
     /**
@@ -227,9 +253,28 @@ class default_container implements container {
      * @return factory\badge_url_resolver_course_world_factory
      */
     protected function get_badge_url_resolver_course_world_factory() {
-        return new \block_xp\local\factory\default_badge_url_resolver_course_world_factory(
-            $this->get('badge_url_resolver')
-        );
+        $resolver = new factory\default_badge_url_resolver_course_world_factory($this->get('badge_url_resolver'));
+        $resolver->set_stock_resolver($this->get('badge_url_resolver_stock'));
+        return $resolver;
+    }
+
+    /**
+     * Get the badge URL resolver for stock badges.
+     *
+     * @return xp\badge_url_resolver
+     */
+    protected function get_badge_url_resolver_stock() {
+        return new xp\stock_badge_url_resolver($this->get('config'));
+    }
+
+    /**
+     * Get the badge URL resolver factory.
+     *
+     * @return factory\badge_url_resolver_world_factory
+     */
+    protected function get_badge_url_resolver_world_factory() {
+        // We know the following implementation satisfies badge_url_resolver_world_factory.
+        return di::get('badge_url_resolver_course_world_factory');
     }
 
     /**
@@ -301,7 +346,7 @@ class default_container implements container {
     /**
      * Get the global collection logger.
      *
-     * @return logger
+     * @return logger\collection_logger
      */
     protected function get_collection_logger() {
         return new \block_xp\local\logger\global_collection_logger($this->get('db'));
@@ -310,7 +355,7 @@ class default_container implements container {
     /**
      * Collection strategy.
      *
-     * @return collection_strategy
+     * @return strategy\collection_strategy
      */
     protected function get_collection_strategy() {
         $strategy = new \block_xp\local\strategy\global_collection_strategy(
@@ -325,7 +370,7 @@ class default_container implements container {
     /**
      * Get the global config object.
      *
-     * @return config
+     * @return config\config
      */
     protected function get_config() {
         return new \block_xp\local\config\admin_config(
@@ -336,7 +381,7 @@ class default_container implements container {
     /**
      * Get global config about locked settings.
      *
-     * @return config
+     * @return config\config
      */
     protected function get_config_locked() {
         return new \block_xp\local\config\mdl_locked_config('block_xp', [
@@ -348,6 +393,7 @@ class default_container implements container {
      * Context collection logger factory.
      *
      * @return factory\context_collection_logger_factory
+     * @deprecated Since XP+ 21, use world_logger_factory instead.
      */
     protected function get_context_collection_logger_factory() {
         $factory = new factory\default_context_collection_logger_factory($this->get('db'));
@@ -410,17 +456,17 @@ class default_container implements container {
     /**
      * Course world factory.
      *
-     * @return course_world_factory
+     * @return factory\course_world_factory
      */
     protected function get_course_world_factory() {
         $factory = new \block_xp\local\factory\default_course_world_factory(
             di::get('config'),
             di::get('db'),
-            di::get('badge_url_resolver_course_world_factory'),
+            null, // We used to pass the badge_url_resolver_course_world_factory.
             di::get('config_locked'),
             di::get('levels_info_factory')
         );
-        $factory->set_context_collection_logger_factory(di::get('context_collection_logger_factory'));
+        $factory->set_logger_factory(di::get('world_logger_factory'));
         return $factory;
     }
 
@@ -447,7 +493,8 @@ class default_container implements container {
     /**
      * Get the course world navigation factory.
      *
-     * @return course_world_navigation_factory
+     * @return factory\course_world_navigation_factory
+     * @deprecated Since XP 21, use navigator instead.
      */
     protected function get_course_world_navigation_factory() {
         return new \block_xp\local\factory\default_course_world_navigation_factory(
@@ -459,7 +506,7 @@ class default_container implements container {
     /**
      * Get DB.
      *
-     * @return moodle_database
+     * @return \moodle_database
      */
     protected function get_db() {
         global $DB;
@@ -481,9 +528,10 @@ class default_container implements container {
      * @return factory\levels_info_factory
      */
     protected function get_levels_info_factory() {
-        return new factory\levels_factory($this->get('config'),
+        return new factory\levels_factory(
+            $this->get('config'),
             $this->get('badge_url_resolver'),
-            $this->get('badge_url_resolver_course_world_factory')
+            di::get('badge_url_resolver_world_factory')
         );
     }
 
@@ -524,12 +572,49 @@ class default_container implements container {
     }
 
     /**
+     * Get the MCP router.
+     *
+     * @return routing\not_implemented_router
+     */
+    protected function get_mcp_router() {
+        return new routing\not_implemented_router([
+            'jsonrpc' => '2.0',
+            'error' => [
+                'code' => -32000,
+                'message' => get_string('xppremiumrequired', 'block_xp'),
+            ],
+            'id' => null,
+        ]);
+    }
+
+    /**
+     * Get factory.
+     *
+     * @return factory\navbar_world_factory
+     */
+    protected function get_navbar_world_factory() {
+        return di::get('context_world_factory');
+    }
+
+    /**
      * Get observer rules maker.
      *
-     * @return observer_rules_maker
+     * @return observer\observer_rules_maker
      */
     protected function get_observer_rules_maker() {
         return new \block_xp\local\observer\default_observer_rules_maker();
+    }
+
+    /**
+     * Get the OAuth router.
+     *
+     * @return routing\not_implemented_router
+     */
+    protected function get_oauth_router() {
+        return new routing\not_implemented_router([
+            'error' => 'server_error',
+            'error_description' => get_string('xppremiumrequired', 'block_xp'),
+        ]);
     }
 
     /**
@@ -559,7 +644,7 @@ class default_container implements container {
      * than passed around to other objects, mainly because we cannot instantiate it too early.
      * Which would be hard to avoid when we have factories of objects depending on it.
      *
-     * @return renderer_base
+     * @return \renderer_base
      */
     protected function get_renderer() {
         global $PAGE;
@@ -572,7 +657,7 @@ class default_container implements container {
     /**
      * Get the router.
      *
-     * @return router
+     * @return routing\router
      */
     protected function get_router() {
         return new \block_xp\local\routing\router(
@@ -611,7 +696,7 @@ class default_container implements container {
     /**
      * Get the rule event lister.
      *
-     * @return event_lister
+     * @return rule\event_lister
      */
     protected function get_rule_event_lister() {
         return new \block_xp\local\rule\event_lister($this->get('config'));
@@ -665,7 +750,7 @@ class default_container implements container {
     /**
      * Get the settings maker.
      *
-     * @return settings_maker
+     * @return setting\settings_maker
      */
     protected function get_settings_maker() {
         return new \block_xp\local\setting\default_settings_maker(
@@ -693,7 +778,7 @@ class default_container implements container {
     /**
      * Get the shortcodes definition maker.
      *
-     * @return shortcodes_definition_maker
+     * @return shortcode\shortcodes_definition_maker
      */
     protected function get_shortcodes_definition_maker() {
         return new \block_xp\local\shortcode\default_shortcodes_definition_maker();
@@ -702,10 +787,28 @@ class default_container implements container {
     /**
      * Get the tasks definition maker.
      *
-     * @return tasks_definition_maker
+     * @return task\tasks_definition_maker
      */
     protected function get_tasks_definition_maker() {
         return new \block_xp\local\task\default_tasks_definition_maker();
+    }
+
+    /**
+     * Get update checker.
+     *
+     * @return plugin\update_checker
+     */
+    protected function get_update_checker() {
+        return new plugin\update_checker(di::get('config'), di::get('api_client'));
+    }
+
+    /**
+     * Get usage report maker.
+     *
+     * @return plugin\usage_report_maker
+     */
+    protected function get_usage_report_maker() {
+        return new plugin\usage_report_maker($this->get('db'), di::get('config'));
     }
 
     /**
@@ -714,14 +817,17 @@ class default_container implements container {
      * @return plugin\usage_reporter
      */
     protected function get_usage_reporter() {
-        $config = $this->get('config');
-        return new \block_xp\local\plugin\usage_reporter($config, new plugin\usage_report_maker($this->get('db'), $config));
+        return new \block_xp\local\plugin\usage_reporter(
+            di::get('config'),
+            di::get('usage_report_maker'),
+            di::get('api_client')
+        );
     }
 
     /**
      * Get URL resolver.
      *
-     * @return url_resolver
+     * @return routing\url_resolver
      */
     protected function get_url_resolver() {
         return new \block_xp\local\routing\default_url_resolver(
@@ -735,7 +841,7 @@ class default_container implements container {
      *
      * Generic indicator to use when no other indicators seem appropriate.
      *
-     * @return user_indicator
+     * @return indicator\user_indicator
      */
     protected function get_user_generic_indicator() {
         return new \block_xp\local\indicator\prefs_user_indicator($this->get('db'), 'generic');
@@ -744,10 +850,38 @@ class default_container implements container {
     /**
      * Get the user notice indicator.
      *
-     * @return user_indicator
+     * @return indicator\user_indicator
+     * @deprecated Since XP 21, use something else instead.
      */
     protected function get_user_notice_indicator() {
         return new \block_xp\local\indicator\user_notice_indicator($this->get('db'));
+    }
+
+    /**
+     * Get the factory.
+     *
+     * @return factory\world_level_up_notification_service_factory
+     */
+    protected function get_world_level_up_notification_service_factory() {
+        return new factory\world_level_up_notification_service_factory();
+    }
+
+    /**
+     * Get the world logger factory.
+     *
+     * @return factory\world_logger_factory
+     */
+    protected function get_world_logger_factory() {
+        return new factory\world_logger_factory($this->get('config'));
+    }
+
+    /**
+     * Get the world navigator factory.
+     *
+     * @return factory\world_navigator_factory
+     */
+    protected function get_world_navigator_factory() {
+        return new factory\world_navigator_factory(di::get('url_resolver'));
     }
 
     /**
@@ -768,5 +902,4 @@ class default_container implements container {
     public function has($id) {
         return array_key_exists($id, static::$supports);
     }
-
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Default admin config.
@@ -53,7 +53,6 @@ namespace block_xp\local\config;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class default_admin_config extends immutable_config {
-
     /**
      * Constructor.
      */
@@ -62,9 +61,9 @@ class default_admin_config extends immutable_config {
             'actionrulesstate' => course_world_config::DEFAULT_ACTION_RULES_MISSING,
             'context' => CONTEXT_COURSE,
             'adminscanearnxp' => 0,
-            'enablepromoincourses' => 1,
             'keeplogs' => 90,
             'navbardisplay' => 0,
+            'uselegacylevelbadges' => 0,
 
             'enablecheatguard' => 1,
             'enableinfos' => 1,
@@ -87,8 +86,11 @@ class default_admin_config extends immutable_config {
             'adminnotices' => 1,
             'lastdeactivationnoticekey' => '',
             'lastoutofsyncnoticekey' => '',
+            'lastupdatesnoticekeys' => '',
             'provisionstates' => 0,
             'shortcodesecret' => '',
+            'enablepromoincourses' => 1,
+            'promoctamode' => 0b111111,
 
             'apiroot' => 'https://backend.levelup.plus/api',
             'usagereport' => 1,
@@ -103,5 +105,4 @@ class default_admin_config extends immutable_config {
             'logmigrationmaxruntime' => 10 * MINSECS,
         ]));
     }
-
 }

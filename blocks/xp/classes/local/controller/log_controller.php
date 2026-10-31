@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Log controller.
@@ -29,6 +29,7 @@ namespace block_xp\local\controller;
 
 use block_xp\di;
 use block_xp\local\routing\url;
+use block_xp\local\utils\user_utils;
 use block_xp\output\log_table_filterset;
 use core_table\local\filter\filterset;
 use core_table\local\filter\string_filter;
@@ -44,7 +45,8 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class log_controller extends page_controller {
-
+    /** @var bool Whether manage permissions are required. */
+    protected $requiremanage = false;
     /** @var string The nav name. */
     protected $navname = 'report';
     /** @var string The route name. */
@@ -54,12 +56,17 @@ class log_controller extends page_controller {
     /** @var bool Whether supports groups. */
     protected $supportsgroups = true;
 
-    /** @var bool Whether we're using an old XP+. */
-    protected $isusingoldxpp = false;
     /** @var int|null The user ID to filter the logs for. Use {@see self::get_user_id} to obtain. */
     protected $userid = null;
 
+    /**
+     * Check permissions.
+     *
+     * @return void
+     */
     protected function permissions_checks() {
+        parent::permissions_checks();
+
         $accessperms = $this->world->get_access_permissions();
         if (!($accessperms instanceof \block_xp\local\permission\access_logs_permissions)) {
             throw new \coding_exception('Access permissions object requires logs permissions.');
@@ -67,6 +74,11 @@ class log_controller extends page_controller {
         $accessperms->require_access_logs();
     }
 
+    /**
+     * Define optional parameters.
+     *
+     * @return array
+     */
     protected function define_optional_params() {
         return [
             ['userid', null, PARAM_INT],
@@ -74,22 +86,22 @@ class log_controller extends page_controller {
         ];
     }
 
-    protected function post_login() {
-        parent::post_login();
-
-        $addon = di::get('addon');
-        $this->isusingoldxpp = $addon->is_older_than(2024090500);
-    }
-
+    /**
+     * Get table.
+     *
+     * @return \block_xp\output\logs_table
+     */
     protected function get_table() {
         $table = new \block_xp\output\logs_table(
             $this->world,
-            di::get('reason_from_log_entry_factory'),
+            null,
             $this->get_groupid(),
             $this->get_user_id()
         );
         $table->define_baseurl($this->pageurl);
         $table->set_filterset($this->get_filterset());
+        $logger = di::get('world_logger_factory')->get_logger_for_world($this->world);
+        $table->set_collection_logger($logger);
         return $table;
     }
 
@@ -109,10 +121,20 @@ class log_controller extends page_controller {
         return $filterset;
     }
 
+    /**
+     * Get page title.
+     *
+     * @return string
+     */
     protected function get_page_html_head_title() {
         return get_string('courselog', 'block_xp');
     }
 
+    /**
+     * Get page heading.
+     *
+     * @return string
+     */
     protected function get_page_heading() {
         return get_string('courselog', 'block_xp');
     }
@@ -125,7 +147,9 @@ class log_controller extends page_controller {
     protected function get_user_id() {
         if ($this->userid === null) {
             $userid = $this->get_param('userid');
-            if (!$userid || $userid <= 0 || isguestuser($userid)) {
+            if (!$userid || $userid <= 0) {
+                $userid = 0;
+            } else if (!user_utils::is_valid_target($this->world->get_context(), $userid)) {
                 $userid = 0;
             }
             $this->userid = $userid;
@@ -133,6 +157,11 @@ class log_controller extends page_controller {
         return $this->userid;
     }
 
+    /**
+     * Get dismissable filters.
+     *
+     * @return array|null
+     */
     protected function get_dismissable_filters() {
         $userid = $this->get_user_id();
         if (!$userid) {
@@ -150,6 +179,11 @@ class log_controller extends page_controller {
         ];
     }
 
+    /**
+     * Output advanced heading.
+     *
+     * @return void
+     */
     protected function page_advanced_heading() {
         $output = $this->get_renderer();
         echo $output->advanced_heading(get_string('courselog', 'block_xp'), [
@@ -158,9 +192,12 @@ class log_controller extends page_controller {
         ]);
     }
 
+    /**
+     * Output page content.
+     *
+     * @return void
+     */
     protected function page_content() {
-        global $PAGE;
-
         $userid = $this->get_user_id();
         $singleuser = (bool) $userid;
 
@@ -178,10 +215,15 @@ class log_controller extends page_controller {
 
         // Displaying the report.
         echo html_writer::start_div('xp-cancel-overflow');
-        echo $this->get_table()->out(50, !$singleuser && $this->isusingoldxpp);
+        echo $this->get_table()->out(50, false);
         echo html_writer::end_div();
     }
 
+    /**
+     * Output dismissable filters.
+     *
+     * @return void
+     */
     protected function page_dismissable_filters() {
         $dismissablefilters = $this->get_dismissable_filters();
         if (!$dismissablefilters) {
@@ -196,8 +238,13 @@ class log_controller extends page_controller {
         echo html_writer::end_tag('p');
     }
 
+    /**
+     * Output user filter.
+     *
+     * @return void
+     */
     protected function page_user_filter() {
-        if ($this->isusingoldxpp || $this->get_user_id()) {
+        if ($this->get_user_id()) {
             return null;
         }
 
@@ -222,10 +269,9 @@ class log_controller extends page_controller {
      * @return array
      */
     protected function get_page_menu_items() {
-        $config = di::get('config');
         $hasaddon = di::get('addon')->is_activated();
         return array_filter([
-            $config->get('enablepromoincourses') && !$hasaddon ? [
+            di::get('addon')->is_promo_allowed() && !$hasaddon ? [
                 'label' => get_string('exportdata', 'block_xp'),
                 'href' => '#',
                 'disabled' => true,
@@ -233,5 +279,4 @@ class log_controller extends page_controller {
             ] : null,
         ]);
     }
-
 }

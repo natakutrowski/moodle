@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Block XP observer.
@@ -34,7 +34,6 @@ namespace block_xp\local\observer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class observer {
-
     /**
      * Act when a course is deleted.
      *
@@ -62,6 +61,9 @@ class observer {
             'name' => 'block_xp-notice-block_intro_' . $courseid,
         ]);
         $DB->delete_records_select('user_preferences', $sql, [
+            'name' => 'block_xp_block_intro_' . $event->contextid,
+        ]);
+        $DB->delete_records_select('user_preferences', $sql, [
             'name' => 'block_xp_notify_level_up_' . $courseid,
         ]);
 
@@ -82,5 +84,4 @@ class observer {
             $cs->collect_event($event);
         }
     }
-
 }

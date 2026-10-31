@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Notification popup queue.
@@ -50,7 +50,7 @@ define(['block_xp/popup-notification', 'core/ajax'], function(PopupNotification,
                 Ajax.call([{
                     methodname: 'block_xp_mark_popup_notification_seen',
                     args: {
-                        courseid: instance.courseid,
+                        contextid: instance.contextid,
                         level: instance.levelnum
                     }
                 }])[0].fail(function() {

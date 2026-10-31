@@ -14,11 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 namespace block_xp\local\factory;
 
 use block_xp\local\rule\admin_rule_manager;
+use block_xp\local\rule\rule_manager;
 use block_xp\local\rule\world_rule_manager;
 use block_xp\local\world;
 use moodle_database;
@@ -32,7 +33,6 @@ use moodle_database;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class world_rule_manager_factory {
-
     /** @var admin_rule_manager The admin rule manager. */
     protected $adminrulemanager;
     /** @var moodle_database The database. */
@@ -53,10 +53,9 @@ class world_rule_manager_factory {
      * Get a rule manager for a world.
      *
      * @param world $world The world.
-     * @return world_rule_manager
+     * @return rule_manager
      */
-    public function get_rule_manager(world $world): world_rule_manager {
+    public function get_rule_manager(world $world): rule_manager {
         return new world_rule_manager($this->db, $world, $this->adminrulemanager);
     }
-
 }

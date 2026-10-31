@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Modal.
@@ -44,6 +44,19 @@ let simpleOpenModalActionObserverSelector = '[data-xp-action="open-modal"]';
 export async function createConfirmModal(config) {
     const modal = await Compat.createModal(config, ModalSaveCancel);
     modal.setSaveButtonText(Str.get_string('yes', 'moodle'));
+    return modal;
+}
+
+/**
+ * Create an information modal.
+ *
+ * @param {Object} config
+ * @returns {Promise<Modal>}
+ */
+export async function createInfoModal(config) {
+    const modal = await Compat.createModal(config, ModalCancel);
+    modal.getRoot()[0].classList.add('block_xp');
+    modal.setButtonText('cancel', Str.get_string('closebuttontitle', 'core'));
     return modal;
 }
 

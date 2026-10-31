@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Shortcode handler.
@@ -43,7 +43,6 @@ use block_xp\local\xp\level_with_name;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class handler {
-
     /**
      * Best guess what group ID to use.
      *
@@ -168,7 +167,8 @@ class handler {
             }
         }
 
-        if ($lessgreater['<'] === null && $lessgreater['<='] === null
+        if (
+            $lessgreater['<'] === null && $lessgreater['<='] === null
                 && $lessgreater['>'] === null && $lessgreater['>='] === null
         ) {
             return '';
@@ -216,6 +216,8 @@ class handler {
             return;
         }
 
+        $navigator = di::get('world_navigator_factory')->get_navigator_for_world($world);
+
         // Override the config to disable the neighbours when the top argument is set.
         $configoverride = null;
         if (!empty($args['top'])) {
@@ -243,7 +245,6 @@ class handler {
                 $count = max(1, intval($args['top']));
             }
             $limit = new limit($count, 0);
-
         } else {
             // Determine what part of the leaderboard to show and fence it.
             $before = 2;
@@ -255,7 +256,7 @@ class handler {
 
         // Prepare the page.
         if (!$PAGE->has_set_url() && defined('WS_SERVER') && WS_SERVER) {
-            $PAGE->set_url(di::get('url_resolver')->reverse('ladder', ['courseid' => $world->get_courseid()]));
+            $PAGE->set_url($navigator->get_url('ladder'));
         }
 
         // Output the table.
@@ -275,13 +276,12 @@ class handler {
         ob_end_clean();
 
         // Output.
-        $urlresolver = di::get('url_resolver');
         $link = '';
         $withlink = empty($args['hidelink']);
         if ($withlink) {
             $link = \html_writer::div(
                 \html_writer::link(
-                    $urlresolver->reverse('ladder', ['courseid' => $world->get_courseid()]),
+                    $navigator->get_url('ladder'),
                     get_string('gotofullladder', 'block_xp')
                 ),
                 'xp-link-to-full-ladder'
@@ -335,7 +335,7 @@ class handler {
         }
 
         $name = $level instanceof level_with_name ? $level->get_name() : null;
-        return empty($name) ? get_string('levelx', 'block_xp', $level->get_level()) : $name;
+        return empty($name) ? get_string('levelx', 'block_xp', $level->get_level()) : s($name);
     }
 
     /**

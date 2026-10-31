@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Block XP log table.
@@ -45,7 +45,6 @@ use pix_icon;
  * @deprecated Since XP 20, use logs_table instead.
  */
 class log_table extends table_sql {
-
     /** @var string The key of the user ID column. */
     public $useridfield = 'userid';
     /** @var \moodle_database DB. */
@@ -183,51 +182,7 @@ class log_table extends table_sql {
             return ['1=1', []];
         }
 
-        $term = trim($filterset->get_filter('term')->current());
-        if (empty($term)) {
-            return ['1=1', []];
-        }
-
-        $wheres = [];
-        $params = [];
-
-        $nameoptions = [
-            ['firstname' => $term],
-            ['lastname' => $term],
-        ];
-        $nameparts = explode(' ', $term);
-        if (count($nameparts) > 1) {
-            for ($i = 0; $i < count($nameparts) - 1; $i++) {
-                $nameoptions[] = [
-                    'firstname' => implode(' ', array_slice($nameparts, 0, $i + 1)),
-                    'lastname' => implode(' ', array_slice($nameparts, $i + 1)),
-                ];
-            }
-        }
-        foreach ($nameoptions as $i => $option) {
-            $subparams = [];
-            $subsql = [];
-            if (!empty($option['firstname'])) {
-                $paramname = 'usertermfn' . $i;
-                $subsql[] = $this->db->sql_like("u.firstname", ':' . $paramname, false, false);
-                $subparams[$paramname] = $this->db->sql_like_escape($option['firstname']) . '%';
-            }
-            if (!empty($option['lastname'])) {
-                $paramname = 'usertermln' . $i;
-                $subsql[] = $this->db->sql_like("u.lastname", ':' . $paramname, false, false);
-                $subparams[$paramname] = $this->db->sql_like_escape($option['lastname']) . '%';
-            }
-            if (!empty($subsql)) {
-                $wheres[] = '(' . implode(' AND ', $subsql) . ')';
-                $params = array_merge($params, $subparams);
-            }
-        }
-
-        if (empty($wheres)) {
-            return ['1=1', []];
-        }
-
-        return ['((' . implode(') OR (', $wheres) . '))', $params];
+        return user_utils::get_filter_user_by_term_sql($filterset->get_filter('term')->current());
     }
 
     /**

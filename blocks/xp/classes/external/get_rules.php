@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * External function.
@@ -28,6 +28,7 @@
 namespace block_xp\external;
 
 use block_xp\di;
+use block_xp\local\utils\world_utils;
 use context;
 use context_system;
 
@@ -40,7 +41,6 @@ use context_system;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class get_rules extends external_api {
-
     /**
      * External function parameters.
      *
@@ -124,6 +124,11 @@ class get_rules extends external_api {
         $world = $worldfactory->get_world_from_context(context::instance_by_id($contextid));
         self::validate_context($world->get_context());
         $world->get_access_permissions()->require_manage();
+
+        if (!world_utils::supports_local_points_management($world)) {
+            throw new \moodle_exception('errorfeaturenotenabled', 'block_xp');
+        }
+
         return $world;
     }
 
@@ -153,5 +158,4 @@ class get_rules extends external_api {
             ])
         );
     }
-
 }

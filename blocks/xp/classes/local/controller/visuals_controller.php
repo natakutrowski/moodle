@@ -14,25 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
-
-/**
- * Visuals controller.
- *
- * @package    block_xp
- * @copyright  2017 Frédéric Massart
- * @author     Frédéric Massart <fred@branchup.tech>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// See <https://levelup.plus>.
 
 namespace block_xp\local\controller;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/filelib.php');
 
-use block_xp\di;
 use context_system;
-use html_writer;
 use stdClass;
 use block_xp\local\config\course_world_config;
 use block_xp\local\routing\url;
@@ -46,15 +35,19 @@ use block_xp\local\routing\url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class visuals_controller extends page_controller {
-
     /** @var string The nav name. */
     protected $navname = 'levels';
     /** @var string The route name. */
     protected $routename = 'visuals';
 
-    /** @var moodleform The form. */
+    /** @var \moodleform The form. */
     private $form;
 
+    /**
+     * Define optional parameters.
+     *
+     * @return array
+     */
     protected function define_optional_params() {
         return [
             ['reset', false, PARAM_BOOL, false],
@@ -65,7 +58,7 @@ class visuals_controller extends page_controller {
     /**
      * Get manager context.
      *
-     * @return context
+     * @return \context
      */
     final protected function get_filemanager_context() {
         return $this->world->get_context();
@@ -83,12 +76,11 @@ class visuals_controller extends page_controller {
     /**
      * Define the form.
      *
-     * @return moodleform
+     * @return \moodleform
      */
     protected function define_form() {
         return new \block_xp\form\visuals($this->pageurl->out(false), [
-            'showpromo' => di::get('config')->get('enablepromoincourses'),
-            'promourl' => $this->urlresolver->reverse('promo', ['courseid' => $this->courseid]),
+            'promourl' => $this->navigator->get_url('promo'),
             'fmoptions' => $this->get_filemanager_options(),
         ]);
     }
@@ -96,7 +88,7 @@ class visuals_controller extends page_controller {
     /**
      * Get the form.
      *
-     * @return moodleform
+     * @return \moodleform
      */
     final protected function get_form() {
         if (!$this->form) {
@@ -105,6 +97,11 @@ class visuals_controller extends page_controller {
         return $this->form;
     }
 
+    /**
+     * Prepare content.
+     *
+     * @return void
+     */
     protected function pre_content() {
 
         // Reset to defaults.
@@ -119,9 +116,7 @@ class visuals_controller extends page_controller {
         $form->set_data((object) $this->get_initial_form_data());
         if ($data = $form->get_data()) {
             $this->save_form_data($data);
-            // TODO Add a confirmation message.
             $this->redirect();
-
         } else if ($form->is_cancelled()) {
             $this->redirect();
         }
@@ -138,7 +133,8 @@ class visuals_controller extends page_controller {
 
         // If the badges are missing, we copy them now.
         if ($config->get('enablecustomlevelbadges') == course_world_config::CUSTOM_BADGES_MISSING) {
-            file_prepare_draft_area($draftitemid,
+            file_prepare_draft_area(
+                $draftitemid,
                 context_system::instance()->id,
                 'block_xp',
                 'defaultbadges',
@@ -146,7 +142,8 @@ class visuals_controller extends page_controller {
                 $this->get_filemanager_options()
             );
         } else {
-            file_prepare_draft_area($draftitemid,
+            file_prepare_draft_area(
+                $draftitemid,
                 $this->get_filemanager_context()->id,
                 'block_xp',
                 'badges',
@@ -181,7 +178,8 @@ class visuals_controller extends page_controller {
         $config = $this->world->get_config();
 
         // Save the area.
-        file_save_draft_area_files($data->badges,
+        file_save_draft_area_files(
+            $data->badges,
             $this->get_filemanager_context()->id,
             'block_xp',
             'badges',
@@ -195,14 +193,29 @@ class visuals_controller extends page_controller {
         $config->set('enablecustomlevelbadges', course_world_config::CUSTOM_BADGES_NOOP);
     }
 
+    /**
+     * Get page title.
+     *
+     * @return string
+     */
     protected function get_page_html_head_title() {
         return get_string('levelsappearance', 'block_xp');
     }
 
+    /**
+     * Get page heading.
+     *
+     * @return string
+     */
     protected function get_page_heading() {
         return get_string('levelsappearance', 'block_xp');
     }
 
+    /**
+     * Output page content.
+     *
+     * @return void
+     */
     protected function page_content() {
         $output = $this->get_renderer();
 
@@ -246,6 +259,11 @@ class visuals_controller extends page_controller {
         echo $this->get_renderer()->levels_preview($levelsinfo->get_levels());
     }
 
+    /**
+     * Output danger zone.
+     *
+     * @return void
+     */
     protected function page_danger_zone_content() {
     }
 
@@ -257,5 +275,4 @@ class visuals_controller extends page_controller {
      */
     protected function intro() {
     }
-
 }

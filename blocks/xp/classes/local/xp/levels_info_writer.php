@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Level Up XP.  If not, see <https://www.gnu.org/licenses/>.
 //
-// https://levelup.plus
+// See <https://levelup.plus>.
 
 /**
  * Levels info writer.
@@ -27,13 +27,13 @@
 
 namespace block_xp\local\xp;
 
+use block_xp\di;
 use block_xp\external\external_api;
 use block_xp\external\external_multiple_structure;
 use block_xp\external\external_single_structure;
 use block_xp\external\external_value;
 use block_xp\local\backup\restore_context;
 use block_xp\local\config\config;
-use block_xp\local\course_world;
 use block_xp\local\world;
 use core_collator;
 use core_text;
@@ -48,9 +48,12 @@ use invalid_parameter_exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class levels_info_writer {
-
+    /** Max level. */
+    const MAX_LEVEL = 100;
     /** @var config The admin config. */
     protected $config;
+    /** @var bool Whether is used sitewide. */
+    protected $issitewide;
 
     /**
      * Constructor.
@@ -59,6 +62,29 @@ class levels_info_writer {
      */
     public function __construct(config $config) {
         $this->config = $config;
+        $this->issitewide = $config->get('context') == CONTEXT_SYSTEM;
+    }
+
+    /**
+     * Reset the world.
+     */
+    public function reset_all_courses() {
+        $sql = 'courseid > 0';
+        $params = [];
+        if (!$this->issitewide) {
+            $sql = 'courseid > 0 AND courseid != :siteid';
+            $params = ['siteid' => SITEID];
+        }
+        di::get('db')->set_field_select('block_xp_config', 'levelsdata', '', $sql, $params);
+    }
+
+    /**
+     * Reset the world.
+     *
+     * @param world $world
+     */
+    public function reset_world(world $world) {
+        $world->get_config()->set('levelsdata', '');
     }
 
     /**
@@ -89,10 +115,6 @@ class levels_info_writer {
      * @param array $rawdata The raw data.
      */
     public function save_for_world(world $world, $rawdata) {
-        if (!$world instanceof course_world) {
-            throw new \coding_exception('Type of world not handled.');
-        }
-
         $data = $this->validate_raw_data($rawdata);
 
         $finalpoints = $this->process_points($data);
@@ -220,17 +242,16 @@ class levels_info_writer {
      * @param world|null $world The world, if any.
      */
     protected function get_metadata_for_level($level, $metadata, ?world $world = null) {
-
-        // We can only deal with this type of world at the moment.
-        $world = $world instanceof course_world ? $world : null;
-
         $finaldata = [];
-        if (!empty($metadata['name'])) {
-            $finaldata['name'] = core_text::substr($metadata['name'], 0, 40);
+
+        $name = clean_param($metadata['name'] ?? '', PARAM_NOTAGS);
+        if (!empty($name)) {
+            $finaldata['name'] = core_text::substr($name, 0, 40);
         }
 
-        if (!empty($metadata['description'])) {
-            $finaldata['desc'] = core_text::substr($metadata['description'], 0, 280);
+        $desc = clean_param($metadata['description'] ?? '', PARAM_NOTAGS);
+        if (!empty($desc)) {
+            $finaldata['desc'] = core_text::substr($desc, 0, 280);
         }
 
         return $finaldata;
@@ -288,7 +309,7 @@ class levels_info_writer {
         // Construct all the metadata.
         $finalmetadata = [];
         foreach ($rawmetadata as $level => $metadata) {
-            if ($level < 1  || $level > 99) {
+            if ($level < 1  || $level > static::MAX_LEVEL) {
                 continue;
             }
             $tmp = $this->get_metadata_for_level($level, $metadata, $world);
@@ -375,11 +396,10 @@ class levels_info_writer {
         ]);
 
         $data = external_api::validate_parameters($structure, $rawdata);
-        if (count($data['levels']) < 2 || count($data['levels']) > 99) {
+        if (count($data['levels']) < 2 || count($data['levels']) > static::MAX_LEVEL) {
             throw new invalid_parameter_exception('Invalid number of levels');
         }
 
         return $data;
     }
-
 }
