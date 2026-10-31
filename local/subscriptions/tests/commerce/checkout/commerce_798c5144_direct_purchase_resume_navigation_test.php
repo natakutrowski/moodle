@@ -28,6 +28,10 @@ final class commerce_798c5144_direct_purchase_resume_navigation_test extends adv
         $view = CommerceDirectPurchaseResumePresenter::present();
 
         self::assertTrue($view['hasdirectpurchase']);
+        self::assertStringContainsString('/local/subscriptions/direct_purchase_cancel.php', $view['directpurchasecancelurl']);
+        self::assertSame(str_repeat('a', 32), $view['directpurchasecancelcartuuid']);
+        self::assertSame('DONATION.ALF', $view['directpurchasecancelsku']);
+        self::assertSame(70, $view['directpurchasecancelpriceid']);
         self::assertStringContainsString(
             '/local/subscriptions/commerce_checkout.php',
             $view['directpurchaseresumeurl']
@@ -95,6 +99,9 @@ final class commerce_798c5144_direct_purchase_resume_navigation_test extends adv
             . '/local/subscriptions/templates/checkout/direct_purchase_resume.mustache'
         );
         self::assertStringContainsString('{{#hasdirectpurchase}}', $partial);
+        self::assertStringContainsString('action="{{directpurchasecancelurl}}"', $partial);
+        self::assertStringContainsString('name="sesskey"', $partial);
+        self::assertStringContainsString('name="cartuuid"', $partial);
         self::assertStringContainsString('data-direct-purchase-resume', $partial);
         self::assertStringContainsString(
             'href="{{directpurchaseresumeurl}}"',

@@ -3,9 +3,23 @@
         <div>
             <div class="fw-semibold">{{directpurchaseresumetitle}}</div>
             <div class="small mt-1">{{directpurchaseresumetext}}</div>
+            <div class="small mt-1">{{directpurchasecancelhelp}}</div>
         </div>
-        <a href="{{directpurchaseresumeurl}}" class="btn btn-primary flex-shrink-0">
-            <i class="fa-solid fa-arrow-right-to-bracket me-2" aria-hidden="true"></i>{{directpurchaseresumelabel}}
-        </a>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <a href="{{directpurchaseresumeurl}}" class="btn btn-primary flex-shrink-0">
+                <i class="fa-solid fa-arrow-right-to-bracket me-2" aria-hidden="true"></i>{{directpurchaseresumelabel}}
+            </a>
+            <form action="{{directpurchasecancelurl}}" method="post" class="m-0">
+                <input type="hidden" name="sesskey" value="{{directpurchasecancelkey}}">
+                <input type="hidden" name="currency" value="{{directpurchasecancelcurrency}}">
+                <input type="hidden" name="sku" value="{{directpurchasecancelsku}}">
+                <input type="hidden" name="priceid" value="{{directpurchasecancelpriceid}}">
+                <input type="hidden" name="storedat" value="{{directpurchasecancelstoredat}}">
+                <input type="hidden" name="cartuuid" value="{{directpurchasecancelcartuuid}}">
+                <button type="submit" class="btn btn-outline-secondary flex-shrink-0">
+                    {{directpurchasecancellabel}}
+                </button>
+            </form>
+        </div>
     </div>
 {{/hasdirectpurchase}}

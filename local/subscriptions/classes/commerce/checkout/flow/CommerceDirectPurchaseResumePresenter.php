@@ -20,7 +20,16 @@ final class CommerceDirectPurchaseResumePresenter {
      *   directpurchaseresumeurl:string,
      *   directpurchaseresumetitle:string,
      *   directpurchaseresumetext:string,
-     *   directpurchaseresumelabel:string
+     *   directpurchaseresumelabel:string,
+     *   directpurchasecancelurl:string,
+     *   directpurchasecancelkey:string,
+     *   directpurchasecancelcurrency:string,
+     *   directpurchasecancelsku:string,
+     *   directpurchasecancelpriceid:int,
+     *   directpurchasecancelstoredat:int,
+     *   directpurchasecancelcartuuid:string,
+     *   directpurchasecancellabel:string,
+     *   directpurchasecancelhelp:string
      * }
      */
     public static function present(): array {
@@ -32,6 +41,15 @@ final class CommerceDirectPurchaseResumePresenter {
                 'directpurchaseresumetitle' => '',
                 'directpurchaseresumetext' => '',
                 'directpurchaseresumelabel' => '',
+                'directpurchasecancelurl' => '',
+                'directpurchasecancelkey' => '',
+                'directpurchasecancelcurrency' => '',
+                'directpurchasecancelsku' => '',
+                'directpurchasecancelpriceid' => 0,
+                'directpurchasecancelstoredat' => 0,
+                'directpurchasecancelcartuuid' => '',
+                'directpurchasecancellabel' => '',
+                'directpurchasecancelhelp' => '',
             ];
         }
 
@@ -56,6 +74,23 @@ final class CommerceDirectPurchaseResumePresenter {
             ),
             'directpurchaseresumelabel' => get_string(
                 'commerce_direct_purchase_resume_action',
+                'local_subscriptions'
+            ),
+            'directpurchasecancelurl' => (new \moodle_url(
+                '/local/subscriptions/direct_purchase_cancel.php'
+            ))->out(false),
+            'directpurchasecancelkey' => sesskey(),
+            'directpurchasecancelcurrency' => $directpurchase['currency'],
+            'directpurchasecancelsku' => $directpurchase['sku'],
+            'directpurchasecancelpriceid' => $directpurchase['priceid'],
+            'directpurchasecancelstoredat' => $directpurchase['storedat'],
+            'directpurchasecancelcartuuid' => (string)($directpurchase['cartuuid'] ?? ''),
+            'directpurchasecancellabel' => get_string(
+                'commerce_direct_purchase_cancel_action',
+                'local_subscriptions'
+            ),
+            'directpurchasecancelhelp' => get_string(
+                'commerce_direct_purchase_cancel_help',
                 'local_subscriptions'
             ),
         ];

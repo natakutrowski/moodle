@@ -90,6 +90,7 @@ final class CommercePaymentPolicyResolver {
         if (
             $currency === 'RUB'
             && $recommended === CommercePaymentMethod::CARD
+            && count($ordered) > 1
         ) {
             $advicekey = 'regional_card_recommended';
         }

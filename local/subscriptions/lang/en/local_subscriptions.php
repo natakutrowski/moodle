@@ -12937,3 +12937,7 @@ $string['commerce_campaign_e11_language_en'] = 'English (EN) — for all recipie
 $string['commerce_campaign_e11_language_help'] = 'If the template is Russian-only, select RU: everyone in this campaign will receive Russian without changing their Moodle profile language. The translation must exist in the template.';
 $string['commerce_campaign_e11_override_unavailable'] = 'The {$a} translation is missing or incomplete in the chosen template. Choose an available language or complete the template.';
 $string['commerce_campaign_e9c_open_settings'] = 'Open course campaign settings';
+
+// Separate Buy Now session: explicit customer dismissal (never cancels a provider payment).
+$string['commerce_direct_purchase_cancel_action'] = 'Discard this unfinished purchase';
+$string['commerce_direct_purchase_cancel_help'] = 'This only removes the reminder in this browser; it does not cancel a payment already started.';

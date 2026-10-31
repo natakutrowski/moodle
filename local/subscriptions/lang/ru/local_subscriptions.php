@@ -13012,3 +13012,7 @@ $string['commerce_campaign_e11_language_en'] = 'Английский (EN) — в
 $string['commerce_campaign_e11_language_help'] = 'Если шаблон есть только на русском, выберите RU. Все получатели этой кампании получат русский текст; язык профиля Moodle не изменится. Перевод должен присутствовать в шаблоне.';
 $string['commerce_campaign_e11_override_unavailable'] = 'Перевод {$a} отсутствует или не завершён в выбранном шаблоне. Выберите доступный язык или дополните шаблон.';
 $string['commerce_campaign_e9c_open_settings'] = 'Открыть настройки рассылок по курсам';
+
+// Separate Buy Now session: explicit customer dismissal (never cancels a provider payment).
+$string['commerce_direct_purchase_cancel_action'] = 'Удалить незавершённую покупку';
+$string['commerce_direct_purchase_cancel_help'] = 'Это удалит только напоминание в этом браузере. Уже начатый платёж не отменяется.';
