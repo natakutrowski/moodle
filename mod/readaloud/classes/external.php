@@ -21,18 +21,9 @@
  * @author  Justin Hunt - Poodll.com
  */
 
-global $CFG;
-
-// This is for pre M4.0 and post M4.0 to work on same code base
-require_once($CFG->libdir . '/externallib.php');
-
-/*
- * This is for M4.0 and later
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_value;
-*/
-
 use mod_readaloud\utils;
 use mod_readaloud\diff;
 use mod_readaloud\alphabetconverter;
@@ -40,7 +31,6 @@ use mod_readaloud\constants;
 
 
 class mod_readaloud_external extends external_api {
-
     public static function check_for_results_parameters() {
         return new external_function_parameters([
                 'cmid' => new external_value(PARAM_INT),
@@ -55,8 +45,10 @@ class mod_readaloud_external extends external_api {
         $haveaieval = false;
         $aigrade = false;
 
-        $params = self::validate_parameters(self::check_for_results_parameters(),
-                ['cmid' => $cmid]);
+        $params = self::validate_parameters(
+            self::check_for_results_parameters(),
+            ['cmid' => $cmid]
+        );
 
         // fetch attempt information
         $cm = get_coursemodule_from_id('readaloud', $cmid, 0, false, MUST_EXIST);
@@ -116,8 +108,10 @@ class mod_readaloud_external extends external_api {
     public static function submit_regular_attempt($cmid, $filename, $rectime, $shadowing) {
         global $DB, $CFG;
 
-        $params = self::validate_parameters(self::submit_regular_attempt_parameters(),
-                ['cmid' => $cmid, 'filename' => $filename, 'rectime' => $rectime, 'shadowing' => $shadowing]);
+        $params = self::validate_parameters(
+            self::submit_regular_attempt_parameters(),
+            ['cmid' => $cmid, 'filename' => $filename, 'rectime' => $rectime, 'shadowing' => $shadowing]
+        );
 
         $cm = get_coursemodule_from_id('readaloud', $cmid, 0, false, MUST_EXIST);
         $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
@@ -185,12 +179,12 @@ class mod_readaloud_external extends external_api {
     public static function compare_passage_to_transcript($cmid, $language, $passage, $transcript, $passagephonetic) {
         global $DB, $CFG;
 
-        if($cmid > 0){
+        if ($cmid > 0) {
             $cm = get_coursemodule_from_id('readaloud', $cmid, 0, false, MUST_EXIST);
             $readaloud = $DB->get_record('readaloud', ['id' => $cm->instance], '*', MUST_EXIST);
             $alternatives = $readaloud->alternatives;
             $region = $readaloud->region;
-        }else {
+        } else {
             $alternatives = '';
             $region = 'tokyo';
         }
@@ -202,11 +196,11 @@ class mod_readaloud_external extends external_api {
         $alternativesarray = diff::fetchAlternativesArray($alternatives);
 
         // Fetch phonetics and segments
-        list($transcriptphonetic, $transcript) = utils::fetch_phones_and_segments($transcript, $language, $region);
+        [$transcriptphonetic, $transcript] = utils::fetch_phones_and_segments($transcript, $language, $region);
         ;
 
         // conv. number words to digits (if that is what they originally were)
-        switch ($shortlang){
+        switch ($shortlang) {
             case 'ja':
                 // find digits in original passage, and convert number words to digits in the target passage (transcript)
                 // this works but segmented digits are a bit messed up, not sure its worthwhile. more testing needed
@@ -224,13 +218,13 @@ class mod_readaloud_external extends external_api {
         }
 
         // for german we need to deal with eszetts
-        if($shortlang == 'de'){
+        if ($shortlang == 'de') {
                 // find eszetts in original passage, and convert ss words to eszetts in the target passage
-                $transcript = alphabetconverter::ss_to_eszett_convert($passage, $transcript );
+                $transcript = alphabetconverter::ss_to_eszett_convert($passage, $transcript);
         }
 
         // if its japanese turn zenkaku numbers into hankaku ones
-        if($language == constants::M_LANG_JAJP) {
+        if ($language == constants::M_LANG_JAJP) {
             $sentence = mb_convert_kana($passage, "n");
         }
 
@@ -284,7 +278,6 @@ class mod_readaloud_external extends external_api {
         $sessionresults = json_encode($results);
 
         return $sessionresults;
-
     }
     public static function compare_passage_to_transcript_returns() {
         return new external_value(PARAM_RAW);
@@ -304,9 +297,11 @@ class mod_readaloud_external extends external_api {
     public static function submit_streaming_attempt($cmid, $filename, $rectime, $awsresults, $shadowing = 0) {
         global $DB;
 
-        $params = self::validate_parameters(self::submit_streaming_attempt_parameters(),
-                ['cmid' => $cmid, 'filename' => $filename, 'rectime' => $rectime, 'awsresults' => $awsresults,
-                 'shadowing' => $shadowing]);
+        $params = self::validate_parameters(
+            self::submit_streaming_attempt_parameters(),
+            ['cmid' => $cmid, 'filename' => $filename, 'rectime' => $rectime, 'awsresults' => $awsresults,
+            'shadowing' => $shadowing]
+        );
         extract($params);
 
         $cm = get_coursemodule_from_id('readaloud', $cmid, 0, false, MUST_EXIST);
@@ -363,7 +358,6 @@ class mod_readaloud_external extends external_api {
                 } else {
                     $success = true;
                 }
-
             } else {
                 $message = 'Unable to create AI grade for some reason';
                 $success = false;
@@ -433,7 +427,7 @@ class mod_readaloud_external extends external_api {
 
     public static function delete_item_parameters() {
         return new external_function_parameters(
-                [
+            [
                         'contextid' => new external_value(PARAM_INT, 'The context id for the course'),
                         'itemid' => new external_value(PARAM_INT, 'The itemid to delete'),
                         'formname' => new external_value(PARAM_TEXT, 'The formname'),
@@ -445,8 +439,10 @@ class mod_readaloud_external extends external_api {
         global $CFG, $DB, $USER;
 
         // We always must pass webservice params through validate_parameters.
-        $params = self::validate_parameters(self::delete_item_parameters(),
-                ['contextid' => $contextid, 'itemid' => $itemid, 'formname' => $formname]);
+        $params = self::validate_parameters(
+            self::delete_item_parameters(),
+            ['contextid' => $contextid, 'itemid' => $itemid, 'formname' => $formname]
+        );
 
         $context = context::instance_by_id($params['contextid'], MUST_EXIST);
 
@@ -472,7 +468,7 @@ class mod_readaloud_external extends external_api {
 
     public static function move_item_parameters() {
         return new external_function_parameters(
-                [
+            [
                         'contextid' => new external_value(PARAM_INT, 'The context id for the course'),
                         'itemid' => new external_value(PARAM_INT, 'The itemid to move'),
                         'direction' => new external_value(PARAM_TEXT, 'The move direction'),
@@ -484,8 +480,10 @@ class mod_readaloud_external extends external_api {
         global $CFG, $DB, $USER;
 
         // We always must pass webservice params through validate_parameters.
-        $params = self::validate_parameters(self::move_item_parameters(),
-                ['contextid' => $contextid, 'itemid' => $itemid, 'direction' => $direction]);
+        $params = self::validate_parameters(
+            self::move_item_parameters(),
+            ['contextid' => $contextid, 'itemid' => $itemid, 'direction' => $direction]
+        );
 
         $context = context::instance_by_id($params['contextid'], MUST_EXIST);
 
@@ -521,8 +519,10 @@ class mod_readaloud_external extends external_api {
         global $CFG, $DB, $USER;
 
         // We always must pass webservice params through validate_parameters.
-        $params = self::validate_parameters(self::duplicate_item_parameters(),
-            ['contextid' => $contextid, 'itemid' => $itemid]);
+        $params = self::validate_parameters(
+            self::duplicate_item_parameters(),
+            ['contextid' => $contextid, 'itemid' => $itemid]
+        );
 
         $context = context::instance_by_id($params['contextid'], MUST_EXIST);
 
@@ -533,7 +533,7 @@ class mod_readaloud_external extends external_api {
         // get the objects we need
         $cm = get_coursemodule_from_id('', $context->instanceid, 0, false, MUST_EXIST);
         $moduleinstance = $DB->get_record(constants::M_TABLE, ['id' => $cm->instance], '*', MUST_EXIST);
-        list($newitemid, $newitemname, $type, $typelabel) = \mod_readaloud\local\itemform\helper::duplicate_item($moduleinstance, $context, $itemid);
+        [$newitemid, $newitemname, $type, $typelabel] = \mod_readaloud\local\itemform\helper::duplicate_item($moduleinstance, $context, $itemid);
 
         $ret = new \stdClass();
         $ret->olditemid = $itemid;
@@ -558,7 +558,7 @@ class mod_readaloud_external extends external_api {
 
     public static function report_quizstep_grade($cmid, $step) {
         $stepdata = json_decode($step);
-        list($success, $message, $returndata) = utils::update_quizstep_grade($cmid, $stepdata);
+        [$success, $message, $returndata] = utils::update_quizstep_grade($cmid, $stepdata);
         return $success;
     }
     public static function report_quizstep_grade_returns() {
@@ -567,7 +567,7 @@ class mod_readaloud_external extends external_api {
 
     public static function evaluate_transcript_parameters() {
         return new external_function_parameters(
-                ['transcript' => new external_value(PARAM_TEXT, 'The transcript of speaking or writing', VALUE_REQUIRED),
+            ['transcript' => new external_value(PARAM_TEXT, 'The transcript of speaking or writing', VALUE_REQUIRED),
                         'itemid' => new external_value(PARAM_INT, 'The item id in the readaloud quiz', VALUE_REQUIRED),
                         'cmid' => new external_value(PARAM_INT, 'The cmid', VALUE_REQUIRED),
                 ]
@@ -586,7 +586,7 @@ class mod_readaloud_external extends external_api {
 
     public static function fetch_quiz_results_parameters() {
         return new external_function_parameters(
-                ['cmid' => new external_value(PARAM_INT, 'The cmid', VALUE_REQUIRED)]
+            ['cmid' => new external_value(PARAM_INT, 'The cmid', VALUE_REQUIRED)]
         );
     }
 
@@ -633,7 +633,6 @@ class mod_readaloud_external extends external_api {
         $modulecontext = context_module::instance($cmid);
         $config = get_config(constants::M_COMPONENT);
 
-
         // Hacks to make sure we can call renderer without errors
         $PAGE->set_url('/');
         $PAGE->set_context($modulecontext);
@@ -642,9 +641,9 @@ class mod_readaloud_external extends external_api {
         ob_start();
 
         $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
-        $debug=0;
-        $embed=0;
-        $reviewattempts=0;
+        $debug = 0;
+        $embed = 0;
+        $reviewattempts = 0;
         $appcontext = $renderer->get_view_page_data(
             $cm,
             $config,
@@ -661,7 +660,8 @@ class mod_readaloud_external extends external_api {
 
         // If its "all" we return everything.
         if ($requestedcontextitems == 'all') {
-            return $appcontextobj;
+            ob_clean();
+            return json_encode($appcontextobj);
         }
 
         // Else we make an item array and loop it.
@@ -669,7 +669,7 @@ class mod_readaloud_external extends external_api {
         $returnobj = new stdClass();
         foreach ($contextitems as $requestedcontextitem) {
             $requestedcontextitem = trim($requestedcontextitem);
-            switch($requestedcontextitem){
+            switch ($requestedcontextitem) {
                 case 'somedatathatneedstobedealtwith':
                     // Do something special here
                     break;
@@ -737,6 +737,4 @@ class mod_readaloud_external extends external_api {
     public static function refresh_token_returns() {
         return new external_value(PARAM_RAW);
     }
-
-
 }

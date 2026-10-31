@@ -1,6 +1,55 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_readaloud/itemlistitem
+
+    One row of the quiz item table.
+
+    Context variables required for this template:
+    * id - Item id
+    * index - Position in the list
+    * name - Item name
+    * type - Item type
+    * typelabel - Human readable item type
+    * up - Pix icon data for the move up icon
+    * down - Pix icon data for the move down icon
+
+    Example context (json):
+    {
+        "id": 11,
+        "index": 1,
+        "name": "Polar bears 1",
+        "type": "multichoice",
+        "typelabel": "Multiple choice",
+        "up": {
+            "key": "t/up",
+            "component": "core",
+            "title": "Move up"
+        },
+        "down": {
+            "key": "t/down",
+            "component": "core",
+            "title": "Move down"
+        }
+    }
+}}
 <tr id="mod_readaloud_item_row_{{id}}" class="mod_readaloud_item_row" data-id="{{id}}">
     <td class="cell c0">
-    <label><input name="deletequestionid[]" type="checkbox" value="{{id}}" data-action="toggle" data-toggle="slave" data-togglegroup="delete-question"></label>
+    <label><input name="deletequestionid[]" type="checkbox" value="{{id}}" data-action="toggle" data-toggle="target" data-togglegroup="delete-question"></label>
     </td>
     <td class="itemnumber cell c1" style="">{{index}}</td>
     <td class="itemid cell c2" style="">{{name}}</td>
@@ -10,9 +59,9 @@
         <a href="#" class="mod_readaloud_item_move" data-id="{{id}}" data-direction="down">{{#pix}}{{down.key}},{{down.component}},{{down.title}}{{/pix}}</a>
     </td>
     <td class="itemaction cell c5" style="">
-        <a href="#" class="mod_readaloud_item_row_editlink" data-id="{{id}}" data-qtype='{{type}}' data-type="edit" alt="{{#str}}edititem, mod_readaloud{{/str}}">{{#pix}}i/edit{{/pix}}</a>
-        <a href="#" class="mod_readaloud_item_row_previewlink" data-id="{{id}}" data-name="{{name}}" data-type="preview" alt="{{#str}}previewitem, mod_readaloud{{/str}}">{{#pix}}i/preview{{/pix}}</a>
-        <a href="#" class="mod_readaloud_item_row_duplicatelink" data-id="{{id}}" data-name="{{name}}" data-type="duplicate" alt="{{#str}}duplicateitem, mod_readaloud{{/str}}">{{#pix}}t/copy{{/pix}}</a>
-        <a href="#" class="mod_readaloud_item_row_deletelink" data-id="{{id}}" data-name="{{name}}" data-type="delete" alt="{{#str}}deleteitem, mod_readaloud{{/str}}">{{#pix}}i/delete{{/pix}}</a>
+        <a href="#" class="mod_readaloud_item_row_editlink" data-id="{{id}}" data-qtype='{{type}}' data-type="edit" aria-label="{{#str}}edititem, mod_readaloud{{/str}}">{{#pix}}i/edit{{/pix}}</a>
+        <a href="#" class="mod_readaloud_item_row_previewlink" data-id="{{id}}" data-name="{{name}}" data-type="preview" aria-label="{{#str}}previewitem, mod_readaloud{{/str}}">{{#pix}}i/preview{{/pix}}</a>
+        <a href="#" class="mod_readaloud_item_row_duplicatelink" data-id="{{id}}" data-name="{{name}}" data-type="duplicate" aria-label="{{#str}}duplicateitem, mod_readaloud{{/str}}">{{#pix}}t/copy{{/pix}}</a>
+        <a href="#" class="mod_readaloud_item_row_deletelink" data-id="{{id}}" data-name="{{name}}" data-type="delete" aria-label="{{#str}}deleteitem, mod_readaloud{{/str}}">{{#pix}}i/delete{{/pix}}</a>
     </td>
 </tr>
