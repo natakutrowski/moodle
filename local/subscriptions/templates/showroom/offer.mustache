@@ -80,18 +80,37 @@
             {{#hasaccesspromisepromotion}}<p class="commerce-showroom-offer__owner-join-promotion"><i class="fa-solid fa-user-group" aria-hidden="true"></i>{{accesspromisepromotionlabel}}</p>{{/hasaccesspromisepromotion}}
         </div>
         {{/haspromotionjoincontext}}{{/owned}}
-        {{#haspedagogicalcapacity}}
+        {{#haspedagogicalcapacity}}{{^a1compactoffercurrency}}
         <div class="commerce-pedagogical-capacity {{pedagogicalcapacityclass}}" role="status">
             <i class="fa-solid {{#pedagogicalsoldout}}fa-circle-xmark{{/pedagogicalsoldout}}{{^pedagogicalsoldout}}fa-ticket{{/pedagogicalsoldout}}" aria-hidden="true"></i>
             <span>{{pedagogicalcapacitylabel}}</span>
         </div>
-        {{#haspedagogicalsalesclose}}
+        {{/a1compactoffercurrency}}{{/haspedagogicalcapacity}}
+        {{#a1compactoffercurrency}}
+        <div class="commerce-showroom-offer__enrolment-row">
+            {{#haspedagogicalcapacity}}
+            <div class="commerce-pedagogical-capacity {{pedagogicalcapacityclass}}" role="status">
+                <i class="fa-solid {{#pedagogicalsoldout}}fa-circle-xmark{{/pedagogicalsoldout}}{{^pedagogicalsoldout}}fa-ticket{{/pedagogicalsoldout}}" aria-hidden="true"></i>
+                <span>{{pedagogicalcapacitylabel}}</span>
+            </div>
+            {{/haspedagogicalcapacity}}
+            <div class="commerce-showroom-offers__toolbar commerce-showroom-currency-card commerce-showroom-currency-card--inline" data-showroom-currency-toolbar data-endpoint="{{currencyendpoint}}" data-showroom-key="{{showroomkey}}" data-error-message="{{currencyerrormessage}}">
+                <span class="commerce-showroom-currency-card__icon" aria-hidden="true"><i class="fa-solid fa-coins"></i></span>
+                <span class="commerce-showroom-currency-card__copy"><strong>{{currencylabel}}</strong></span>
+                <label class="visually-hidden" for="showroom-offers-currency">{{currencylabel}}</label>
+                <select id="showroom-offers-currency" data-showroom-currency-ajax>
+                    {{#currencies}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/currencies}}
+                </select>
+                <span class="commerce-showroom-offers__currency-status" data-showroom-currency-status aria-live="polite"></span>
+            </div>
+        </div>
+        {{/a1compactoffercurrency}}
+        {{#haspedagogicalcapacity}}{{#haspedagogicalsalesclose}}
         <div class="commerce-pedagogical-sales-deadline">
             <i class="{{#pedagogicalsalescloseurgent}}fa-solid fa-fire{{/pedagogicalsalescloseurgent}}{{^pedagogicalsalescloseurgent}}fa-regular fa-clock{{/pedagogicalsalescloseurgent}}" aria-hidden="true"></i>
             <span>{{pedagogicalsalescloselabel}}</span>
         </div>
-        {{/haspedagogicalsalesclose}}
-        {{/haspedagogicalcapacity}}
+        {{/haspedagogicalsalesclose}}{{/haspedagogicalcapacity}}
         <div class="commerce-showroom-offer__actions">
             {{#canbuy}}
                 <form method="post" action="{{cartaction}}" data-showroom-standard-buy data-showroom-track="offer_buy" data-showroom-track-role="{{role}}">

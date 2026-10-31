@@ -1216,7 +1216,7 @@
     <section class="commerce-showroom-offers {{offerspresentationclass}} {{offerslayoutclass}} commerce-showroom-offers--{{offerscardvariant}} commerce-showroom-offers--columns-{{offerscolumns}} {{offersmobilepresentationclass}} {{offerscardstopspacingclass}}" id="showroom-offers" aria-labelledby="showroom-offers-heading" style="--showroom-section-custom-background: {{offerslayoutbackgroundcolor}};">
         {{#hasofferslayoutbackgroundimage}}<span class="commerce-showroom-common-background" aria-hidden="true" style="--showroom-common-bg-opacity: {{offerslayoutbackgroundopacity}}%; --showroom-common-bg-blur: {{offerslayoutbackgroundblur}}px;"><img src="{{offerslayoutbackgroundimageurl}}" alt="" loading="lazy" decoding="async"></span>{{/hasofferslayoutbackgroundimage}}
         <div class="commerce-showroom-container">
-            <div class="commerce-showroom-offers__header" data-showroom-currency-toolbar data-endpoint="{{currencyendpoint}}" data-showroom-key="{{showroomkey}}" data-error-message="{{currencyerrormessage}}">
+            <div class="commerce-showroom-offers__header" {{^a1compactoffercurrency}}data-showroom-currency-toolbar data-endpoint="{{currencyendpoint}}" data-showroom-key="{{showroomkey}}" data-error-message="{{currencyerrormessage}}"{{/a1compactoffercurrency}}>
                 <div class="commerce-showroom-section__heading commerce-showroom-offers__heading">
                     <p class="commerce-showroom-offers__badge">
                         <i class="{{offersbadgeicon}}" aria-hidden="true"></i>
@@ -1228,6 +1228,7 @@
                     </h2>
                     <p>{{offersdescription}}</p>
                 </div>
+                {{^a1compactoffercurrency}}
                 <div class="commerce-showroom-offers__toolbar commerce-showroom-currency-card">
                     <span class="commerce-showroom-currency-card__icon" aria-hidden="true"><i class="fa-solid fa-coins"></i></span>
                     <span class="commerce-showroom-currency-card__copy">
@@ -1239,6 +1240,7 @@
                     </select>
                     <span class="commerce-showroom-offers__currency-status" data-showroom-currency-status aria-live="polite"></span>
                 </div>
+                {{/a1compactoffercurrency}}
             </div>
             {{#offersmobileslider}}
                 <div class="commerce-showroom-offers__swipe-hint" aria-hidden="true">

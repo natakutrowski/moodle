@@ -16917,3 +16917,149 @@
         height: 58px;
     }
 }
+
+
+/* CampusFR A1 compact offer 2026-10-31 — scoped to the official A1 showroom.
+   Keep all other Showrooms (Verbs, Articles, Alf, multi-product) unchanged. */
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers {
+    padding-block: clamp(.65rem, 1.6vh, 1.6rem);
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offers__header {
+    margin-bottom: .45rem;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offers__grid {
+    width: min(600px, 100%);
+    margin: .5rem auto 0 !important;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__visual {
+    flex: 0 0 auto;
+    width: 100%;
+    height: clamp(182px, 23.5vh, 222px);
+    min-height: 0;
+    max-height: 222px;
+    aspect-ratio: auto;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__visual img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 8%;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__body {
+    padding: .72rem .95rem .8rem;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__role {
+    margin-bottom: .25rem;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__body h3 {
+    font-size: 1.15rem;
+    line-height: 1.16;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__description {
+    margin: .3rem 0 .35rem;
+    font-size: .82rem;
+    line-height: 1.35;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__features {
+    gap: .18rem;
+    margin: .3rem 0 .4rem;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__features li {
+    gap: .4rem;
+    font-size: .8rem;
+    line-height: 1.3;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__pricing {
+    min-height: 0;
+    gap: .08rem;
+    margin-top: .25rem;
+    padding-top: 0;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__pricing-promotion.is-empty {
+    display: none;
+    min-height: 0;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__price-row strong {
+    font-size: 1.5rem;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__enrolment-row {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .45rem .7rem;
+    margin-top: .35rem;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__enrolment-row .commerce-pedagogical-capacity {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    font-size: .79rem;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-currency-card--inline {
+    position: static !important;
+    display: grid;
+    flex: 0 0 auto;
+    width: max-content;
+    min-width: 0;
+    min-height: 2.2rem;
+    grid-template-columns: auto auto minmax(6.6rem, auto);
+    gap: .2rem .35rem;
+    margin: 0 0 0 auto !important;
+    padding: .2rem .3rem .2rem .4rem;
+    border-radius: .7rem;
+    box-shadow: none;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-currency-card--inline .commerce-showroom-currency-card__icon {
+    width: 1.45rem;
+    height: 1.45rem;
+    border-radius: .4rem;
+    font-size: .73rem;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-currency-card--inline .commerce-showroom-currency-card__copy strong {
+    font-size: .72rem;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-currency-card--inline select {
+    width: auto;
+    min-width: 6.6rem;
+    min-height: 1.7rem;
+    padding: .14rem 1.35rem .14rem .4rem;
+    border-radius: .5rem;
+    font-size: .76rem;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-pedagogical-sales-deadline {
+    margin: .25rem 0 .35rem;
+    font-size: .75rem;
+}
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__actions {
+    margin-top: .4rem;
+}
+@media (max-width: 575.98px) {
+    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__visual {
+        height: clamp(187px, 29vh, 225px);
+        max-height: 225px;
+    }
+    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__enrolment-row {
+        align-items: flex-start;
+    }
+    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-currency-card--inline {
+        grid-template-columns: auto minmax(6.6rem, auto);
+    }
+    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-currency-card--inline .commerce-showroom-currency-card__copy {
+        display: none;
+    }
+}
+
+/* CampusFR A1 - Offers heading: quieter typography (pass 2, 2026-10-31).
+   Scoped to the A1 offers section; other section headings and Showrooms untouched. */
+.commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offers__heading h2 {
+    font-size: clamp(1.85rem, 3.1vw, 2.7rem);
+    line-height: 1.10;
+}
+@media (max-width: 767.98px) {
+    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offers__heading h2 {
+        font-size: clamp(1.5rem, 5.5vw, 2rem);
+    }
+}

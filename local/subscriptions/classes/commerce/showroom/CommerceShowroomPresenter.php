@@ -28,6 +28,9 @@ final class CommerceShowroomPresenter {
 
         return array_replace($data, $pedagogicalcontext, [
             'showroomkey' => $definition->get_key(),
+            // Keep the currency selector next to the purchase action only for
+            // the single-offer A1 showroom; other showrooms keep their header control.
+            'a1compactoffercurrency' => $definition->get_key() === 'a1-course' && count($offers) === 1,
             'title' => get_string($definition->get_title_key(), 'local_subscriptions'),
             'description' => get_string($definition->get_description_key(), 'local_subscriptions'),
             'videomodalclose' => get_string('commerce_showroom_video_close', 'local_subscriptions'),
