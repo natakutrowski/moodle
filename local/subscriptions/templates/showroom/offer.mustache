@@ -94,6 +94,12 @@
                 <span>{{pedagogicalcapacitylabel}}</span>
             </div>
             {{/haspedagogicalcapacity}}
+            {{#haspedagogicalcapacity}}{{#haspedagogicalsalesclose}}
+            <div class="commerce-pedagogical-sales-deadline">
+                <i class="{{#pedagogicalsalescloseurgent}}fa-solid fa-fire{{/pedagogicalsalescloseurgent}}{{^pedagogicalsalescloseurgent}}fa-regular fa-clock{{/pedagogicalsalescloseurgent}}" aria-hidden="true"></i>
+                <span>{{pedagogicalsalescloselabel}}</span>
+            </div>
+            {{/haspedagogicalsalesclose}}{{/haspedagogicalcapacity}}
             <div class="commerce-showroom-offers__toolbar commerce-showroom-currency-card commerce-showroom-currency-card--inline" data-showroom-currency-toolbar data-endpoint="{{currencyendpoint}}" data-showroom-key="{{showroomkey}}" data-error-message="{{currencyerrormessage}}">
                 <span class="commerce-showroom-currency-card__icon" aria-hidden="true"><i class="fa-solid fa-coins"></i></span>
                 <span class="commerce-showroom-currency-card__copy"><strong>{{currencylabel}}</strong></span>
@@ -105,12 +111,12 @@
             </div>
         </div>
         {{/a1compactoffercurrency}}
-        {{#haspedagogicalcapacity}}{{#haspedagogicalsalesclose}}
+        {{^a1compactoffercurrency}}{{#haspedagogicalcapacity}}{{#haspedagogicalsalesclose}}
         <div class="commerce-pedagogical-sales-deadline">
             <i class="{{#pedagogicalsalescloseurgent}}fa-solid fa-fire{{/pedagogicalsalescloseurgent}}{{^pedagogicalsalescloseurgent}}fa-regular fa-clock{{/pedagogicalsalescloseurgent}}" aria-hidden="true"></i>
             <span>{{pedagogicalsalescloselabel}}</span>
         </div>
-        {{/haspedagogicalsalesclose}}{{/haspedagogicalcapacity}}
+        {{/haspedagogicalsalesclose}}{{/haspedagogicalcapacity}}{{/a1compactoffercurrency}}
         <div class="commerce-showroom-offer__actions">
             {{#canbuy}}
                 <form method="post" action="{{cartaction}}" data-showroom-standard-buy data-showroom-track="offer_buy" data-showroom-track-role="{{role}}">

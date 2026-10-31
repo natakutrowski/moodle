@@ -16984,16 +16984,16 @@
     font-size: 1.5rem;
 }
 .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__enrolment-row {
-    display: flex;
+    display: grid;
     min-width: 0;
-    flex-wrap: wrap;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
-    gap: .45rem .7rem;
+    gap: .2rem .7rem;
     margin-top: .35rem;
 }
 .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__enrolment-row .commerce-pedagogical-capacity {
-    flex: 1 1 auto;
+    grid-column: 1;
+    grid-row: 1;
     min-width: 0;
     margin: 0;
     font-size: .79rem;
@@ -17001,7 +17001,8 @@
 .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-currency-card--inline {
     position: static !important;
     display: grid;
-    flex: 0 0 auto;
+    grid-column: 2;
+    grid-row: 1;
     width: max-content;
     min-width: 0;
     min-height: 2.2rem;
@@ -17030,25 +17031,61 @@
     font-size: .76rem;
 }
 .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-pedagogical-sales-deadline {
-    margin: .25rem 0 .35rem;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin: .05rem 0 .15rem;
     font-size: .75rem;
 }
 .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__actions {
     margin-top: .4rem;
 }
+/* A1 mobile/tablet: remaining seats, registration deadline, compact currency, CTA. */
+@media (max-width: 767.98px) {
+    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__enrolment-row {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: .2rem;
+    }
+    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__enrolment-row .commerce-pedagogical-capacity {
+        flex: 0 1 auto;
+    }
+    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__enrolment-row .commerce-pedagogical-sales-deadline {
+        margin: 0;
+    }
+    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-currency-card--inline {
+        align-self: flex-end;
+        max-width: 100%;
+        min-height: 0;
+        grid-template-columns: auto minmax(6.3rem, auto);
+        gap: .2rem;
+        margin: .15rem 0 0 auto !important;
+        padding: .13rem .28rem .13rem .32rem;
+        border-radius: .6rem;
+    }
+    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-currency-card--inline .commerce-showroom-currency-card__copy {
+        display: none;
+    }
+    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-currency-card--inline .commerce-showroom-currency-card__icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: .36rem;
+        font-size: .67rem;
+    }
+    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-currency-card--inline select {
+        min-width: 6.3rem;
+        min-height: 1.55rem;
+        padding: .12rem 1.2rem .12rem .35rem;
+        font-size: .73rem;
+    }
+    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__actions {
+        margin-top: .3rem;
+    }
+}
 @media (max-width: 575.98px) {
     .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__visual {
         height: clamp(235px, 35vh, 275px);
         max-height: 275px;
-    }
-    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-offer__enrolment-row {
-        align-items: flex-start;
-    }
-    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-currency-card--inline {
-        grid-template-columns: auto minmax(6.6rem, auto);
-    }
-    .commerce-showroom[data-showroom="a1-course"] #showroom-offers .commerce-showroom-currency-card--inline .commerce-showroom-currency-card__copy {
-        display: none;
     }
 }
 
