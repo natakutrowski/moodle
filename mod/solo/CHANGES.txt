@@ -1,3 +1,25 @@
+1.0.81 (Build 2026102700)
+- Tested with Moodle 5.3
+- Replaced calls to print_error() and error(), which no longer exist in Moodle, so error pages show their message instead of a fatal error
+- Use the core_form/changechecker module after saving a modal form: the old YUI form change checker no longer exists in Moodle 5.3
+
+1.0.80 (Build 2026102500)
+- Fixed issue where grade calculation was not displayed correctly in autograding log
+- Fixed issue where an empty results page was displayed instead of a "waiting for results" page
+
+1.0.79 (Build 2026101800)
+- Pass the full attempt record to the step and attempt submitted events
+- Load recorder scripts from the configured Cloud Poodll server
+
+1.0.78 (Build 2026092303)
+- Added streaming speech recognition for record mode
+
+1.0.77 (Build 2026081600)
+- Added in-plugin free trial set up
+
+1.0.76 (Build 2026073000)
+- Added separate teacher evaluation comments section to finished results
+
 1.0.75 (Build 2026042000)
 - Updates for Moodle 5.2 (now requires Moodle 4.3)
 - Removed Modal_factory

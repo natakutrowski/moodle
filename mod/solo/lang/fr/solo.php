@@ -706,8 +706,8 @@ $string['content_ytid'] = "ID Vidéo YouTube";
 $string['content_ytstart'] = "Début (en secondes)";
 $string['content_ytend'] = "Fin (en secondes)";
 $string['ytclipdetails'] = "Clip YouTube/Vimeo";
-$string['freetrial'] = "Obtenez les identifiants API Cloud Poodll et un essai gratuit";
-$string['freetrial_desc'] = "Une boîte de dialogue devrait apparaître vous permettant de vous inscrire pour un essai gratuit avec Poodll. Après l'inscription, vous devez vous connecter au tableau de bord des membres pour obtenir votre nom d'utilisateur API et votre clé secrète. Et pour enregistrer l'URL de votre site.";
+$string['freetrial'] = 'Obtenir un essai gratuit Poodll';
+$string['freetrial_desc'] = 'Poodll Solo est un plugin Moodle payant. Vous pouvez configurer un essai gratuit en quelques minutes sans quitter votre site Moodle. Pour connaître les tarifs, consultez <a href="https://poodll.com/pricing">Poodll.com</a>.';
 $string['fillcredentials'] = "Définir l'utilisateur API et la clé secrète avec les identifiants existants";
 $string['viewstart'] = "Ouverture de l'activité";
 $string['viewend'] = "Fermeture de l'activité";
@@ -865,10 +865,66 @@ $string['stats_ieltslevel'] = 'Niveau IELTS';
 $string['stats_toefllevel'] = 'Niveau TOEFL';
 $string['stats_genericlevel'] = 'Niveau de langue';
 $string['enablenativelanguage'] = "Activer la langue maternelle";
-$string['enablenativelanguage_details'] = 'Si activé, l\'étudiant peut choisir sa langue maternelle, ce qui remplacera la langue par défaut du feedback fourni par l\'IA. La langue doit actuellement être <a href="https://support.poodll.com/en/support/solutions/articles/19000163890-definitions-in-user-s-native-language">définie dans Poodll WordCards</a>, et elle est détectée ici.';
+$string['enablenativelanguage_details'] = 'Si cette option est activée, l’étudiant peut choisir sa langue maternelle, qui remplace la langue de feedback par défaut utilisée par l’IA pour les résultats. La langue peut être <a href="https://support.poodll.com/en/support/solutions/articles/19000163890-definitions-in-user-s-native-language">définie dans Poodll WordCards</a> ou dans Poodll MiniLesson, puis utilisée ici.';
 $string['teacherfeedback'] = 'Feedback de l\'enseignant';
 
 
 $string['cloudpoodllserver'] = 'Serveur Cloud Poodll';
 $string['cloudpoodllserver_details'] = 'Le serveur à utiliser pour Cloud Poodll. Ne le modifiez que si Poodll vous en a fourni un autre.';
 $string['ningxia'] = 'Ningxia, Chine';
+
+// New strings translated for the CampusFR 1.0.81a release.
+$string['allowmicaccess'] = 'Veuillez autoriser l’accès à votre microphone.';
+$string['azureapikey'] = 'Clé API Azure Speech';
+$string['azureapikey_details'] = 'Facultatif. Clé API Azure Speech pour la reconnaissance vocale en continu, principalement destinée aux utilisateurs de Chine continentale. Si ce champ est vide, la reconnaissance en continu utilise le service vocal Poodll.';
+$string['azureapiregion'] = 'Région Azure Speech';
+$string['azureapiregion_details'] = 'Région associée à votre clé API Azure Speech.';
+$string['cbaftercheckout'] = 'Presque terminé : consultez votre boîte mail';
+$string['cbaftercheckout_desc'] = 'Vos identifiants et votre clé secrète API Poodll vous seront envoyés par email. À leur réception, revenez à l’onglet précédent, renseignez le formulaire d’identification et enregistrez.';
+$string['cbaskadmin'] = 'Demandez à l’administrateur du site de configurer les identifiants API Poodll.';
+$string['cbcredentialssaved'] = 'Les identifiants API Poodll ont été enregistrés et acceptés.';
+$string['cbgetfreetrial'] = 'Obtenir un essai gratuit';
+$string['cbgotosettings'] = 'Accéder aux réglages de Poodll Solo';
+$string['cbnocredentialsset'] = 'Poodll Solo ne peut pas encore fonctionner : les identifiants et la clé secrète API Poodll ne sont pas configurés pour ce site.';
+$string['cbsavecredentials'] = 'Enregistrer les identifiants';
+$string['cbsetupfound'] = 'Un autre plugin Poodll sur ce site dispose déjà d’identifiants. Vous pouvez les copier avec le bouton ci-dessous, puis les enregistrer.';
+$string['cbsetupheading'] = 'Configurer les identifiants API Poodll';
+$string['cbsetupintro'] = 'Poodll Solo nécessite des identifiants et une clé secrète API Poodll. Ces réglages s’appliquent à l’ensemble du site : il suffit de les configurer une seule fois.';
+$string['cbsetupnotfound'] = 'Aucun identifiant Poodll trouvé sur ce site. Si vous n’en avez pas, vous pouvez démarrer un essai gratuit : les identifiants API vous seront envoyés par email.';
+$string['cbtrialfailed'] = 'Impossible de charger le formulaire d’inscription Poodll. Vérifiez votre connexion Internet et réessayez, ou inscrivez-vous sur member.poodll.com.';
+$string['cbtrialsiteurl'] = 'Votre abonnement sera enregistré pour l’URL du site :';
+$string['cbtrialsiteurl_desc'] = 'Si vos utilisateurs accèdent à Moodle par une autre adresse, enregistrez la bonne URL dans l’espace membre sur member.poodll.com après votre inscription.';
+$string['cbtrialstep1'] = 'Cliquez sur « Obtenir un essai gratuit » et remplissez le formulaire Poodll. Aucun paiement ni carte bancaire ne sont nécessaires.';
+$string['cbtrialstep2'] = 'Consultez votre boîte mail. Vos identifiants API Poodll arriveront peu après votre inscription.';
+$string['cbtrialstep3'] = 'Revenez à l’onglet précédent, saisissez les identifiants API dans le formulaire et enregistrez.';
+$string['nocredentialsentered'] = 'Aucun identifiant ni clé secrète API saisis.';
+$string['nomicdetected'] = 'Aucun microphone détecté.';
+$string['speechnotrecognized'] = 'Impossible de reconnaître votre voix.';
+$string['stepsubmitfailed'] = 'Impossible d’envoyer votre enregistrement. Réenregistrez-vous ou réessayez plus tard.';
+$string['streamdownload'] = 'Télécharger votre enregistrement';
+$string['streamingheading'] = 'Reconnaissance vocale en continu';
+$string['streamingheading_details'] = 'Réglages de l’enregistreur intégré à la page, qui transcrit la parole pendant l’enregistrement.';
+$string['streamingrecord'] = 'Utiliser l’enregistrement en continu';
+$string['streamingrecord_cloudonly'] = 'Oui, reconnaissance dans le cloud uniquement';
+$string['streamingrecord_default'] = 'Enregistreur en continu par défaut';
+$string['streamingrecord_default_details'] = 'Mode d’enregistrement utilisé par défaut pour les nouvelles activités. Il peut être modifié dans les réglages de chaque activité.';
+$string['streamingrecord_help'] = 'Utiliser l’enregistreur en continu, qui transcrit la parole pendant que l’apprenant parle, pour que les résultats soient prêts dès la fin de l’enregistrement.
+
+« Préférer le navigateur » utilise la reconnaissance vocale du navigateur lorsqu’elle est disponible, ce qui couvre davantage de langues. Sinon, le système passe à la reconnaissance en continu dans le cloud.
+
+« Reconnaissance cloud uniquement » utilise toujours le cloud et conserve l’enregistreur classique défini plus haut pour les langues non prises en charge.
+
+Les enregistreurs vidéo et « Importer » ne prennent pas en charge ce mode.';
+$string['streamingrecord_off'] = 'Non, utiliser l’enregistreur classique (ci-dessus)';
+$string['streamingrecord_preferbrowser'] = 'Oui, préférer la reconnaissance vocale du navigateur';
+$string['streammicdefault'] = 'Microphone par défaut';
+$string['streammicrophone'] = 'Microphone';
+$string['streamrecord'] = 'Enregistrer';
+$string['streamrecording'] = 'Enregistrement en cours';
+$string['streamrerecord'] = 'Réenregistrer';
+$string['streamsettings'] = 'Réglages de l’enregistreur';
+$string['streamstop'] = 'Arrêter';
+$string['streamuploaded'] = 'Votre enregistrement a été sauvegardé.';
+$string['streamuploadfailed'] = 'Impossible de sauvegarder votre enregistrement. Réenregistrez-vous.';
+$string['streamuploading'] = 'Enregistrement en cours de sauvegarde : {$a} %';
+$string['teachercomments'] = 'Commentaires de l’enseignant';

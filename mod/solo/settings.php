@@ -49,47 +49,11 @@ if ($ADMIN->fulltree) {
         $showbelowapisecret = $tokeninfo;
         // if we have no API user and secret we show a "fetch from elsewhere on site" or "take a free trial" link
     } else {
-        $amddata = ['apppath' => $CFG->wwwroot . '/' . constants::M_URL];
-        $cpcomponents = [
-            'filter_poodll',
-            'qtype_cloudpoodll',
-            'mod_readaloud',
-            'mod_wordcards',
-            'mod_solo',
-            'mod_englishcentral',
-            'mod_pchat',
-            'atto_cloudpoodll',
-            'tinymce_cloudpoodll',
-            'tiny_poodll',
-            'assignsubmission_cloudpoodll',
-            'assignfeedback_cloudpoodll',
-        ];
-
-        foreach ($cpcomponents as $cpcomponent) {
-            switch ($cpcomponent) {
-                case 'filter_poodll':
-                    $apiusersetting = 'cpapiuser';
-                    $apisecretsetting = 'cpapisecret';
-                    break;
-                case 'mod_englishcentral':
-                    $apiusersetting = 'poodllapiuser';
-                    $apisecretsetting = 'poodllapisecret';
-                    break;
-                default:
-                    $apiusersetting = 'apiuser';
-                    $apisecretsetting = 'apisecret';
-            }
-            $cloudpoodllapiuser = get_config($cpcomponent, $apiusersetting);
-            if (!empty($cloudpoodllapiuser)) {
-                $cloudpoodllapisecret = get_config($cpcomponent, $apisecretsetting);
-                if (!empty($cloudpoodllapisecret)) {
-                    $amddata['apiuser'] = $cloudpoodllapiuser;
-                    $amddata['apisecret'] = $cloudpoodllapisecret;
-                    break;
-                }
-            }
-        }
-        $showbelowapisecret = $OUTPUT->render_from_template(constants::M_COMPONENT . '/managecreds', $amddata);
+        $amddata = \mod_solo\cbcredentials::export_buttons_data(
+            '#id_s_mod_solo_apiuser',
+            '#id_s_mod_solo_apisecret'
+        );
+        $showbelowapisecret = $OUTPUT->render_from_template(constants::M_COMPONENT . '/cbmanagecreds', $amddata);
     }
 
 
@@ -261,6 +225,40 @@ if ($ADMIN->fulltree) {
         get_string('enablenativelanguage', constants::M_COMPONENT),
         get_string('enablenativelanguage_details', constants::M_COMPONENT),
         1
+    ));
+
+    // Streaming speech recognition, used by the in page recorder.
+    $settings->add(new admin_setting_heading(
+        constants::M_COMPONENT . '/streamingheading',
+        get_string('streamingheading', constants::M_COMPONENT),
+        get_string('streamingheading_details', constants::M_COMPONENT)
+    ));
+
+    // Default for the per activity streaming recorder setting, for new activities.
+    $settings->add(new admin_setting_configselect(
+        constants::M_COMPONENT . '/streamingrecord_default',
+        get_string('streamingrecord_default', constants::M_COMPONENT),
+        get_string('streamingrecord_default_details', constants::M_COMPONENT),
+        constants::STREAMINGRECORD_OFF,
+        utils::fetch_options_streamingrecord()
+    ));
+
+    // Azure API key, optional. Without one, streaming uses AssemblyAI through Cloud Poodll.
+    $settings->add(new admin_setting_configtext(
+        constants::M_COMPONENT . '/azureapikey',
+        get_string('azureapikey', constants::M_COMPONENT),
+        get_string('azureapikey_details', constants::M_COMPONENT),
+        '',
+        PARAM_TEXT
+    ));
+
+    // Azure API region.
+    $settings->add(new admin_setting_configselect(
+        constants::M_COMPONENT . '/azureapiregion',
+        get_string('azureapiregion', constants::M_COMPONENT),
+        get_string('azureapiregion_details', constants::M_COMPONENT),
+        'eastus',
+        utils::fetch_regions_azure()
     ));
 
 }

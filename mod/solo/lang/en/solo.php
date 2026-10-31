@@ -369,7 +369,6 @@ $string['transcriber'] = 'Transcriber';
 $string['transcriber_details'] = 'The transcription engine to use. ';
 $string['transcriber_open'] = 'Open transcription';
 // $string['transcriber_amazontranscribe'] = 'Regular transcription(AWS)';
-// $string['transcriber_amazonstreaming'] = 'Instant Transcription(AWS)';
 // $string['transcriber_googlechrome'] = 'Instant transcription (Chrome only)';
 // $string['transcriber_googlecloud'] = 'Quick Transcription(Google)(audio length < 60s ony)';
 $string['transcriber_none'] = 'No transcription';
@@ -714,11 +713,32 @@ $string['content_ytid'] = "Youtube Video ID";
 $string['content_ytstart'] = "Start Secs";
 $string['content_ytend'] = "End Secs";
 $string['ytclipdetails'] = "Youtube/Vimeo Clip";
-$string['freetrial'] = "Get Cloud Poodll API Credentials and a Free Trial";
-$string['freetrial_desc'] = "A dialog should appear that allows you to register for a free trial with Poodll. After registering you should login to the members dashboard to get your API user and secret. And to register your site URL.";
+$string['freetrial'] = "Get a Poodll free trial";
+$string['freetrial_desc'] = "Poodll Solo is a premium Moodle plugin. A free trial can be set up in a couple of minutes without leaving your Moodle site. For details on pricing visit <a href='https://poodll.com/pricing'>Poodll.com</a>. ";
 // $string['memberdashboard'] = "Member Dashboard";
 // $string['memberdashboard_desc'] = "";
 $string['fillcredentials'] = "Set API user and secret with existing credentials";
+
+// In-app management of the Poodll API credentials (see classes/cbcredentials.php).
+$string['cbsetupheading'] = "Set up your Poodll API credentials";
+$string['cbsetupintro'] = "Poodll Solo cannot run until the Poodll API user and secret have been set for this site. They are site wide settings, so you only need to do this once.";
+$string['cbsetupfound'] = "Another Poodll plugin on this site already has credentials. You can copy them across with the button below, then save them.";
+$string['cbsetupnotfound'] = "No Poodll credentials were found anywhere on this site. If you do not have them yet you can take a free trial, and your API user and secret will be emailed to you.";
+$string['cbsavecredentials'] = "Save credentials";
+$string['cbgotosettings'] = "Go to the Poodll Solo settings page";
+$string['cbcredentialssaved'] = "Your Poodll API credentials were saved and accepted.";
+$string['cbnocredentialsset'] = "Poodll Solo cannot run yet because the Poodll API user and secret have not been set for this site.";
+$string['cbaskadmin'] = "Please ask your site administrator to set up the Poodll API credentials for this site.";
+$string['nocredentialsentered'] = "No API user and secret were entered.";
+$string['cbgetfreetrial'] = "Get free trial";
+$string['cbtrialstep1'] = "Click the \"Get free trial\" button below and fill in the Poodll checkout form. There is nothing to pay and no credit card is required.";
+$string['cbtrialstep2'] = "Check your email. Your Poodll API user and secret will arrive there a moment after you register.";
+$string['cbtrialstep3'] = "Return to the tab you came from, paste the API user and secret into the form there, and save.";
+$string['cbtrialsiteurl'] = "Your subscription will be registered for the site URL:";
+$string['cbtrialsiteurl_desc'] = "If that is not the address your users visit this Moodle site on, register the correct URL in the members dashboard at member.poodll.com after signing up.";
+$string['cbaftercheckout'] = "Almost done: check your email";
+$string['cbaftercheckout_desc'] = "Your Poodll API user and secret are on their way by email. When they arrive, return to the tab you came from, paste them into the credentials form and save.";
+$string['cbtrialfailed'] = "The Poodll signup form could not be loaded. Please check your internet connection and try again, or sign up at member.poodll.com instead.";
 $string['viewstart'] = "Activity open";
 $string['viewend'] = "Activity close";
 $string['viewstart_help'] = "If set, prevents a student from entering the activity before the start date/time.";
@@ -877,7 +897,42 @@ $string['stats_ieltslevel'] = 'IELTS Level';
 $string['stats_toefllevel'] = 'TOEFL Level';
 $string['stats_genericlevel'] = 'Language Level';
 $string['enablenativelanguage'] = "Enable Native Language";
-$string['enablenativelanguage_details'] = 'If set, the student can choose their native language, this will override the default language of the feedback language that AI returns with the results. The language must currently be <a href="https://support.poodll.com/en/support/solutions/articles/19000163890-definitions-in-user-s-native-language">set in Poodll WordCards</a>, and it is picked up here.';
+$string['enablenativelanguage_details'] = 'If set, the student can choose their native language, this will override the default language of the feedback language that AI returns with the results. The language must currently be <a href="https://support.poodll.com/en/support/solutions/articles/19000163890-definitions-in-user-s-native-language">set in Poodll WordCards</a>, or Poodll MiniLesson, and it is used here.';
 $string['teacherfeedback'] = 'Teacher Feedback';
 $string['cloudpoodllserver'] = 'Cloud Poodll Server';
 $string['cloudpoodllserver_details'] = 'The server to use for Cloud Poodll. Only change this if Poodll has provided a different one.';
+$string['teachercomments'] = 'Teacher Comments';
+$string['streamingheading'] = 'Streaming speech recognition';
+$string['streamingheading_details'] = 'Settings for the in page recorder, which transcribes speech as the student records.';
+$string['azureapikey'] = 'Azure speech API key';
+$string['azureapikey_details'] = 'Optional. An Azure speech API key for streaming speech recognition. This is mainly for users in mainland China. If it is empty, streaming uses the Poodll speech service.';
+$string['azureapiregion'] = 'Azure speech region';
+$string['azureapiregion_details'] = 'The region of your Azure speech API key.';
+$string['allowmicaccess'] = 'Please allow access to your microphone.';
+$string['nomicdetected'] = 'No microphone detected.';
+$string['speechnotrecognized'] = 'We could not recognize your speech.';
+$string['streamrecord'] = 'Record';
+$string['streamingrecord'] = 'Use streaming recording';
+$string['streamingrecord_help'] = 'Record with the streaming recorder which transcribes while the student speaks, so results are ready as soon as they finish.
+
+"Prefer the browser" uses the browser\'s own speech recognition where it has it, which covers many more languages. Falls back to cloud streaming otherwise.
+
+"Cloud recogniser only" always uses the cloud recogniser, and keeps the non-streaming recorder chosen above for languages it does not cover.
+
+The video and the Upload recorder will not use streaming.';
+$string['streamingrecord_off'] = 'No, use the standard recorder (above)';
+$string['streamingrecord_preferbrowser'] = 'Yes, use browser speech recognition';
+$string['streamingrecord_cloudonly'] = 'Yes, use cloud recognition';
+$string['streamingrecord_default'] = 'Streaming recorder by default';
+$string['streamingrecord_default_details'] = 'What new activities use for recording. Each activity can change this in its settings.';
+$string['streamstop'] = 'Stop';
+$string['streamrerecord'] = 'Record again';
+$string['streamsettings'] = 'Recorder settings';
+$string['streammicrophone'] = 'Microphone';
+$string['streammicdefault'] = 'Default microphone';
+$string['streamdownload'] = 'Download your recording';
+$string['streamuploading'] = 'Saving your recording: {$a}%';
+$string['streamuploaded'] = 'Your recording is saved.';
+$string['streamuploadfailed'] = 'Your recording could not be saved. Please record again.';
+$string['streamrecording'] = 'Recording';
+$string['stepsubmitfailed'] = 'Your recording could not be submitted. Please record again, or try again later.';

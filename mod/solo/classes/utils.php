@@ -39,6 +39,16 @@ require_once($CFG->dirroot . '/mod/solo/lib.php');
  */
 class utils
 {
+    /** @var int A cached streaming token is only handed out if it has at least this many seconds left. */
+    const STREAMING_TOKEN_MINLIFE = 2 * MINSECS;
+    /** @var int Longest transcript we ask the Poodll API to punctuate; its answer is capped, and a longer one
+     * would come back cut short. */
+    const PUNCTUATION_MAXWORDS = 900;
+    /** @var int Longest streamed transcript text accepted with a recording, in characters. */
+    const STREAMING_TEXT_MAXLENGTH = 100000;
+    /** @var int Longest streamed word list (JSON) accepted with a recording, in bytes. */
+    const STREAMING_WORDS_MAXLENGTH = 2000000;
+
     // Get the Cloud Poodll Server URL
     public static function get_cloud_poodll_server()
     {
@@ -72,75 +82,103 @@ class utils
         return $ret;
     }
 
-    public static function can_streaming_transcribe($instance)
-    {
-
-        $ret = false;
-
-        // The instance languages
-        switch ($instance->ttslanguage) {
-            case constants::M_LANG_ENAU:
-            case constants::M_LANG_ENGB:
-            case constants::M_LANG_ENUS:
-            case constants::M_LANG_ESUS:
-            case constants::M_LANG_FRFR:
-            case constants::M_LANG_FRCA:
-                $ret = true;
-                break;
-            default:
-                $ret = false;
-        }
-
-        // The supported regions
-        if ($ret) {
-            switch ($instance->region) {
-                case "useast1":
-                case "useast2":
-                case "uswest2":
-                case "sydney":
-                case "dublin":
-                case "ottawa":
-                    $ret = true;
-                    break;
-                default:
-                    $ret = false;
-            }
-        }
-
-        return $ret;
-    }
-
-    // streaming results are not the same format as non streaming, we massage the streaming to look like a non streaming
-    // to our code that will go on to process it.
+    /**
+     * Turn the word list from the in page streaming recorder into the transcript json the rest of Solo reads,
+     * which is the AWS transcribe shape (results.items with start_time and end_time), the same as the server side
+     * transcript. See aitranscriptutils::fetch_audio_points_json() and textanalyser::fetch_duration_from_transcript().
+     *
+     * @param string $streamingresults JSON array of {content, start_time, end_time, confidence}
+     * @return string|false The transcript json, or false if the input is not a JSON array. An empty array is valid.
+     */
     public static function parse_streaming_results($streamingresults)
     {
-        $results = json_decode($streamingresults);
-        $alltranscript = '';
-        $allitems = [];
-        foreach ($results as $result) {
-            foreach ($result as $completion) {
-                foreach ($completion->Alternatives as $alternative) {
-                    $alltranscript .= $alternative->Transcript . ' ';
-                    foreach ($alternative->Items as $item) {
-                        $processeditem = new \stdClass();
-                        $processeditem->alternatives = [['content' => $item->Content, 'confidence' => "1.0000"]];
-                        $processeditem->end_time = "" . round($item->EndTime, 3);
-                        $processeditem->start_time = "" . round($item->StartTime, 3);
-                        $processeditem->type = $item->Type;
-                        $allitems[] = $processeditem;
-                    }
-                }
-            }
+        if (!self::is_json($streamingresults)) {
+            return false;
         }
+        $words = json_decode($streamingresults);
+        if (!is_array($words)) {
+            return false;
+        }
+
+        $transcriptbits = [];
+        $allitems = [];
+        foreach ($words as $word) {
+            if (!is_object($word) || !isset($word->content) || !is_string($word->content)) {
+                continue;
+            }
+            $content = trim($word->content);
+            if ($content === '') {
+                continue;
+            }
+            $transcriptbits[] = $content;
+
+            $processeditem = new \stdClass();
+            // Confidence is a string in the server side transcript, so match that.
+            $confidence = isset($word->confidence) ? (float) $word->confidence : 1;
+            $processeditem->alternatives = [['content' => $content, 'confidence' => sprintf('%.4f', $confidence)]];
+            $processeditem->start_time = '' . round(isset($word->start_time) ? (float) $word->start_time : 0, 3);
+            $processeditem->end_time = '' . round(isset($word->end_time) ? (float) $word->end_time : 0, 3);
+            // The streaming recogniser only hands back spoken words, never punctuation items.
+            $processeditem->type = 'pronunciation';
+            $allitems[] = $processeditem;
+        }
+
         $ret = new \stdClass();
         $ret->jobName = "streaming";
         $ret->accountId = "streaming";
         $ret->results = [];
         $ret->status = 'COMPLETED';
-        $ret->results['transcripts'] = [['transcript' => $alltranscript]];
+        $ret->results['transcripts'] = [['transcript' => implode(' ', $transcriptbits)]];
         $ret->results['items'] = $allitems;
-
         return json_encode($ret);
+    }
+
+    /**
+     * The transcript the in page streaming recorder sent with a recording, ready to store on the attempt.
+     *
+     * Only a stream that ended properly is used: 'complete' (the service confirmed it had sent everything) or
+     * 'unconfirmed' (Azure, which has no such confirmation). An empty transcript from such a stream is a real result,
+     * the student said nothing, and it grades as zero. Anything else means the stream failed, and nothing is returned,
+     * so the attempt waits for the server side transcript of the uploaded audio instead.
+     *
+     * @param \stdClass $data The record step's submitted data (streamingtext, streamingtranscript, streamingstatus).
+     * @return \stdClass|false transcript and jsontranscript, or false if there is no usable streamed transcript.
+     */
+    public static function fetch_streamed_transcript($data)
+    {
+        $status = isset($data->streamingstatus) && is_string($data->streamingstatus) ? $data->streamingstatus : '';
+        if (!in_array($status, ['complete', 'unconfirmed', 'browser'])) {
+            return false;
+        }
+        $text = isset($data->streamingtext) && is_string($data->streamingtext) ? $data->streamingtext : '';
+        // The browser's own speech recognition cannot say why it heard nothing: the student may have said nothing,
+        // or it may not handle this language. Storing nothing leaves the recording to the cloud transcript, which
+        // takes a couple of minutes but cannot hand out a wrong zero. A cloud stream that ends properly is
+        // different: an empty transcript there really is silence, and grades as zero.
+        if ($status === 'browser' && trim($text) === '') {
+            return false;
+        }
+        $words = isset($data->streamingtranscript) && is_string($data->streamingtranscript) ? $data->streamingtranscript : '[]';
+        // A ten minute recording is well under these.
+        if (\core_text::strlen($text) > self::STREAMING_TEXT_MAXLENGTH || strlen($words) > self::STREAMING_WORDS_MAXLENGTH) {
+            return false;
+        }
+
+        $jsontranscript = self::parse_streaming_results($words);
+        if ($jsontranscript === false) {
+            // The words are malformed but the text is not: keep the text, without word timings.
+            $jsontranscript = self::parse_streaming_results('[]');
+        }
+
+        $ret = new \stdClass();
+        // Plain text only, on one line. Azure's text starts with a space.
+        $ret->transcript = trim(preg_replace('/\s+/u', ' ', clean_param($text, PARAM_TEXT)));
+        $ret->jsontranscript = $jsontranscript;
+        // How long the recording was. Browser speech recognition reports no word timings, so this is where words
+        // per minute comes from for those attempts.
+        $rectime = isset($data->streamingrectime) ? (int) $data->streamingrectime : 0;
+        $ret->rectime = ($rectime > 0 && $rectime < DAYSECS) ? $rectime : 0;
+        return $ret;
     }
 
 
@@ -155,13 +193,13 @@ class utils
 
     public static function transcripts_are_ready_on_s3($attempt)
     {
-        // if the audio filename is empty or wrong, its hopeless ...just return false
+        // If the audio filename is empty or wrong, its hopeless ...just return false.
         if (!$attempt->filename || empty($attempt->filename)) {
             return false;
         }
         $transcripturl = $attempt->filename . '.txt';
         $postdata = [];
-        // fetch transcripts, and bail out of they are not ready or wrong
+        // Fetch transcripts, and bail out of they are not ready or wrong.
         $transcript = self::curl_fetch($transcripturl, $postdata);
         return self::is_valid_transcript($transcript);
     }
@@ -185,20 +223,22 @@ class utils
             return false;
         }
 
-        $vtttranscript = self::curl_fetch($vtttranscripturl, $postdata);
-        if (!self::is_valid_transcript($vtttranscript)) {
-            return false;
-        }
-
         $transcript = self::curl_fetch($transcripturl, $postdata);
         if (!self::is_valid_transcript($transcript)) {
             return false;
         }
 
-        // If we got here, we have transcripts and we do not need to come back
-        // jsontranscript and vtttranscript will both be truthy even if empty, but transcript will not ... it will falsey
-        // So we allow emtpy transcript even though it sucks 15/01/2024 J
-        if ($jsontranscript && $vtttranscript && $transcript !== null && $transcript !== false) {
+        // The subtitles are optional. Nothing reads them, and the streaming recorder's uploader does not ask for
+        // them (subtitle=0), so its backup transcription never makes a .vtt. Requiring one left those attempts
+        // waiting for a file that would never come. Keep it when the cloud made one, as the iframe recorder asks it to.
+        $vtttranscript = self::curl_fetch($vtttranscripturl, $postdata);
+        if (!$vtttranscript || !self::is_valid_transcript($vtttranscript)) {
+            $vtttranscript = '';
+        }
+
+        // If we got here, we have transcripts and we do not need to come back.
+        // The json is truthy even if the speech was empty, the text may be empty. We allow an empty transcript.
+        if ($jsontranscript && $transcript !== null && $transcript !== false) {
             $updateattempt = new \stdClass();
             $updateattempt->id = $attempt->id;
             $updateattempt->jsontranscript = $jsontranscript;
@@ -485,28 +525,28 @@ class utils
             }
         }
 
-        // if we do not have automatic transcripts, try to fetch them
+        // If we do not have automatic transcripts, try to fetch them.
         $recordstep = self::fetch_step_no($moduleinstance, constants::M_STEP_RECORD);
         $hastranscripts = !empty($attempt->jsontranscript);
-        // if we have no record step, this is a written assignment
+        // If we have no record step, this is a written assignment.
         if (!$hastranscripts && $recordstep === false) {
-            // fake some ai data so we dont need to rewrite the whole world
+            // Fake some ai data so we dont need to rewrite the whole world.
             $DB->update_record(
                 constants::M_ATTEMPTSTABLE,
                 ['id' => $attempt->id, 'transcript' => $attempt->selftranscript, 'jsontranscript' => '{}']
             );
-            // if we have a record step but no transcripts th
+            // If we have a record step but no transcripts.
         } else if (!$hastranscripts) {
             $attemptwithtranscripts = self::retrieve_transcripts_from_s3($attempt);
             $hastranscripts = $attemptwithtranscripts !== false;
 
-            // if we are calling from cron, just return here
+            // If we are calling from cron, just return here.
             if (!$hastranscripts && $trace) {
                 $trace->output("Transcript not ready yet");
                 return false;
             }
 
-            // if we fetched the transcript, and this activity has no manual self transcript, use the auto transcript as manual
+            // If we fetched the transcript, and this activity has no manual self transcript, use the auto transcript as manual.
             if ($transcribestep === false && $hastranscripts) {
                 $attempt->selftranscript = $attemptwithtranscripts->transcript;
                 $DB->update_record(constants::M_ATTEMPTSTABLE, ['id' => $attempt->id, 'selftranscript' => $attempt->selftranscript]);
@@ -514,9 +554,15 @@ class utils
             $attempt = $DB->get_record(constants::M_ATTEMPTSTABLE, ['id' => $attempt->id]);
         }
 
-        // this should run down the aitranscript constructor and do the diffs if the passage arrives late or on time, but not redo
-        // this line caused an error if the user entered a blank transcript. Do we need to check for empty?
+        // This should run down the aitranscript constructor and do the diffs if the passage arrives late or on time, but not redo.
+        // This line caused an error if the user entered a blank transcript. Do we need to check for empty?
         // if($hastranscripts && !empty($attempt->selftranscript)){
+        // Speech recognised in the browser comes back with no punctuation at all, so add it before the statistics,
+        // the grammar check and the AI grade read the transcript.
+        if ($hastranscripts) {
+            $attempt = self::punctuate_attempt_transcript($attempt, $moduleinstance);
+        }
+
         if ($hastranscripts) {
             $autotranscript = $attempt->transcript;
             $aitranscript = new \mod_solo\aitranscript(
@@ -579,6 +625,10 @@ class utils
                     unset($stats->wordslong);
                     // also calculate WPM
                     $duration = textanalyser::fetch_duration_from_transcript($attempt->jsontranscript);
+                    // Browser speech recognition gives no word timings, so fall back to how long the recording was.
+                    if (!$duration && !empty($attempt->rectime)) {
+                        $duration = $attempt->rectime;
+                    }
                     if ($stats->words && $duration) {
                         $stats->wpm = round(($stats->words / $duration) * 60, 0);
                     } else {
@@ -615,19 +665,7 @@ class utils
             $instructions->modeltext = '';
             $isspeech = !self::is_textonlysubmission($moduleinstance);
             $aigraderesults = self::fetch_ai_grade($token, $moduleinstance->region, $moduleinstance->ttslanguage, $isspeech, $studentresponse, $instructions);
-            if ($aigraderesults && isset($aigraderesults->marks) && isset($aigraderesults->feedback)) {
-                if ($aigraderesults->feedback !== null) {
-                    $aigraderesults->feedback = json_encode($aigraderesults->feedback);
-                }
-                $DB->update_record(
-                    constants::M_ATTEMPTSTABLE,
-                    [
-                        'id' => $attempt->id,
-                        'aigrade' => $aigraderesults->marks,
-                        'aifeedback' => $aigraderesults->feedback
-                    ]
-                );
-            }
+            $attempt = self::store_ai_grade($attempt, $aigraderesults);
         }
 
         // Process grammar correction (it won't fetch again if it has it already)
@@ -647,6 +685,171 @@ class utils
         return $attempt;
     }
 
+
+    /**
+     * Does this transcript need punctuation adding?
+     *
+     * The browser's own speech recognition returns none at all, which leaves the whole answer as one sentence,
+     * and makes the grammar check report every missing full stop as a mistake. The cloud recognisers punctuate as
+     * they go, so their transcripts are left alone. Same test as the Poodll API uses.
+     *
+     * @param string $text
+     * @return bool
+     */
+    public static function needs_punctuation($text)
+    {
+        if (trim((string) $text) === '') {
+            return false;
+        }
+        $punctuation = '/[.,!?;:()\[\]{}"«»„“”‹›¡¿،؛؟。、「」『』【】《》]/u';
+        if (preg_match($punctuation, $text)) {
+            return false;
+        }
+        // The service caps its answer, so a long answer would come back cut short. Its words would then not match
+        // and we would throw the result away, so do not ask in the first place.
+        return str_word_count($text) <= self::PUNCTUATION_MAXWORDS;
+    }
+
+    /**
+     * Are these the same words, ignoring punctuation and capitals?
+     *
+     * The service is told to add punctuation without changing any words. This checks that it did, so a wandering
+     * answer can never rewrite what a student said.
+     *
+     * @param string $before
+     * @param string $after
+     * @return bool
+     */
+    public static function same_words($before, $after)
+    {
+        $normalise = function ($text) {
+            $text = \core_text::strtolower($text);
+            // Drop everything that is not a letter, a number or an apostrophe, so "beer," matches "beer".
+            $text = preg_replace('/[^\p{L}\p{N}\']+/u', ' ', $text);
+            return array_values(array_filter(explode(' ', trim($text)), function ($word) {
+                return $word !== '';
+            }));
+        };
+        return $normalise($before) === $normalise($after);
+    }
+
+    /**
+     * Ask the Poodll API to punctuate a passage of speech.
+     *
+     * @param string $token The Cloud Poodll token.
+     * @param string $region
+     * @param string $language The activity language, eg en-US.
+     * @param string $text
+     * @return string|false The punctuated text, or false if the service could not do it.
+     */
+    public static function fetch_punctuated_text($token, $region, $language, $text)
+    {
+        $params = [
+            'wstoken' => $token,
+            'wsfunction' => 'local_cpapi_call_ai',
+            'moodlewsrestformat' => 'json',
+            'action' => 'add_punctuation',
+            'subject' => '',
+            'prompt' => $text,
+            'language' => $language,
+            'appid' => constants::M_COMPONENT,
+            'region' => $region,
+            'owner' => hash('md5', $token),
+        ];
+        $response = self::curl_fetch(self::get_cloud_poodll_server() . '/webservice/rest/server.php', $params);
+        if (!self::is_json($response)) {
+            return false;
+        }
+        $payload = json_decode($response);
+        if (!isset($payload->returnCode) || $payload->returnCode != 0 || !isset($payload->returnMessage)) {
+            return false;
+        }
+        $punctuated = trim((string) $payload->returnMessage);
+        return $punctuated === '' ? false : $punctuated;
+    }
+
+    /**
+     * Add punctuation to an attempt's transcript, if it has none.
+     *
+     * Done before anything reads the transcript, so the statistics, the grammar check, the AI grade and the student
+     * all see the same text. Once punctuated it is left alone, so processing an attempt again costs nothing.
+     *
+     * @param \stdClass $attempt
+     * @param \stdClass $moduleinstance
+     * @return \stdClass The attempt, punctuated if it could be.
+     */
+    public static function punctuate_attempt_transcript($attempt, $moduleinstance)
+    {
+        global $DB;
+
+        if (!self::needs_punctuation($attempt->transcript)) {
+            return $attempt;
+        }
+        $siteconfig = get_config(constants::M_COMPONENT);
+        $token = self::fetch_token($siteconfig->apiuser, $siteconfig->apisecret);
+        if (empty($token)) {
+            return $attempt;
+        }
+        $language = $moduleinstance->ttslanguage;
+        $punctuated = self::fetch_punctuated_text($token, $moduleinstance->region, $language, $attempt->transcript);
+        if ($punctuated === false) {
+            return $attempt;
+        }
+        if (!self::same_words($attempt->transcript, $punctuated)) {
+            // It changed the words, so it is not a punctuated copy of what the student said. Keep theirs.
+            $message = 'mod_solo: punctuation changed the words of attempt ' . $attempt->id . ', keeping the original';
+            debugging($message, DEBUG_DEVELOPER);
+            return $attempt;
+        }
+
+        $update = ['id' => $attempt->id, 'transcript' => $punctuated];
+        // The graded text too, where it is the transcript rather than something the student typed.
+        if (trim((string) $attempt->selftranscript) === trim((string) $attempt->transcript)) {
+            $update['selftranscript'] = $punctuated;
+        }
+        $DB->update_record(constants::M_ATTEMPTSTABLE, $update);
+        foreach ($update as $field => $value) {
+            $attempt->{$field} = $value;
+        }
+        return $attempt;
+    }
+
+    /**
+     * Store the AI grade and feedback on an attempt, whichever of them came back.
+     *
+     * They are stored independently: an AI reply with marks but no feedback used to be thrown away whole, so the
+     * mark never reached the attempt. The grade formula then treats the AI part as 100% (see autograde_attempt),
+     * which quietly drops the AI assessment out of the grade.
+     *
+     * @param \stdClass $attempt The attempt.
+     * @param \stdClass|false $aigraderesults What fetch_ai_grade() returned.
+     * @return \stdClass The attempt, with anything stored set on it too.
+     */
+    public static function store_ai_grade($attempt, $aigraderesults)
+    {
+        global $DB;
+
+        if (!$aigraderesults) {
+            return $attempt;
+        }
+        $update = ['id' => $attempt->id];
+        if (isset($aigraderesults->marks) && $aigraderesults->marks !== null && is_numeric($aigraderesults->marks)) {
+            $update['aigrade'] = $aigraderesults->marks;
+        }
+        if (isset($aigraderesults->feedback) && $aigraderesults->feedback !== null) {
+            // The feedback is stored as json, and the display side only shows it if it is valid json.
+            $update['aifeedback'] = is_string($aigraderesults->feedback) && self::is_json($aigraderesults->feedback)
+                ? $aigraderesults->feedback : json_encode($aigraderesults->feedback);
+        }
+        if (count($update) === 1) {
+            return $attempt;
+        }
+        $DB->update_record(constants::M_ATTEMPTSTABLE, $update);
+        foreach ($update as $field => $value) {
+            $attempt->{$field} = $value;
+        }
+        return $attempt;
+    }
 
     /*
      * Process grammar correction details as returned by text analyser
@@ -1359,7 +1562,9 @@ class utils
 
         // Update attempts table.
         $attempt->grade = round($autograde, 0);
-        $aglog[] = "Autograde = 100 * (Words[$wordratio] * Accuracy[$accuracyratio] * Relevance[$relevanceratio] * AI Grade[$aigraderatio])  + bonustotal[$bonustotal] => $attempt->grade%";
+        $aglog[] = "Autograde = Base score[$basescore] *"
+            . " (Words[$wordratio] * Accuracy[$accuracyratio] * Relevance[$relevanceratio] * AI Grade[$aigraderatio])"
+            . "  + bonustotal[$bonustotal] => $attempt->grade%";
         $attempt->autogradelog = json_encode($aglog);
         $DB->update_record(constants::M_ATTEMPTSTABLE, $attempt);
 
@@ -1585,6 +1790,353 @@ class utils
 
         return $refresh . $message;
 
+    }
+
+    /**
+     * Fetch a token for streaming speech recognition in the browser.
+     *
+     * A site's own Azure key is used when one is configured, otherwise an AssemblyAI token is fetched through
+     * Cloud Poodll. Tokens are cached for the whole site, which is safe: one token can open many sessions.
+     *
+     * @param string $poodllregion The Poodll region of the activity.
+     * @return \stdClass|false The token object (token, tokentype, region, validuntil, validseconds), or false.
+     */
+    public static function fetch_streaming_token($poodllregion)
+    {
+        $token = self::fetch_azure_token();
+        if ($token) {
+            return $token;
+        }
+        $tokentype = 'assemblyai';
+
+        // If we already have a token with a useful life left, just use that. A token about to expire would make the
+        // page refresh it almost at once, and again when the refresh hands back the same cached token, and every
+        // refresh costs the recording the end of the sentence being spoken.
+        $now = time();
+        $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
+        $tokenobject = $cache->get($tokentype . 'token' . '_' . $poodllregion);
+        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now + self::STREAMING_TOKEN_MINLIFE) {
+            // For js we set the valid number of seconds.
+            $tokenobject->validseconds = $tokenobject->validuntil - $now;
+            return $tokenobject;
+        }
+
+        $conf = get_config(constants::M_COMPONENT);
+        if (empty($conf->apiuser) || empty($conf->apisecret)) {
+            return false;
+        }
+        $cloudpoodlltoken = self::fetch_token($conf->apiuser, $conf->apisecret);
+        if (empty($cloudpoodlltoken)) {
+            return false;
+        }
+
+        $params = [
+            'wstoken' => $cloudpoodlltoken,
+            'wsfunction' => 'local_cpapi_fetch_some_token',
+            'moodlewsrestformat' => 'json',
+            'region' => $poodllregion,
+            'tokentype' => $tokentype,
+        ];
+        $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
+        $response = self::curl_fetch($serverurl, $params);
+        if (!self::is_json($response)) {
+            return false;
+        }
+        $payloadobject = json_decode($response);
+        if (!isset($payloadobject->returnCode) || $payloadobject->returnCode != 0 || !isset($payloadobject->returnMessage)) {
+            return false;
+        }
+
+        $tokenobject = new \stdClass();
+        $tokenobject->tokentype = $tokentype;
+        $tokenobject->token = $payloadobject->returnMessage;
+        $tokenobject->region = $poodllregion;
+        $tokenobject->validuntil = $now + (10 * MINSECS);
+        $cache->set($tokentype . 'token' . '_' . $poodllregion, $tokenobject);
+        // For js we set the valid number of seconds.
+        $tokenobject->validseconds = $tokenobject->validuntil - $now;
+        return $tokenobject;
+    }
+
+    /**
+     * Fetch an Azure speech token, using the site's own Azure key if one is configured.
+     *
+     * @return \stdClass|false The token object, or false if there is no key or the request failed.
+     */
+    public static function fetch_azure_token()
+    {
+        global $CFG;
+        $conf = get_config(constants::M_COMPONENT);
+        $apikey = isset($conf->azureapikey) ? $conf->azureapikey : '';
+        $apiregion = isset($conf->azureapiregion) ? $conf->azureapiregion : '';
+        if (empty($apikey) || empty($apiregion)) {
+            return false;
+        }
+
+        // If we already have a token with a useful life left, just use that. See fetch_streaming_token().
+        $now = time();
+        $cache = \cache::make_from_params(\cache_store::MODE_APPLICATION, constants::M_COMPONENT, 'token');
+        $tokenobject = $cache->get('azuretoken' . '_' . $apiregion);
+        if ($tokenobject && isset($tokenobject->validuntil) && $tokenobject->validuntil > $now + self::STREAMING_TOKEN_MINLIFE) {
+            // For js we set the valid number of seconds.
+            $tokenobject->validseconds = $tokenobject->validuntil - $now;
+            return $tokenobject;
+        }
+
+        $apidomain = 'microsoft.com';
+        if (strpos($apiregion, 'china') === 0) {
+            $apidomain = 'azure.cn';
+        } else if (strpos($apiregion, 'usgov') === 0) {
+            $apidomain = 'azure.us';
+        }
+        $fetchurl = 'https://' . $apiregion . '.api.cognitive.' . $apidomain . '/sts/v1.0/issueToken';
+        require_once($CFG->libdir . '/filelib.php');
+        $c = new \curl();
+        $options = [
+            'CURLOPT_HTTPHEADER' => [
+                'Ocp-Apim-Subscription-Key: ' . $apikey,
+                'Content-Length: 0',
+            ],
+            'CURLOPT_POSTFIELDS' => '',
+            'CURLOPT_POST' => true,
+        ];
+        $response = $c->post($fetchurl, '', $options);
+        if (!$response) {
+            return false;
+        }
+
+        $tokenobject = new \stdClass();
+        $tokenobject->token = $response;
+        $tokenobject->tokentype = 'azure';
+        $tokenobject->region = $apiregion;
+        // Azure tokens are valid for 10 minutes, we refresh a minute early.
+        $tokenobject->validuntil = $now + (9 * MINSECS);
+        $cache->set('azuretoken' . '_' . $apiregion, $tokenobject);
+        // For js we set the valid number of seconds.
+        $tokenobject->validseconds = $tokenobject->validuntil - $now;
+        return $tokenobject;
+    }
+
+    /**
+     * The Azure speech regions, for the admin setting.
+     *
+     * @return array region code => name
+     */
+    public static function fetch_regions_azure()
+    {
+        return [
+            'australiacentral' => 'Australia Central',
+            'australiaeast' => 'Australia East',
+            'australiasoutheast' => 'Australia Southeast',
+            'brazilsouth' => 'Brazil South',
+            'brazilsoutheast' => 'Brazil Southeast',
+            'canadacentral' => 'Canada Central',
+            'canadaeast' => 'Canada East',
+            'centralindia' => 'Central India',
+            'centralus' => 'Central US',
+            'chinaeast' => 'China East',
+            'chinaeast2' => 'China East 2',
+            'chinaeast3' => 'China East 3',
+            'chinanorth' => 'China North',
+            'chinanorth2' => 'China North 2',
+            'chinanorth3' => 'China North 3',
+            'eastasia' => 'East Asia',
+            'eastus' => 'East US',
+            'eastus2' => 'East US 2',
+            'francecentral' => 'France Central',
+            'germanywestcentral' => 'Germany West Central',
+            'israelcentral' => 'Israel Central',
+            'italynorth' => 'Italy North',
+            'japaneast' => 'Japan East',
+            'japanwest' => 'Japan West',
+            'koreacentral' => 'Korea Central',
+            'mexicocentral' => 'Mexico Central',
+            'newzealandnorth' => 'New Zealand North',
+            'northcentralus' => 'North Central US',
+            'northeurope' => 'North Europe',
+            'polandcentral' => 'Poland Central',
+            'qatarcentral' => 'Qatar Central',
+            'southafricanorth' => 'South Africa North',
+            'southcentralus' => 'South Central US',
+            'southeastasia' => 'Southeast Asia',
+            'southindia' => 'South India',
+            'spaincentral' => 'Spain Central',
+            'swedencentral' => 'Sweden Central',
+            'switzerlandnorth' => 'Switzerland North',
+            'uaenorth' => 'UAE North',
+            'uksouth' => 'UK South',
+            'ukwest' => 'UK West',
+            'westcentralus' => 'West Central US',
+            'westeurope' => 'West Europe',
+            'westus2' => 'West US 2',
+            'westus3' => 'West US 3',
+        ];
+    }
+
+    /**
+     * Template data for the in page streaming recorder (templates/streamrecorder.mustache).
+     *
+     * It saves the media (teachers grade against it), forces streaming (browser speech recognition has no word
+     * timings and cannot record audio on Android), and has the cloud transcribe the saved audio as well, so an
+     * attempt whose streaming transcript failed can still be graded from the server side transcript.
+     *
+     * @param \stdClass $cm The course module.
+     * @param \stdClass $moduleinstance The solo instance.
+     * @param string $cloudpoodlltoken The Cloud Poodll token, used for the media upload.
+     * @return array|false The template data, or false if no streaming token can be had.
+     */
+    public static function fetch_streaming_recorder_data($cm, $moduleinstance, $cloudpoodlltoken)
+    {
+        global $CFG, $USER;
+
+        // A token is only issued for a language the cloud recogniser can read. Without one the page falls back to
+        // the browser's own speech recognition, or to the iframe recorder if the browser has none: the cloud
+        // recogniser does not fail on a language it cannot read, it just returns nothing.
+        $tokenobject = self::fetch_streaming_token($moduleinstance->region);
+        if ($tokenobject && !self::streaming_supports_language($tokenobject->tokentype, $moduleinstance->ttslanguage)) {
+            $tokenobject = false;
+        }
+        $cloudonly = (int) $moduleinstance->streamingrecord === constants::STREAMINGRECORD_CLOUDONLY;
+        // Cloud only with no usable token means there is nothing for the in page recorder to do.
+        if ($cloudonly && !$tokenobject) {
+            return false;
+        }
+        // Minutes in the settings, 0 means no limit, and the timer treats 0 the same way.
+        $maxtime = $moduleinstance->maxconvlength > 0 ? $moduleinstance->maxconvlength * 60 : 0;
+
+        $uniqueid = \html_writer::random_id('solo_ttrec');
+        return [
+            'uniqueid' => $uniqueid,
+            'cmid' => $cm->id,
+            'language' => $moduleinstance->ttslanguage,
+            'region' => $moduleinstance->region,
+            'waveheight' => 75,
+            'maxtime' => $maxtime,
+            'hastimelimit' => $maxtime > 0,
+            'asrurl' => self::fetch_lang_server_url($moduleinstance->region, 'transcribe'),
+            'speechtoken' => $tokenobject ? $tokenobject->token : '',
+            'speechtokenregion' => $tokenobject ? $tokenobject->region : '',
+            'speechtokenvalidseconds' => $tokenobject ? $tokenobject->validseconds : 0,
+            'speechtokentype' => $tokenobject ? $tokenobject->tokentype : '',
+            // Only "cloud recogniser only" stops ttrecorder choosing the browser's own speech recognition.
+            'forcestreaming' => $cloudonly ? 1 : 0,
+            'hastoken' => $tokenobject ? 1 : 0,
+            'savemedia' => 1,
+            'savemediaregion' => $moduleinstance->region,
+            'cloudpoodlltoken' => $cloudpoodlltoken,
+            'wwwroot' => $CFG->wwwroot,
+            'appid' => constants::M_COMPONENT,
+            'owner' => hash('md5', $USER->username),
+            'transcode' => 1,
+            'transcribemedia' => 1,
+            'expiredays' => $moduleinstance->expiredays,
+            'mediatype' => 'audio',
+            'cloudpoodllurl' => self::get_cloud_poodll_server(),
+            // The counter before recording starts, in the same hh:mm:ss form timer.js uses.
+            'initialtime' => sprintf('%02d:%02d:%02d', intdiv($maxtime, 3600), intdiv($maxtime % 3600, 60), $maxtime % 60),
+            // For the playback player partial (mediasubmissionplayer), pointed at the recording once there is one.
+            'UNIQID' => $uniqueid . '_player',
+            'isaudiosubmission' => true,
+            'audiofilename' => '',
+        ];
+    }
+
+    /**
+     * The options for the record step's recorder setting.
+     *
+     * @return array
+     */
+    public static function fetch_options_streamingrecord()
+    {
+        return [
+            constants::STREAMINGRECORD_OFF => get_string('streamingrecord_off', constants::M_COMPONENT),
+            constants::STREAMINGRECORD_PREFERBROWSER => get_string('streamingrecord_preferbrowser', constants::M_COMPONENT),
+            constants::STREAMINGRECORD_CLOUDONLY => get_string('streamingrecord_cloudonly', constants::M_COMPONENT),
+        ];
+    }
+
+    /**
+     * The streaming speech provider this site uses: its own Azure key if one is set, otherwise AssemblyAI.
+     *
+     * @return string 'azure' or 'assemblyai'
+     */
+    public static function streaming_token_type()
+    {
+        $conf = get_config(constants::M_COMPONENT);
+        return (!empty($conf->azureapikey) && !empty($conf->azureapiregion)) ? 'azure' : 'assemblyai';
+    }
+
+    /**
+     * Whether this activity records with the in page streaming recorder rather than the Cloud Poodll iframe.
+     *
+     * The single decision point, for the record step and for the submit path. It looks at settings only and makes
+     * no network calls, so the record step still falls back to the iframe if no streaming token can be fetched
+     * (see fetch_streaming_recorder_data).
+     *
+     * @param \stdClass $moduleinstance The solo instance.
+     * @return bool
+     */
+    public static function can_stream_record($moduleinstance)
+    {
+        // Switched on for this activity.
+        if (empty($moduleinstance->streamingrecord)) {
+            return false;
+        }
+        // The streaming recorder is audio only, and cannot take an uploaded file.
+        if ($moduleinstance->recordertype != constants::REC_AUDIO || $moduleinstance->recorderskin == constants::SKIN_UPLOAD) {
+            return false;
+        }
+        if (!self::can_transcribe($moduleinstance)) {
+            return false;
+        }
+        // Only the sequences a teacher can choose today that have a record step. The legacy PRTM and PRMT preload
+        // an automatic transcript into the transcribe step from S3, which streaming does not provide. Compare the
+        // steps exactly: steps_to_sequence() reports PRM for any layout it does not recognise.
+        $streamable = false;
+        foreach ([constants::M_SEQ_PRM, constants::M_SEQ_RM, constants::M_SEQ_PTRM] as $sequence) {
+            $steps = self::sequence_to_steps((object) ['activitysteps' => $sequence]);
+            $same = true;
+            for ($i = 1; $i <= 5; $i++) {
+                if ((int) $steps->{'step' . $i} !== (int) ($moduleinstance->{'step' . $i} ?? constants::M_STEP_NONE)) {
+                    $same = false;
+                    break;
+                }
+            }
+            if ($same) {
+                $streamable = true;
+                break;
+            }
+        }
+        // The language is not checked here. It decides whether a streaming token is issued
+        // (fetch_streaming_recorder_data), not which recorder the step uses: the browser's own speech recognition
+        // covers many more languages, and the page falls back to the iframe when it has neither.
+        return $streamable;
+    }
+
+    /**
+     * Whether a streaming speech provider can transcribe a Solo language.
+     *
+     * AssemblyAI (ttstreamer.js) picks its model from the first two letters: English, or the multilingual model,
+     * which covers Spanish, French, German, Italian and Portuguese. Azure (ttazure.js) is passed the locale as is,
+     * so the locale must be one Azure lists for speech to text. Checked against Microsoft's table dated 2026-08-18:
+     * every Solo locale is there except en-WL, en-AB, mi-NZ and no-NO (Azure uses nb-NO).
+     *
+     * @param string $tokentype 'assemblyai' or 'azure'
+     * @param string $language A Solo language code, eg 'en-US'
+     * @return bool
+     */
+    public static function streaming_supports_language($tokentype, $language)
+    {
+        switch ($tokentype) {
+            case 'assemblyai':
+                return in_array(substr($language, 0, 2), ['en', 'es', 'fr', 'de', 'it', 'pt']);
+            case 'azure':
+                $unsupported = [constants::M_LANG_ENWL, constants::M_LANG_ENAB, constants::M_LANG_MINZ,
+                    constants::M_LANG_NONO];
+                return array_key_exists($language, self::get_lang_options()) && !in_array($language, $unsupported);
+            default:
+                return false;
+        }
     }
 
     // We need a Poodll token to make all this recording and transcripts happen
@@ -3285,6 +3837,18 @@ class utils
         $mform->addElement('select', 'recorderskin', get_string('recorderskin', constants::M_COMPONENT), $options, []);
         $mform->setDefault('recorderskin', constants::SKIN_SOLO);
 
+        // In page streaming recorder. Where the activity cannot stream (see can_stream_record) it keeps the recorder
+        // above, so the recorder style still matters and is left enabled.
+        $streamingrecordoptions = self::fetch_options_streamingrecord();
+        $streamingrecordlabel = get_string('streamingrecord', constants::M_COMPONENT);
+        $mform->addElement('select', 'streamingrecord', $streamingrecordlabel, $streamingrecordoptions);
+        $mform->setType('streamingrecord', PARAM_INT);
+        $mform->setDefault('streamingrecord', isset($config->streamingrecord_default)
+            ? $config->streamingrecord_default : constants::STREAMINGRECORD_OFF);
+        $mform->addHelpButton('streamingrecord', 'streamingrecord', constants::M_COMPONENT);
+        $mform->disabledIf('streamingrecord', 'recordertype', 'eq', constants::REC_VIDEO);
+        $mform->disabledIf('streamingrecord', 'activitysteps', 'eq', constants::M_SEQ_PTM);
+
         // Enable Manual Transcription [lets force this ]
         $mform->addElement('hidden', 'enabletranscription', 1);
         $mform->setType('enabletranscription', PARAM_BOOL);
@@ -3471,6 +4035,7 @@ class utils
         $props['regionid'] = '#id_region';
         $props['targetlanguageid'] = '#id_ttslanguage';
         $props['feedbacklanguageid'] = '#id_feedbacklanguage';
+        $props['contextid'] = $context->id;
         $PAGE->requires->js_call_amd(constants::M_COMPONENT . '/aigradepreview', 'init', [$props]);
     } //end of add_mform_elements
 

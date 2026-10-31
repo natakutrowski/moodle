@@ -83,12 +83,22 @@ if( $config->layout == constants::M_LAYOUT_NARROW) {
 $renderer = $PAGE->get_renderer('mod_solo');
 $attemptrenderer = $PAGE->get_renderer('mod_solo', 'attempt');
 
+// Deleting is a teacher action on any attempt in this activity. Everything else is a student working on their own.
+$deleting = ($action == 'confirmdelete' || $action == 'delete');
+if ($deleting) {
+    require_capability('mod/solo:manageattempts', $context);
+}
+
 // are we in new or edit mode?
 $attempt = false;
 if ($attemptid) {
-    $attempt = $DB->get_record(constants::M_ATTEMPTSTABLE, ['id' => $attemptid, constants::M_MODNAME => $cm->instance], '*', MUST_EXIST);
+    $attemptconditions = ['id' => $attemptid, constants::M_MODNAME => $cm->instance];
+    if (!$deleting) {
+        $attemptconditions['userid'] = $USER->id;
+    }
+    $attempt = $DB->get_record(constants::M_ATTEMPTSTABLE, $attemptconditions, '*', MUST_EXIST);
     if(!$attempt){
-        print_error('could not find attempt of id:' . $attemptid);
+        throw new \moodle_exception('could not find attempt of id:' . $attemptid);
     }
 
     //This would force a step, if we needed to
@@ -123,6 +133,17 @@ if($action == 'confirmdelete'){
     $attempthelper->delete_attempt($attemptid);
     $deleteredirect = new moodle_url('/mod/solo/reports.php', ['report' => 'menu', 'id' => $cm->id, 'embed' => $embed]);
     redirect($deleteredirect);
+}
+
+// Without working Poodll API credentials this activity cannot run. Administrators get an in page
+// setup panel, everybody else gets an explanation. This is checked before we ask for a token,
+// because the site config has no API user to ask with.
+$credentialserror = $embed == 0 ? \mod_solo\cbcredentials::credentials_error() : '';
+if (!empty($credentialserror)) {
+    echo $renderer->header($moduleinstance, $cm, 'attempts', null, get_string('edit', constants::M_COMPONENT));
+    echo $renderer->show_cbcredentials_setup($PAGE->url, $credentialserror);
+    echo $renderer->footer();
+    return;
 }
 
 $siteconfig = get_config(constants::M_COMPONENT);
@@ -294,6 +315,16 @@ switch($type) {
             }
         }
         $stepcontent->rec = utils::fetch_recorder_data($cm, $moduleinstance, $moduleinstance->recordertype, $token);
+        // The in page streaming recorder, where the activity allows it and a streaming token can be had.
+        // Otherwise the step keeps the Cloud Poodll recorder above.
+        if (utils::can_stream_record($moduleinstance)) {
+            $streamrec = utils::fetch_streaming_recorder_data($cm, $moduleinstance, $token);
+            if ($streamrec) {
+                $stepcontent->streamrec = $streamrec;
+                // Both recorders are on the page; mod_solo/streamrecord starts whichever this browser can use.
+                $stepcontent->rec->deferinit = true;
+            }
+        }
         echo $renderer->render_from_template(constants::M_COMPONENT . '/stepmediarecord', $stepcontent);
         break;
 

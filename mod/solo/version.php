@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * Defines the version of solo
  *
@@ -28,10 +27,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2026042000;
+$plugin->version = 2026102702;
 $plugin->requires = 2023100900; // Requires Moodle 4.3
+$plugin->supported = [403, 503]; // Moodle 4.3 to 5.3.
 $plugin->component = 'mod_solo';
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.0.75 (Build 2026042000) - Updated for Moodle 5.2';
+$plugin->release = '1.0.81b (Build 2026102702)';
 
 

@@ -6,18 +6,13 @@
  * @author  Justin Hunt - Poodll.com
  */
 
-global $CFG;
-
-//This is for pre M4.0 and post M4.0 to work on same code base
-require_once($CFG->libdir . '/externallib.php');
-
-/*
+// The core_external classes exist from Moodle 4.2, and this plugin requires 4.3.
+// Including lib/externallib.php instead breaks PHPUnit, which requires it to run in an isolated process.
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_value;
 use core_external\external_single_structure;
 use core_external\external_multiple_structure;
-*/
 
 use mod_solo\grades\gradesubmissions;
 use mod_solo\utils;
@@ -32,33 +27,40 @@ use mod_solo\attempthelper;
  * @package mod_solo
  * @author  Justin Hunt - Poodll.com
  */
-class mod_solo_external extends external_api {
+class mod_solo_external extends external_api
+{
 
-    public static function check_grammar($text, $activityid) {
+    public static function check_grammar($text, $activityid)
+    {
         global $DB, $USER;
 
         $params = self::validate_parameters(self::check_grammar_parameters(), [
             'text' => $text,
-            'activityid' => $activityid]);
+            'activityid' => $activityid
+        ]);
         extract($params);
 
         $mod = $DB->get_record(constants::M_TABLE, ['id' => $activityid], '*', MUST_EXIST);
         if (!$mod) {
             return "";
         }
+        $cm = get_coursemodule_from_instance(constants::M_MODNAME, $mod->id, $mod->course, false, MUST_EXIST);
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/solo:view', $context);
 
         $siteconfig = get_config(constants::M_COMPONENT);
         $token = utils::fetch_token($siteconfig->apiuser, $siteconfig->apisecret);
-        $textanalyser = new textanalyser($token,$text,$mod->region,$mod->ttslanguage);
+        $textanalyser = new textanalyser($token, $text, $mod->region, $mod->ttslanguage);
         $suggestions = $textanalyser->fetch_grammar_correction();
-        if($suggestions==$text || empty($suggestions)){
+        if ($suggestions == $text || empty($suggestions)) {
             return "";
         }
 
         //if we have suggestions, mark those up and return them
-        $direction="r2l";//"l2r";
-        list($grammarerrors,$grammarmatches,$insertioncount) = \mod_solo\utils::fetch_grammar_correction_diff($text, $suggestions,$direction);
-        $markedupsuggestions = \mod_solo\aitranscriptutils::render_passage($suggestions,'corrections');
+        $direction = "r2l";//"l2r";
+        list($grammarerrors, $grammarmatches, $insertioncount) = \mod_solo\utils::fetch_grammar_correction_diff($text, $suggestions, $direction);
+        $markedupsuggestions = \mod_solo\aitranscriptutils::render_passage($suggestions, 'corrections');
         $ret = [];
         $ret['grammarerrors'] = $grammarerrors;
         $ret['grammarmatches'] = $grammarmatches;
@@ -69,30 +71,45 @@ class mod_solo_external extends external_api {
 
     }
 
-    public static function check_grammar_parameters() {
+    public static function check_grammar_parameters()
+    {
         return new external_function_parameters([
             'text' => new external_value(PARAM_TEXT),
             'activityid' => new external_value(PARAM_INT)
         ]);
     }
 
-    public static function check_grammar_returns() {
+    public static function check_grammar_returns()
+    {
         return new external_value(PARAM_RAW);
     }
 
-    public static function get_grade_submission_parameters() {
+    public static function get_grade_submission_parameters()
+    {
         return new external_function_parameters([
             'userid' => new external_value(PARAM_INT),
             'cmid' => new external_value(PARAM_INT),
         ]);
     }
 
-    public static function get_grade_submission($userid,  $cmid) {
+    public static function get_grade_submission($userid, $cmid)
+    {
+        $params = self::validate_parameters(self::get_grade_submission_parameters(), ['userid' => $userid, 'cmid' => $cmid]);
+        $userid = $params['userid'];
+        $cmid = $params['cmid'];
+
+        // This returns a student's transcripts and grades, so only graders may call it.
+        $cm = get_coursemodule_from_id(constants::M_MODNAME, $cmid, 0, false, MUST_EXIST);
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/solo:grades', $context);
+
         $gradesubmissions = new gradesubmissions();
-            return ['response' => $gradesubmissions->getSubmissionData($userid,$cmid)];
+        return ['response' => $gradesubmissions->getSubmissionData($userid, $cmid)];
     }
 
-    public static function get_grade_submission_returns() {
+    public static function get_grade_submission_returns()
+    {
         return new external_function_parameters([
             'response' => new external_multiple_structure(
                 new external_single_structure([
@@ -111,7 +128,7 @@ class mod_solo_external extends external_api {
                     'jsontranscript' => new external_value(PARAM_TEXT, 'JSON transcript', VALUE_OPTIONAL),
                     'selftranscript' => new external_value(PARAM_TEXT, 'Self Transcript', VALUE_OPTIONAL),
                     'words' => new external_value(PARAM_TEXT, 'Words', VALUE_OPTIONAL),
-                     'uniquewords' => new external_value(PARAM_TEXT, 'Unique Words', VALUE_OPTIONAL),
+                    'uniquewords' => new external_value(PARAM_TEXT, 'Unique Words', VALUE_OPTIONAL),
                     'longwords' => new external_value(PARAM_TEXT, 'Long Words', VALUE_OPTIONAL),
                     'longestturn' => new external_value(PARAM_TEXT, 'Longest Turn', VALUE_OPTIONAL),
                     'targetwords' => new external_value(PARAM_TEXT, 'Target Words', VALUE_OPTIONAL),
@@ -131,13 +148,14 @@ class mod_solo_external extends external_api {
      * Describes the parameters for submit_rubric_grade_form webservice.
      * @return external_function_parameters
      */
-    public static function submit_rubric_grade_form_parameters() {
+    public static function submit_rubric_grade_form_parameters()
+    {
         return new external_function_parameters(
             array(
-                'contextid' => new external_value(PARAM_INT, 'The context id for the course',VALUE_REQUIRED),
-                'jsonformdata' => new external_value(PARAM_RAW, 'The data from the create grade form, encoded as a json array',VALUE_REQUIRED),
-                'studentid' => new external_value(PARAM_INT, 'The id for the student', VALUE_DEFAULT,0),
-                'cmid' => new external_value(PARAM_INT, 'The course module id for the item', VALUE_DEFAULT,0),
+                'contextid' => new external_value(PARAM_INT, 'The context id for the course', VALUE_REQUIRED),
+                'jsonformdata' => new external_value(PARAM_RAW, 'The data from the create grade form, encoded as a json array', VALUE_REQUIRED),
+                'studentid' => new external_value(PARAM_INT, 'The id for the student', VALUE_DEFAULT, 0),
+                'cmid' => new external_value(PARAM_INT, 'The course module id for the item', VALUE_DEFAULT, 0),
             )
         );
     }
@@ -157,7 +175,8 @@ class mod_solo_external extends external_api {
      * @throws \required_capability_exception
      * @throws \restricted_context_exception
      */
-    public static function submit_rubric_grade_form($contextid, $jsonformdata, $studentid, $cmid) {
+    public static function submit_rubric_grade_form($contextid, $jsonformdata, $studentid, $cmid)
+    {
         global $CFG, $DB;
 
         require_once($CFG->dirroot . '/mod/solo/rubric_grade_form.php');
@@ -165,8 +184,10 @@ class mod_solo_external extends external_api {
         require_once($CFG->dirroot . '/mod/solo/lib.php');
 
         // We always must pass webservice params through validate_parameters.
-        $params = self::validate_parameters(self::submit_rubric_grade_form_parameters(),
-            ['contextid' => $contextid, 'jsonformdata' => $jsonformdata]);
+        $params = self::validate_parameters(
+            self::submit_rubric_grade_form_parameters(),
+            ['contextid' => $contextid, 'jsonformdata' => $jsonformdata]
+        );
 
         $context = \context::instance_by_id($params['contextid'], MUST_EXIST);
 
@@ -181,13 +202,15 @@ class mod_solo_external extends external_api {
         $modulecontext = context_module::instance($cmid);
         $cm = get_coursemodule_from_id(constants::M_MODNAME, $cmid, 0, false, MUST_EXIST);
         $attempthelper = new \mod_solo\attempthelper($cm);
-        $attempt= $attempthelper->fetch_latest_complete_attempt($studentid);
+        $attempt = $attempthelper->fetch_latest_complete_attempt($studentid);
 
-        if (!$attempt) { return 0; }
+        if (!$attempt) {
+            return 0;
+        }
 
-        $moduleinstance = $DB->get_record(constants::M_TABLE, array('id'=>$attempt->solo));
-        $gradingdisabled=false;
-        $gradinginstance = utils::get_grading_instance($attempt->attemptid, $gradingdisabled,$moduleinstance, $modulecontext);
+        $moduleinstance = $DB->get_record(constants::M_TABLE, array('id' => $attempt->solo));
+        $gradingdisabled = false;
+        $gradinginstance = utils::get_grading_instance($attempt->attemptid, $gradingdisabled, $moduleinstance, $modulecontext);
 
         $mform = new \rubric_grade_form(null, array('gradinginstance' => $gradinginstance), 'post', '', null, true, $data);
 
@@ -196,11 +219,13 @@ class mod_solo_external extends external_api {
         if ($validateddata) {
             // Insert rubric
             if (!empty($validateddata->advancedgrading['criteria'])) {
-                $thegrade=null;
+                $thegrade = null;
                 if (!$gradingdisabled) {
                     if ($gradinginstance) {
-                        $thegrade = $gradinginstance->submit_and_get_grade($validateddata->advancedgrading,
-                            $attempt->id);
+                        $thegrade = $gradinginstance->submit_and_get_grade(
+                            $validateddata->advancedgrading,
+                            $attempt->id
+                        );
                     }
                 }
             }
@@ -213,7 +238,7 @@ class mod_solo_external extends external_api {
             $grade = new \stdClass();
             $grade->userid = $studentid;
             $grade->rawgrade = $thegrade;
-            \solo_grade_item_update($moduleinstance,$grade);
+            \solo_grade_item_update($moduleinstance, $grade);
         } else {
             // Generate a warning.
             throw new \moodle_exception('erroreditgroup', 'group');
@@ -228,7 +253,8 @@ class mod_solo_external extends external_api {
      * @return external_value
      * @since Moodle 3.0
      */
-    public static function submit_rubric_grade_form_returns() {
+    public static function submit_rubric_grade_form_returns()
+    {
         return new external_value(PARAM_INT, 'grade id');
     }
 
@@ -238,14 +264,15 @@ class mod_solo_external extends external_api {
      * Describes the parameters for submit_simple_grade_form webservice.
      * @return external_function_parameters
      */
-    public static function submit_simple_grade_form_parameters() {
+    public static function submit_simple_grade_form_parameters()
+    {
         return new external_function_parameters(
-                array(
-                        'contextid' => new external_value(PARAM_INT, 'The context id for the course',VALUE_REQUIRED),
-                        'jsonformdata' => new external_value(PARAM_RAW, 'The data from the create grade form, encoded as a json array',VALUE_REQUIRED),
-                        'studentid' => new external_value(PARAM_INT, 'The id for the student', VALUE_DEFAULT,0),
-                        'cmid' => new external_value(PARAM_INT, 'The course module id for the item', VALUE_DEFAULT,0),
-                )
+            array(
+                'contextid' => new external_value(PARAM_INT, 'The context id for the course', VALUE_REQUIRED),
+                'jsonformdata' => new external_value(PARAM_RAW, 'The data from the create grade form, encoded as a json array', VALUE_REQUIRED),
+                'studentid' => new external_value(PARAM_INT, 'The id for the student', VALUE_DEFAULT, 0),
+                'cmid' => new external_value(PARAM_INT, 'The course module id for the item', VALUE_DEFAULT, 0),
+            )
         );
     }
 
@@ -264,7 +291,8 @@ class mod_solo_external extends external_api {
      * @throws \required_capability_exception
      * @throws \restricted_context_exception
      */
-    public static function submit_simple_grade_form($contextid, $jsonformdata, $studentid, $cmid) {
+    public static function submit_simple_grade_form($contextid, $jsonformdata, $studentid, $cmid)
+    {
         global $CFG, $DB;
 
         require_once($CFG->dirroot . '/mod/solo/simple_grade_form.php');
@@ -272,8 +300,10 @@ class mod_solo_external extends external_api {
         require_once($CFG->dirroot . '/mod/solo/lib.php');
 
         // We always must pass webservice params through validate_parameters.
-        $params = self::validate_parameters(self::submit_simple_grade_form_parameters(),
-                ['contextid' => $contextid, 'jsonformdata' => $jsonformdata]);
+        $params = self::validate_parameters(
+            self::submit_simple_grade_form_parameters(),
+            ['contextid' => $contextid, 'jsonformdata' => $jsonformdata]
+        );
 
         $context = \context::instance_by_id($params['contextid'], MUST_EXIST);
 
@@ -288,11 +318,13 @@ class mod_solo_external extends external_api {
 
         $cm = get_coursemodule_from_id(constants::M_MODNAME, $cmid, 0, false, MUST_EXIST);
         $attempthelper = new \mod_solo\attempthelper($cm);
-        $attempt= $attempthelper->fetch_latest_complete_attempt($studentid);
+        $attempt = $attempthelper->fetch_latest_complete_attempt($studentid);
 
-        if (!$attempt) { return 0; }
+        if (!$attempt) {
+            return 0;
+        }
 
-        $moduleinstance = $DB->get_record(constants::M_TABLE, array('id'=>$attempt->solo));
+        $moduleinstance = $DB->get_record(constants::M_TABLE, array('id' => $attempt->solo));
 
         $mform = new \simple_grade_form(null, array(), 'post', '', null, true, $data);
 
@@ -308,7 +340,7 @@ class mod_solo_external extends external_api {
             $grade = new \stdClass();
             $grade->userid = $studentid;
             $grade->rawgrade = $validateddata->grade;
-            \solo_grade_item_update($moduleinstance,$grade);
+            \solo_grade_item_update($moduleinstance, $grade);
         } else {
             // Generate a warning.
             throw new \moodle_exception('erroreditgroup', 'group');
@@ -323,103 +355,185 @@ class mod_solo_external extends external_api {
      * @return external_value
      * @since Moodle 3.0
      */
-    public static function submit_simple_grade_form_returns() {
+    public static function submit_simple_grade_form_returns()
+    {
         return new external_value(PARAM_INT, 'grade id');
     }
 
 
 
-    public static function check_for_results_parameters() {
+    public static function check_for_results_parameters()
+    {
         return new external_function_parameters([
-                'attemptid' => new external_value(PARAM_INT)
+            'attemptid' => new external_value(PARAM_INT)
         ]);
     }
 
-    public static function check_for_results($attemptid) {
+    public static function check_for_results($attemptid)
+    {
         global $DB, $USER;
         //defaults
-        $ret = ['ready'=>false];
-        $have_humaneval = false;
-        $have_aieval =false;
+        $ret = ['ready' => false];
+        $havehumaneval = false;
+        $haveaieval = false;
 
-        $params = self::validate_parameters(self::check_for_results_parameters(),
-                array('attemptid'=>$attemptid));
+        $params = self::validate_parameters(
+            self::check_for_results_parameters(),
+            array('attemptid' => $attemptid)
+        );
 
-        //fetch attempt information
-        $attempt = $DB->get_record(constants::M_ATTEMPTSTABLE, array('userid' => $USER->id, 'id' => $attemptid));
+        // Fetch attempt information. Only the owner of an attempt can ask about it.
+        $attempt = $DB->get_record(constants::M_ATTEMPTSTABLE, ['userid' => $USER->id, 'id' => $params['attemptid']]);
+        if (!$attempt) {
+            return json_encode($ret);
+        }
         $moduleinstance = $DB->get_record(constants::M_TABLE, array('id' => $attempt->solo), '*', MUST_EXIST);
         $cm = get_coursemodule_from_instance(constants::M_MODNAME, $moduleinstance->id, $moduleinstance->course, false, MUST_EXIST);
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/solo:view', $context);
 
-        if($attempt) {
+        if ($attempt) {
             $hastranscripts = !empty($attempt->jsontranscript);
             if ($hastranscripts) {
-                $have_aieval = true;
+                $haveaieval = true;
             } else {
-                $have_aieval= utils::transcripts_are_ready_on_s3($attempt);
+                $haveaieval = utils::transcripts_are_ready_on_s3($attempt);
             }
         }
 
-        //if no results, that's that. return.
-        if($have_aieval || $have_humaneval){
-            $ret['ready']=true;
+        // If no results, that's that. return.
+        if ($haveaieval || $havehumaneval) {
+            $ret['ready'] = true;
         }
         return json_encode($ret);
     }
 
-    public static function check_for_results_returns() {
+    public static function check_for_results_returns()
+    {
         return new external_value(PARAM_RAW);
     }
 
-    public static function submit_step_parameters() {
+    public static function submit_step_parameters()
+    {
         return new external_function_parameters([
             'cmid' => new external_value(PARAM_INT),
             'step' => new external_value(PARAM_INT),
             'action' => new external_value(PARAM_ALPHA),
-            'data' => new external_value(PARAM_RAW)
+            'data' => new external_value(PARAM_RAW),
         ]);
     }
 
-    public static function submit_step($cmid,$step,$action,$data) {
-          $params = self::validate_parameters(self::submit_step_parameters(),
-            array('cmid'=>$cmid,'step'=>$step,'action'=>$action, 'data'=>$data));
+    public static function submit_step($cmid, $step, $action, $data)
+    {
+        $params = self::validate_parameters(
+            self::submit_step_parameters(),
+            array('cmid' => $cmid, 'step' => $step, 'action' => $action, 'data' => $data)
+        );
 
         //make sure we have a sesskey and are really logged in
-        try{
+        try {
             require_sesskey();
-        }catch(Exception $e){
+        } catch (Exception $e) {
             $ret = new \stdClass();
             $ret->message = "Could not insert solo attempt! " . $e->getMessage();
             $ret->success = false;
             return json_encode($ret);
         }
 
-        $dataobject=json_decode($data);
-        $cm = get_coursemodule_from_id(constants::M_MODNAME, $cmid, 0, false, MUST_EXIST);
-        $attempt_helper =  new attempthelper($cm);
+        $cm = get_coursemodule_from_id(constants::M_MODNAME, $params['cmid'], 0, false, MUST_EXIST);
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/solo:view', $context);
 
-        $ret = $attempt_helper->submit_step($step,$dataobject);
+        $dataobject = json_decode($params['data']);
+        if (!is_object($dataobject)) {
+            $ret = new \stdClass();
+            $ret->message = "Could not read the submitted step data";
+            $ret->success = false;
+            return json_encode($ret);
+        }
+        $attempthelper = new attempthelper($cm);
+
+        $ret = $attempthelper->submit_step($params['step'], $dataobject);
         return json_encode($ret);
     }
 
-    public static function submit_step_returns() {
+    public static function submit_step_returns()
+    {
         return new external_value(PARAM_RAW);
     }
 
-       /**
+    /**
+     * Parameters for refresh_token.
+     *
+     * @return external_function_parameters
+     */
+    public static function refresh_token_parameters()
+    {
+        return new external_function_parameters([
+            'cmid' => new external_value(PARAM_INT, 'The course module the recorder is on'),
+            'type' => new external_value(PARAM_ALPHANUMEXT, 'The token type the recorder has (assemblyai or azure)'),
+            'region' => new external_value(PARAM_ALPHANUMEXT, 'Ignored, the activity region is used', VALUE_DEFAULT, ''),
+        ]);
+    }
+
+    /**
+     * Fetch a fresh streaming speech token for an in page recorder whose token is about to expire.
+     *
+     * @param int $cmid
+     * @param string $type
+     * @param string $region
+     * @return string JSON encoded token object, or false
+     */
+    public static function refresh_token($cmid, $type, $region = '')
+    {
+        global $DB;
+        $params = self::validate_parameters(
+            self::refresh_token_parameters(),
+            ['cmid' => $cmid, 'type' => $type, 'region' => $region]
+        );
+
+        // Tokens cost money and open the speech service, so only users who can do this activity get one.
+        $cm = get_coursemodule_from_id(constants::M_MODNAME, $params['cmid'], 0, false, MUST_EXIST);
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/solo:view', $context);
+
+        // The region comes from the activity, not from the browser.
+        $moduleinstance = $DB->get_record(constants::M_TABLE, ['id' => $cm->instance], '*', MUST_EXIST);
+        return json_encode(utils::fetch_streaming_token($moduleinstance->region));
+    }
+
+    /**
+     * Returns for refresh_token.
+     *
+     * @return external_value
+     */
+    public static function refresh_token_returns()
+    {
+        return new external_value(PARAM_RAW);
+    }
+
+    /**
      * Get the parameters and types
      *
      * @return void
      */
-    public static function fetch_ai_grade_parameters(): external_function_parameters {
+    public static function fetch_ai_grade_parameters(): external_function_parameters
+    {
         return new external_function_parameters(
-            [   'region' => new external_value(PARAM_TEXT, 'The aws regions'),
-               'targetlanguage' => new external_value(PARAM_TEXT, 'The target language'),
-               'questiontext' => new external_value(PARAM_TEXT, 'The target language'), 
+            [
+                'region' => new external_value(PARAM_TEXT, 'The aws regions'),
+                'targetlanguage' => new external_value(PARAM_TEXT, 'The target language'),
+                'questiontext' => new external_value(PARAM_TEXT, 'The target language'),
                 'studentresponse' => new external_value(PARAM_TEXT, 'The students response'),
                 'maxmarks' => new external_value(PARAM_INT, 'The total possible score'),
                 'markscheme' => new external_value(PARAM_TEXT, 'The marks scheme'),
                 'feedbackscheme' => new external_value(PARAM_TEXT, 'The AI Prompt'),
-                'feedbacklanguage' => new external_value(PARAM_TEXT, 'The language of feedback')]
+                'feedbacklanguage' => new external_value(PARAM_TEXT, 'The language of feedback'),
+                'contextid' => new external_value(PARAM_INT, 'The course or module context of the settings form'),
+            ]
         );
 
     }
@@ -435,20 +549,55 @@ class mod_solo_external extends external_api {
      * @param string $feedbacklanguage
      * @return array $contentobject
      */
-    public static function fetch_ai_grade($region,$targetlanguage,$questiontext,$studentresponse, $maxmarks, $markscheme, $feedbackscheme,$feedbacklanguage) {
+    public static function fetch_ai_grade(
+        $region,
+        $targetlanguage,
+        $questiontext,
+        $studentresponse,
+        $maxmarks,
+        $markscheme,
+        $feedbackscheme,
+        $feedbacklanguage,
+        $contextid
+    ) {
+        $params = self::validate_parameters(self::fetch_ai_grade_parameters(), [
+            'region' => $region,
+            'targetlanguage' => $targetlanguage,
+            'questiontext' => $questiontext,
+            'studentresponse' => $studentresponse,
+            'maxmarks' => $maxmarks,
+            'markscheme' => $markscheme,
+            'feedbackscheme' => $feedbackscheme,
+            'feedbacklanguage' => $feedbacklanguage,
+            'contextid' => $contextid,
+        ]);
+        $region = $params['region'];
+        $targetlanguage = $params['targetlanguage'];
+        $questiontext = $params['questiontext'];
+        $studentresponse = $params['studentresponse'];
+        $maxmarks = $params['maxmarks'];
+        $markscheme = $params['markscheme'];
+        $feedbackscheme = $params['feedbackscheme'];
+        $feedbacklanguage = $params['feedbacklanguage'];
+
+        // This spends the site's Poodll AI credit, so only people who can set up activities may use it.
+        $context = context::instance_by_id($params['contextid']);
+        self::validate_context($context);
+        require_capability('moodle/course:manageactivities', $context);
+
         $siteconfig = get_config(constants::M_COMPONENT);
         $token = utils::fetch_token($siteconfig->apiuser, $siteconfig->apisecret);
         if (empty($token)) {
-            return ["correctedtext"=>"An error occurred","feedback" => ["Invalid API credentials"], "marks" => 0];
+            return ["correctedtext" => "An error occurred", "feedback" => ["Invalid API credentials"], "marks" => 0];
         }
         if (empty($targetlanguage)) {
-            return ["correctedtext"=>"An error occurred","feedback" => ["Invalid target language"], "marks" => 0];
+            return ["correctedtext" => "An error occurred", "feedback" => ["Invalid target language"], "marks" => 0];
         }
 
         // Make sure we have the right data for AI to work with.
         if (!empty($studentresponse) && !empty($feedbackscheme) && $maxmarks > 0) {
             //Feedback language for AI instructions
-            if($siteconfig->setnativelanguage) {
+            if ($siteconfig->setnativelanguage) {
                 $userprefdeflanguage = get_user_preferences('wordcards_deflang');
                 if (!empty($userprefdeflanguage)) {
                     //the WC language is 2 char (eg 'en') but Poodll AI expects a locale code (eg 'en-US')
@@ -460,27 +609,27 @@ class mod_solo_external extends external_api {
                 }
             }//end of feedback language
 
-        //if (!empty($studentresponse)) {
+            //if (!empty($studentresponse)) {
             $instructions = new \stdClass();
-            $instructions->feedbackscheme=$feedbackscheme;
-            $instructions->feedbacklanguage=$feedbacklanguage;
-            $instructions->markscheme=$markscheme;
-            $instructions->maxmarks=$maxmarks;
-            $instructions->questiontext=$questiontext;
-            $instructions->modeltext='';
+            $instructions->feedbackscheme = $feedbackscheme;
+            $instructions->feedbacklanguage = $feedbacklanguage;
+            $instructions->markscheme = $markscheme;
+            $instructions->maxmarks = $maxmarks;
+            $instructions->questiontext = $questiontext;
+            $instructions->modeltext = '';
 
             // At this point we do not have a module instance to help us establish if its text only, assume its speech
             $isspeech = true;
             //$isspeech = !utils::is_textonlysubmission($moduleinstance);
             $llmresponse = utils::fetch_ai_grade($token, $region, $targetlanguage, $isspeech, $studentresponse, $instructions);
-        //   error_log(print_r($llmresponse, true));
-           if(!$llmresponse){
-                $contentobject = ["correctedtext"=>"An error occurred","feedback" => ["Invalid response received from server. Could be a network issue, or possibly a Poodll auth issue."], "marks" => 0];
-            }else{
-                $contentobject =$llmresponse;
+            //   error_log(print_r($llmresponse, true));
+            if (!$llmresponse) {
+                $contentobject = ["correctedtext" => "An error occurred", "feedback" => ["Invalid response received from server. Could be a network issue, or possibly a Poodll auth issue."], "marks" => 0];
+            } else {
+                $contentobject = $llmresponse;
             }
         } else {
-            $contentobject = ["correctedtext"=>"An error occurred","feedback" => ["Invalid parameters. Check that you have a sample answer,feedback and marks instructions."], "marks" => 0];
+            $contentobject = ["correctedtext" => "An error occurred", "feedback" => ["Invalid parameters. Check that you have a sample answer,feedback and marks instructions."], "marks" => 0];
         }
 
         // Return whatever we have got.
@@ -493,7 +642,8 @@ class mod_solo_external extends external_api {
      *
      * @return void
      */
-    public static function fetch_ai_grade_returns(): external_single_structure {
+    public static function fetch_ai_grade_returns(): external_single_structure
+    {
         return new external_single_structure([
             'correctedtext' => new external_value(PARAM_TEXT, 'corrected text of student submission', VALUE_DEFAULT),
             'marks' => new external_value(PARAM_FLOAT, 'AI grader awarded marks for student response', VALUE_DEFAULT),
@@ -503,6 +653,6 @@ class mod_solo_external extends external_api {
     }
 
 
-    
+
 
 }
