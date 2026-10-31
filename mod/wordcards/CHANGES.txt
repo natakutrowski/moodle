@@ -1,3 +1,77 @@
+1.3.94 (Build 2026102700)
+- Use the core_external web service classes (the old global names log debugging notices on Moodle 5.3)
+- Fixed the Setup tab, which stopped with an error
+- Tested with Moodle 5.3
+- Replaced calls to print_error() and error(), which no longer exist in Moodle, so error pages show their message instead of a fatal error
+- Use the core_form/changechecker module after saving a modal form: the old YUI form change checker no longer exists in Moodle 5.3
+
+1.3.93 (Build 2026102302)
+- Words the dictionary has no translation for in a language the activity offers can be
+  translated by the site's own AI provider, as each word is used in its example sentence.
+  It runs in the background when words are added with the Word Wizard, and for the whole
+  word set from a new "Complete missing translations with AI" button on the Word Wizard.
+  It needs an AI provider that can generate text (Moodle 4.5 and later), and is off by default.
+- A word or phrase that is not in the dictionary at all, such as an inflected form or an
+  idiom, can be made into a card with a new "Create with AI" button on the Word Wizard. 
+- New capability mod/wordcards:useai
+- Words automatically added in a background task prefer a meaning with an example sentence.
+- Fetching translated example sentences no longer overwrites the ones a word already has
+- The learner's chosen definitions language is now shared with Poodll MiniLesson as their
+  native language.
+- The list of words now shows each example sentence's translation in the learner's language,
+  under the sentence, as the one sided cards already did.
+
+1.3.92 (Build 2026101404)
+- New "Card style (learn mode)" setting, adding one sided learn cards as an alternative
+  to the default 2 sided ones.
+- New model sentence translations
+- Word Wizard can add words in the background, so a long list no longer means a long
+  wait. The first meaning of each word is chosen, and a picture can be made for each word
+  too. A lookup that fails is retried. A message on the Word Wizard and Manage words pages
+  shows while words are still being added
+- Word Wizard's Image Wizard can make the pictures in the background too
+- New cli/add_words.php adds words to an activity from the command line, now or through
+  cron, optionally with a picture for each
+- Redesigned the Word Wizard search results. Each word is a card listing its meanings,
+  with the definition and example sentence to read and an Edit button to change them.
+  Once a meaning is added the word's card fades away and the word is listed under
+  "Added to this activity". Words already in the activity are marked as such
+- Word Wizard no longer adds a word that is already in the word set, so choosing a
+  second sense of the same word does not create a duplicate
+- Fixed the Word Wizard and image generation web services not checking that the user
+  can manage the activity
+- Word Wizard shows a message and a Try again button when a word's lookup fails,
+  instead of loading forever
+- Word Wizard no longer fills in "No translation available" as the definition when the
+  dictionary has none in the chosen language
+- Word Wizard no longer offers the same meaning of a word twice, when the dictionary
+  sends it twice
+- Word Wizard says when a meaning has no example sentence, so one can be added with Edit
+- Fixed definitions going blank for learners who chose English in the language chooser,
+  and when an activity's definitions language was changed to English, for words added
+  with the Word Wizard
+- Word Wizard saves the English definition of each word again, so learners who choose
+  English see one for words in activities with another definitions language
+
+
+1.3.91 (Build 2026090700)
+- Added Danish and Estonian as target languages
+- Added Somali and Tigrinya as definitions languages
+- The Word Wizard now only offers definitions languages that its dictionary lookup
+  can actually return for the language being taught
+- Removed Serbian from the definitions language lists - no dictionary or AI
+  translation could produce it
+- Sorted the definitions language dropdowns alphabetically
+- Tidied language names: Indonesian (was Bahasa Indonesia), Chinese (Simplified)
+  and Chinese (Traditional) spelled out, and dropped the "(Latin)" script suffixes
+
+1.3.90 (Build 2026082300)
+- Added the Scatter matching game as a practice and review activity
+- Fixed AI image generation failing with a server error on larger word sets
+
+1.3.89 (Build 2026081600)
+- Added in-plugin free trial set up
+
 1.3.87 (Build 2026042000)
 - Moodle 5.2 support - removed modal_factory
 - Set minimum Moodle to Moodle 4.3

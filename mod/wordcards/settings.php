@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -48,46 +47,11 @@ if ($ADMIN->fulltree) {
         $show_below_apisecret = $tokeninfo;
         // If we have no API user and secret we show a "fetch from elsewhere on site" or "take a free trial" link.
     } else {
-        $amddata = ['apppath' => $CFG->wwwroot . '/' . constants::M_URL];
-        $cp_components = [
-            'filter_poodll',
-            'qtype_cloudpoodll',
-            'mod_readaloud',
-            'mod_solo',
-            'mod_minilesson',
-            'mod_englishcentral',
-            'mod_pchat',
-            'atto_cloudpoodll',
-            'tinymce_cloudpoodll',
-            'assignsubmission_cloudpoodll',
-            'assignfeedback_cloudpoodll',
-            'tiny_poodll'
-        ];
-        foreach ($cp_components as $cp_component) {
-            switch ($cp_component) {
-                case 'filter_poodll':
-                    $apiusersetting = 'cpapiuser';
-                    $apisecretsetting = 'cpapisecret';
-                    break;
-                case 'mod_englishcentral':
-                    $apiusersetting = 'poodllapiuser';
-                    $apisecretsetting = 'poodllapisecret';
-                    break;
-                default:
-                    $apiusersetting = 'apiuser';
-                    $apisecretsetting = 'apisecret';
-            }
-            $cloudpoodll_apiuser = get_config($cp_component, $apiusersetting);
-            if (!empty($cloudpoodll_apiuser)) {
-                $cloudpoodll_apisecret = get_config($cp_component, $apisecretsetting);
-                if (!empty($cloudpoodll_apisecret)) {
-                    $amddata['apiuser'] = $cloudpoodll_apiuser;
-                    $amddata['apisecret'] = $cloudpoodll_apisecret;
-                    break;
-                }
-            }
-        }
-        $show_below_apisecret = $OUTPUT->render_from_template(constants::M_COMPONENT . '/managecreds', $amddata);
+        $amddata = \mod_wordcards\cbcredentials::export_buttons_data(
+            '#id_s_mod_wordcards_apiuser',
+            '#id_s_mod_wordcards_apisecret'
+        );
+        $show_below_apisecret = $OUTPUT->render_from_template(constants::M_COMPONENT . '/cbmanagecreds', $amddata);
     }
 
     $settings->add(new admin_setting_configtext(
@@ -212,6 +176,24 @@ if ($ADMIN->fulltree) {
         $options
     ));
 
+    // Two sided flip cards, or one sided cards, in learn mode.
+
+    $name = 'learnmodecards';
+    $label = get_string($name, constants::M_COMPONENT);
+    $details = get_string($name . '_details', constants::M_COMPONENT);
+    $options = [
+        constants::M_CARDS_TWOSIDED => get_string('cards_twosided', constants::M_COMPONENT),
+        constants::M_CARDS_ONESIDED => get_string('cards_onesided', constants::M_COMPONENT),
+    ];
+    $default = constants::M_CARDS_TWOSIDED;
+    $settings->add(new admin_setting_configselect(
+        constants::M_COMPONENT . "/$name",
+        $label,
+        $details,
+        $default,
+        $options
+    ));
+
     // Show images on flip screen.
     $name = 'showimageflip';
     $label = get_string('showimageflip', constants::M_COMPONENT);
@@ -295,6 +277,20 @@ if ($ADMIN->fulltree) {
         $options
     ));
 
+    // Scatter - definition card shows definition, image, or both.
+    $name = 'scatteroptions';
+    $label = get_string($name, constants::M_COMPONENT);
+    $details = get_string($name . '_details', constants::M_COMPONENT);
+    $default = constants::M_SCATTER_DEF_ONLY;
+    $options = utils::fetch_options_scatter();
+    $settings->add(new admin_setting_configselect(
+        constants::M_COMPONENT . "/$name",
+        $label,
+        $details,
+        $default,
+        $options
+    ));
+
     // In free mode, how many items max to show to users.
     $name = 'def_wordstoshow';
     $label = get_string($name, constants::M_COMPONENT);
@@ -354,6 +350,19 @@ if ($ADMIN->fulltree) {
     $label = get_string('showlangchooser', constants::M_COMPONENT);
     $details = get_string('showlangchooser_help', constants::M_COMPONENT);
     $default = 1;
+    $settings->add(new admin_setting_configcheckbox(
+        constants::M_COMPONENT . "/$name",
+        $label,
+        $details,
+        $default
+    ));
+
+    // Let the site's AI fill in the translations the dictionary does not have. Off until an admin
+    // chooses it, since every word added then costs a call to the site's AI.
+    $name = 'localaitranslations';
+    $label = get_string($name, constants::M_COMPONENT);
+    $details = get_string($name . '_details', constants::M_COMPONENT);
+    $default = 0;
     $settings->add(new admin_setting_configcheckbox(
         constants::M_COMPONENT . "/$name",
         $label,

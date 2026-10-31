@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Define all the backup steps that will be used by the backup_wordcards_activity_task
  *
@@ -50,12 +51,27 @@ class backup_wordcards_activity_structure_step extends backup_activity_structure
                 'step1practicetype','step2practicetype','step3practicetype','step4practicetype','step5practicetype',
                 'completionwhenfinish','completionwhenlearned','maxattempts', 'timecreated', 'timemodified','skipreview', 'finishedstepmsg',
                 'completedmsg', 'ttslanguage','deflanguage','transcriber','passagehash','hashisold','foriframe',
-                'showimageflip', 'frontfaceflip','lcoptions','msoptions','sgoptions','scoptions','viewstart','viewend',
-                'videoexamples','learnpoint','freemodeoptions','showlangchooser','imageonfront','masterinstance'));
+                'showimageflip', 'frontfaceflip', 'lcoptions', 'msoptions', 'sgoptions', 'scoptions', 'scatteroptions',
+                'viewstart', 'viewend',
+                'videoexamples','learnpoint','freemodeoptions','showlangchooser','imageonfront', 'learnmodecards', 'masterinstance'));
 
         $terms = new backup_nested_element('terms');
-        $term = new backup_nested_element('term', array('id'), array(
-            'term', 'definition','model_sentence','sourcedef','translations','image','audio','model_sentence_audio', 'ttsvoice','alternates','deleted','phonetic','phoneticms'));
+        $term = new backup_nested_element('term', ['id'], [
+            'term',
+            'definition',
+            'model_sentence',
+            'sourcedef',
+            'translations',
+            'model_sentence_translations',
+            'image',
+            'audio',
+            'model_sentence_audio',
+            'ttsvoice',
+            'alternates',
+            'deleted',
+            'phonetic',
+            'phoneticms',
+        ]);
 
         $seens = new backup_nested_element('seens');
         $seen = new backup_nested_element('seen', array('id'), array(

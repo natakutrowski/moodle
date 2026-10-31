@@ -17,8 +17,10 @@
 /**
  * Displays information about the wordcards in the course.
  *
- * @package mod_wordcards
- * @author  Frédéric Massart - FMCorz.net
+ * @package    mod_wordcards
+ * @author     Frédéric Massart - FMCorz.net
+ * @copyright  2016 Justin Hunt (poodllsupport@gmail.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -54,6 +56,7 @@ $string['wordcards:manageattempts'] = 'Manage Attempts';
 $string['wordcards:manage'] = 'Manage';
 $string['wordcards:export'] = 'Export Wordcards';
 $string['wordcards:push'] = 'Push settings from one instance to others';
+$string['wordcards:useai'] = 'Use the site AI to fill in missing translations';
 $string['reviewactivity'] = 'Review';
 
 $string['privacy:metadata:attemptid'] = 'The unique identifier of a users Wordcards attempt.';
@@ -78,7 +81,7 @@ $string['privacy:metadata:lastfail'] = 'The last time the user failed to associa
 $string['privacy:metadata:lastsuccess'] = 'The last time the user succcessfully associated a specific Poodll Wordcards word correctly.';
 $string['privacy:metadata:failcount'] = 'The total number of times the user failed to associate a specific Poodll Wordcards word correctly.';
 $string['privacy:metadata:successcount'] = 'The total number of times the user successfully associated a specific Poodll Wordcards word correctly.';
-$string['privacy:metadata:deflangpref'] = 'The users selected definitions language for Poodll WordCards (probably their native language).';
+$string['privacy:metadata:deflangpref'] = 'The user\'s native language, used to choose the language of the definitions in Poodll WordCards. It is shared with Poodll MiniLesson.';
 
 
 // $string['reviewactivityfinished'] = 'You finished the review session in {$a->seconds} seconds.';
@@ -207,6 +210,7 @@ $string['mi-nz'] = 'Maori';
 $string['bg-bg'] = 'Bulgarian'; // Bulgarian
 $string['cs-cz'] = 'Czech'; // Czech
 $string['el-gr'] = 'Greek'; // Greek
+$string['et-ee'] = 'Estonian';
 $string['hr-hr'] = 'Croatian'; // Croatian
 $string['hu-hu'] = 'Hungarian'; // Hungarian
 $string['lt-lt'] = 'Lithuanian'; // Lithuanian
@@ -279,10 +283,10 @@ $string['loading'] = 'Loading';
 $string['title_matchselect'] = 'Choose the Answer';
 $string['title_matchtype'] = 'Type the Answer';
 $string['title_dictation'] = 'Listen and Type';
-// $string['title_scatter'] = 'Match the Words';
 $string['title_speechcards'] = 'Say the Words';
 $string['title_listenchoose'] = 'Listen and Choose';
 $string['title_spacegame'] = 'Space Game';
+$string['title_scatter'] = 'Match the Words';
 
 $string['review'] = 'Review';
 $string['practice'] = 'Practice';
@@ -291,16 +295,16 @@ $string['title_noactivity'] = 'None';
 $string['title_matchselect_rev'] = 'Choose the Answer (Review)';
 $string['title_matchtype_rev'] = 'Type the Answer (Review)';
 $string['title_dictation_rev'] = 'Listen and Type (Review)';
-// $string['title_scatter_rev'] = 'Match the Words (Review)';
 $string['title_speechcards_rev'] = 'Say the Words (Review)';
 $string['title_listenchoose_rev'] = 'Listen and Choose (Review)';
 $string['title_spacegame_rev'] = 'Space Game (Review)';
+$string['title_scatter_rev'] = 'Match the Words (Review)';
 
 $string['title_vocablist'] = 'Get Ready';
 $string['instructions_matchselect'] = 'Tap the best match from the choices below for the highlighted word.';
 $string['instructions_matchtype'] = 'Type the best match for the highlighted word.';
 $string['instructions_dictation'] = 'Listen and type the word(s) that you hear. Tap the blue button to hear the word(s).';
-// $string['instructions_scatter'] = 'Match the cards with the same meaning, by tapping them,';
+$string['instructions_scatter'] = 'Clear the grid by tapping a word and then the card that matches it.';
 $string['instructions_speechcards'] = 'Tap the blue button and speak the word(s) shown on the card. Speak slowly and clearly.';
 $string['instructions_vocablist'] = 'Review the words that will be used in this activity. Tap the word card or the \'Flip\' button to show the other side of the cards. When you are ready, tap \'Begin\' to test your knowledge of these words.';
 // $string['pushtospeak'] = 'Tap to Speak';
@@ -386,11 +390,33 @@ $string['gradeoptions_details'] =
 $string['letsaddwords'] = "Lets add some words..";
 $string['addwords'] = "Add Words";
 
-$string['freetrial'] = "Get Cloud Poodll API Credentials and a Free Trial";
-$string['freetrial_desc'] = "A dialog should appear that allows you to register for a free trial with Poodll. After registering you should login to the members dashboard to get your API user and secret. And to register your site URL.";
+$string['freetrial'] = "Get a Poodll free trial";
+$string['freetrial_desc'] = "Poodll Word Cards is a premium Moodle plugin. A free trial can be set up in a couple of minutes without leaving your Moodle site. For details on pricing visit <a href='https://poodll.com/pricing'>Poodll.com</a>. ";
 $string['fillcredentials'] = "Set API user and secret with existing credentials";
+
+// In-app management of the Poodll API credentials (see classes/cbcredentials.php).
+$string['cbsetupheading'] = "Set up your Poodll API credentials";
+$string['cbsetupintro'] = "Poodll Word Cards cannot run until the Poodll API user and secret have been set for this site. They are site wide settings, so you only need to do this once.";
+$string['cbsetupfound'] = "Another Poodll plugin on this site already has credentials. You can copy them across with the button below, then save them.";
+$string['cbsetupnotfound'] = "No Poodll credentials were found anywhere on this site. If you do not have them yet you can take a free trial, and your API user and secret will be emailed to you.";
+$string['cbsavecredentials'] = "Save credentials";
+$string['cbgotosettings'] = "Go to the Word Cards settings page";
+$string['cbcredentialssaved'] = "Your Poodll API credentials were saved and accepted.";
+$string['cbnocredentialsset'] = "Word Cards cannot run yet because the Poodll API user and secret have not been set for this site.";
+$string['cbaskadmin'] = "Please ask your site administrator to set up the Poodll API credentials for this site.";
+$string['nocredentialsentered'] = "No API user and secret were entered.";
+$string['cbgetfreetrial'] = "Get free trial";
+$string['cbtrialstep1'] = "Click the \"Get free trial\" button below and fill in the Poodll checkout form. There is nothing to pay and no credit card is required.";
+$string['cbtrialstep2'] = "Check your email. Your Poodll API user and secret will arrive there a moment after you register.";
+$string['cbtrialstep3'] = "Return to the tab you came from, paste the API user and secret into the form there, and save.";
+$string['cbtrialsiteurl'] = "Your subscription will be registered for the site URL:";
+$string['cbtrialsiteurl_desc'] = "If that is not the address your users visit this Moodle site on, register the correct URL in the members dashboard at member.poodll.com after signing up.";
+$string['cbaftercheckout'] = "Almost done: check your email";
+$string['cbaftercheckout_desc'] = "Your Poodll API user and secret are on their way by email. When they arrive, return to the tab you came from, paste them into the credentials form and save.";
+$string['cbtrialfailed'] = "The Poodll signup form could not be loaded. Please check your internet connection and try again, or sign up at member.poodll.com instead.";
 $string['ww_words_instructions'] = " Wordcards will fetch a list of definitions for the words you entered.";
-$string['ww_words'] = "Enter Words separated by commas, e.g cat,dog";
+$string['ww_words'] = "e.g. cat, dog";
+$string['ww_words_label'] = 'Words to look up, separated by commas or one per line';
 $string['ww_words_fetch'] = "Fetch Definitions";
 $string['word_wizard'] = "Word Wizard";
 $string['wordwizard'] = "Word Wizard";
@@ -400,8 +426,43 @@ $string['use'] = "Use";
 $string['dismiss'] = "Dismiss";
 $string['deflanguage'] = "Definitions Language";
 $string['deflanguage_help'] = "This preselects the correct language when using the dictionary in the Word Wizard, and the default language in the language chooser. (Not all langs are available ..sorry)";
-$string['wizardinstructions'] = 'Word Wizard will search the {$a} dictionary for the words you enter. <ol><li>Enter a comma separated list of {$a} words.</li><li>Press the \'Fetch Definitions\' button.</li><li>Select the best entry per term, edit the entry content and press the \'use\' button to add the word to the wordcards activity.</li></ol>';
+$string['wizardinstructions'] = 'Word Wizard will search the {$a} dictionary for the words you enter. <ol><li>Enter the {$a} words, separated by commas or one per line.</li><li>Press the \'Fetch Definitions\' button.</li><li>For each word, find the meaning you want and press \'Use this\' to add it to the activity. Press \'Edit\' first to change the definition or example sentence.</li></ol>';
 $string['nodefinitionfound'] = "No definition found";
+$string['ww_lookupfailed'] = 'The dictionary lookup failed. Please try this word again.';
+$string['ww_notranslation'] = 'No translation available, please enter one';
+$string['ww_nosentence'] = 'No example sentence. Use Edit to add one.';
+$string['ww_createai'] = 'Create with AI';
+$string['ww_createai_working'] = 'Asking the site AI. This can take a few seconds.';
+$string['ww_createai_none'] = 'The site AI could not make anything of this either. Check the spelling, or add it by hand on the Manage words page.';
+$string['ww_createai_failed'] = 'The site AI could not be asked. Please try again.';
+$string['ww_aimade'] = 'Not in the dictionary. The site AI suggested these meanings, so check them before adding one.';
+$string['ww_added_heading'] = 'Added to this activity';
+$string['ww_managewords'] = 'Manage words';
+$string['ww_choosesense'] = 'Choose the meaning you want';
+$string['ww_skip'] = 'Skip';
+$string['ww_skipword'] = 'Skip {$a}';
+$string['ww_alreadyinset'] = 'This word is already in this activity.';
+$string['ww_retry'] = 'Try again';
+$string['ww_edit'] = 'Edit';
+$string['ww_usethis'] = 'Use this';
+$string['ww_lookingup'] = 'Looking up...';
+$string['ww_addfailed'] = 'The word could not be added. Please try again.';
+$string['ww_needdefinition'] = 'Please enter a definition first.';
+$string['ww_background'] = 'Add the words in the background';
+$string['ww_background_help'] = 'The first meaning of each word is chosen for you, and you do not need to stay on this page. You can check and edit the words afterwards in Manage words.';
+$string['ww_withimages'] = 'Also make a picture for each word';
+$string['ww_words_queue'] = 'Add words';
+$string['ww_queued'] = '{$a} word(s) will be added in the background.';
+$string['ww_queued_already'] = 'Already in this activity: {$a}.';
+$string['ww_queuefailed'] = 'The words could not be queued. Please try again.';
+$string['ww_bg_words'] = 'A task is scheduled to add {$a} word(s) to this activity.';
+$string['ww_bg_images'] = 'A task is scheduled to make pictures for words in this activity.';
+$string['ww_bg_retrying'] = 'Some lookups failed and will be tried again shortly.';
+$string['ww_bg_when'] = 'This happens when the site\'s scheduled tasks run, usually within a few minutes.';
+$string['ww_bg_done'] = 'The words have been added.';
+$string['ww_bg_reload'] = 'Reload the page to see them.';
+$string['ww_images_background'] = 'Make the pictures in the background, so you do not need to wait on this page';
+$string['ww_images_queued'] = 'The pictures will be made in the background.';
 $string['viewstart'] = "Activity open";
 $string['viewend'] = "Activity close";
 $string['viewstart_help'] = "If set, prevents a student from entering the activity before the start date/time.";
@@ -461,6 +522,8 @@ $string['sgoptions'] = "Space Game options";
 $string['sgoptions_details'] = "Display terms as aliens, or definitions as aliens";
 $string['scoptions'] = "Speechcards options";
 $string['scoptions_details'] = "Display new word, or model sentence on the speechcard";
+$string['scatteroptions'] = "Match the Words options";
+$string['scatteroptions_details'] = "Display the definition, the picture, or both, on the matching card";
 
 $string['animations'] = "Animations";
 $string['animations_details'] = "Transitions between item subtypes are animated. If fancy animation causes trouble, choose plain.";
@@ -517,9 +580,14 @@ $string['userlearned'] = "User Learned Terms";
 $string['userlearnedheading'] = 'Terms learned by: {$a}';
 $string['courseuserlearned'] = 'User Learned Terms in Course';
 $string['courseuserlearnedheading'] = 'Terms learned by {$a->username} in course: {$a->coursename}: ';
+$string['sitelearned'] = 'Terms Learned (Site)';
+$string['sitelearnedheading'] = 'Terms Learned (Site)';
+$string['siteuserlearned'] = 'User Learned Terms (Site)';
+$string['siteuserlearnedheading'] = 'Terms learned by {$a->username} (Site)';
 $string['reportsmenutoptext'] = "Review attempts on WordCards activities using the reports below.";
 $string['learnedreport_explanation'] = 'A list of the number of terms learned by each user in this activity.';
 $string['courselearnedreport_explanation'] = 'A list of the number of terms learned by each user in this course.';
+$string['sitelearnedreport_explanation'] = 'A list of the number of terms learned by each user across the entire site.';
 $string['gradesreport_explanation'] = 'The grades for each user in this activity.';
 $string['attemptsreport_explanation'] = 'A summary of WordCards attempts per user in this activity.';
 $string['deflang_other'] = "Other";
@@ -542,6 +610,9 @@ $string['ms_termattop'] = 'Term at top, Definitions as choices';
 $string['ms_defattop'] = 'Definition at top, Terms as choices';
 $string['sg_termasalien'] = 'Terms as aliens (enemies)';
 $string['sg_defasalien'] = 'Definition as aliens (enemies)';
+$string['scatter_defonly'] = 'Definition only';
+$string['scatter_imageonly'] = 'Picture only';
+$string['scatter_defandimage'] = 'Definition and picture';
 $string['wc_termasreadable'] = 'Term on speech card';
 $string['wc_modelsentenceasreadable'] = 'Model sentence on speech card';
 $string['learningactivityoptions'] = 'Learning Activity Options';
@@ -553,7 +624,7 @@ $string['freemodesettings_details'] = 'Choose which activity types are available
 $string['freemodeoptions'] = 'Free Mode Options';
 $string['freemodeoptions_details'] = 'Enable the learning activities that should be available to students in free mode.';
 $string['never'] = 'Never';
-$string['choose_deflang'] = "change"; // "Choose definitions language";
+$string['choose_deflang'] = "Change"; // "Choose definitions language";
 $string['showlangchooser'] = "Show language chooser";
 $string['showlangchooser_help'] = "The language chooser allows the user to select the language that the wordcard definition is displayed in. Multiple language definitions will only be available if the word as added via the Word Wizard. The language chooser is available from Moodle 4.3 and newer.";
 $string['showlangchooser_details'] = "The language chooser allows the user to select the language that the wordcard definition is displayed in. Multiple language definitions will only be available if the word as added via the Word Wizard. The language chooser is available from Moodle 4.3 and newer.";
@@ -619,3 +690,32 @@ $string['imageonfront_details'] = 'If an image is specified for a wordcard, shou
 $string['imageonfront_help'] = 'If an image is specified for a wordcard, should it be shown on the front or back of the card in learn mode?';
 $string['cardfront'] = 'Card front';
 $string['cardback'] = 'Card back';
+$string['learnmodecards'] = 'Card style (learn mode)';
+$string['learnmodecards_details'] = 'Should learn mode show two sided cards that flip between the term and its details, or one sided cards that show everything at once?';
+$string['learnmodecards_help'] = 'Two sided cards show the term on the front and its definition on the back, and the learner flips the card. One sided cards show the term, its definition, the example sentence and its translation together on a single face.';
+$string['cards_twosided'] = 'Two sided';
+$string['cards_onesided'] = 'One sided';
+$string['task_sync_sentence_translations'] = 'Fetch translated example sentences for new words';
+$string['task_translate_custom_sentence'] = 'Translate an example sentence written by a teacher';
+$string['task_complete_translations'] = 'Fill in a word\'s missing translations with the site AI';
+$string['localaitranslations'] = 'Fill in missing translations with the site AI';
+$string['localaitranslations_details'] = 'When the dictionary has no translation of a word in a language the activity offers, ask this site\'s own AI provider for one, as the word is used in its example sentence. A word with no example sentence is given one first. This runs in the background when words are added with the Word Wizard, and when a teacher asks for it there. It needs an AI provider that can generate text, AI allowed in the course, and the teacher to have accepted the AI policy. What the AI writes stays on this site.';
+$string['ai_completetranslations'] = 'Missing translations';
+$string['ai_completetranslations_instructions'] = 'The dictionary does not have every word in every language. This site\'s AI can fill in the gaps, translating each word as it is used in its example sentence, and writing an example sentence for a word that has none. It runs in the background, one word at a time.';
+$string['ai_completetranslations_btn'] = 'Complete missing translations with AI';
+$string['ai_completetranslations_queued'] = '{$a} word(s) queued. Their translations will be filled in shortly, in the background.';
+$string['ai_completetranslations_nothing'] = 'No word is missing a translation.';
+$string['ai_completetranslations_unavailable'] = 'The site AI cannot be used here.';
+$string['ai_completetranslations_policy'] = 'The AI policy has to be accepted first. Once it is, press the button again.';
+$string['ai_completetranslations_failed'] = 'The words could not be queued.';
+$string['task_add_word'] = 'Add a word to a Wordcards activity in the background';
+$string['task_generate_word_images'] = 'Make pictures for words added to a Wordcards activity in the background';
+$string['ww_syncsentences'] = 'Translated example sentences';
+$string['ww_syncsentences_instructions'] = 'Example sentence translations in the learner\'s own language are generated as a background task. Newly created entries will show here when the task is complete. This button just pulls what is already ready.';
+$string['ww_syncsentences_btn'] = 'Fetch translated sentences';
+$string['ww_syncsentences_working'] = 'Fetching. This makes one dictionary lookup for each word, so it may take a moment.';
+$string['ww_syncsentences_result'] = '{$a->updated} word(s) updated. {$a->alreadyhave} already had translations, {$a->nodata} are not translated at the dictionary yet, {$a->failed} could not be looked up.';
+$string['ww_syncsentences_queued'] = '{$a} sentence(s) of your own were queued to be translated.';
+$string['ww_syncsentences_failed'] = 'The lookup could not be completed.';
+$string['playtermaudio'] = 'Play the word';
+$string['playsentenceaudio'] = 'Play the example sentence';

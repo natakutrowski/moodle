@@ -1,9 +1,25 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * Created by PhpStorm.
- * User: ishineguy
- * Date: 2018/06/26
- * Time: 13:16
+ * Report renderer.
+ *
+ * @package    mod_wordcards
+ * @copyright  2020 Justin Hunt (poodllsupport@gmail.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace mod_wordcards\output;
@@ -47,6 +63,14 @@ class report_renderer extends \plugin_renderer_base {
         $reports[]=$this->render($courselearned);
         $reports[] = array('button'=>$this->render($courselearned),
             'text'=>get_string('courselearnedreport_explanation', constants::M_COMPONENT));
+
+        $sitelearned = new \single_button(
+            new \moodle_url(constants::M_URL . '/reports.php',
+                array('report' => 'sitelearned', 'id' => $cm->id, 'n' => $moduleinstance->id)),
+            get_string('sitelearned', constants::M_COMPONENT), 'get');
+        $reports[]=$this->render($sitelearned);
+        $reports[] = array('button'=>$this->render($sitelearned),
+            'text'=>get_string('sitelearnedreport_explanation', constants::M_COMPONENT));
 
         $data=['reports' => $reports];
         $ret= $this->render_from_template('mod_wordcards/reportsmenu', $data);

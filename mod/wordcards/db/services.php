@@ -1,9 +1,26 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Services definition.
  *
- * @package mod_wordcards
- * @author  Frédéric Massart - FMCorz.net
+ * @package    mod_wordcards
+ * @author     Frédéric Massart - FMCorz.net
+ * @copyright  2016 Justin Hunt (poodllsupport@gmail.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $functions = array(
@@ -68,6 +85,30 @@ $functions = array(
         'type'        => 'write',
         'ajax'        => true,
     ),
+    'mod_wordcards_sync_sentence_translations' => array(
+        'classname'   => 'mod_wordcards_external',
+        'methodname'  => 'sync_sentence_translations',
+        'description' => 'fetches translated example sentences for terms that do not have them',
+        'capabilities'=> 'mod/wordcards:manage',
+        'type'        => 'write',
+        'ajax'        => true,
+    ),
+    'mod_wordcards_complete_translations' => array(
+        'classname'   => 'mod_wordcards_external',
+        'methodname'  => 'complete_translations',
+        'description' => 'queues words to have their missing translations filled in by the site AI',
+        'capabilities'=> 'mod/wordcards:manage, mod/wordcards:useai',
+        'type'        => 'write',
+        'ajax'        => true,
+    ),
+    'mod_wordcards_create_senses' => array(
+        'classname'   => 'mod_wordcards_external',
+        'methodname'  => 'create_senses',
+        'description' => 'suggests meanings, with the site AI, for a word the dictionary does not have',
+        'capabilities'=> 'mod/wordcards:manage, mod/wordcards:useai',
+        'type'        => 'write',
+        'ajax'        => true,
+    ),
     'mod_wordcards_search_dictionary' => array(
         'classname'   => 'mod_wordcards_external',
         'methodname'  => 'search_dictionary',
@@ -113,6 +154,30 @@ $functions = array(
         'ajax'        => true,
     ),
 
+    'mod_wordcards_queue_words' => [
+        'classname'   => 'mod_wordcards_external',
+        'methodname'  => 'queue_words',
+        'description' => 'Queue words to be looked up and added in the background',
+        'capabilities' => 'mod/wordcards:manage',
+        'type'        => 'write',
+        'ajax'        => true,
+    ],
+    'mod_wordcards_queue_images' => [
+        'classname'   => 'mod_wordcards_external',
+        'methodname'  => 'queue_images',
+        'description' => 'Queue pictures to be made in the background for the words that have none',
+        'capabilities' => 'mod/wordcards:manage',
+        'type'        => 'write',
+        'ajax'        => true,
+    ],
+    'mod_wordcards_get_background_status' => [
+        'classname'   => 'mod_wordcards_external',
+        'methodname'  => 'get_background_status',
+        'description' => 'What is still to be done in the background for an activity',
+        'capabilities' => 'mod/wordcards:manage',
+        'type'        => 'read',
+        'ajax'        => true,
+    ],
     'mod_wordcards_generate_bulk_images' => array(
         'classname'   => 'mod_wordcards_external',
         'methodname'  => 'generate_bulk_images',

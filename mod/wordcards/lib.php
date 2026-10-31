@@ -1,9 +1,26 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Lib.
  *
- * @package mod_wordcards
- * @author  Frédéric Massart - FMCorz.net
+ * @package    mod_wordcards
+ * @author     Frédéric Massart - FMCorz.net
+ * @copyright  2016 Justin Hunt (poodllsupport@gmail.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 // TODO Support activity completion.
@@ -774,8 +791,8 @@ function mod_wordcards_get_completion_active_rule_descriptions($cm)
 function mod_wordcards_user_preferences(): array
 {
     $prefs = [];
-    $prefs['wordcards_deflang'] = [
-        'type' => PARAM_ALPHA,
+    $prefs[constants::NATIVELANG_PREF] = [
+        'type' => PARAM_ALPHANUMEXT,
         'null' => NULL_NOT_ALLOWED,
         'default' => false,
         'permissioncallback' => [core_user::class, 'is_current_user'],

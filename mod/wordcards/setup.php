@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -49,7 +48,7 @@ if ($id) {
     $cm         = get_coursemodule_from_instance(constants::M_TABLE, $moduleinstance->id, $course->id, false, MUST_EXIST);
     $id = $cm->id;
 } else {
-    print_error('You must specify a course_module ID or an instance ID');
+    throw new \moodle_exception('You must specify a course_module ID or an instance ID');
 }
 
 $modulecontext = context_module::instance($cm->id);
@@ -111,7 +110,7 @@ if ($mform->is_cancelled()) {
 $moduleinstance->n =$moduleinstance->id;
 $mod = mod_wordcards_module::get_by_cmid($cm->id);
 $data =(array)$moduleinstance;
-$data = utils::prepare_file_and_json_stuff($data,$modulecontext);
+$data = utils::unpack_freemode_options($data);
 $mform->set_data($data);
 
 echo $renderer->header($moduleinstance, $cm, "setup");

@@ -15,10 +15,11 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Page to display free mode activity.
+ * Page to display session mode activity.
  *
- * @package mod_wordcards
- * @author  David Watson - evolutioncode.uk
+ * @package    mod_wordcards
+ * @copyright  2022 Justin Hunt (poodllsupport@gmail.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(__DIR__ . '/../../config.php');
@@ -87,6 +88,19 @@ if ($mod->get_mod()->foriframe==1  || $embed == 1) {
     $PAGE->add_body_class('poodll-wordcards-embed');
 } else {
     $PAGE->set_pagelayout('incourse');
+}
+
+// Without working Poodll API credentials this activity cannot run. Administrators get an in page
+// setup panel, everybody else gets an explanation. This is checked before the activity data is
+// prepared, because preparing it needs a Cloud Poodll token.
+$credentialserror = $embed == 0 ? \mod_wordcards\cbcredentials::credentials_error() : '';
+if (!empty($credentialserror)) {
+    $PAGE->set_heading(format_string($course->fullname, true));
+    $PAGE->set_title(format_string($mod->get_mod()->name, true));
+    echo $renderer->header();
+    echo $renderer->show_cbcredentials_setup($PAGE->url, $credentialserror);
+    echo $renderer->footer();
+    die;
 }
 
 $templateable = new \mod_wordcards\output\sessionmode($cm, $course, $practicetype, $wordpool);

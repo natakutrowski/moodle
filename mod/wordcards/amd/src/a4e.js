@@ -65,6 +65,9 @@ define([
         //self select icons
       var selectors = '.a4e-flashcards-container .play-tts';
       selectors += ', .definitions-container .definition-play-tts';
+      // The one sided learn card sits in the carousel, which is outside .definitions-container, and
+      // it carries no id of its own, so it needs naming here or its word never plays.
+      selectors += ', .wc-onesided-card-inner .definition-play-tts';
       selectors += ', #speech-container .wordcards-speechcards-speaker-icon';
       selectors += ', .mod_wordcards_matching_frontbtn';
       selectors += ', .model-sentence-play-tts';
@@ -80,18 +83,20 @@ define([
 
     progress_dots: function(results, terms) {
 
-      var code = "",
-        color;
+      var code = "";
       terms.forEach(function(o, i) {
-        var color = "darkgray";
+        var color = "#E6E9FD";
+        var icon = "fa-square";
         if (results[i] !== undefined) {
           if (results[i].points) {
-            color = "green";
+            color = "#74DC72";
+            icon = "fa-check-square";
           } else {
-            color = "red";
+            color = "#FB6363";
+            icon = "fa-window-close";
           }
         }
-        code += '<i style="color:' + color + ';" class="fa fa-circle"></i>';
+        code += '<i style="color:' + color + ';" class="fa ' + icon + '"></i>';
       });
 
       $("#wordcards-progress-dots").html(code);
@@ -136,7 +141,7 @@ define([
           $(target).html(html);
 
           var cards = $(".a4e-flashcards-container .a4e-card");
-          var faces = $(".front,.back");
+          var faces = $(".a4e-flashcards-container .wordcards_cardtext");
 
           setTimeout(function() {
             cards.flip({axis:'x'});
@@ -150,7 +155,26 @@ define([
 
           $('.a4e-flashcards-container .mod_wordcards_matching_frontbtn').on('click', function() {
             $(".a4e-flashcards-container .a4e-card").flip(a4e.face);
+            $(".a4e-flashcards-container .a4e-card").attr('aria-pressed', a4e.face.toString());
             a4e.face = !a4e.face;
+          });
+
+          //keyboard access: flip a focused card with Enter or Space
+          $('.a4e-flashcards-container').on('keydown', '.a4e-card', function(e) {
+            //let the browser's native activation handle inner buttons (e.g. play-tts)
+            if ($(e.target).closest('button').length) {
+              return;
+            }
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              $(this).trigger('click');
+            }
+          });
+
+          //keep aria-pressed in sync for both mouse and keyboard flips
+          $('.a4e-flashcards-container').on('click', '.a4e-card', function() {
+            var pressed = $(this).attr('aria-pressed') === "true";
+            $(this).attr('aria-pressed', (!pressed).toString());
           });
 
         }

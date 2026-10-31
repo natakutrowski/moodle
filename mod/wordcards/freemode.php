@@ -1,9 +1,26 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Page to display free mode activity.
  *
- * @package mod_wordcards
- * @author  David Watson - evolutioncode.uk
+ * @package    mod_wordcards
+ * @author     David Watson - evolutioncode.uk
+ * @copyright  2022 Justin Hunt (poodllsupport@gmail.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(__DIR__ . '/../../config.php');
@@ -72,6 +89,19 @@ if ($mod->get_mod()->foriframe == 1 || $embed == 1) {
     $PAGE->add_body_class('poodll-wordcards-embed');
 } else {
     $PAGE->set_pagelayout('incourse');
+}
+
+// Without working Poodll API credentials this activity cannot run. Administrators get an in page
+// setup panel, everybody else gets an explanation. This is checked before the activity data is
+// prepared, because preparing it needs a Cloud Poodll token.
+$credentialserror = $embed == 0 ? \mod_wordcards\cbcredentials::credentials_error() : '';
+if (!empty($credentialserror)) {
+    $PAGE->set_heading(format_string($course->fullname, true));
+    $PAGE->set_title(format_string($mod->get_mod()->name, true));
+    echo $renderer->header();
+    echo $renderer->show_cbcredentials_setup($PAGE->url, $credentialserror);
+    echo $renderer->footer();
+    die;
 }
 
 $templateable = new \mod_wordcards\output\freemode($cm, $course, $practicetype, $wordpool);

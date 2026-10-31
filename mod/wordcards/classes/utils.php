@@ -886,8 +886,16 @@ class utils
     }
 
 
-    // fetch the dictionary entries from cloud poodll
-    public static function fetch_dictionary_entries($terms, $sourcelang, $targetlangs)
+    /**
+     * Fetch the dictionary entries from cloud poodll.
+     *
+     * @param string $terms the word, or a comma separated list of words
+     * @param string $sourcelang
+     * @param string $targetlangs comma separated
+     * @param string|null $error set to why it failed, when it does
+     * @return string|false the entries as json, or false
+     */
+    public static function fetch_dictionary_entries($terms, $sourcelang, $targetlangs, &$error = null)
     {
         global $USER;
 
@@ -897,6 +905,7 @@ class utils
             $token = self::fetch_token($conf->apiuser, $conf->apisecret);
         }
         if (!$token || empty($token)) {
+            $error = 'No Cloud Poodll token';
             return false;
         }
 
@@ -916,20 +925,72 @@ class utils
         $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
         $response = self::curl_fetch($serverurl, $params);
         if (!self::is_json($response)) {
+            $error = 'Not json: ' . \core_text::substr(trim(strip_tags((string) $response)), 0, 300);
             return false;
         }
         $payloadobject = json_decode($response);
 
         // returnCode > 0  indicates an error
-        if ($payloadobject->returnCode > 0) {
+        if (isset($payloadobject->returnCode) && $payloadobject->returnCode > 0) {
+            $error = 'Error ' . $payloadobject->returnCode . ': ' . json_encode($payloadobject->returnMessage ?? '');
             return false;
             // if all good, then lets do the embed
-        } else if ($payloadobject->returnCode === 0) {
+        } else if (isset($payloadobject->returnCode) && $payloadobject->returnCode === 0) {
             $pollyurl = $payloadobject->returnMessage;
             return $pollyurl;
         } else {
+            // Most likely a web service exception, which has no returnCode.
+            $error = 'Unexpected reply: ' . \core_text::substr($response, 0, 300);
             return false;
         }
+    }
+
+    /**
+     * Ask the Poodll server to translate a sentence that is not the dictionary's own.
+     *
+     * @param string $term the word the sentence is built around
+     * @param string $sourcelang the language the term and sentence are in
+     * @param string $sentence the sentence to translate
+     * @param string $targetlangs csv of language codes
+     * @param string $knownwords json of language code to the word already stored for it
+     * @return string|false json of language code to sentence, or false
+     */
+    public static function fetch_sentence_translation($term, $sourcelang, $sentence, $targetlangs, $knownwords = '') {
+        $conf = get_config(constants::M_COMPONENT);
+        if (empty($conf->apiuser) || empty($conf->apisecret)) {
+            return false;
+        }
+        $token = self::fetch_token($conf->apiuser, $conf->apisecret);
+        if (empty($token)) {
+            return false;
+        }
+
+        $params = [];
+        $params['wstoken'] = $token;
+        $params['wsfunction'] = 'local_cpapi_translate_sentence';
+        $params['moodlewsrestformat'] = 'json';
+        $params['term'] = $term;
+        $params['sourcelang'] = $sourcelang;
+        $params['sentence'] = $sentence;
+        $params['targetlangs'] = $targetlangs;
+        $params['knownwords'] = $knownwords;
+        $params['appid'] = constants::M_COMPONENT;
+
+        $serverurl = self::get_cloud_poodll_server() . '/webservice/rest/server.php';
+        $response = self::curl_fetch($serverurl, $params);
+        if (!self::is_json($response)) {
+            return false;
+        }
+        $payloadobject = json_decode($response);
+        if (!isset($payloadobject->returnCode) || $payloadobject->returnCode != 0) {
+            return false;
+        }
+        // An empty object means every language was rejected, which is worth nothing to a caller.
+        $empty = ['', '[]', '{}'];
+        if (in_array($payloadobject->returnMessage, $empty, true)) {
+            return false;
+        }
+        return $payloadobject->returnMessage;
     }
 
     public static function fetch_auto_voice($langcode)
@@ -1061,6 +1122,10 @@ class utils
             case \mod_wordcards_module::PRACTICETYPE_SPEECHCARDS_REV:
                 return 'fa-comment-o';
 
+            case \mod_wordcards_module::PRACTICETYPE_SCATTER:
+            case \mod_wordcards_module::PRACTICETYPE_SCATTER_REV:
+                return 'fa-th';
+
             default:
                 return 'fa-dot-circle-o';
         }
@@ -1117,6 +1182,10 @@ class utils
                 return get_string('title_listenchoose_rev', constants::M_COMPONENT);
             case \mod_wordcards_module::PRACTICETYPE_SPACEGAME_REV:
                 return get_string('title_spacegame_rev', constants::M_COMPONENT);
+            case \mod_wordcards_module::PRACTICETYPE_SCATTER:
+                return get_string('title_scatter', constants::M_COMPONENT);
+            case \mod_wordcards_module::PRACTICETYPE_SCATTER_REV:
+                return get_string('title_scatter_rev', constants::M_COMPONENT);
             case \mod_wordcards_module::PRACTICETYPE_WORDPREVIEW:
             case \mod_wordcards_module::PRACTICETYPE_WORDPREVIEW_REV:
                 return get_string('title_wordpreview', constants::M_COMPONENT);
@@ -1170,6 +1239,9 @@ class utils
                 case 'freemode_wordpreview':
                     $available[\mod_wordcards_module::PRACTICETYPE_WORDPREVIEW] = get_string('title_wordpreview', constants::M_COMPONENT);
                     break;
+                case 'freemode_scatter':
+                    $available[\mod_wordcards_module::PRACTICETYPE_SCATTER] = get_string('title_scatter', constants::M_COMPONENT);
+                    break;
             }
         }
         return $available;
@@ -1186,6 +1258,7 @@ class utils
             \mod_wordcards_module::PRACTICETYPE_SPEECHCARDS => get_string('title_speechcards', constants::M_COMPONENT),
             \mod_wordcards_module::PRACTICETYPE_LISTENCHOOSE => get_string('title_listenchoose', constants::M_COMPONENT),
             \mod_wordcards_module::PRACTICETYPE_SPACEGAME => get_string('title_spacegame', constants::M_COMPONENT),
+            \mod_wordcards_module::PRACTICETYPE_SCATTER => get_string('title_scatter', constants::M_COMPONENT),
         ];
 
         $reviewoptions = [
@@ -1196,6 +1269,7 @@ class utils
             \mod_wordcards_module::PRACTICETYPE_SPEECHCARDS_REV => get_string('title_speechcards_rev', constants::M_COMPONENT),
             \mod_wordcards_module::PRACTICETYPE_LISTENCHOOSE_REV => get_string('title_listenchoose_rev', constants::M_COMPONENT),
             \mod_wordcards_module::PRACTICETYPE_SPACEGAME_REV => get_string('title_spacegame_rev', constants::M_COMPONENT),
+            \mod_wordcards_module::PRACTICETYPE_SCATTER_REV => get_string('title_scatter_rev', constants::M_COMPONENT),
         ];
 
         if ($wordpool === \mod_wordcards_module::WORDPOOL_LEARN) {
@@ -1228,6 +1302,20 @@ class utils
         return [
             constants::M_SG_TERM_AS_ALIEN => get_string('sg_termasalien', constants::M_COMPONENT),
             constants::M_SG_DEF_AS_ALIEN => get_string('sg_defasalien', constants::M_COMPONENT)
+        ];
+    }
+
+    /**
+     * The display options for the matching card in the scatter activity.
+     *
+     * @return array of constants::M_SCATTER_* => display name
+     */
+    public static function fetch_options_scatter()
+    {
+        return [
+            constants::M_SCATTER_DEF_ONLY => get_string('scatter_defonly', constants::M_COMPONENT),
+            constants::M_SCATTER_IMAGE_ONLY => get_string('scatter_imageonly', constants::M_COMPONENT),
+            constants::M_SCATTER_DEF_AND_IMAGE => get_string('scatter_defandimage', constants::M_COMPONENT),
         ];
     }
 
@@ -1304,7 +1392,9 @@ class utils
 
             constants::M_LANG_BGBG => get_string('bg-bg', constants::M_COMPONENT),
             constants::M_LANG_CSCZ => get_string('cs-cz', constants::M_COMPONENT),
+            constants::M_LANG_DADK => get_string('da-dk', constants::M_COMPONENT),
             constants::M_LANG_ELGR => get_string('el-gr', constants::M_COMPONENT),
+            constants::M_LANG_ETEE => get_string('et-ee', constants::M_COMPONENT),
             constants::M_LANG_HRHR => get_string('hr-hr', constants::M_COMPONENT),
             constants::M_LANG_LTLT => get_string('lt-lt', constants::M_COMPONENT),
             constants::M_LANG_LVLV => get_string('lv-lv', constants::M_COMPONENT),
@@ -1593,11 +1683,22 @@ class utils
         $mform->setDefault('showlangchooser', $config->showlangchooser);
         $mform->addHelpButton('showlangchooser', 'showlangchooser', constants::M_COMPONENT);
 
+        // Two sided flip cards, or one sided cards, in learn mode.
+        $cardoptions = [
+            constants::M_CARDS_TWOSIDED => get_string('cards_twosided', constants::M_COMPONENT),
+            constants::M_CARDS_ONESIDED => get_string('cards_onesided', constants::M_COMPONENT),
+        ];
+        $mform->addElement('select', 'learnmodecards', get_string('learnmodecards', constants::M_COMPONENT), $cardoptions);
+        $mform->setDefault('learnmodecards', $config->learnmodecards);
+        $mform->addHelpButton('learnmodecards', 'learnmodecards', constants::M_COMPONENT);
+
         // Show images for cards on front or back of card in learn mode.
         $img_options = [0=>get_string('cardback', constants::M_COMPONENT),1=>get_string('cardfront', constants::M_COMPONENT)];
         $mform->addElement('select', 'imageonfront', get_string('imageonfront', constants::M_COMPONENT),$img_options);
         $mform->setDefault('imageonfront', $config->imageonfront);
         $mform->addHelpButton('imageonfront', 'imageonfront', constants::M_COMPONENT);
+        // A one sided card has no back to put the image on, so the question does not arise.
+        $mform->hideIf('imageonfront', 'learnmodecards', 'eq', constants::M_CARDS_ONESIDED);
 
         $videooptions = [0 => get_string('no'), 1 => get_string('yes')];
         $mform->addElement(
@@ -1791,6 +1892,15 @@ class utils
             $config->scoptions
         );
 
+        $scatteroptions = self::fetch_options_scatter();
+        $mform->addElement(
+            'select',
+            'scatteroptions',
+            get_string('scatteroptions', constants::M_COMPONENT),
+            $scatteroptions,
+            $config->scatteroptions
+        );
+
         // show activity open closes
         $dateoptions = ['optional' => true];
         $name = 'activityopenscloses';
@@ -1864,11 +1974,25 @@ class utils
         ];
     }
 
-    public static function save_newterm($modid, $term, $definition, $translations, $sourcedef, $modelsentence)
-    {
+    public static function save_newterm(
+        $modid,
+        $term,
+        $definition,
+        $translations,
+        $sourcedef,
+        $modelsentence,
+        $modelsentencetranslations = '',
+        $sentenceedited = false
+    ) {
 
         global $DB;
         $mod = \mod_wordcards_module::get_by_modid($modid);
+
+        // A word set holding two senses of the same word makes the practice activities nonsensical,
+        // e.g. two identical options of which only one counts as correct. So add a word only once.
+        if (self::term_exists($modid, $term)) {
+            return false;
+        }
 
         $insertdata = new \stdClass();
         $insertdata->modid = $modid;
@@ -1877,15 +2001,92 @@ class utils
         $insertdata->translations = self::super_trim($translations);
         $insertdata->sourcedef = self::super_trim($sourcedef);
         $insertdata->model_sentence = self::super_trim($modelsentence);
+        // The dictionary only carries these once the sentence filling task has reached that sense,
+        // so a word looked up today often arrives without them. Store what came, if anything.
+        $insertdata->model_sentence_translations = self::super_trim($modelsentencetranslations);
         $insertdata->ttsvoice = self::fetch_auto_voice($mod->get_mod()->ttslanguage);
         $ret = $DB->insert_record(constants::M_TERMSTABLE, $insertdata);
-        if ($ret && !empty($insertdata->model_sentence)) {
+        if (!$ret) {
+            return $ret;
+        }
+
+        // Where the site's AI may be used, it fills in the languages the dictionary had no word for,
+        // and makes an example sentence when there is none. For a sentence of the teacher's own it
+        // also does the translating the Poodll server would otherwise do, below.
+        $insertdata->id = $ret;
+        $aiqueued = \mod_wordcards\local\ai\completer::queue_if_needed($insertdata, $mod, $sentenceedited);
+
+        if (!empty($insertdata->model_sentence)) {
             $DB->update_record('wordcards', ['id' => $modid, 'hashisold' => 1]);
+
+            if (empty($insertdata->model_sentence_translations)) {
+                if ($sentenceedited) {
+                    // This sentence is the teacher's own, so no dictionary sense holds it and
+                    // looking it up would find nothing however long we waited. It has to be
+                    // translated on its own, unless the site's AI is doing that already.
+                    if (!$aiqueued) {
+                        \mod_wordcards\task\translate_custom_sentence::queue_for_term($ret);
+                    }
+                } else {
+                    // The dictionary makes these in a task of its own, so a word new to it arrives
+                    // before they exist. Ask to come back for them tomorrow rather than leaving
+                    // the card short for good. Queueing is deduplicated, so adding twenty words in
+                    // a row leaves one task.
+                    \mod_wordcards\task\sync_sentence_translations::queue_for_module($modid);
+                }
+            }
         }
         return $ret;
     }
 
-    public static function get_rcdic_langs($selected = 'en', $other = true)
+    /**
+     * Is this word already in the word set? Case is ignored, and deleted terms do not count.
+     *
+     * @param int $modid the wordcards instance id
+     * @param string $term the word
+     * @return bool
+     */
+    public static function term_exists($modid, $term)
+    {
+        global $DB;
+        $select = 'modid = :modid AND deleted = 0 AND ' . $DB->sql_equal('term', ':term', false);
+        return $DB->record_exists_select(
+            constants::M_TERMSTABLE,
+            $select,
+            ['modid' => $modid, 'term' => self::super_trim($term)]
+        );
+    }
+
+    /**
+     * Which definitions languages can a dictionary lookup actually return, for a given source
+     * language? If the source language is one the ESL Apps dictionary covers, the lookup resolves
+     * against it and the AI adds the extras on top, so nearly everything is reachable. If it is
+     * not, the lookup falls back to the MS dictionary, whose lookup endpoint only supports pairs
+     * with English - so English is all we can honestly offer.
+     *
+     * @param string $sourcelang short code of the language being taught
+     * @return array of allowed short language codes
+     */
+    public static function get_lookup_deflangs($sourcelang)
+    {
+        if (!in_array($sourcelang, constants::M_RSDIC_LANGS)) {
+            return ['en'];
+        }
+        return array_merge(constants::M_RSDIC_LANGS, constants::M_AIDEF_LANGS);
+    }
+
+    /**
+     * Build the definitions language list.
+     *
+     * @param string $selected the language to mark as selected
+     * @param bool $other whether to offer the "Other" option
+     * @param string|bool $sourcelang when set, restrict the list to languages a lookup can
+     *        actually return for that source language. Pass it for the Word Wizard, where the
+     *        choice drives a dictionary lookup; leave it off for the student language chooser,
+     *        which only reads translations already stored on the term.
+     * @return array
+     */
+    public static function get_rcdic_langs($selected = 'en', $other = true, $sourcelang = false)
     {
 
         $langdefs = [];
@@ -1907,6 +2108,26 @@ class utils
         // add ms dictionary languages
         $langdefs = self::get_msdic_langs($langdefs);
 
+        // These have no dictionary coverage at all - the AI translates them - so they are not
+        // part of the msdic list above, but a student can still read definitions in them.
+        $langdefs[] = ['code' => 'so', 'name' => 'Somali'];
+        $langdefs[] = ['code' => 'ti', 'name' => 'Tigrinya'];
+
+        // Drop anything a lookup could not actually resolve for this source language.
+        if ($sourcelang !== false) {
+            $allowed = self::get_lookup_deflangs($sourcelang);
+            $langdefs = array_values(array_filter($langdefs, function ($langdef) use ($allowed) {
+                return in_array($langdef['code'], $allowed);
+            }));
+        }
+
+        // Sort by display name. The list is assembled in several blocks - the ESL Apps dictionary
+        // languages, then the MS dictionary ones, then the AI only ones - so without this the
+        // alphabet restarts partway down the dropdown. Sort before "Other" is added, so that stays
+        // at the bottom where it belongs, and reindex because the selection loop below counts from 0.
+        \core_collator::asort_array_of_arrays_by_key($langdefs, 'name');
+        $langdefs = array_values($langdefs);
+
         if ($other) {
             $langdefs[] = ['code' => constants::M_DEFLANG_OTHER, 'name' => self::get_lang_name(constants::M_DEFLANG_OTHER)];
         }
@@ -1919,7 +2140,16 @@ class utils
             }
         }
         if (!$defaultset) {
-            $langdefs[1]['selected'] = true;
+            // Fall back to English, not to whatever happens to sit at a fixed index - the list is
+            // shorter when it has been filtered, and "Other" must never become the default.
+            $fallback = 0;
+            for ($i = 0; $i < count($langdefs); $i++) {
+                if ($langdefs[$i]['code'] == 'en') {
+                    $fallback = $i;
+                    break;
+                }
+            }
+            $langdefs[$fallback]['selected'] = true;
         }
         return $langdefs;
     }
@@ -1940,7 +2170,7 @@ class utils
         // $langdefs = [];
         $langdefs[] = ['code' => 'af', 'name' => 'Afrikaans'];
         $langdefs[] = ['code' => 'bn', 'name' => 'Bangla'];
-        $langdefs[] = ['code' => 'bs', 'name' => 'Bosnian (Latin)'];
+        $langdefs[] = ['code' => 'bs', 'name' => 'Bosnian'];
         $langdefs[] = ['code' => 'bg', 'name' => 'Bulgarian'];
         $langdefs[] = ['code' => 'ca', 'name' => 'Catalan'];
         $langdefs[] = ['code' => 'hr', 'name' => 'Croatian'];
@@ -1958,16 +2188,20 @@ class utils
         $langdefs[] = ['code' => 'it', 'name' => 'Italian'];
         $langdefs[] = ['code' => 'lv', 'name' => 'Latvian'];
         $langdefs[] = ['code' => 'lt', 'name' => 'Lithuanian'];
-        $langdefs[] = ['code' => 'ms', 'name' => 'Malay (Latin)'];
+        $langdefs[] = ['code' => 'ms', 'name' => 'Malay'];
         $langdefs[] = ['code' => 'mt', 'name' => 'Maltese'];
         $langdefs[] = ['code' => 'nb', 'name' => 'Norwegian'];
         $langdefs[] = ['code' => 'fa', 'name' => 'Persian'];
         $langdefs[] = ['code' => 'pl', 'name' => 'Polish'];
         $langdefs[] = ['code' => 'ro', 'name' => 'Romanian'];
-        $langdefs[] = ['code' => 'sr', 'name' => 'Serbian (Latin)'];
+        // No Serbian here on purpose. It is not one of the languages the AI translates into
+        // (local_cpapi's M_EXTRALANGS), and the MS dictionary is only reached when the source
+        // language is one the ESL Apps dictionary does not cover - at which point the pairing
+        // is not with English and the lookup fails. So it could only ever have resolved to
+        // "No translation available".
         $langdefs[] = ['code' => 'sk', 'name' => 'Slovak'];
         $langdefs[] = ['code' => 'sl', 'name' => 'Slovenian'];
-        $langdefs[] = ['code' => 'sw', 'name' => 'Swahili (Latin)'];
+        $langdefs[] = ['code' => 'sw', 'name' => 'Swahili'];
         $langdefs[] = ['code' => 'sv', 'name' => 'Swedish'];
         $langdefs[] = ['code' => 'ta', 'name' => 'Tamil'];
         $langdefs[] = ['code' => 'tr', 'name' => 'Turkish'];
@@ -1975,6 +2209,58 @@ class utils
         $langdefs[] = ['code' => 'ur', 'name' => 'Urdu'];
         $langdefs[] = ['code' => 'cy', 'name' => 'Welsh'];
         return $langdefs;
+    }
+
+    /**
+     * The locale code to store in the native language preference for a definitions language.
+     *
+     * @param string $deflang a definitions language code, e.g. ja, rus or zh_tw
+     * @return string the locale code, e.g. ja-JP, or '' if the language is not one we know
+     */
+    public static function deflang_to_locale($deflang) {
+        return constants::M_DEFLANG_LOCALES[$deflang] ?? '';
+    }
+
+    /**
+     * The definitions language for a locale code from the native language preference.
+     *
+     * The preference is shared with mod_minilesson, which offers more locales than there are
+     * definitions languages, so several locales map to one language (en-GB and en-US are both en)
+     * and some map to none at all.
+     *
+     * @param string $locale a locale code, e.g. ja-JP or zh-TW
+     * @return string the definitions language code, or '' if there is no matching one
+     */
+    public static function locale_to_deflang($locale) {
+        $locale = trim((string) $locale);
+        if ($locale === '') {
+            return '';
+        }
+        $deflang = array_search($locale, constants::M_DEFLANG_LOCALES, true);
+        if ($deflang !== false) {
+            return $deflang;
+        }
+        // A definitions language code is accepted as it is.
+        if (isset(constants::M_DEFLANG_LOCALES[$locale])) {
+            return $locale;
+        }
+        $parts = explode('-', strtolower($locale));
+        if ($parts[0] === 'zh' && in_array(end($parts), ['tw', 'hk', 'mo', 'hant'])) {
+            return 'zh_tw';
+        }
+        $aliases = ['ru' => 'rus', 'no' => 'nb', 'nn' => 'nb', 'iw' => 'he'];
+        $base = $aliases[$parts[0]] ?? $parts[0];
+        return isset(constants::M_DEFLANG_LOCALES[$base]) ? $base : '';
+    }
+
+    /**
+     * The definitions language the user chose as their native language.
+     *
+     * @param int|null $userid the user, or null for the current user
+     * @return string the definitions language code, or '' if they have not chosen one we can show
+     */
+    public static function get_user_deflang($userid = null) {
+        return self::locale_to_deflang(get_user_preferences(constants::NATIVELANG_PREF, '', $userid));
     }
 
     public static function get_youglish_config($ttslang)
@@ -2035,70 +2321,6 @@ class utils
         return $youglish;
     }
 
-    public static function get_lexicala_langs($selected = 'en')
-    {
-        $langdefs = [];
-        $langdefs[] = ['code' => 'af', 'name' => 'Afrikaans'];
-        $langdefs[] = ['code' => 'ar', 'name' => 'Arabic'];
-        $langdefs[] = ['code' => 'az', 'name' => 'Azerbaijani'];
-        $langdefs[] = ['code' => 'bg', 'name' => 'Bulgarian'];
-        $langdefs[] = ['code' => 'br', 'name' => 'Breton'];
-        $langdefs[] = ['code' => 'ca', 'name' => 'Catalan'];
-        $langdefs[] = ['code' => 'cs', 'name' => 'Czech'];
-        $langdefs[] = ['code' => 'de', 'name' => 'German'];
-        $langdefs[] = ['code' => 'dk', 'name' => 'Danish'];
-        $langdefs[] = ['code' => 'el', 'name' => 'Greek'];
-        $langdefs[] = ['code' => 'en', 'name' => 'English'];
-        $langdefs[] = ['code' => 'es', 'name' => 'Spanish'];
-        $langdefs[] = ['code' => 'et', 'name' => 'Estonian'];
-        $langdefs[] = ['code' => 'fa', 'name' => 'Persian'];
-        $langdefs[] = ['code' => 'fi', 'name' => 'Finnish'];
-        $langdefs[] = ['code' => 'fr', 'name' => 'French'];
-        $langdefs[] = ['code' => 'fy', 'name' => 'Western Frisian'];
-        $langdefs[] = ['code' => 'he', 'name' => 'Hebrew'];
-        $langdefs[] = ['code' => 'hi', 'name' => 'Hindi'];
-        $langdefs[] = ['code' => 'hr', 'name' => 'Croatian'];
-        $langdefs[] = ['code' => 'hu', 'name' => 'Hungarian'];
-        $langdefs[] = ['code' => 'is', 'name' => 'Icelandic'];
-        $langdefs[] = ['code' => 'it', 'name' => 'Italian'];
-        $langdefs[] = ['code' => 'ja', 'name' => 'Japanese'];
-        $langdefs[] = ['code' => 'ko', 'name' => 'Korean'];
-        $langdefs[] = ['code' => 'lt', 'name' => 'Lithuanian'];
-        $langdefs[] = ['code' => 'lv', 'name' => 'Latvian'];
-        $langdefs[] = ['code' => 'ml', 'name' => 'Burmese'];
-        $langdefs[] = ['code' => 'nl', 'name' => 'Dutch'];
-        $langdefs[] = ['code' => 'no', 'name' => 'Norwegian'];
-        $langdefs[] = ['code' => 'pl', 'name' => 'Polish'];
-        $langdefs[] = ['code' => 'prs', 'name' => 'English'];
-        $langdefs[] = ['code' => 'ps', 'name' => 'Pushto'];
-        $langdefs[] = ['code' => 'pt', 'name' => 'Portuguese'];
-        $langdefs[] = ['code' => 'ro', 'name' => 'Romanian'];
-        $langdefs[] = ['code' => 'ru', 'name' => 'Russian'];
-        $langdefs[] = ['code' => 'sk', 'name' => 'Slovak'];
-        $langdefs[] = ['code' => 'sl', 'name' => 'Slovenian'];
-        $langdefs[] = ['code' => 'sr', 'name' => 'Serbian'];
-        $langdefs[] = ['code' => 'sv', 'name' => 'Swedish'];
-        $langdefs[] = ['code' => 'th', 'name' => 'Thai'];
-        $langdefs[] = ['code' => 'tr', 'name' => 'Turkish'];
-        $langdefs[] = ['code' => 'tw', 'name' => 'Twi'];
-        $langdefs[] = ['code' => 'uk', 'name' => 'Ukranian'];
-        $langdefs[] = ['code' => 'ur', 'name' => 'Urdu'];
-        $langdefs[] = ['code' => 'vi', 'name' => 'Vietnamese'];
-        $langdefs[] = ['code' => 'zh', 'name' => 'Chinese'];
-        $defaultset = false;
-        for ($i = 0; $i < count($langdefs); $i++) {
-            if ($langdefs[$i]['code'] == $selected) {
-                $langdefs[$i]['selected'] = true;
-                $defaultset = true;
-                break;
-            }
-        }
-        if (!$defaultset) {
-            $langdefs[10]['selected'] = true;
-        }
-        return $langdefs;
-    }
-
     public static function get_lang_name($fulllangcode)
     {
         if (mb_strlen($fulllangcode) > 2) {
@@ -2117,7 +2339,7 @@ class utils
             case 'fr':
                 return 'French';
             case 'id':
-                return 'Bahasa Indonesia';
+                return 'Indonesian';
             case 'ja':
                 return 'Japanese';
             case 'ko':
@@ -2135,7 +2357,7 @@ class utils
             case 'vi':
                 return 'Vietnamese';
             case 'zh':
-                return $fulllangcode == "zh_tw" ? 'Chinese (trad.)' : 'Chinese (simpl.)';
+                return $fulllangcode == "zh_tw" ? 'Chinese (Traditional)' : 'Chinese (Simplified)';
             case constants::M_DEFLANG_OTHER:
                 return get_string('deflang_other', constants::M_COMPONENT);
         }
@@ -2161,7 +2383,9 @@ class utils
             }
             $translations = json_decode($term->translations);
             // english is a special case, lets support it
-            if ($mod->get_mod()->deflanguage == 'en') {
+            // Terms the Word Wizard added before 1.3.92 have no source definition, and an empty one
+            // must not blank out the definition the term already has.
+            if ($mod->get_mod()->deflanguage == 'en' && !empty($term->sourcedef)) {
                 $translations->en = $term->sourcedef;
             }
             if (

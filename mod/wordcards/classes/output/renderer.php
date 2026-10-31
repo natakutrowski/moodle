@@ -17,8 +17,10 @@
 /**
  * Renderer.
  *
- * @package mod_wordcards
- * @author  Frédéric Massart - FMCorz.net
+ * @package    mod_wordcards
+ * @author     Frédéric Massart - FMCorz.net
+ * @copyright  2016 Justin Hunt (poodllsupport@gmail.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
@@ -33,6 +35,7 @@ namespace mod_wordcards\output;
 use mod_wordcards\my_words_pool;
 use mod_wordcards\utils;
 use mod_wordcards\constants;
+use mod_wordcards\cbcredentials;
 
 class renderer extends \plugin_renderer_base
 {
@@ -116,6 +119,9 @@ class renderer extends \plugin_renderer_base
             'str_definition' => get_string('definition', 'mod_wordcards'),
             'definitions' => array_values($definitions),
             'imageonfront' => $mod->get_mod()->imageonfront,
+            // Step 1 plumbs this through unused: the template still renders the two sided card
+            // either way, so flipping the setting is provably inert until the card itself lands.
+            'onesided' => (int)$mod->get_mod()->learnmodecards === constants::M_CARDS_ONESIDED,
             'youglish' => $youglish,
             'gotit' => get_string('gotit', 'mod_wordcards'),
             'loading' => get_string('loading', 'mod_wordcards'),
@@ -338,6 +344,13 @@ class renderer extends \plugin_renderer_base
                 $activityhtml = $this->render_from_template('mod_wordcards/wordpreview_page', $data);
                 break;
 
+            case \mod_wordcards_module::PRACTICETYPE_SCATTER:
+            case \mod_wordcards_module::PRACTICETYPE_SCATTER_REV:
+                $opts['scatteroptions'] = $mod->get_mod()->scatteroptions;
+                $this->page->requires->js_call_amd("mod_wordcards/scatter", 'init', [$opts]);
+                $activityhtml = $this->render_from_template('mod_wordcards/scatter_page', $data);
+                break;
+
             case \mod_wordcards_module::PRACTICETYPE_DICTATION:
             case \mod_wordcards_module::PRACTICETYPE_DICTATION_REV:
             default:
@@ -487,23 +500,13 @@ class renderer extends \plugin_renderer_base
         $apisecret = get_config(constants::M_COMPONENT, 'apisecret');
         $region = get_config(constants::M_COMPONENT, 'awsregion');
 
-        // check user has entered api credentials
-        if (empty($apiuser) || empty($apisecret)) {
-            $errormessage = get_string(
-                'nocredentials',
-                constants::M_COMPONENT,
-                $CFG->wwwroot . constants::M_PLUGINSETTINGS
-            );
-            return ($this->show_problembox($errormessage));
-        } else {
-            $token = utils::fetch_token($apiuser, $apisecret);
-
-            // check token authenticated and no errors in it
-            $errormessage = utils::fetch_token_error($token);
-            if (!empty($errormessage)) {
-                return ($this->show_problembox($errormessage));
-            }
+        // Check the user has entered api credentials, and that Cloud Poodll accepts them.
+        // Administrators get an in page setup panel, everybody else is told who to ask.
+        $errormessage = cbcredentials::credentials_error();
+        if (!empty($errormessage)) {
+            return $this->show_cbcredentials_setup($this->page->url, $errormessage);
         }
+        $token = utils::fetch_token($apiuser, $apisecret);
 
         // ok we now have a token and can continue to set up the cards
         $widgetid = \html_writer::random_id();
@@ -597,44 +600,6 @@ class renderer extends \plugin_renderer_base
 
     }
 
-    public function scatter_page(\mod_wordcards_module $mod, $wordpool, $currentstep)
-    {
-        list($state) = $mod->get_state();
-
-        $nextstep = $mod->get_next_step($currentstep);
-        $nexturl = (new \moodle_url('/mod/wordcards/activity.php', ['id' => $mod->get_cmid(), 'oldstep' => $currentstep, 'nextstep' => $nextstep]))->out(true);
-
-        // if we are in review state, we use different words and the next page is a finish page
-        if ($wordpool == \mod_wordcards_module::WORDPOOL_REVIEW) {
-            $definitions = $mod->get_review_terms($mod->fetch_step_termcount($currentstep));
-        } else {
-            $definitions = $mod->get_learn_terms($mod->fetch_step_termcount($currentstep));
-        }
-
-        // make sure each definition has a voice
-        foreach ($definitions as $def) {
-            if ($def->ttsvoice == 'Auto' || $def->ttsvoice == '') {
-                $def->ttsvoice = utils::fetch_auto_voice($mod->get_mod()->ttslanguage);
-            }
-        }
-
-        $data = [
-            'canmanage' => $mod->can_manage(),
-            'continue' => get_string('continue'),
-            'congrats' => get_string('congrats', 'mod_wordcards'),
-            'definitionsjson' => json_encode(array_values($definitions)),
-            'finishscatterin' => get_string('finishscatterin', 'mod_wordcards'),
-            'modid' => $mod->get_id(),
-            'isglobalcompleted' => $state == \mod_wordcards_module::STATE_END,
-            'hascontinue' => $state != \mod_wordcards_module::STATE_END,
-            'nexturl' => $nexturl,
-            'isglobalscatter' => true,
-        ];
-
-        return $this->render_from_template('mod_wordcards/scatter_page', $data);
-    }
-
-
     public function navigation(\mod_wordcards_module $mod, $currentstate, $navdisabled = false)
     {
         $embed = $this->get_embed_flag();
@@ -678,7 +643,7 @@ class renderer extends \plugin_renderer_base
 
         // get selected definitions language
         $selected = $activitydefinitionslanguage;
-        $userprefdeflanguage = get_user_preferences('wordcards_deflang');
+        $userprefdeflanguage = utils::get_user_deflang();
         if (!empty($userprefdeflanguage)) {
             $selected = $userprefdeflanguage;
         }
@@ -694,7 +659,6 @@ class renderer extends \plugin_renderer_base
         // prepare data for js and html in mustache template
         $data = [];
         $data['dropdownlist'] = \html_writer::select($options, 'mydefs_lang', $selected);
-        $data['activitydefault'] = $activitydefinitionslanguage;
         $data['cssprefix'] = $cssprefix;
         return $this->render_from_template('mod_wordcards/deflang_chooser', $data);
     }
@@ -705,7 +669,7 @@ class renderer extends \plugin_renderer_base
 
         $dd = [];
         // Get the embedded language chooser
-        $currentlang = get_user_preferences('wordcards_deflang');
+        $currentlang = utils::get_user_deflang();
         $dd['langchooser'] = $this->language_chooser($currentlang, 'wordcardsdashboard');
         // Get the word totals and other data
         $dd  = $dd + utils::prepare_usercourseprogress_data($courseid);
@@ -719,7 +683,7 @@ class renderer extends \plugin_renderer_base
     public function embed_nativelangchooser($cmid, $token)
     {
         global $DB;
-        $currentlang = get_user_preferences('wordcards_deflang');
+        $currentlang = utils::get_user_deflang();
         return $this->language_chooser($currentlang, 'wordcardsembed');
     }
 
@@ -739,6 +703,25 @@ class renderer extends \plugin_renderer_base
         $output .= $this->notification($msg, 'warning');
         $output .= $this->output->box_end();
         return $output;
+    }
+
+    /**
+     * Return HTML to let an administrator sort out the Poodll API credentials without leaving the page.
+     *
+     * @param \moodle_url|string $returnurl where to send the administrator after saving
+     * @param string $errormessage what is currently wrong with the credentials, if anything
+     * @return string HTML
+     */
+    public function show_cbcredentials_setup($returnurl, $errormessage = '')
+    {
+        if (cbcredentials::can_manage()) {
+            return $this->render_from_template(
+                constants::M_COMPONENT . '/cbcredentialspanel',
+                cbcredentials::export_panel_data($returnurl, $errormessage)
+            );
+        }
+        // Users who cannot fix it get no technical detail, just who to ask.
+        return $this->show_problembox(get_string('cbaskadmin', constants::M_COMPONENT));
     }
 
     /*
@@ -778,7 +761,9 @@ class renderer extends \plugin_renderer_base
             'lcoptions',
             'msoptions',
             'sgoptions',
-            'imageonfront'
+            'scatteroptions',
+            'imageonfront',
+            'learnmodecards',
         ];
 
         foreach ($pushthings as $pushthing) {
@@ -825,6 +810,12 @@ class renderer extends \plugin_renderer_base
                 case 'imageonfront':
                     $action = constants::M_PUSH_IMAGEONFRONT;
                     break;
+                case 'scatteroptions':
+                    $action = constants::M_PUSH_SCATTEROPTIONS;
+                    break;
+                case 'learnmodecards':
+                    $action = constants::M_PUSH_LEARNMODECARDS;
+                    break;
 
             }
             $templateitems[] = [
@@ -849,17 +840,60 @@ class renderer extends \plugin_renderer_base
      */
     public function word_wizard($mod, $cm)
     {
+        global $USER;
         $langterm = utils::fetch_rcdic_lang($mod->get_mod()->ttslanguage);
         $includeother = false;
-        $langdefs = utils::get_rcdic_langs($mod->get_mod()->deflanguage, $includeother);
+        // Restrict the list to languages a lookup can actually return for this source language,
+        // so the wizard cannot be pointed at a pairing that comes back empty.
+        $langdefs = utils::get_rcdic_langs($mod->get_mod()->deflanguage, $includeother, $langterm);
 
         $data = [
             'modid' => $mod->get_mod()->id,
             'cmid' => $cm->id,
             'langterm' => $langterm,
             'langdefs' => $langdefs,
+            'managewordsurl' => (new \moodle_url('/mod/wordcards/managewords.php', ['id' => $cm->id]))->out(false),
+            'bgstatus' => $this->background_status($mod),
+            // The policy is left out here because the page can ask for it.
+            'aiavailable' => \mod_wordcards\local\ai\translator::is_available($mod->get_context(), null, false),
+            'aipolicyaccepted' => \mod_wordcards\local\ai\translator::policy_accepted($USER->id),
         ];
         return $this->render_from_template('mod_wordcards/word_wizard', $data);
+    }
+
+    /**
+     * A message saying what is still being done in the background, kept up to date as it is done.
+     *
+     * Renders an empty holder when there is nothing, so the message can appear later.
+     *
+     * @param \mod_wordcards_module $mod
+     * @param \moodle_url|null $reloadurl if set, say when the work is done and link here to see it
+     * @return string
+     */
+    public function background_status($mod, $reloadurl = null)
+    {
+        $pending = \mod_wordcards\local\wordwizard\background::pending($mod->get_id());
+        $data = self::background_status_context($pending);
+        $data['cmid'] = $mod->get_cmid();
+        $data['reloadurl'] = $reloadurl ? $reloadurl->out(false) : '';
+        $this->page->requires->js_call_amd('mod_wordcards/bgstatus', 'init', []);
+        return $this->render_from_template('mod_wordcards/ww_bgstatus', $data);
+    }
+
+    /**
+     * The ww_bgstatus template's context, from background::pending(). amd/src/bgstatus.js does the same.
+     *
+     * @param array $pending
+     * @return array
+     */
+    public static function background_status_context(array $pending)
+    {
+        return $pending + [
+            'active' => $pending['words'] > 0 || $pending['images'] > 0,
+            'haswords' => $pending['words'] > 0,
+            'hasimages' => $pending['images'] > 0,
+            'hasretrying' => $pending['retrying'] > 0,
+        ];
     }
 
     /**

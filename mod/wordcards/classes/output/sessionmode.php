@@ -17,8 +17,9 @@
 /**
  * Session mode class to produce data for session mode mustache.
  *
- * @package mod_wordcards
- * @author  Justin Hunt - poodll.com
+ * @package    mod_wordcards
+ * @copyright  2022 Justin Hunt (poodllsupport@gmail.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
@@ -148,6 +149,7 @@ class sessionmode implements \renderable, \templatable {
                 case \mod_wordcards_module::PRACTICETYPE_DICTATION:
                 case \mod_wordcards_module::PRACTICETYPE_LISTENCHOOSE:
                 case \mod_wordcards_module::PRACTICETYPE_WORDPREVIEW:
+                case \mod_wordcards_module::PRACTICETYPE_SCATTER:
                     $data->mainhtml = $renderer->a4e_page($this->mod, $this->practicetype, $definitions, constants::CURRENTMODE_SESSION);
                     break;
                 case \mod_wordcards_module::PRACTICETYPE_SPEECHCARDS:

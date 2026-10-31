@@ -17,8 +17,9 @@
 /**
  * Displays the definitions.
  *
- * @package mod_wordcards
- * @author  Frédéric Massart - FMCorz.net
+ * @package    mod_wordcards
+ * @author     Frédéric Massart - FMCorz.net
+ * @copyright  2016 Justin Hunt (poodllsupport@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -105,6 +106,17 @@ $renderer = $PAGE->get_renderer('mod_wordcards');
 $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/mywords", 'init', []);
 // $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/cardactions", 'init', []);
 $PAGE->requires->css(new moodle_url('/mod/wordcards/freemode.css'));
+
+// Without working Poodll API credentials this activity cannot run. Administrators get an in page
+// setup panel, everybody else gets an explanation. This is checked before the activity data is
+// prepared, because preparing it needs a Cloud Poodll token.
+$credentialserror = $embed == 0 ? \mod_wordcards\cbcredentials::credentials_error() : '';
+if (!empty($credentialserror)) {
+    echo $renderer->header();
+    echo $renderer->show_cbcredentials_setup($PAGE->url, $credentialserror);
+    echo $renderer->footer();
+    die;
+}
 
 // prepare definitions data (which also outputs AMD )
 $definitions = $mod->get_terms();

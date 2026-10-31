@@ -45,6 +45,12 @@
          </div>
          <ul class="definition_flashcards_ul">
             {{#definitions}}
+            {{#onesided}}
+            <li class="wc-onesided-card {{#isfirstcard}}is-current slide-is-visible{{/isfirstcard}} {{^isfirstcard}}slide-is-hidden{{/isfirstcard}}">
+               {{>mod_wordcards/onesided_card}}
+            </li>
+            {{/onesided}}
+            {{^onesided}}
             <li class="flip-card {{#isfirstcard}}is-current slide-is-visible{{/isfirstcard}} {{^isfirstcard}}slide-is-hidden{{/isfirstcard}}">
                <div class="wc-faces flip-card-inner">
                   <!-- front face -->
@@ -96,6 +102,7 @@
                   </div>
                </div>
             </li>
+            {{/onesided}}
             {{/definitions}}
          </ul>
          <div class="wc_cardsprogress"> -- / -- </div>
@@ -129,7 +136,12 @@
                   {{{definition}}}
                   {{#model_sentence}}
                   <div class="term-modelsentence">
-                     <span>{{model_sentence}}</span>
+                     <div class="term-modelsentence-text">
+                        <span>{{model_sentence}}</span>
+                        {{#model_sentence_translation}}
+                        <div class="term-modelsentence-translation" dir="auto">{{model_sentence_translation}}</div>
+                        {{/model_sentence_translation}}
+                     </div>
                      <span data-modelaudio="{{model_sentence_audio}}" data-tts="{{model_sentence}}" data-ttsvoice="{{ttsvoice}}"  tabindex="0" class="model-sentence-play-tts term-modelsentence-small" style="cursor:pointer;">
                      </span>
                   </div>

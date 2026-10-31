@@ -17,25 +17,25 @@
 /**
  * External.
  *
- * @package mod_wordcards
- * @author  Frédéric Massart - FMCorz.net
+ * @package    mod_wordcards
+ * @author     Frédéric Massart - FMCorz.net
+ * @copyright  2016 Justin Hunt (poodllsupport@gmail.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-global $CFG;
-
-// This is for pre M4.0 and post M4.0 to work on same code base
-require_once($CFG->libdir . '/externallib.php');
-
-/*
- * This is for M4.0 and later
 use core_external\external_api;
 use core_external\external_function_parameters;
+use core_external\external_multiple_structure;
+use core_external\external_single_structure;
 use core_external\external_value;
-*/
-
 use mod_wordcards\utils;
 use mod_wordcards\constants;
 use mod_wordcards\imagegen;
+use mod_wordcards\sentence_sync;
+use mod_wordcards\local\ai\completer;
+use mod_wordcards\local\ai\translator;
+use mod_wordcards\local\wordwizard\background;
+use mod_wordcards\local\wordwizard\word_adder;
 
 
 /**
@@ -222,21 +222,73 @@ class mod_wordcards_external extends external_api
             'translations' => new external_value(PARAM_RAW),
             'sourcedef' => new external_value(PARAM_RAW),
             'modelsentence' => new external_value(PARAM_RAW),
+            'modelsentencetranslations' => new external_value(
+                PARAM_RAW,
+                'The model sentence in each definitions language, as json',
+                VALUE_DEFAULT,
+                ''
+            ),
+            'sentenceedited' => new external_value(
+                PARAM_BOOL,
+                'Whether the teacher rewrote the sentence the dictionary offered',
+                VALUE_DEFAULT,
+                false
+            ),
         ]);
     }
 
-    public static function submit_newterm($modid, $term, $definition, $translations, $sourcedef, $modelsentence)
-    {
-        $ret = utils::save_newterm($modid, $term, $definition, $translations, $sourcedef, $modelsentence);
-        if ($ret) {
-            return true;
-        } else {
-            return false;
-        }
+    public static function submit_newterm(
+        $modid,
+        $term,
+        $definition,
+        $translations,
+        $sourcedef,
+        $modelsentence,
+        $modelsentencetranslations = '',
+        $sentenceedited = false
+    ) {
+        $params = self::validate_parameters(
+            self::submit_newterm_parameters(),
+            compact(
+                'modid',
+                'term',
+                'definition',
+                'translations',
+                'sourcedef',
+                'modelsentence',
+                'modelsentencetranslations',
+                'sentenceedited'
+            )
+        );
+
+        $mod = mod_wordcards_module::get_by_modid($params['modid']);
+        self::validate_context($mod->get_context());
+        $mod->require_manage();
+
+        $ret = utils::save_newterm(
+            $params['modid'],
+            $params['term'],
+            $params['definition'],
+            $params['translations'],
+            $params['sourcedef'],
+            $params['modelsentence'],
+            $params['modelsentencetranslations'],
+            $params['sentenceedited']
+        );
+        // A word is only added once, so when nothing was added say whether that is why.
+        return [
+            'added' => !empty($ret),
+            'termid' => $ret ? (int) $ret : 0,
+            'alreadyinset' => !$ret && utils::term_exists($params['modid'], $params['term']),
+        ];
     }
     public static function submit_newterm_returns()
     {
-        return new external_value(PARAM_BOOL);
+        return new external_single_structure([
+            'added' => new external_value(PARAM_BOOL, 'Whether the word was added'),
+            'termid' => new external_value(PARAM_INT, 'The new term id, or 0 if it was not added'),
+            'alreadyinset' => new external_value(PARAM_BOOL, 'Whether it was not added because the word is already there'),
+        ]);
     }
 
 
@@ -362,6 +414,18 @@ class mod_wordcards_external extends external_api
             } else {
                 $data->id = $data->termid;
                 $needsupdating = true;
+
+                // The stored sentence translations are of the sentence as it was. Rewriting it
+                // leaves them describing something that is no longer on the card, so they go, and
+                // a task is asked to translate the new one.
+                $fields = 'id, modid, model_sentence, model_sentence_translations';
+                $existing = $DB->get_record(constants::M_TERMSTABLE, ['id' => $data->id], $fields);
+                if ($existing && trim((string)$existing->model_sentence) !== trim((string)$data->model_sentence)) {
+                    $data->model_sentence_translations = '';
+                    if (trim((string)$data->model_sentence) !== '') {
+                        \mod_wordcards\task\translate_custom_sentence::queue_for_term($data->id);
+                    }
+                }
             }
             if ($data->id) {
                 $ret->error = false;
@@ -476,6 +540,214 @@ class mod_wordcards_external extends external_api
         // return new external_value(PARAM_INT, 'group id');
     }
 
+    /**
+     * Parameters for sync_sentence_translations.
+     *
+     * @return external_function_parameters
+     */
+    public static function sync_sentence_translations_parameters() {
+        return new external_function_parameters(
+            [
+                'cmid' => new external_value(PARAM_INT, 'The course module id'),
+            ]
+        );
+    }
+
+    /**
+     * Fetch the translated example sentences for terms that do not have them.
+     *
+     * The work is in \mod_wordcards\sentence_sync, which an adhoc task and a cli script also call.
+     * This is the path for somebody pressing a button and waiting for an answer.
+     *
+     * @param int $cmid
+     * @return array counts, and a sentence saying what happened
+     */
+    public static function sync_sentence_translations($cmid) {
+        $params = self::validate_parameters(self::sync_sentence_translations_parameters(), compact('cmid'));
+        $cmid = $params['cmid'];
+
+        $mod = mod_wordcards_module::get_by_cmid($cmid);
+        self::validate_context($mod->get_context());
+        $mod->require_manage();
+
+        // One dictionary lookup per term that needs one, so a large word list takes a while.
+        \core_php_time_limit::raise(300);
+        session_write_close();
+
+        $counts = sentence_sync::sync_module($mod->get_id());
+
+        // A term nothing matched has a sentence of its own, so no amount of looking it up will
+        // help. Queue those to be translated directly instead - the alternative is a teacher
+        // seeing the same unmatched count on every press with no way to act on it. Queueing is
+        // deduplicated per term, so pressing twice does not double up.
+        foreach ($counts['unmatchedids'] as $termid) {
+            \mod_wordcards\task\translate_custom_sentence::queue_for_term($termid);
+        }
+
+        $counts['queued'] = count($counts['unmatchedids']);
+        $message = get_string('ww_syncsentences_result', constants::M_COMPONENT, (object)$counts);
+        if ($counts['queued'] > 0) {
+            $message .= ' ' . get_string('ww_syncsentences_queued', constants::M_COMPONENT, $counts['queued']);
+        }
+
+        return [
+            'updated' => $counts['updated'],
+            'alreadyhave' => $counts['alreadyhave'],
+            'nodata' => $counts['nodata'],
+            'unmatched' => $counts['unmatched'],
+            'queued' => $counts['queued'],
+            'failed' => $counts['failed'],
+            'message' => $message,
+        ];
+    }
+
+    /**
+     * What sync_sentence_translations returns.
+     *
+     * @return external_single_structure
+     */
+    public static function sync_sentence_translations_returns() {
+        return new external_single_structure(
+            [
+                'updated' => new external_value(PARAM_INT, 'Terms that now have translated sentences'),
+                'alreadyhave' => new external_value(PARAM_INT, 'Terms that already had them'),
+                'nodata' => new external_value(PARAM_INT, 'Terms whose sense the dictionary has not translated yet'),
+                'unmatched' => new external_value(PARAM_INT, 'Terms whose example sentence matched no sense'),
+                'queued' => new external_value(PARAM_INT, 'Terms queued to have their own sentence translated'),
+                'failed' => new external_value(PARAM_INT, 'Terms whose lookup failed'),
+                'message' => new external_value(PARAM_TEXT, 'A sentence describing the result'),
+            ]
+        );
+    }
+
+    /**
+     * Parameters for complete_translations.
+     *
+     * @return external_function_parameters
+     */
+    public static function complete_translations_parameters() {
+        return new external_function_parameters(
+            [
+                'cmid' => new external_value(PARAM_INT, 'The course module id'),
+            ]
+        );
+    }
+
+    /**
+     * Queue the activity's words to have their missing translations filled in by the site's AI.
+     *
+     * @param int $cmid
+     * @return array how many words were queued, whether the AI policy must be accepted first, and
+     *               a sentence saying what happened
+     */
+    public static function complete_translations($cmid) {
+        $params = self::validate_parameters(self::complete_translations_parameters(), compact('cmid'));
+
+        $mod = mod_wordcards_module::get_by_cmid($params['cmid']);
+        $context = $mod->get_context();
+        self::validate_context($context);
+        $mod->require_manage();
+
+        $ret = ['queued' => 0, 'policyneeded' => false, 'message' => ''];
+        if (!translator::is_available($context, null, false)) {
+            $ret['message'] = get_string('ai_completetranslations_unavailable', constants::M_COMPONENT);
+        } else if (!translator::is_available($context)) {
+            $ret['policyneeded'] = true;
+            $ret['message'] = get_string('ai_completetranslations_policy', constants::M_COMPONENT);
+        } else {
+            $ret['queued'] = completer::queue_module($mod);
+            $ret['message'] = $ret['queued']
+                ? get_string('ai_completetranslations_queued', constants::M_COMPONENT, $ret['queued'])
+                : get_string('ai_completetranslations_nothing', constants::M_COMPONENT);
+        }
+        return $ret;
+    }
+
+    /**
+     * What complete_translations returns.
+     *
+     * @return external_single_structure
+     */
+    public static function complete_translations_returns() {
+        return new external_single_structure(
+            [
+                'queued' => new external_value(PARAM_INT, 'Words queued to be completed'),
+                'policyneeded' => new external_value(PARAM_BOOL, 'Whether the AI policy has to be accepted first'),
+                'message' => new external_value(PARAM_TEXT, 'A sentence describing the result'),
+            ]
+        );
+    }
+
+    /**
+     * Parameters for create_senses.
+     *
+     * @return external_function_parameters
+     */
+    public static function create_senses_parameters() {
+        return new external_function_parameters(
+            [
+                'cmid' => new external_value(PARAM_INT, 'The course module id'),
+                'term' => new external_value(PARAM_TEXT, 'The word or phrase'),
+                'deflang' => new external_value(PARAM_TEXT, 'The language the definitions should be in'),
+            ]
+        );
+    }
+
+    /**
+     * Have the site's AI suggest meanings for a word or phrase the dictionary does not have.
+     *
+     * @param int $cmid
+     * @param string $term
+     * @param string $deflang
+     * @return array success, whether the AI policy must be accepted first, and the word as json in
+     *               the shape search_dictionary returns one
+     */
+    public static function create_senses($cmid, $term, $deflang) {
+        global $USER;
+        $params = self::validate_parameters(self::create_senses_parameters(), compact('cmid', 'term', 'deflang'));
+
+        $mod = mod_wordcards_module::get_by_cmid($params['cmid']);
+        $context = $mod->get_context();
+        self::validate_context($context);
+        $mod->require_manage();
+
+        $ret = ['success' => false, 'policyneeded' => false, 'payload' => ''];
+        $term = trim($params['term']);
+        $deflang = clean_param($params['deflang'], PARAM_ALPHAEXT);
+        if ($term === '' || $deflang === '' || $deflang === constants::M_DEFLANG_OTHER) {
+            return $ret;
+        }
+        if (!translator::is_available($context, null, false)) {
+            return $ret;
+        }
+        if (!translator::is_available($context)) {
+            $ret['policyneeded'] = true;
+            return $ret;
+        }
+
+        $sourcelang = utils::fetch_rcdic_lang($mod->get_mod()->ttslanguage);
+        $translator = new translator($context, $USER->id);
+        $aisenses = $translator->create_senses($term, $sourcelang, $deflang);
+        $ret['success'] = true;
+        $ret['payload'] = json_encode(word_adder::ai_entry($term, $aisenses, $deflang), JSON_UNESCAPED_UNICODE);
+        return $ret;
+    }
+
+    /**
+     * What create_senses returns.
+     *
+     * @return external_single_structure
+     */
+    public static function create_senses_returns() {
+        return new external_single_structure(
+            [
+                'success' => new external_value(PARAM_BOOL, 'Whether the AI was asked'),
+                'policyneeded' => new external_value(PARAM_BOOL, 'Whether the AI policy has to be accepted first'),
+                'payload' => new external_value(PARAM_RAW, 'The word and its suggested meanings, as json'),
+            ]
+        );
+    }
+
     public static function search_dictionary_parameters()
     {
         return new external_function_parameters(
@@ -490,18 +762,33 @@ class mod_wordcards_external extends external_api
     }
     public static function search_dictionary($terms, $cmid, $sourcelang, $targetlangs)
     {
+        $params = self::validate_parameters(
+            self::search_dictionary_parameters(),
+            compact('terms', 'cmid', 'sourcelang', 'targetlangs')
+        );
+
+        $mod = mod_wordcards_module::get_by_cmid($params['cmid']);
+        self::validate_context($mod->get_context());
+        $mod->require_manage();
+
         $ret = new \stdClass();
 
         // We need to do this so that search_dictionary requests can run in parallel.
         session_write_close();
 
-        $payload = utils::fetch_dictionary_entries($terms, $sourcelang, $targetlangs);
-        if (!$payload) {
+        // The wizard asks for one definitions language, which is the one the senses are read for.
+        $deflang = trim(explode(',', $params['targetlangs'])[0]);
+        $entries = word_adder::lookup($params['terms'], $params['sourcelang'], $deflang, $error);
+        if ($entries === null) {
             $ret->success = false;
-            $ret->payload = "unable to fetch dictionary entries";
+            $ret->payload = "unable to fetch dictionary entries: " . $error;
         } else {
+            // Say which words are already in the set, so the wizard does not offer to add them again.
+            foreach ($entries as $i => $entry) {
+                $entries[$i]['alreadyinset'] = utils::term_exists($mod->get_id(), $entry['term']);
+            }
             $ret->success = true;
-            $ret->payload = $payload;
+            $ret->payload = json_encode($entries);
         }
         return $ret;
     }
@@ -511,7 +798,10 @@ class mod_wordcards_external extends external_api
         return new external_single_structure(
             [
                 'success' => new external_value(PARAM_INT, 'Indicates success or failure of the call'),
-                'payload' => new external_value(PARAM_RAW, 'If call failed, contains a message about why. Else contains a json string of results'),
+                'payload' => new external_value(
+                    PARAM_RAW,
+                    'If call failed, contains a message about why. Else a json list of words, each with its senses'
+                ),
             ]
         );
     }
@@ -622,11 +912,22 @@ class mod_wordcards_external extends external_api
 
         //set the user preference
         switch ($name) {
-            case 'wordcards_deflang':
+            // The old name is still accepted from pages that were loaded before the upgrade.
+            case constants::LEGACY_DEFLANG_PREF:
+            case constants::NATIVELANG_PREF:
+                // The chooser sends a definitions language code, the preference holds a locale code.
+                $locale = utils::deflang_to_locale($value);
+                $islocale = preg_match('/^[a-z]{2,3}(-[a-z0-9]{2,4}){1,2}$/i', $value);
+                if ($locale === '' && $islocale && utils::locale_to_deflang($value) !== '') {
+                    // It is already a locale code.
+                    $locale = $value;
+                }
                 if (empty($value)) {
-                    unset_user_preference($name);
+                    unset_user_preference(constants::NATIVELANG_PREF);
+                } else if ($locale === '') {
+                    return false;
                 } else {
-                    set_user_preference($name, $value);
+                    set_user_preference(constants::NATIVELANG_PREF, $locale);
                 }
                 return true;
             default:
@@ -637,6 +938,149 @@ class mod_wordcards_external extends external_api
     public static function set_user_preference_returns()
     {
         return new external_value(PARAM_BOOL);
+    }
+
+    /**
+     * Parameters for queue_words.
+     *
+     * @return external_function_parameters
+     */
+    public static function queue_words_parameters() {
+        return new external_function_parameters([
+            'cmid' => new external_value(PARAM_INT, 'The course module id'),
+            'words' => new external_multiple_structure(new external_value(PARAM_TEXT, 'A word to add')),
+            'deflang' => new external_value(PARAM_ALPHANUMEXT, 'The language the definitions should be in'),
+            'withimages' => new external_value(PARAM_BOOL, 'Also make a picture for each word', VALUE_DEFAULT, false),
+        ]);
+    }
+
+    /**
+     * Queue words to be looked up and added in the background, the first good meaning of each.
+     *
+     * @param int $cmid
+     * @param array $words
+     * @param string $deflang
+     * @param bool $withimages
+     * @return array
+     */
+    public static function queue_words($cmid, $words, $deflang, $withimages = false) {
+        $params = self::validate_parameters(self::queue_words_parameters(), compact('cmid', 'words', 'deflang', 'withimages'));
+
+        $mod = mod_wordcards_module::get_by_cmid($params['cmid']);
+        self::validate_context($mod->get_context());
+        $mod->require_manage();
+
+        // Only a language a lookup can return, as the wizard's own list offers.
+        $sourcelang = utils::fetch_rcdic_lang($mod->get_mod()->ttslanguage);
+        if (!in_array($params['deflang'], utils::get_lookup_deflangs($sourcelang))) {
+            throw new invalid_parameter_exception('The dictionary cannot give definitions in ' . $params['deflang']);
+        }
+
+        $result = background::queue_words($mod, $params['words'], $params['deflang'], $params['withimages']);
+        return $result + ['pending' => background::pending($mod->get_id())];
+    }
+
+    /**
+     * What queue_words returns.
+     *
+     * @return external_single_structure
+     */
+    public static function queue_words_returns() {
+        return new external_single_structure([
+            'queued' => new external_value(PARAM_INT, 'How many words were queued'),
+            'alreadyinset' => new external_multiple_structure(
+                new external_value(PARAM_TEXT, 'A word left out because it is in the activity already')
+            ),
+            'pending' => self::pending_structure(),
+        ]);
+    }
+
+    /**
+     * Parameters for queue_images.
+     *
+     * @return external_function_parameters
+     */
+    public static function queue_images_parameters() {
+        return new external_function_parameters([
+            'cmid' => new external_value(PARAM_INT, 'The course module id'),
+        ]);
+    }
+
+    /**
+     * Queue a picture to be made in the background for every word in the activity that has none.
+     *
+     * @param int $cmid
+     * @return array
+     */
+    public static function queue_images($cmid) {
+        $params = self::validate_parameters(self::queue_images_parameters(), compact('cmid'));
+
+        $mod = mod_wordcards_module::get_by_cmid($params['cmid']);
+        self::validate_context($mod->get_context());
+        $mod->require_manage();
+
+        \mod_wordcards\task\generate_word_images::queue_all($mod->get_id());
+        return ['pending' => background::pending($mod->get_id())];
+    }
+
+    /**
+     * What queue_images returns.
+     *
+     * @return external_single_structure
+     */
+    public static function queue_images_returns() {
+        return new external_single_structure([
+            'pending' => self::pending_structure(),
+        ]);
+    }
+
+    /**
+     * Parameters for get_background_status.
+     *
+     * @return external_function_parameters
+     */
+    public static function get_background_status_parameters() {
+        return new external_function_parameters([
+            'cmid' => new external_value(PARAM_INT, 'The course module id'),
+        ]);
+    }
+
+    /**
+     * What is still to be done in the background for an activity.
+     *
+     * @param int $cmid
+     * @return array
+     */
+    public static function get_background_status($cmid) {
+        $params = self::validate_parameters(self::get_background_status_parameters(), compact('cmid'));
+
+        $mod = mod_wordcards_module::get_by_cmid($params['cmid']);
+        self::validate_context($mod->get_context());
+        $mod->require_manage();
+
+        return background::pending($mod->get_id());
+    }
+
+    /**
+     * What get_background_status returns.
+     *
+     * @return external_single_structure
+     */
+    public static function get_background_status_returns() {
+        return self::pending_structure();
+    }
+
+    /**
+     * The shape of background::pending().
+     *
+     * @return external_single_structure
+     */
+    protected static function pending_structure() {
+        return new external_single_structure([
+            'words' => new external_value(PARAM_INT, 'Words still to be looked up and added'),
+            'images' => new external_value(PARAM_INT, 'Batches of pictures still to be made'),
+            'retrying' => new external_value(PARAM_INT, 'Word lookups that failed and will be tried again'),
+        ]);
     }
 
     // Image Generation Parameters
@@ -657,39 +1101,13 @@ class mod_wordcards_external extends external_api
             self::generate_bulk_images_parameters(),
             ['cmid' => $cmid]
         );
-        $mod = mod_wordcards_module::get_by_cmid($cmid);
+        $mod = mod_wordcards_module::get_by_cmid($params['cmid']);
+        self::validate_context($mod->get_context());
+        $mod->require_manage();
 
-        // Make image generator.
+        // Make a picture for each term that has none.
         $imagegen = new imagegen($mod);
-
-        // Get terms and a prompt for each term.
-        $terms = $mod->get_term_records();
-        $termids = array_map(function ($term) {
-            if ($term->image !== "1") {
-                return $term->id;
-            }
-        }, $terms);
-
-
-        $imageprompts = [];
-        foreach ($terms as $term) {
-            if (in_array($term->id, $termids)) {
-                // Make image prompt for each term.
-                // NB The DESCRIPTION: prefix, tells Poodll to first generate a detailed prompt (description) and then generate the image 
-                $imageprompts[$term->id] = 'DESCRIPTION: ' . $imagegen->make_image_prompt($term);
-            }
-        }
-
-        // Do the bulk image generation.
-        $overallimagecontext = "";
-         $imageurls = false;
-        if (count($termids) > 0) {
-            $imageurls = $imagegen->generate_images($termids, $imageprompts, $overallimagecontext);
-        }
-
-        if (!$imageurls) {
-            $imageurls = [];
-        }
+        $imageurls = $imagegen->generate_for_terms($mod->get_term_records());
 
         return ['images' => $imageurls];
     }
@@ -730,12 +1148,14 @@ class mod_wordcards_external extends external_api
             ['termid' => $termid, 'prompt' => $prompt]
         );
 
-        $term = $DB->get_record(constants::M_TERMSTABLE, ['id' => $termid], '*', MUST_EXIST);
+        $term = $DB->get_record(constants::M_TERMSTABLE, ['id' => $params['termid']], '*', MUST_EXIST);
         $mod = mod_wordcards_module::get_by_modid($term->modid);
+        self::validate_context($mod->get_context());
+        $mod->require_manage();
 
         // Make image generator
         $imagegen = new imagegen($mod);
-        $imagedata = $imagegen->generate_image($termid, $prompt);
+        $imagedata = $imagegen->generate_image($params['termid'], $params['prompt']);
         if (!$imagedata) {
             throw new invalid_parameter_exception('Invalid generation failed');
         }

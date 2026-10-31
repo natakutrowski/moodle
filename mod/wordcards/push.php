@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -45,7 +44,7 @@ if ($id) {
     $course     = $DB->get_record('course', array('id' => $moduleinstance->course), '*', MUST_EXIST);
     $cm         = get_coursemodule_from_instance(constants::M_TABLE, $moduleinstance->id, $course->id, false, MUST_EXIST);
 } else {
-    print_error('You must specify a course_module ID or an instance ID');
+    throw new \moodle_exception('You must specify a course_module ID or an instance ID');
 }
 
 $PAGE->set_url(constants::M_URL . '/push.php', ['id' => $cm->id]);
@@ -133,6 +132,12 @@ switch($action){
         break;
     case constants::M_PUSH_IMAGEONFRONT:
         $updatefields = ['imageonfront'];
+        break;
+    case constants::M_PUSH_SCATTEROPTIONS:
+        $updatefields = ['scatteroptions'];
+        break;
+    case constants::M_PUSH_LEARNMODECARDS:
+        $updatefields = ['learnmodecards'];
         break;
     case constants::M_PUSH_NONE:
     default:

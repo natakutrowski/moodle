@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -52,7 +51,7 @@ if ($id) {
     $course = $DB->get_record('course', array('id' => $moduleinstance->course), '*', MUST_EXIST);
     $cm = get_coursemodule_from_instance(constants::M_TABLE, $moduleinstance->id, $course->id, false, MUST_EXIST);
 } else {
-    error('You must specify a course_module ID or an instance ID');
+    throw new \moodle_exception('You must specify a course_module ID or an instance ID');
 }
 
 $PAGE->set_url(constants::M_URL . '/reports.php',
@@ -197,6 +196,22 @@ switch ($showreport) {
         $formdata->modid = $moduleinstance->id;
         $formdata->userid = $userid;
         $formdata->modulecontextid = $modulecontext->id;
+        break;
+
+    case 'sitelearned':
+        $report = new \mod_wordcards\local\report\sitelearned();
+        $formdata = new stdClass();
+        $formdata->modid = $moduleinstance->id;
+        $formdata->modulecontextid = $modulecontext->id;
+        break;
+
+    case 'siteuserlearned':
+        $report = new \mod_wordcards\local\report\siteuserlearned();
+        $formdata = new stdClass();
+        $formdata->modid = $moduleinstance->id;
+        $formdata->userid = $userid;
+        $formdata->modulecontextid = $modulecontext->id;
+        $formdata->cmid = $cm->id;
         break;
 
 

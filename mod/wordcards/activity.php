@@ -17,8 +17,10 @@
 /**
  * Displays the global scatter.
  *
- * @package mod_wordcards
- * @author  Frédéric Massart - FMCorz.net
+ * @package    mod_wordcards
+ * @author     Frédéric Massart - FMCorz.net
+ * @copyright  2019 Justin Hunt (poodllsupport@gmail.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(__DIR__ . '/../../config.php');
@@ -172,6 +174,16 @@ if($config->animations == constants::M_ANIM_FANCY) {
 
 $renderer = $PAGE->get_renderer('mod_wordcards');
 
+// Without working Poodll API credentials this activity cannot run. Administrators get an in page
+// setup panel, everybody else gets an explanation.
+$credentialserror = $embed == 0 ? \mod_wordcards\cbcredentials::credentials_error() : '';
+if (!empty($credentialserror)) {
+    echo $renderer->header();
+    echo $renderer->show_cbcredentials_setup($PAGE->url, $credentialserror);
+    echo $renderer->footer();
+    die;
+}
+
 echo $renderer->header();
 //Do we still need this?
 $heading = $renderer->heading($pagetitle, 3, 'main');
@@ -233,6 +245,9 @@ switch ($practicetype){
     case mod_wordcards_module::PRACTICETYPE_DICTATION_REV:
     case mod_wordcards_module::PRACTICETYPE_LISTENCHOOSE_REV:
     case mod_wordcards_module::PRACTICETYPE_WORDPREVIEW_REV:
+    case mod_wordcards_module::PRACTICETYPE_SCATTER:
+    case mod_wordcards_module::PRACTICETYPE_SCATTER_REV:
+    default:
         echo $renderer->a4e_page($mod, $practicetype, $definitions, constants::CURRENTMODE_STEPS, $currentstep);
         break;
     case mod_wordcards_module::PRACTICETYPE_SPACEGAME:
@@ -244,11 +259,6 @@ switch ($practicetype){
     case mod_wordcards_module::PRACTICETYPE_SPEECHCARDS_REV:
         echo $renderer->speechcards_page($mod, $definitions, constants::CURRENTMODE_STEPS, $currentstep);
         break;
-    // no longer using this
-    case mod_wordcards_module::PRACTICETYPE_SCATTER:
-    case mod_wordcards_module::PRACTICETYPE_SCATTER_REV:
-    default:
-        echo $renderer->scatter_page($mod, $wordpool, $currentstep);
 }
 echo $renderer->cancel_attempt_button($mod);
 
