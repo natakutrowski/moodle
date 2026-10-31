@@ -68,7 +68,10 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
-    </TABLE>
+          <INDEXES>
+        <INDEX NAME="modusertime" UNIQUE="false" FIELDS="moduleid, userid, timecreated"/>
+      </INDEXES>
+</TABLE>
     <TABLE NAME="minilesson_rsquestions" COMMENT="minilesson_items table retrofitted from MySQL">
         <FIELDS>
             <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>

@@ -1654,5 +1654,18 @@ function xmldb_minilesson_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2026102601, 'minilesson');
     }
 
+    if ($oldversion < 2026102801) {
+        // CampusFR: accelerate loading attempts for a user and MiniLesson activity.
+        // view.php filters by moduleid + userid and sorts by timecreated DESC.
+        // Avoid changes to attempt/session/grade semantics.
+        $table = new xmldb_table(constants::M_ATTEMPTSTABLE);
+        $index = new xmldb_index('modusertime', XMLDB_INDEX_NOTUNIQUE,
+                ['moduleid', 'userid', 'timecreated']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        upgrade_mod_savepoint(true, 2026102801, 'minilesson');
+    }
+
     return true;
 }

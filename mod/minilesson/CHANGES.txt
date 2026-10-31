@@ -1,3 +1,12 @@
+CampusFR 1.1.61b (Build 2026102801) — database performance only
+- Adds non-unique composite index (moduleid, userid, timecreated) on minilesson_attempt,
+  matching the attempt lookup in view.php:175.
+- Adds the index to install.xml for new installs and a guarded Moodle upgrade step
+  for existing installs (no direct SQL, no modification to attempt/grade logic).
+- Preserves all 1.1.61a CampusFR customisations, translations FR/RU,
+  Gustave avatar, CloudPoodll async instrumentation and AI feedback.
+- TEST ON DEV ONLY FIRST. Verify actual indexes and table size before deployment.
+
 CampusFR 1.1.61a (Build 2026102701) — customized release
 - Based on official 1.1.61; preserves all official Moodle 5.3 compatibility changes.
 - Preserves all CampusFR 1.1.60c FR and RU language files for MiniLesson and item subplugins.
