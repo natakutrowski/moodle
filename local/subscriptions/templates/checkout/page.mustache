@@ -655,8 +655,10 @@
                     {{/hasalfawidgetcandidate}}
 
                     {{#hasalfawidgetcandidate}}
+                    {{^alfaiframeenabled}}
                     <script id="alfa-payment-script"
                             src="{{alfawidgetscripturl}}"></script>
+                    {{/alfaiframeenabled}}
                     <section class="commerce-checkout-alfa-widget commerce-checkout-payment-section"
                              data-checkout-alfa-widget
                              data-action-url="{{alfawidgetactionurl}}"
