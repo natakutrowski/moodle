@@ -10738,5 +10738,45 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110101, 'local', 'subscriptions');
     }
 
+    if ($oldversion < 2026110103) {
+        // Audited, promotion-only manual user/group XP bonuses. Personal Level Up remains untouched.
+        $table = new xmldb_table('local_subs_commerce_ped_xpadj');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('promotionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('targettype', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('groupid', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('points', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('reason', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL);
+            $table->add_field('actorid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('requestkey', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('promotion_fk', XMLDB_KEY_FOREIGN, ['promotionid'], 'local_subs_commerce_ped_promo', ['id']);
+            $table->add_key('actor_fk', XMLDB_KEY_FOREIGN, ['actorid'], 'user', ['id']);
+            $table->add_index('promotion_request_uix', XMLDB_INDEX_UNIQUE, ['promotionid', 'requestkey']);
+            $table->add_index('promotion_target_idx', XMLDB_INDEX_NOTUNIQUE, ['promotionid', 'targettype']);
+            $table->add_index('promotion_user_idx', XMLDB_INDEX_NOTUNIQUE, ['promotionid', 'userid']);
+            $table->add_index('promotion_group_idx', XMLDB_INDEX_NOTUNIQUE, ['promotionid', 'groupid']);
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026110103, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026110104) {
+        // Soft cancellation: retain the original bonus and its award provenance.
+        $table = new xmldb_table('local_subs_commerce_ped_xpadj');
+        $field = new xmldb_field('cancelledat', XMLDB_TYPE_INTEGER, '10', null, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('cancelledby', XMLDB_TYPE_INTEGER, '10', null, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026110104, 'local', 'subscriptions');
+    }
+
     return true;
 }

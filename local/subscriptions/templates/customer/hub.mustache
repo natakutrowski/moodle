@@ -101,6 +101,8 @@
                             <div class="commerce-customer-hub__team-card">
                                 {{#isleaderboardhidden}}
                                 <p class="commerce-customer-hub__team-hidden-notice">
+                                    {{#isxpnotstarted}}{{#str}}commerce_education_xp_reveal_before_start, local_subscriptions, {{xpstartdate}}{{/str}} {{/isxpnotstarted}}
+                                    {{#isxpstarted}}{{#str}}commerce_education_xp_reveal_after_start, local_subscriptions{{/str}} {{/isxpstarted}}
                                     {{#str}}commerce_education_xp_reveal_notice, local_subscriptions, {{revealdate}}{{/str}}
                                 </p>
                                 {{/isleaderboardhidden}}

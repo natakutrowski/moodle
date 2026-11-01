@@ -53,12 +53,14 @@ final class CommercePedagogicalXpRepository {
     }
 
     public function user_points(int $promotionid, int $userid): int {
-        return (int)$this->db->get_field_select(
+        $earned = (int)$this->db->get_field_select(
             self::TABLE,
             'COALESCE(SUM(points), 0)',
             'promotionid = :promotionid AND userid = :userid',
             ['promotionid' => $promotionid, 'userid' => $userid]
         );
+        $cancelled = $this->cancelled_user_totals($promotionid, $userid);
+        return $earned - ($cancelled[$userid] ?? 0);
     }
 
     /**
@@ -76,7 +78,33 @@ final class CommercePedagogicalXpRepository {
         foreach ($records as $record) {
             $result[(int)$record->userid] = (int)$record->points;
         }
+        foreach ($this->cancelled_user_totals($promotionid) as $userid => $points) {
+            $result[$userid] = ($result[$userid] ?? 0) - $points;
+        }
         return $result;
+    }
+
+    /** Cancelled individual bonuses remain in the XP ledger for provenance only. */
+    private function cancelled_user_totals(int $promotionid, ?int $userid = null): array {
+        $params = ['promotionid' => $promotionid, 'targettype' => 'user'];
+        $filter = '';
+        if ($userid !== null) {
+            $filter = ' AND userid = :userid';
+            $params['userid'] = $userid;
+        }
+        $rows = $this->db->get_records_sql(
+            "SELECT userid, SUM(points) AS points
+               FROM {local_subs_commerce_ped_xpadj}
+              WHERE promotionid = :promotionid AND targettype = :targettype
+                AND cancelledat IS NOT NULL AND userid IS NOT NULL{$filter}
+           GROUP BY userid",
+            $params
+        );
+        $totals = [];
+        foreach ($rows as $row) {
+            $totals[(int)$row->userid] = (int)$row->points;
+        }
+        return $totals;
     }
 
     private function hydrate(\stdClass $record): CommercePedagogicalXpContribution {

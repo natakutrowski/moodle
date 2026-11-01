@@ -9,6 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 use advanced_testcase;
 use local_subscriptions\commerce\education\xp\CommercePedagogicalStudentLeaderboardService;
 use local_subscriptions\commerce\education\xp\CommercePedagogicalXpService;
+use local_subscriptions\commerce\education\xp\CommercePedagogicalXpAdjustmentService;
 
 final class commerce_797m53_student_team_leaderboard_test extends advanced_testcase {
     private function create_product(): int {
@@ -180,6 +181,11 @@ final class commerce_797m53_student_team_leaderboard_test extends advanced_testc
         self::assertArrayNotHasKey('grouprank', $hidden[0]);
         self::assertArrayNotHasKey('leaderboard', $hidden[0]);
         self::assertNotEmpty($hidden[0]['revealdate']);
+        self::assertFalse($hidden[0]['isxpnotstarted']);
+        self::assertTrue($hidden[0]['isxpstarted']);
+        $beforestart = $service->get_for_user((int)$user->id, $start - 1);
+        self::assertTrue($beforestart[0]['isxpnotstarted']);
+        self::assertNotEmpty($beforestart[0]['xpstartdate']);
 
         $revealed = $service->get_for_user((int)$user->id, $start + 48 * HOURSECS);
         self::assertCount(1, $revealed);
@@ -205,6 +211,100 @@ final class commerce_797m53_student_team_leaderboard_test extends advanced_testc
         );
     }
 
+    public function test_manual_user_and_group_bonuses_affect_only_their_promotion_scores(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course();
+        $productid = $this->create_product();
+        $promotionid = $this->create_promotion((int)$course->id, 'M5.3 Bonuses');
+        $g1 = $this->create_group($promotionid, (int)$course->id, 'Group one', 0);
+        $g2 = $this->create_group($promotionid, (int)$course->id, 'Group two', 1);
+        $user = $this->getDataGenerator()->create_user();
+        $other = $this->getDataGenerator()->create_user();
+        $admin = $this->getDataGenerator()->create_user();
+        $this->attach_user($promotionid, (int)$course->id, (int)$user->id, $productid, $g1);
+        $this->attach_user($promotionid, (int)$course->id, (int)$other->id, $productid, $g2);
+        $service = CommercePedagogicalXpAdjustmentService::create($DB);
+        $now = time();
+        $start = $now - HOURSECS;
+        $DB->set_field('local_subs_commerce_ped_promo', 'xpstartsat', $start, ['id' => $promotionid]);
+        $personalbefore = $DB->count_records('block_xp_logs', ['userid' => $user->id]);
+
+        $userkey = bin2hex(random_bytes(16));
+        $award = $service->award($promotionid, 'user', (int)$user->id, 20,
+            'Participation exceptionnelle', (int)$admin->id, $userkey, $now);
+        self::assertSame(20, CommercePedagogicalXpService::create($DB)->record_once(
+            $promotionid, (int)$user->id, 'local_subscriptions', 'manual_adjustment',
+            'adjustment:' . $award->id, 20, $now, $now)->get_contribution()->get_points());
+        self::assertSame((int)$award->id, (int)$service->award($promotionid, 'user', (int)$user->id, 20,
+            'Participation exceptionnelle', (int)$admin->id, $userkey, $now)->id);
+        self::assertSame(1, $DB->count_records('local_subs_commerce_ped_xpadj',
+            ['promotionid' => $promotionid, 'targettype' => 'user']));
+        self::assertSame(20, (int)$DB->get_field_sql(
+            'SELECT COALESCE(SUM(points), 0) FROM {local_subs_commerce_ped_xp} WHERE promotionid = :p AND userid = :u',
+            ['p' => $promotionid, 'u' => $user->id]));
+        self::assertSame($personalbefore, $DB->count_records('block_xp_logs', ['userid' => $user->id]));
+
+        $service->award($promotionid, 'group', $g2, 50,
+            'Equilibre du groupe incomplet', (int)$admin->id, bin2hex(random_bytes(16)), $now);
+        self::assertSame(50, $service->group_bonus_totals($promotionid)[$g2]);
+        $ranking = CommercePedagogicalStudentLeaderboardService::create($DB)
+            ->get_for_user((int)$user->id, $now);
+        self::assertCount(1, $ranking);
+        self::assertSame(20, $ranking[0]['userpoints']);
+        self::assertSame(20, $ranking[0]['grouppoints']);
+        self::assertSame(2, $ranking[0]['grouprank']);
+        $otherchallenge = CommercePedagogicalStudentLeaderboardService::create($DB)
+            ->get_for_user((int)$other->id, $now);
+        self::assertSame(0, $otherchallenge[0]['userpoints']);
+        self::assertSame(50, $otherchallenge[0]['grouppoints']);
+        self::assertSame(0, $DB->count_records('local_subs_commerce_ped_xp', ['promotionid' => $promotionid, 'userid' => $other->id]));
+        self::assertSame($personalbefore, $DB->count_records('block_xp_logs', ['userid' => $user->id]));
+        self::assertCount(1, $service->recent_for_target($promotionid, 'group', $g2));
+    }
+
+    public function test_manual_xp_uses_start_date_and_rejects_invalid_targets_and_points(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $productid = $this->create_product();
+        $promotionid = $this->create_promotion((int)$course->id, 'M5.3 Bonus Validation');
+        $groupid = $this->create_group($promotionid, (int)$course->id, 'Group', 0);
+        $user = $this->getDataGenerator()->create_user();
+        $outsider = $this->getDataGenerator()->create_user();
+        $admin = $this->getDataGenerator()->create_user();
+        $this->attach_user($promotionid, (int)$course->id, (int)$user->id, $productid, $groupid);
+        $now = time();
+        $DB->set_field('local_subs_commerce_ped_promo', 'xpstartsat', $now + 1000, ['id' => $promotionid]);
+        $service = CommercePedagogicalXpAdjustmentService::create($DB);
+        try {
+            $service->award($promotionid, 'user', (int)$user->id, 5, 'Early bonus',
+                (int)$admin->id, bin2hex(random_bytes(16)), $now);
+            self::fail('Manual XP cannot be awarded before the start.');
+        } catch (\coding_exception $e) {
+            self::assertStringContainsString('scoring start', $e->getMessage());
+        }
+        $DB->set_field('local_subs_commerce_ped_promo', 'xpstartsat', $now - 1, ['id' => $promotionid]);
+        foreach ([
+            ['user', (int)$outsider->id, 10, 'Outside member'],
+            ['user', (int)$user->id, 501, 'Too many points'],
+            ['group', 99999999, 10, 'Wrong group id'],
+            ['group', $groupid, 5001, 'Too many group points'],
+            ['user', (int)$user->id, 20, 'short'],
+        ] as [$target, $targetid, $points, $reason]) {
+            try {
+                $service->award($promotionid, $target, $targetid, $points, $reason,
+                    (int)$admin->id, bin2hex(random_bytes(16)), $now);
+                self::fail('Rejected request must not credit the promotion');
+            } catch (\coding_exception $e) {
+                self::assertNotEmpty($e->getMessage());
+            }
+        }
+        self::assertSame(0, $DB->count_records('local_subs_commerce_ped_xpadj', ['promotionid' => $promotionid]));
+        self::assertSame(0, $DB->count_records('local_subs_commerce_ped_xp', ['promotionid' => $promotionid]));
+    }
+
     public function test_mon_campus_template_contains_team_ranking_surface(): void {
         global $CFG;
         $template = file_get_contents(
@@ -214,5 +314,62 @@ final class commerce_797m53_student_team_leaderboard_test extends advanced_testc
         self::assertStringContainsString('commerce-customer-hub__team-challenges', $template);
         self::assertStringContainsString('{{#teamchallenges}}', $template);
         self::assertStringContainsString('{{#ismine}}', $template);
+    }
+
+    public function test_cancelling_bonuses_preserves_audit_and_removes_only_promotion_scores(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $productid = $this->create_product();
+        $promotionid = $this->create_promotion((int)$course->id, 'M5.3 Cancellation');
+        $groupid = $this->create_group($promotionid, (int)$course->id, 'Group one', 0);
+        $user = $this->getDataGenerator()->create_user();
+        $awarder = $this->getDataGenerator()->create_user();
+        $canceller = $this->getDataGenerator()->create_user();
+        $this->attach_user($promotionid, (int)$course->id, (int)$user->id, $productid, $groupid);
+        $now = time();
+        $DB->set_field('local_subs_commerce_ped_promo', 'xpstartsat', $now - HOURSECS,
+            ['id' => $promotionid]);
+        $service = CommercePedagogicalXpAdjustmentService::create($DB);
+        $repository = \local_subscriptions\commerce\education\xp\CommercePedagogicalXpRepository::create($DB);
+        $personalbefore = $DB->count_records('block_xp_logs', ['userid' => $user->id]);
+        $normal = CommercePedagogicalXpService::create($DB)->record_once($promotionid, (int)$user->id,
+            'block_xp', 'activity_completion', 'real-exercise', 7, $now, $now);
+        $userbonus = $service->award($promotionid, 'user', (int)$user->id, 20,
+            'Bonus test annulation user', (int)$awarder->id, bin2hex(random_bytes(16)), $now);
+        $groupbonus = $service->award($promotionid, 'group', $groupid, 50,
+            'Bonus test annulation group', (int)$awarder->id, bin2hex(random_bytes(16)), $now);
+        self::assertSame(27, $repository->user_points($promotionid, (int)$user->id));
+        self::assertSame(77, CommercePedagogicalStudentLeaderboardService::create($DB)
+            ->get_for_user((int)$user->id, $now)[0]['grouppoints']);
+
+        $cancelled = $service->cancel($promotionid, 'user', (int)$user->id,
+            (int)$userbonus->id, (int)$canceller->id, $now + 10);
+        self::assertSame((int)$canceller->id, (int)$cancelled->cancelledby);
+        self::assertSame($now + 10, (int)$cancelled->cancelledat);
+        self::assertSame(7, $repository->user_points($promotionid, (int)$user->id));
+        self::assertSame(57, CommercePedagogicalStudentLeaderboardService::create($DB)
+            ->get_for_user((int)$user->id, $now)[0]['grouppoints']);
+        // Existing positive ledger row stays as auditable original evidence.
+        self::assertSame(2, $DB->count_records('local_subs_commerce_ped_xp',
+            ['promotionid' => $promotionid, 'userid' => $user->id]));
+        $again = $service->cancel($promotionid, 'user', (int)$user->id,
+            (int)$userbonus->id, (int)$awarder->id, $now + 99);
+        self::assertSame((int)$canceller->id, (int)$again->cancelledby);
+        self::assertSame($now + 10, (int)$again->cancelledat);
+        try {
+            $service->cancel($promotionid, 'group', $groupid, (int)$userbonus->id, (int)$awarder->id);
+            self::fail('Cancellation with wrong target must be rejected.');
+        } catch (\coding_exception $e) {
+            self::assertStringContainsString('does not belong', $e->getMessage());
+        }
+        $service->cancel($promotionid, 'group', $groupid,
+            (int)$groupbonus->id, (int)$canceller->id, $now + 20);
+        self::assertSame([], $service->group_bonus_totals($promotionid));
+        self::assertSame(7, CommercePedagogicalStudentLeaderboardService::create($DB)
+            ->get_for_user((int)$user->id, $now)[0]['grouppoints']);
+        self::assertSame(2, count($service->recent_for_target($promotionid, 'user', (int)$user->id)) +
+            count($service->recent_for_target($promotionid, 'group', $groupid)));
+        self::assertSame($personalbefore, $DB->count_records('block_xp_logs', ['userid' => $user->id]));
     }
 }

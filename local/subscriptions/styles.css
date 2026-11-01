@@ -42742,3 +42742,90 @@ body.local-subscriptions-dashboard-page
 @media (max-width: 575px) {
     .crm-cr5-course-details { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Promotion XP bonus: compact CRM typography, breathing room and audited cancellation. */
+.commerce-ped-xp-bonus {
+    min-width: 0;
+    padding: .9rem 1rem 1rem;
+    border: 1px solid #ece8f7;
+    border-radius: .65rem;
+    background: #fbfaff;
+    font-size: .77rem;
+    line-height: 1.45;
+}
+.commerce-ped-xp-bonus > summary {
+    cursor: pointer;
+    color: #5b4796;
+    font-size: .77rem;
+    font-weight: 700;
+    margin-bottom: .4rem;
+}
+.commerce-ped-xp-bonus .small.text-muted {
+    font-size: .73rem !important;
+    line-height: 1.45;
+    margin-bottom: .75rem !important;
+}
+.commerce-ped-xp-bonus .form-label {
+    font-size: .72rem;
+    margin-bottom: .2rem;
+}
+.commerce-ped-xp-bonus .form-control {
+    font-size: .77rem;
+    min-height: 2rem;
+}
+.commerce-ped-xp-bonus form > .btn { margin-top: .25rem; }
+.commerce-ped-xp-bonus .commerce-ped-xp-history-title {
+    font-size: .81rem;
+    font-weight: 700;
+    margin: 1rem 0 .5rem;
+    color: #403762;
+}
+.commerce-ped-xp-history-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: .45rem;
+    border-top: 1px solid #eceaf4;
+    padding: .48rem 0;
+    font-size: .72rem;
+}
+.commerce-ped-xp-history-entry:first-of-type { border-top: 0; }
+.commerce-ped-xp-history-entry.is-cancelled { color: #89909b; }
+.commerce-ped-xp-history-entry.is-cancelled .commerce-ped-xp-amount {
+    text-decoration: line-through;
+}
+.commerce-ped-xp-history-copy { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.commerce-ped-xp-amount { font-weight: 700; }
+.commerce-ped-xp-cancel-form { flex: 0 0 1.4rem; margin: 0; }
+.commerce-ped-xp-cancel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: .25rem;
+    color: #85808d;
+    cursor: pointer;
+}
+.commerce-ped-xp-cancel-btn:hover,
+.commerce-ped-xp-cancel-btn:focus-visible {
+    color: #b42343;
+    background: #fff0f3;
+    outline: 1px solid #d67890;
+}
+.commerce-ped-xp-cancel-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 1.4rem;
+    color: #aab0bb;
+}
+.commerce-ped-xp-actor { color: #6748bb; text-decoration: underline; text-underline-offset: 2px; }
+.commerce-ped-xp-cancelled-info { font-size: .7rem; color: #9a6573; margin-top: .25rem; }
+/* This group panel also has a generic summary arrow; remove its extra padding. */
+.commerce-ped-m741-group-edit.commerce-ped-xp-bonus > summary {
+    padding: 0 0 .45rem;
+    margin-bottom: .4rem;
+}

@@ -60,7 +60,13 @@ final class CommercePedagogicalGroupLeaderboardService {
         }
 
         $userpoints = $this->repository->points_by_user($promotionid);
+        $bonuses = CommercePedagogicalXpAdjustmentService::create($this->db)->group_bonus_totals($promotionid);
         $pointsbygroup = array_fill_keys($groupids, 0);
+        foreach ($bonuses as $groupid => $bonus) {
+            if (array_key_exists($groupid, $pointsbygroup)) {
+                $pointsbygroup[$groupid] += $bonus;
+            }
+        }
         $membersbygroup = array_fill_keys($groupids, 0);
 
         foreach ($memberships as $membership) {

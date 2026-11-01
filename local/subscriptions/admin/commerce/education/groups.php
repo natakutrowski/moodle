@@ -15,6 +15,8 @@ use local_subscriptions\commerce\education\promotion\CommercePedagogicalPromotio
 use local_subscriptions\commerce\education\lifecycle\CommercePedagogicalParticipationRepository;
 use local_subscriptions\commerce\education\promotion\CommercePedagogicalPromotionRepository;
 use local_subscriptions\commerce\education\xp\CommercePedagogicalGroupLeaderboardService;
+use local_subscriptions\commerce\education\xp\CommercePedagogicalXpAdjustmentService;
+use local_subscriptions\commerce\education\xp\CommercePedagogicalXpBonusHistoryRenderer;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
 use local_subscriptions\crm\help\CrmPageHeader;
 use local_subscriptions\crm\help\HelpContext;
@@ -53,6 +55,33 @@ $participations = CommercePedagogicalParticipationRepository::create($DB);
 if (data_submitted()) {
     require_sesskey();
     $action = required_param('action', PARAM_ALPHA);
+
+    if ($action === 'xpcancel') {
+        if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+            throw new \coding_exception('Manual XP cancellation requires POST.');
+        }
+        CommercePedagogicalXpAdjustmentService::create($DB)->cancel(
+            $promotionid, CommercePedagogicalXpAdjustmentService::GROUP,
+            required_param('groupid', PARAM_INT),
+            required_param('adjustmentid', PARAM_INT), (int)$USER->id
+        );
+        redirect($pageurl, get_string('commerce_education_xp_manual_cancel_success', 'local_subscriptions'),
+            null, \core\output\notification::NOTIFY_SUCCESS);
+    }
+
+    if ($action === 'xpbonus') {
+        if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+            throw new \coding_exception('Manual XP grants require POST.');
+        }
+        CommercePedagogicalXpAdjustmentService::create($DB)->award(
+            $promotionid, CommercePedagogicalXpAdjustmentService::GROUP,
+            required_param('groupid', PARAM_INT), required_param('points', PARAM_INT),
+            required_param('reason', PARAM_TEXT), (int)$USER->id,
+            required_param('requestkey', PARAM_ALPHANUMEXT)
+        );
+        redirect($pageurl, get_string('commerce_education_xp_manual_added', 'local_subscriptions'),
+            null, \core\output\notification::NOTIFY_SUCCESS);
+    }
 
     if ($action === 'config') {
         $now = time();
@@ -213,6 +242,10 @@ foreach ($offerlinks as $offerlink) {
     $offernames[(int)$offerlink->productid] = $label;
 }
 
+$xpbonusservice = CommercePedagogicalXpAdjustmentService::create($DB);
+$xpbonusallowed = ($promotion->get_xp_starts_at() === null || time() >= $promotion->get_xp_starts_at())
+    && ($promotion->get_ends_at() === null || time() <= $promotion->get_ends_at())
+    && in_array($promotion->get_status(), ['scheduled', 'open', 'full', 'started'], true);
 $leaderboardbygroup = [];
 foreach (CommercePedagogicalGroupLeaderboardService::create($DB)->get_ranking($promotionid) as $entry) {
     $leaderboardbygroup[$entry->get_group_id()] = $entry;
@@ -647,6 +680,55 @@ if ($groups === []) {
         ]);
         echo html_writer::end_tag('form');
         echo html_writer::end_tag('details');
+
+        if ($group->is_active()) {
+            echo html_writer::start_tag('details', ['class' => 'commerce-ped-m741-group-edit commerce-ped-xp-bonus']);
+            echo html_writer::tag('summary',
+                get_string('commerce_education_xp_manual_heading', 'local_subscriptions'),
+                ['class' => 'commerce-ped-m741-group-edit-summary']);
+            echo html_writer::div(get_string('commerce_education_xp_manual_group_help', 'local_subscriptions'),
+                'small text-muted mb-2');
+            if ($xpbonusallowed) {
+                echo html_writer::start_tag('form', ['method' => 'post', 'action' => $pageurl->out(false)]);
+                foreach ([
+                    'sesskey' => sesskey(), 'action' => 'xpbonus', 'groupid' => $groupid,
+                    'requestkey' => bin2hex(random_bytes(16)),
+                ] as $name => $value) {
+                    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
+                }
+                echo html_writer::tag('label', get_string('commerce_education_xp_manual_points', 'local_subscriptions'),
+                    ['for' => 'group-xp-points-' . $groupid, 'class' => 'form-label']);
+                echo html_writer::empty_tag('input', [
+                    'type' => 'number', 'name' => 'points', 'id' => 'group-xp-points-' . $groupid,
+                    'min' => 1, 'max' => CommercePedagogicalXpAdjustmentService::MAX_GROUP_POINTS,
+                    'required' => 'required', 'class' => 'form-control form-control-sm mb-2',
+                ]);
+                echo html_writer::tag('label', get_string('commerce_education_xp_manual_reason', 'local_subscriptions'),
+                    ['for' => 'group-xp-reason-' . $groupid, 'class' => 'form-label']);
+                echo html_writer::empty_tag('input', [
+                    'type' => 'text', 'name' => 'reason', 'id' => 'group-xp-reason-' . $groupid,
+                    'minlength' => 8, 'maxlength' => 250, 'required' => 'required',
+                    'class' => 'form-control form-control-sm mb-2',
+                ]);
+                echo html_writer::tag('button', get_string('commerce_education_xp_manual_submit', 'local_subscriptions'),
+                    ['type' => 'submit', 'class' => 'btn btn-sm btn-outline-primary']);
+                echo html_writer::end_tag('form');
+            } else {
+                echo html_writer::div(get_string('commerce_education_xp_manual_notstarted', 'local_subscriptions'),
+                    'small text-muted');
+            }
+            $manualhistory = $xpbonusservice->recent_for_target(
+                $promotionid, CommercePedagogicalXpAdjustmentService::GROUP, $groupid);
+            if ($manualhistory) {
+                echo html_writer::tag('h5', get_string('commerce_education_xp_manual_history', 'local_subscriptions'),
+                    ['class' => 'commerce-ped-xp-history-title']);
+                foreach ($manualhistory as $adjustment) {
+                    echo CommercePedagogicalXpBonusHistoryRenderer::render(
+                        $adjustment, $pageurl, CommercePedagogicalXpAdjustmentService::GROUP, $groupid);
+                }
+            }
+            echo html_writer::end_tag('details');
+        }
 
         echo html_writer::start_tag('form', [
             'method' => 'post',

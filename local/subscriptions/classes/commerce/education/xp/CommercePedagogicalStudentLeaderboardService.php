@@ -112,6 +112,11 @@ final class CommercePedagogicalStudentLeaderboardService {
                     'groupname' => format_string($group->get_display_name()),
                     'isleaderboardhidden' => true,
                     'revealdate' => userdate($revealat, get_string('strftimedatetime', 'langconfig')),
+                    'isxpnotstarted' => $relation->xpstartsat !== null && $now < (int)$relation->xpstartsat,
+                    'isxpstarted' => $relation->xpstartsat === null || $now >= (int)$relation->xpstartsat,
+                    'xpstartdate' => $relation->xpstartsat !== null
+                        ? userdate((int)$relation->xpstartsat, get_string('strftimedatetime', 'langconfig'))
+                        : '',
                     // No points, ranks or other groups are sent to the learner.
                 ];
                 continue;
