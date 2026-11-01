@@ -12790,3 +12790,11 @@ $string['commerce_mail_forward_not_allowed'] = 'Cet e-mail ne peut pas être tra
 $string['commerce_mail_forward_invalid_email'] = 'Saisis une adresse e-mail valide.';
 $string['crm_user360_transactional_mails_user_scope'] = 'Client Moodle n° {$a}';
 $string['commerce_mail_forward_from_source'] = 'Renvoi de l’e-mail n° {$a} (l’original est conservé).';
+
+// CampusFR — H5P audio compatibility switches (2026-11).
+$string['h5p_audio_switches_title'] = 'Audio H5P (CampusFR)';
+$string['h5p_audio_switches_intro'] = 'Interrupteurs de compatibilité H5P. Les deux sont désactivés par défaut. Les changements s’appliquent aux activités H5P rechargées. OFF conserve les scripts officiels, sans modifier les bibliothèques H5P ni les résultats des élèves.';
+$string['h5p_audio_campusfr_enabled'] = 'Activer H5P.Audio (CampusFR)';
+$string['h5p_audio_campusfr_enabled_desc'] = 'Charger le lecteur audio partagé CampusFR (base 1.5.37) après le script officiel H5P.Audio 1.5.';
+$string['h5p_memory_campusfr_enabled'] = 'Activer Memory Game (CampusFR)';
+$string['h5p_memory_campusfr_enabled_desc'] = 'Charger le lecteur audio partagé des cartes CampusFR (base 1.3.55) après le script officiel H5P.MemoryGame 1.3. Vérifier la compatibilité avec la bibliothèque de production avant activation.';

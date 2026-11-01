@@ -125,6 +125,33 @@ if ($hassiteconfig) {
     // Le nœud "Local plugins" existe déjà. On ajoute une page réglages pour ton plugin.
     $settings = new admin_settingpage('local_subscriptions_settings', get_string('pluginname', 'local_subscriptions'));
 
+    // CampusFR H5P audio: separate administration page, OFF by default.
+    $h5paudiosettings = new admin_settingpage(
+        'local_subscriptions_h5p_audio',
+        get_string('h5p_audio_switches_title', 'local_subscriptions')
+    );
+    $ADMIN->add('subscriptions_category', $h5paudiosettings);
+    if ($ADMIN->fulltree) {
+        $h5paudiosettings->add(new admin_setting_heading(
+            'local_subscriptions_h5p_audio_heading',
+            get_string('h5p_audio_switches_title', 'local_subscriptions'),
+            get_string('h5p_audio_switches_intro', 'local_subscriptions')
+        ));
+        $h5paudiosettings->add(new admin_setting_configcheckbox(
+            'local_subscriptions/h5p_audio_campusfr_enabled',
+            get_string('h5p_audio_campusfr_enabled', 'local_subscriptions'),
+            get_string('h5p_audio_campusfr_enabled_desc', 'local_subscriptions'),
+            0
+        ));
+        $h5paudiosettings->add(new admin_setting_configcheckbox(
+            'local_subscriptions/h5p_memory_campusfr_enabled',
+            get_string('h5p_memory_campusfr_enabled', 'local_subscriptions'),
+            get_string('h5p_memory_campusfr_enabled_desc', 'local_subscriptions'),
+            0
+        ));
+    }
+
+
     if ($ADMIN->fulltree) {
 
         $settings->add(

@@ -13030,3 +13030,11 @@ $string['commerce_mail_forward_not_allowed'] = 'Это письмо нельзя
 $string['commerce_mail_forward_invalid_email'] = 'Укажите корректный адрес электронной почты.';
 $string['crm_user360_transactional_mails_user_scope'] = 'Пользователь Moodle № {$a}';
 $string['commerce_mail_forward_from_source'] = 'Переслано из письма № {$a} (оригинал сохранён).';
+
+// CampusFR — H5P audio compatibility switches (2026-11).
+$string['h5p_audio_switches_title'] = 'Аудио H5P (CampusFR)';
+$string['h5p_audio_switches_intro'] = 'Переключатели совместимости H5P. По умолчанию оба выключены. Изменения действуют после повторной загрузки упражнения H5P. В режиме OFF используются исходные скрипты без изменения библиотек H5P и результатов учащихся.';
+$string['h5p_audio_campusfr_enabled'] = 'Включить H5P.Audio (CampusFR)';
+$string['h5p_audio_campusfr_enabled_desc'] = 'Подключить общий аудиоплеер CampusFR (на основе 1.5.37) после официального H5P.Audio 1.5.';
+$string['h5p_memory_campusfr_enabled'] = 'Включить Memory Game (CampusFR)';
+$string['h5p_memory_campusfr_enabled_desc'] = 'Подключить общий аудиоплеер карточек CampusFR (на основе 1.3.55) после официального H5P.MemoryGame 1.3. Перед включением на PROD проверить совместимость с установленной библиотекой.';
