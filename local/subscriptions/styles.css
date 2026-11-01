@@ -30754,6 +30754,16 @@ strong.d-block,
     overflow: visible;
 }
 
+/* Trial status is prose, unlike the full-width order and mail tables. */
+.crm-user360-n116a-trial-lifecycle .crm-user360-n116a-section-body {
+    padding: .9rem 1rem;
+}
+
+.crm-user360-n116a-mail-actions {
+    padding: .75rem 1rem;
+    border-top: 1px solid #e7ebf0;
+}
+
 .crm-user360-n116a-table {
     margin: 0;
     border: 0 !important;

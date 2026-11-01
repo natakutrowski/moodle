@@ -150,6 +150,14 @@ $technicaldetails = html_writer::tag('summary', get_string('commerce_mail_techni
         . html_writer::div(get_string('commerce_mail_idempotency_key', 'local_subscriptions') . ': ' . s((string)$record->idempotencykey)),
         'small text-muted mt-2'
     );
+$auditcontext = json_decode((string)$record->contextjson, true);
+if (is_array($auditcontext) && !empty($auditcontext['forward']['frommailid'])) {
+    $technicaldetails .= html_writer::div(
+        s(get_string('commerce_mail_forward_from_source', 'local_subscriptions',
+            (int)$auditcontext['forward']['frommailid'])),
+        'small text-muted mt-2'
+    );
+}
 echo html_writer::tag('details', $technicaldetails, ['class' => 'mb-3']);
 
 if (trim((string)($record->lasterror ?? '')) !== '') {
@@ -210,6 +218,42 @@ if ((string)$record->status === 'queued' && $previewerror === null) {
         ['class' => 'btn btn-primary']
     );
 }
+$forwardform = '';
+if ($previewerror === null && CommerceMailAdminService::can_forward($record)
+        && has_capability(Capabilities::MANAGE_SUBSCRIPTIONS, \context_system::instance())) {
+    $forwardurl = new moodle_url('/local/subscriptions/admin/commerce/mail/action.php');
+    $formcontent = html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey(),
+    ]) . html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'id', 'value' => $id,
+    ]) . html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'action', 'value' => 'forward',
+    ]) . html_writer::tag('label',
+        get_string('commerce_mail_forward_label', 'local_subscriptions'),
+        ['for' => 'commerce-mail-forward-email', 'class' => 'form-label fw-semibold mb-1']
+    ) . html_writer::div(
+        html_writer::empty_tag('input', [
+            'type' => 'email', 'id' => 'commerce-mail-forward-email',
+            'name' => 'recipientemail', 'class' => 'form-control',
+            'required' => 'required', 'maxlength' => 254,
+            'autocomplete' => 'off', 'placeholder' => 'nouvelle-adresse@example.com',
+        ]) . html_writer::tag('button',
+            get_string('commerce_mail_forward_action', 'local_subscriptions'),
+            ['type' => 'submit', 'class' => 'btn btn-outline-primary']
+        ),
+        'd-flex flex-wrap gap-2 align-items-center'
+    ) . html_writer::div(
+        get_string('commerce_mail_forward_help', 'local_subscriptions'),
+        'form-text mt-1'
+    );
+    $forwardform = html_writer::tag('form', $formcontent, [
+        'action' => $forwardurl->out(false), 'method' => 'post',
+        'class' => 'mt-3 mb-3 p-3 border rounded',
+        'onsubmit' => 'return confirm(\'' . addslashes_js(
+            get_string('commerce_mail_forward_confirm', 'local_subscriptions')
+        ) . '\' + " " + this.elements[\'recipientemail\'].value + " ?");',
+    ]);
+}
 $toolbaractions = implode('', array_filter([$sendnowbutton, $resendbutton]));
 
 $toolbar = html_writer::div(
@@ -230,6 +274,9 @@ if ($toolbaractions !== '') {
 }
 
 echo html_writer::div($toolbar, 'commerce-mail-preview-toolbar');
+if ($forwardform !== '') {
+    echo $forwardform;
+}
 
 if ($previewerror === null) {
     echo CommerceMailPreviewRenderer::render(

@@ -497,6 +497,29 @@ final class CommerceMailQueueRepository {
     }
 
 
+    /** Recent operational transactional mail records linked to this Moodle user. */
+    public function recent_transactional_for_user(int $userid, int $limit = 8): array {
+        global $DB;
+        if ($userid <= 0 || $limit <= 0) {
+            return [];
+        }
+        return array_values($DB->get_records_sql(
+            'SELECT m.* FROM {local_subs_commerce_mail} m'
+                . ' WHERE m.userid = :userid'
+                . ' AND m.mailtype NOT IN (:marketing, :otp)'
+                . ' AND m.idempotencykey NOT LIKE :auditpattern'
+                . ' AND LOWER(m.recipientemail) <> :auditmail'
+                . ' ORDER BY m.timecreated DESC, m.id DESC',
+            [
+                'userid' => $userid,
+                'marketing' => CommerceMailType::MARKETING_CAMPAIGN,
+                'otp' => CommerceMailType::GUEST_IDENTITY_OTP,
+                'auditpattern' => '%:audit',
+                'auditmail' => self::AUDIT_EMAIL,
+            ], 0, $limit
+        ));
+    }
+
     /** @return array{records:array,total:int} */
     public function search(array $filters, int $page = 0, int $perpage = 25): array {
         global $DB;
@@ -565,6 +588,15 @@ final class CommerceMailQueueRepository {
             $params['journal_auditmail'] = self::AUDIT_EMAIL;
         }
 
+        if (!empty($filters['userid'])) {
+            $where[] = 'userid = :journaluserid';
+            $params['journaluserid'] = (int)$filters['userid'];
+        }
+        if (!empty($filters['transactionalonly'])) {
+            $where[] = 'mailtype NOT IN (:journalmarketing, :journalotp)';
+            $params['journalmarketing'] = CommerceMailType::MARKETING_CAMPAIGN;
+            $params['journalotp'] = CommerceMailType::GUEST_IDENTITY_OTP;
+        }
         foreach (['mailtype', 'language'] as $field) {
             if (!empty($filters[$field])) {
                 $where[] = "$field = :$field";

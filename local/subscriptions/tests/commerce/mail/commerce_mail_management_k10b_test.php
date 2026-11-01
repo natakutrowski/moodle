@@ -43,6 +43,64 @@ final class commerce_mail_management_k10b_test extends advanced_testcase {
         $this->assertSame(42, (int)$context['resend']['byuserid']);
     }
 
+    public function test_forward_queues_new_destination_and_preserves_user_history(): void {
+        $this->resetAfterTest(true);
+        $repo = new CommerceMailQueueRepository();
+        $original = (new CommerceMailQueueService($repo))->queue(new CommerceMailRequest(
+            CommerceMailType::PURCHASE_RECEIPT,
+            new CommerceMailRecipient('old@example.test', 'Buyer', 2437),
+            new CommerceMailContext(['purchase' => ['reference' => 'ORDER-123']]),
+            'fr', 'k10b:forward-original', 123
+        ));
+        $repo->mark_sent((int)$original->id, 'Receipt', time());
+        $service = new CommerceMailAdminService($repo);
+        $forward = $service->forward((int)$original->id, 42, 'new@example.test');
+        $saved = $repo->find_by_id((int)$forward->id);
+        $source = $repo->find_by_id((int)$original->id);
+        $context = json_decode($saved->contextjson, true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertSame('old@example.test', $source->recipientemail);
+        self::assertSame('new@example.test', $saved->recipientemail);
+        self::assertSame(2437, (int)$saved->userid);
+        self::assertSame(123, (int)$saved->purchaseid);
+        self::assertSame(CommerceMailStatus::QUEUED, $saved->status);
+        self::assertSame((int)$original->id, (int)$context['forward']['frommailid']);
+        self::assertSame(42, (int)$context['forward']['byuserid']);
+        self::assertCount(2, $repo->recent_transactional_for_user(2437));
+        self::assertSame(2, $repo->search(['userid' => 2437, 'transactionalonly' => true], 0, 25)['total']);
+    }
+
+    public function test_forward_rejects_bad_destination_and_sensitive_types(): void {
+        $this->resetAfterTest(true);
+        $repo = new CommerceMailQueueRepository();
+        $service = new CommerceMailAdminService($repo);
+        $create = static function(string $type, string $key) use ($repo): \stdClass {
+            $mail = (new CommerceMailQueueService($repo))->queue(new CommerceMailRequest(
+                $type,
+                new CommerceMailRecipient('old@example.test', 'Buyer', 2437),
+                new CommerceMailContext([]), 'fr', $key
+            ));
+            $repo->mark_sent((int)$mail->id, 'Original', time());
+            return $repo->find_by_id((int)$mail->id);
+        };
+        $receipt = $create(CommerceMailType::PURCHASE_RECEIPT, 'k10b:forward-valid');
+        $activation = $create(CommerceMailType::ACCOUNT_ACTIVATION, 'k10b:forward-activation');
+        self::assertTrue(CommerceMailAdminService::can_forward($receipt));
+        self::assertFalse(CommerceMailAdminService::can_forward($activation));
+        try {
+            $service->forward((int)$receipt->id, 42, "bad\naddress@example.test");
+            self::fail('Invalid address was accepted');
+        } catch (\moodle_exception $exception) {
+            self::assertSame('commerce_mail_forward_invalid_email', $exception->errorcode);
+        }
+        try {
+            $service->forward((int)$activation->id, 42, 'new@example.test');
+            self::fail('Activation mail was forwarded');
+        } catch (\moodle_exception $exception) {
+            self::assertSame('commerce_mail_forward_not_allowed', $exception->errorcode);
+        }
+    }
+
     public function test_audit_and_customer_due_rows_can_be_selected_separately(): void {
         $this->resetAfterTest(true);
 

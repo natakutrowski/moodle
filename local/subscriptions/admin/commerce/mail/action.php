@@ -43,6 +43,16 @@ if ($action === 'sendnow') {
         new moodle_url('/local/subscriptions/admin/commerce/mail/view.php', ['id' => (int)$newrecord->id]),
         get_string('commerce_mail_resend_queued', 'local_subscriptions')
     );
+} else if ($action === 'forward') {
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        throw new moodle_exception('invalidparameter');
+    }
+    $email = required_param('recipientemail', PARAM_RAW_TRIMMED);
+    $newrecord = $service->forward($id, (int)$USER->id, $email);
+    redirect(
+        new moodle_url('/local/subscriptions/admin/commerce/mail/view.php', ['id' => (int)$newrecord->id]),
+        get_string('commerce_mail_forward_queued', 'local_subscriptions')
+    );
 } else {
     throw new moodle_exception('invalidparameter');
 }

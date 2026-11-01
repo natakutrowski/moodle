@@ -134,6 +134,77 @@ final class CommerceMailAdminService {
         ));
     }
 
+    /**
+     * Forward a previously sent transactional mail to an explicitly entered address.
+     * The original outbox record is immutable. The new row keeps its user/purchase
+     * association, and the actual destination is stored in recipientemail.
+     * Account activation, OTP, campaigns and audit copies are never forwardable.
+     */
+    public function forward(int $id, int $adminuserid, string $destination): \stdClass {
+        $record = $this->required($id);
+        if (!self::can_forward($record)) {
+            throw new \moodle_exception('commerce_mail_forward_not_allowed', 'local_subscriptions');
+        }
+
+        $destination = trim($destination);
+        if (strlen($destination) > 254 || !filter_var($destination, FILTER_VALIDATE_EMAIL)
+                || preg_match('/[\r\n]/', $destination)) {
+            throw new \moodle_exception('commerce_mail_forward_invalid_email', 'local_subscriptions');
+        }
+
+        $now = time();
+        $contextvalues = json_decode((string)$record->contextjson, true, 512, JSON_THROW_ON_ERROR);
+        $context = (new CommerceMailContext($contextvalues))
+            ->with('resend', [
+                'frommailid' => (int)$record->id,
+                'byuserid' => $adminuserid > 0 ? $adminuserid : null,
+                'timecreated' => $now,
+            ])
+            ->with('forward', [
+                'frommailid' => (int)$record->id,
+                'originalemail' => (string)$record->recipientemail,
+                'destinationemail' => $destination,
+                'byuserid' => $adminuserid > 0 ? $adminuserid : null,
+                'timecreated' => $now,
+            ]);
+
+        // Same-second duplicate clicks collapse; distinct destinations are distinct intents.
+        $key = sprintf(
+            'mail:%d:forward:%d:%d:%s',
+            (int)$record->id,
+            max(0, $adminuserid),
+            $now,
+            substr(hash('sha256', strtolower($destination)), 0, 16)
+        );
+
+        return CommerceMailRuntime::queue_service()->queue(new CommerceMailRequest(
+            (string)$record->mailtype,
+            new CommerceMailRecipient($destination, (string)$record->recipientname, (int)$record->userid),
+            $context,
+            (string)$record->language,
+            $key,
+            $record->purchaseid === null ? null : (int)$record->purchaseid
+        ));
+    }
+
+    /** Security-sensitive identity and campaign messages cannot be redirected. */
+    public static function can_forward(\stdClass $record): bool {
+        if ((string)($record->status ?? '') !== 'sent' || (int)($record->userid ?? 0) <= 0) {
+            return false;
+        }
+        if (str_ends_with((string)($record->idempotencykey ?? ''), ':audit')) {
+            return false;
+        }
+        return in_array((string)($record->mailtype ?? ''), [
+            \local_subscriptions\commerce\mail\CommerceMailType::PURCHASE_ACCESS,
+            \local_subscriptions\commerce\mail\CommerceMailType::GRANT_ACCESS,
+            \local_subscriptions\commerce\mail\CommerceMailType::PURCHASE_RECEIPT,
+            \local_subscriptions\commerce\mail\CommerceMailType::PAYMENT_FAILED,
+            \local_subscriptions\commerce\mail\CommerceMailType::PAYMENT_PENDING,
+            \local_subscriptions\commerce\mail\CommerceMailType::PAYMENT_CANCELLED,
+        ], true);
+    }
+
     private function required(int $id): \stdClass {
         $record = $this->repository->find_by_id($id);
         if ($record === null) { throw new \moodle_exception('invalidrecord'); }

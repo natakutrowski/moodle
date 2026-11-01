@@ -12776,3 +12776,17 @@ $string['commerce_campaign_e9c_open_settings'] = 'Ouvrir le réglage des campagn
 // Separate Buy Now session: explicit customer dismissal (never cancels a provider payment).
 $string['commerce_direct_purchase_cancel_action'] = 'Effacer cet achat inachevé';
 $string['commerce_direct_purchase_cancel_help'] = 'Cela retire seulement le rappel dans ce navigateur, sans annuler un paiement déjà lancé.';
+
+$string['crm_user360_transactional_mails_title'] = 'E-mails transactionnels';
+$string['crm_user360_transactional_mails_help'] = 'Derniers envois du client, avec le destinataire réel et le statut. Les originaux et les renvois restent dans le même historique.';
+$string['crm_user360_transactional_mails_empty'] = 'Aucun e-mail transactionnel enregistré pour ce compte.';
+$string['crm_user360_transactional_mails_all'] = 'Voir tout l’historique des e-mails';
+$string['commerce_mail_forward_label'] = 'Faire suivre cet e-mail à une autre adresse';
+$string['commerce_mail_forward_action'] = 'Faire suivre';
+$string['commerce_mail_forward_help'] = 'L’envoi original reste intact. La nouvelle adresse reçoit le contenu du mail (éventuellement une facture ou un lien d’accès). L’adresse du compte client ne change pas.';
+$string['commerce_mail_forward_confirm'] = 'Confirmer l’envoi à';
+$string['commerce_mail_forward_queued'] = 'Le transfert vers la nouvelle adresse a été ajouté à la file d’attente.';
+$string['commerce_mail_forward_not_allowed'] = 'Cet e-mail ne peut pas être transféré à une autre adresse (type sensible, envoi non confirmé ou utilisateur non associé).';
+$string['commerce_mail_forward_invalid_email'] = 'Saisis une adresse e-mail valide.';
+$string['crm_user360_transactional_mails_user_scope'] = 'Client Moodle n° {$a}';
+$string['commerce_mail_forward_from_source'] = 'Renvoi de l’e-mail n° {$a} (l’original est conservé).';

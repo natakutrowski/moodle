@@ -18,6 +18,8 @@ $status = optional_param('status', '', PARAM_ALPHANUMEXT);
 $mailtype = optional_param('mailtype', '', PARAM_ALPHANUMEXT);
 $language = optional_param('language', '', PARAM_ALPHANUMEXT);
 $purchaseid = optional_param('purchaseid', 0, PARAM_INT);
+$userid = max(0, optional_param('userid', 0, PARAM_INT));
+$transactionalonly = optional_param('transactionalonly', 0, PARAM_BOOL) === 1;
 $attempts = max(0, optional_param('attempts', 0, PARAM_INT));
 $includeaudit = optional_param('includeaudit', 0, PARAM_BOOL) === 1;
 $period = optional_param('period', '30', PARAM_ALPHANUMEXT);
@@ -69,6 +71,8 @@ $filters = compact(
     'mailtype',
     'language',
     'purchaseid',
+    'userid',
+    'transactionalonly',
     'attempts',
     'includeaudit',
     'datefrom',

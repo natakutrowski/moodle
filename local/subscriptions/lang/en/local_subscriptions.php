@@ -12941,3 +12941,17 @@ $string['commerce_campaign_e9c_open_settings'] = 'Open course campaign settings'
 // Separate Buy Now session: explicit customer dismissal (never cancels a provider payment).
 $string['commerce_direct_purchase_cancel_action'] = 'Discard this unfinished purchase';
 $string['commerce_direct_purchase_cancel_help'] = 'This only removes the reminder in this browser; it does not cancel a payment already started.';
+
+$string['crm_user360_transactional_mails_title'] = 'Transactional emails';
+$string['crm_user360_transactional_mails_help'] = 'Recent customer emails with actual destination and delivery status. Originals and forwards remain in the same history.';
+$string['crm_user360_transactional_mails_empty'] = 'No transactional email records for this account.';
+$string['crm_user360_transactional_mails_all'] = 'View full email history';
+$string['commerce_mail_forward_label'] = 'Forward this email to another address';
+$string['commerce_mail_forward_action'] = 'Forward email';
+$string['commerce_mail_forward_help'] = 'The original delivery is unchanged. The new address will receive the mail contents (which may include an invoice or access link). The account email is not changed.';
+$string['commerce_mail_forward_confirm'] = 'Confirm delivery to';
+$string['commerce_mail_forward_queued'] = 'A new delivery to the specified address was queued.';
+$string['commerce_mail_forward_not_allowed'] = 'This email cannot be forwarded (sensitive type, not yet sent, or no linked user).';
+$string['commerce_mail_forward_invalid_email'] = 'Enter a valid email address.';
+$string['crm_user360_transactional_mails_user_scope'] = 'Moodle user #{$a}';
+$string['commerce_mail_forward_from_source'] = 'Forwarded from email #{$a} (original retained).';

@@ -27,6 +27,8 @@ $status = optional_param('status', '', PARAM_ALPHANUMEXT);
 $mailtype = optional_param('mailtype', '', PARAM_ALPHANUMEXT);
 $language = optional_param('language', '', PARAM_ALPHANUMEXT);
 $purchaseid = optional_param('purchaseid', 0, PARAM_INT);
+$userid = max(0, optional_param('userid', 0, PARAM_INT));
+$transactionalonly = optional_param('transactionalonly', 0, PARAM_BOOL) === 1;
 $attempts = max(0, optional_param('attempts', 0, PARAM_INT));
 $includeaudit = optional_param('includeaudit', 0, PARAM_BOOL) === 1;
 $period = optional_param('period', '30', PARAM_ALPHANUMEXT);
@@ -86,6 +88,8 @@ $filters = [
     'mailtype' => $mailtype,
     'language' => $language,
     'purchaseid' => $purchaseid,
+    'userid' => $userid,
+    'transactionalonly' => $transactionalonly,
     'attempts' => $attempts,
     'includeaudit' => $includeaudit,
     'datefrom' => $datefrom,
@@ -112,6 +116,8 @@ $baseparams = array_filter([
     'mailtype' => $mailtype,
     'language' => $language,
     'purchaseid' => $purchaseid ?: null,
+    'userid' => $userid ?: null,
+    'transactionalonly' => $transactionalonly ? 1 : null,
     'attempts' => $attempts ?: null,
     'includeaudit' => $includeaudit ? 1 : null,
     'period' => $period,
@@ -295,6 +301,12 @@ if ($purchaseid > 0) {
         $mailremoveurl($mailscopeparams, 'purchaseid')
     );
 }
+if ($userid > 0) {
+    $mailscopepills[] = $mailscopepill(
+        get_string('crm_user360_transactional_mails_user_scope', 'local_subscriptions', $userid),
+        $mailremoveurl($mailscopeparams, 'userid')
+    );
+}
 if ($attempts > 0) {
     $mailscopepills[] = $mailscopepill(
         get_string(
@@ -341,6 +353,13 @@ $form = html_writer::start_tag('form', [
 $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sort', 'value' => $sort]);
 $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'dir', 'value' => $direction]);
 $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'perpage', 'value' => $perpage]);
+if ($userid > 0) {
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'userid', 'value' => $userid]);
+}
+if ($transactionalonly) {
+    $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'transactionalonly', 'value' => 1]);
+}
+
 
 $form .= html_writer::start_div('commerce-mail-filter-grid');
 $form .= html_writer::div(
@@ -484,7 +503,7 @@ $form .= html_writer::div(
 );
 $form .= html_writer::end_tag('form');
 
-$filtersactive = $q !== '' || $status !== '' || $mailtype !== '' || $language !== '' || $purchaseid > 0
+$filtersactive = $userid > 0 || $transactionalonly || $q !== '' || $status !== '' || $mailtype !== '' || $language !== '' || $purchaseid > 0
     || $attempts > 0 || $includeaudit || $period !== '30' || $customfrom !== '' || $customto !== '';
 $filterpanel = html_writer::tag(
     'details',

@@ -13016,3 +13016,17 @@ $string['commerce_campaign_e9c_open_settings'] = 'Открыть настрой�
 // Separate Buy Now session: explicit customer dismissal (never cancels a provider payment).
 $string['commerce_direct_purchase_cancel_action'] = 'Удалить незавершённую покупку';
 $string['commerce_direct_purchase_cancel_help'] = 'Это удалит только напоминание в этом браузере. Уже начатый платёж не отменяется.';
+
+$string['crm_user360_transactional_mails_title'] = 'Транзакционные письма';
+$string['crm_user360_transactional_mails_help'] = 'Последние письма клиенту, фактический адрес получателя и статус. Исходные письма и пересылки остаются в одной истории.';
+$string['crm_user360_transactional_mails_empty'] = 'Для этого аккаунта нет транзакционных писем.';
+$string['crm_user360_transactional_mails_all'] = 'Вся история писем';
+$string['commerce_mail_forward_label'] = 'Переслать это письмо на другой адрес';
+$string['commerce_mail_forward_action'] = 'Переслать письмо';
+$string['commerce_mail_forward_help'] = 'Исходное письмо сохраняется. Новый адрес получит содержимое письма (в том числе счёт или ссылку доступа). Адрес аккаунта не изменится.';
+$string['commerce_mail_forward_confirm'] = 'Подтвердить отправку на';
+$string['commerce_mail_forward_queued'] = 'Отправка на новый адрес добавлена в очередь.';
+$string['commerce_mail_forward_not_allowed'] = 'Это письмо нельзя переслать (чувствительный тип, письмо ещё не отправлено или нет привязки к пользователю).';
+$string['commerce_mail_forward_invalid_email'] = 'Укажите корректный адрес электронной почты.';
+$string['crm_user360_transactional_mails_user_scope'] = 'Пользователь Moodle № {$a}';
+$string['commerce_mail_forward_from_source'] = 'Переслано из письма № {$a} (оригинал сохранён).';

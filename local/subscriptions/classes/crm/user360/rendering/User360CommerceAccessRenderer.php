@@ -11,6 +11,8 @@ use html_writer;
 use local_subscriptions\admin\AdminFormatter;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\mail\sales\CommerceSalesFollowupService;
+use local_subscriptions\commerce\mail\CommerceMailQueueRepository;
+use local_subscriptions\commerce\mail\admin\CommerceMailAdminPresentation;
 use local_subscriptions\commerce\purchase\action\CommercePurchaseActionPolicy;
 use local_subscriptions\commerce\purchase\readmodel\CommercePurchaseReadRepository;
 use local_subscriptions\commerce\purchase\presentation\CommercePurchasePresentation;
@@ -31,10 +33,12 @@ final class User360CommerceAccessRenderer {
         $orders = self::orders($profile->commercepurchases ?? []);
         $legacy = self::legacy_subscriptions($profile->subscriptions ?? []);
         $trial = self::trial_lifecycle($profile->trialstate ?? null);
+        $mails = self::transactional_mails((int)($profile->user->id ?? 0));
 
         return html_writer::tag(
             'section',
             $trial
+            . $mails
             . self::section(
                 'fa fa-shopping-bag',
                 get_string(
@@ -69,6 +73,59 @@ final class User360CommerceAccessRenderer {
                     'local_subscriptions'
                 ),
             ]
+        );
+    }
+
+    /** Lightweight outbox history with actual destinations; keep payment rights isolated. */
+    private static function transactional_mails(int $userid): string {
+        if ($userid <= 0 || !has_capability(Capabilities::VIEW_PAYMENTS, \context_system::instance())) {
+            return '';
+        }
+
+        $records = (new CommerceMailQueueRepository())->recent_transactional_for_user($userid, 8);
+        if ($records === []) {
+            $content = self::empty_state(get_string(
+                'crm_user360_transactional_mails_empty', 'local_subscriptions'
+            ));
+        } else {
+            $table = new html_table();
+            $table->attributes['class'] = 'generaltable crm-user360-n116a-table';
+            $table->head = [
+                get_string('date'),
+                get_string('type', 'local_subscriptions'),
+                get_string('commerce_mail_recipient_column', 'local_subscriptions'),
+                get_string('status', 'local_subscriptions'),
+            ];
+            foreach ($records as $record) {
+                $viewurl = new moodle_url('/local/subscriptions/admin/commerce/mail/view.php', [
+                    'id' => (int)$record->id,
+                ]);
+                $table->data[] = [
+                    AdminFormatter::datetime((int)($record->timesent ?: $record->timecreated)),
+                    html_writer::link($viewurl,
+                        s(CommerceMailAdminPresentation::type_label((string)$record->mailtype))
+                    ),
+                    s((string)$record->recipientemail),
+                    s(CommerceMailAdminPresentation::status_label((string)$record->status)),
+                ];
+            }
+            $content = html_writer::table($table);
+        }
+
+        $allurl = new moodle_url('/local/subscriptions/admin/commerce/mail/index.php', [
+            'userid' => $userid, 'transactionalonly' => 1, 'period' => 'all',
+        ]);
+        $content .= html_writer::div(
+            html_writer::link($allurl, get_string('crm_user360_transactional_mails_all', 'local_subscriptions'),
+                ['class' => 'btn btn-outline-primary btn-sm']),
+            'crm-user360-n116a-mail-actions'
+        );
+        return self::section(
+            'fa fa-envelope-o',
+            get_string('crm_user360_transactional_mails_title', 'local_subscriptions'),
+            get_string('crm_user360_transactional_mails_help', 'local_subscriptions'),
+            $content,
+            'transactional-mails'
         );
     }
 
