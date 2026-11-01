@@ -146,6 +146,47 @@ final class commerce_797m53_student_team_leaderboard_test extends advanced_testc
         self::assertSame(7, $mine[0]['points']);
     }
 
+    public function test_competition_start_blocks_early_xp_and_hides_leaderboard_until_reveal(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course();
+        $productid = $this->create_product();
+        $promotionid = $this->create_promotion((int)$course->id, 'M5.3 Timed');
+        $groupid = $this->create_group($promotionid, (int)$course->id, 'Les Etoiles', 0);
+        $user = $this->getDataGenerator()->create_user();
+        $this->attach_user($promotionid, (int)$course->id, (int)$user->id, $productid, $groupid);
+
+        $start = time() + HOURSECS;
+        $DB->set_field('local_subs_commerce_ped_promo', 'xpstartsat', $start, ['id' => $promotionid]);
+        $DB->set_field('local_subs_commerce_ped_promo', 'leaderboardhidehours', 48, ['id' => $promotionid]);
+        $xp = CommercePedagogicalXpService::create($DB);
+        try {
+            $xp->record_once($promotionid, (int)$user->id, 'block_xp', 'points_increased',
+                'premature', 10, $start - 1, $start - 1);
+            self::fail('No promotion XP should be recorded before scoring starts.');
+        } catch (\coding_exception $e) {
+            self::assertStringContainsString('scoring start', $e->getMessage());
+        }
+        self::assertSame(0, $DB->count_records('local_subs_commerce_ped_xp', ['promotionid' => $promotionid]));
+
+        $xp->record_once($promotionid, (int)$user->id, 'block_xp', 'points_increased',
+            'eligible', 10, $start, $start);
+        $service = CommercePedagogicalStudentLeaderboardService::create($DB);
+        $hidden = $service->get_for_user((int)$user->id, $start + HOURSECS);
+        self::assertCount(1, $hidden);
+        self::assertTrue($hidden[0]['isleaderboardhidden']);
+        self::assertArrayNotHasKey('grouppoints', $hidden[0]);
+        self::assertArrayNotHasKey('grouprank', $hidden[0]);
+        self::assertArrayNotHasKey('leaderboard', $hidden[0]);
+        self::assertNotEmpty($hidden[0]['revealdate']);
+
+        $revealed = $service->get_for_user((int)$user->id, $start + 48 * HOURSECS);
+        self::assertCount(1, $revealed);
+        self::assertSame(10, $revealed[0]['userpoints']);
+        self::assertSame(10, $revealed[0]['grouppoints']);
+    }
+
     public function test_archived_or_non_current_relation_is_not_exposed(): void {
         global $DB;
         $this->resetAfterTest(true);

@@ -13038,3 +13038,12 @@ $string['h5p_audio_campusfr_enabled'] = 'Включить H5P.Audio (CampusFR)';
 $string['h5p_audio_campusfr_enabled_desc'] = 'Подключить общий аудиоплеер CampusFR (на основе 1.5.37) после официального H5P.Audio 1.5.';
 $string['h5p_memory_campusfr_enabled'] = 'Включить Memory Game (CampusFR)';
 $string['h5p_memory_campusfr_enabled_desc'] = 'Подключить общий аудиоплеер карточек CampusFR (на основе 1.3.55) после официального H5P.MemoryGame 1.3. Перед включением на PROD проверить совместимость с установленной библиотекой.';
+
+// Promotion XP: competition start / leaderboard reveal.
+$string['commerce_education_xp_settings_title'] = 'XP потока и рейтинг';
+$string['commerce_education_xp_settings_help'] = 'Независимо от расписания открытия уроков. Скрытие рейтинга не останавливает начисление баллов.';
+$string['commerce_education_xp_start_label'] = 'Начало начисления XP потока';
+$string['commerce_education_xp_start_help'] = 'Необязательно для существующих потоков (без дополнительного ограничения). Дата независима от начала потока и открытия уроков. Часовой пояс: Europe/Paris.';
+$string['commerce_education_xp_hide_hours_label'] = 'Скрывать рейтинг в течение (часов)';
+$string['commerce_education_xp_hide_hours_help'] = '0 — показывать сразу. Отсчёт начинается с даты начисления XP, а не с даты покупки или вступления. Максимум 2160 часов (90 дней).';
+$string['commerce_education_xp_reveal_notice'] = 'Рейтинг потока откроется {$a}. Пока ты можешь зарабатывать XP за доступные задания.';

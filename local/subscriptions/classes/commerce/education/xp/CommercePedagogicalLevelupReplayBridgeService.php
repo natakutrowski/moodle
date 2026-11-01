@@ -67,7 +67,8 @@ final class CommercePedagogicalLevelupReplayBridgeService {
             "SELECT pj.id AS joinid,
                     pj.timecreated AS jointimecreated,
                     pj.promotionid,
-                    pj.courseid
+                    pj.courseid,
+                    pp.xpstartsat
                FROM {local_subs_commerce_ped_access} pa
                JOIN {local_subs_commerce_ped_join} pj
                  ON pj.userid = pa.userid
@@ -96,6 +97,7 @@ final class CommercePedagogicalLevelupReplayBridgeService {
         return $this->record_for_relation(
             (int)$relation->promotionid,
             (int)$relation->jointimecreated,
+            $relation->xpstartsat !== null ? (int)$relation->xpstartsat : null,
             $userid,
             $points,
             $timeearned,
@@ -106,7 +108,8 @@ final class CommercePedagogicalLevelupReplayBridgeService {
             $envid,
             $parentid,
             $objectid,
-            $scope
+            $scope,
+            (int)$relation->courseid
         );
     }
 
@@ -139,7 +142,8 @@ final class CommercePedagogicalLevelupReplayBridgeService {
             "SELECT pj.id AS joinid,
                     pj.timecreated AS jointimecreated,
                     pj.promotionid,
-                    pj.courseid
+                    pj.courseid,
+                    pp.xpstartsat
                FROM {local_subs_commerce_ped_access} pa
                JOIN {local_subs_commerce_ped_join} pj
                  ON pj.userid = pa.userid
@@ -171,6 +175,7 @@ final class CommercePedagogicalLevelupReplayBridgeService {
             $result = $this->record_for_relation(
                 $promotionid,
                 (int)$row->jointimecreated,
+                $row->xpstartsat !== null ? (int)$row->xpstartsat : null,
                 $userid,
                 $points,
                 $timeearned,
@@ -181,7 +186,8 @@ final class CommercePedagogicalLevelupReplayBridgeService {
                 $envid,
                 $parentid,
                 $objectid,
-                $scope
+                $scope,
+                (int)$row->courseid
             );
             if ($result !== null) {
                 $results[$promotionid] = $result;
@@ -193,6 +199,7 @@ final class CommercePedagogicalLevelupReplayBridgeService {
     private function record_for_relation(
         int $promotionid,
         int $jointimecreated,
+        ?int $xpstartsat,
         int $userid,
         int $points,
         int $timeearned,
@@ -203,17 +210,33 @@ final class CommercePedagogicalLevelupReplayBridgeService {
         ?int $envid,
         ?int $parentid,
         ?int $objectid,
-        int $scope
+        int $scope,
+        int $courseid
     ): ?CommercePedagogicalXpRecordResult {
-        if ($jointimecreated <= 0) {
+        if ($jointimecreated <= 0 || ($xpstartsat !== null && $timeearned < $xpstartsat)) {
             return null;
         }
+
+        $cmid = null;
+        if ($xpstartsat !== null) {
+            // For configured competitions a Level Up replay is eligible ONLY
+            // when its source context unambiguously identifies an open module.
+            $gate = new CommercePedagogicalActivityXpGate($this->db);
+            $cmid = $gate->eligible_cmid($promotionid, $courseid, $envid, $timeearned);
+            if ($cmid === null) {
+                return null;
+            }
+        }
+
+        // Rewards earned before XP competition opens are historical even when the
+        // learner joined weeks earlier. They must not consume the new replay quota.
+        $scoringwindowstart = max($jointimecreated, $xpstartsat ?? 0);
 
         // M5.4 only covers a genuinely historical personal reward: Level Up must
         // already have a matching positive log from before this promotion join.
         if (!$this->has_personal_reward_before_join(
             $userid,
-            $jointimecreated,
+            $scoringwindowstart,
             $xpcontextid,
             $ruleid,
             $reason,
@@ -231,7 +254,7 @@ final class CommercePedagogicalLevelupReplayBridgeService {
         // not add an extra team-only reward.
         if ($this->has_personal_reward_since_join(
             $userid,
-            $jointimecreated,
+            $scoringwindowstart,
             $xpcontextid,
             $ruleid,
             $reason,
@@ -258,8 +281,10 @@ final class CommercePedagogicalLevelupReplayBridgeService {
             $promotionid,
             $userid,
             'block_xp',
-            'reason_limit_replay',
-            $sourcekey,
+            $cmid === null ? 'reason_limit_replay' : 'eligible_activity',
+            $cmid === null ? $sourcekey : CommercePedagogicalActivityXpGate::source_key(
+                $cmid, $ruleid, $reason, $subtype
+            ),
             $points,
             $timeearned
         );

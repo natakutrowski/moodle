@@ -56,9 +56,15 @@ final class CommercePedagogicalXpService {
         $promotion = $this->db->get_record(
             'local_subs_commerce_ped_promo',
             ['id' => $promotionid],
-            'id,courseid',
+            'id,courseid,xpstartsat',
             MUST_EXIST
         );
+
+        // Hard boundary enforced at the ledger itself, independent of the XP bridge.
+        // Callers should normally skip before this point; never rewrite personal XP.
+        if ($promotion->xpstartsat !== null && $timeearned < (int)$promotion->xpstartsat) {
+            throw new \coding_exception('Promotion XP cannot be recorded before its scoring start.');
+        }
 
         if (!$this->db->record_exists('local_subs_commerce_ped_join', [
             'promotionid' => $promotionid,

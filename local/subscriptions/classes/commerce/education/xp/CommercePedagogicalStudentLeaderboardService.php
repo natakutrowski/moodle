@@ -68,6 +68,8 @@ final class CommercePedagogicalStudentLeaderboardService {
                     pa.promotionid,
                     pp.name AS promotionname,
                     pp.startsat,
+                    pp.xpstartsat,
+                    pp.leaderboardhidehours,
                     pp.timecreated
                FROM {local_subs_commerce_ped_access} pa
                JOIN {local_subs_commerce_ped_join} pj
@@ -96,6 +98,22 @@ final class CommercePedagogicalStudentLeaderboardService {
 
             $group = $this->groups->group_for_user($promotionid, $userid);
             if ($group === null) {
+                continue;
+            }
+
+            $revealat = ($relation->xpstartsat !== null && (int)$relation->leaderboardhidehours > 0)
+                ? (int)$relation->xpstartsat + (int)$relation->leaderboardhidehours * HOURSECS
+                : 0;
+            if ($revealat > $now) {
+                $result[] = [
+                    'promotionid' => $promotionid,
+                    'promotionname' => format_string((string)$relation->promotionname),
+                    'groupid' => (int)$group->get_id(),
+                    'groupname' => format_string($group->get_display_name()),
+                    'isleaderboardhidden' => true,
+                    'revealdate' => userdate($revealat, get_string('strftimedatetime', 'langconfig')),
+                    // No points, ranks or other groups are sent to the learner.
+                ];
                 continue;
             }
 

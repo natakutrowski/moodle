@@ -28,7 +28,9 @@ final class CommercePedagogicalPromotion {
         private readonly ?int $createdby,
         private readonly ?int $modifiedby,
         private readonly int $timecreated,
-        private readonly int $timemodified
+        private readonly int $timemodified,
+        private readonly ?int $xpstartsat = null,
+        private readonly int $leaderboardhidehours = 0
     ) {
         if ($courseid <= 0) {
             throw new \coding_exception(
@@ -69,6 +71,13 @@ final class CommercePedagogicalPromotion {
             throw new \coding_exception(
                 'Pedagogical promotion end date cannot precede start date.'
             );
+        }
+
+        if ($xpstartsat !== null && $xpstartsat <= 0) {
+            throw new \coding_exception('Promotion XP scoring start must be a valid timestamp.');
+        }
+        if ($leaderboardhidehours < 0 || $leaderboardhidehours > 2160) {
+            throw new \coding_exception('Promotion leaderboard hiding must be between 0 and 2160 hours.');
         }
 
         if ($capacitytotal !== null && $capacitytotal <= 0) {
@@ -116,6 +125,18 @@ final class CommercePedagogicalPromotion {
 
     public function get_ends_at(): ?int {
         return $this->endsat;
+    }
+
+    public function get_xp_starts_at(): ?int {
+        return $this->xpstartsat;
+    }
+
+    public function get_leaderboard_hide_hours(): int {
+        return $this->leaderboardhidehours;
+    }
+
+    public function get_leaderboard_reveal_at(): ?int {
+        return $this->xpstartsat === null ? null : $this->xpstartsat + $this->leaderboardhidehours * HOURSECS;
     }
 
     public function get_capacity_total(): ?int {

@@ -170,6 +170,13 @@ class world_action_collection_strategy implements action_collection_strategy {
                     } else {
                         $store->increase($targetuserid, $points);
                     }
+                    // Level Up awarded the personal reward. Provide the real
+                    // activity context to opt-in consumers; do not change XP.
+                    if ($reason) {
+                        $this->notify_points_awarded_with_source(
+                            $action, $targetuserid, $points, $rule->get_id(), $reason
+                        );
+                    }
                 } else {
                     if ($this->logger instanceof reason_collection_logger) {
                         $this->logger->log_reason($targetuserid, $points, $reason);
@@ -178,6 +185,29 @@ class world_action_collection_strategy implements action_collection_strategy {
 
                 // Stop evaluating the other rules of the same type.
                 break;
+            }
+        }
+    }
+
+    /**
+     * Notify integrations of an awarded Level Up rule with its original action
+     * context. The standard xp_points_increased callback only receives the
+     * system/course XP world context, which cannot identify a course module.
+     */
+    protected function notify_points_awarded_with_source(
+        action $action, int $userid, int $points, int $ruleid, reason $reason
+    ): void {
+        $hooks = get_plugin_list_with_function('block', 'xp_points_awarded_with_source');
+        foreach ($hooks as $plugin => $callback) {
+            try {
+                component_callback($plugin, 'xp_points_awarded_with_source', [
+                    $action->get_context(), $userid, $points, $ruleid, $reason,
+                ]);
+            } catch (\Throwable $e) {
+                debugging(
+                    "Error while calling $plugin's xp_points_awarded_with_source callback: " . $e->getMessage(),
+                    DEBUG_DEVELOPER
+                );
             }
         }
     }

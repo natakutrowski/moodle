@@ -92,6 +92,21 @@ $parseoptionaldate = static function(
     return $timestamp;
 };
 
+// Competition dates are entered/displayed in the CampusFR Paris timezone,
+// independently of PHP CLI/server timezone and the promotion's other dates.
+$competitiontimezone = new \DateTimeZone('Europe/Paris');
+$parsecompetitiondate = static function(string $name) use ($competitiontimezone): ?int {
+    $raw = trim(optional_param($name, '', PARAM_RAW_TRIMMED));
+    if ($raw === '') {
+        return null;
+    }
+    $date = \DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $raw, $competitiontimezone);
+    if (!$date || $date->format('Y-m-d\TH:i') !== $raw) {
+        throw new \coding_exception('Invalid competition date: ' . $name);
+    }
+    return $date->getTimestamp();
+};
+
 if (
     data_submitted()
     && optional_param('save', 0, PARAM_BOOL)
@@ -154,7 +169,9 @@ if (
         (int)$USER->id,
         $existing?->get_time_created()
             ?? $now,
-        $now
+        $now,
+        $parsecompetitiondate('xpstartsat'),
+        required_param('leaderboardhidehours', PARAM_INT)
     );
 
     $saved = $repository->save($promotion);
@@ -473,6 +490,48 @@ $renderfield(
         ]
     ),
     get_string('commerce_education_m72_datetime_optional_help', 'local_subscriptions')
+);
+echo html_writer::end_div();
+$rendersectionend();
+
+$competitiondatevalue = static function(?int $timestamp) use ($competitiontimezone): string {
+    return $timestamp === null ? '' : (new \DateTimeImmutable('@' . $timestamp))
+        ->setTimezone($competitiontimezone)->format('Y-m-d\TH:i');
+};
+
+$rendersectionstart(
+    'fa-trophy',
+    get_string('commerce_education_xp_settings_title', 'local_subscriptions'),
+    get_string('commerce_education_xp_settings_help', 'local_subscriptions')
+);
+echo html_writer::start_div('commerce-ped-promotion-fields-grid');
+$renderfield(
+    'ped-promo-xp-start',
+    get_string('commerce_education_xp_start_label', 'local_subscriptions'),
+    html_writer::empty_tag('input', [
+        'type' => 'datetime-local',
+        'id' => 'ped-promo-xp-start',
+        'name' => 'xpstartsat',
+        'class' => 'form-control',
+        'value' => $competitiondatevalue($existing?->get_xp_starts_at()),
+    ]),
+    get_string('commerce_education_xp_start_help', 'local_subscriptions')
+);
+$renderfield(
+    'ped-promo-leaderboard-hide',
+    get_string('commerce_education_xp_hide_hours_label', 'local_subscriptions'),
+    html_writer::empty_tag('input', [
+        'type' => 'number',
+        'id' => 'ped-promo-leaderboard-hide',
+        'name' => 'leaderboardhidehours',
+        'min' => '0',
+        'max' => '2160',
+        'step' => '1',
+        'required' => 'required',
+        'class' => 'form-control',
+        'value' => $existing?->get_leaderboard_hide_hours() ?? 0,
+    ]),
+    get_string('commerce_education_xp_hide_hours_help', 'local_subscriptions')
 );
 echo html_writer::end_div();
 $rendersectionend();

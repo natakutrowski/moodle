@@ -286,3 +286,15 @@ $tasks[] = [
     'month' => '*',
     'dayofweek' => '*',
 ];
+
+// A Moodle completion flag changes only once. Re-attempts are reconciled from
+// persisted completed H5P attempts and genuine submission events.
+$tasks[] = [
+    'classname' => '\\local_subscriptions\\task\\reconcile_promotion_xp_replays_task',
+    'blocking' => 0,
+    'minute' => '*/5',
+    'hour' => '*',
+    'day' => '*',
+    'dayofweek' => '*',
+    'month' => '*',
+];

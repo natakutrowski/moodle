@@ -130,7 +130,9 @@ final class CommercePedagogicalPromotionRepository {
                 ? (int)$record->modifiedby
                 : null,
             (int)$record->timecreated,
-            (int)$record->timemodified
+            (int)$record->timemodified,
+            $record->xpstartsat !== null ? (int)$record->xpstartsat : null,
+            (int)$record->leaderboardhidehours
         );
     }
 
@@ -148,6 +150,8 @@ final class CommercePedagogicalPromotionRepository {
             'startsat' => $promotion->get_starts_at(),
             'endsat' => $promotion->get_ends_at(),
             'capacitytotal' => $promotion->get_capacity_total(),
+            'xpstartsat' => $promotion->get_xp_starts_at(),
+            'leaderboardhidehours' => $promotion->get_leaderboard_hide_hours(),
             'createdby' => $promotion->get_created_by(),
             'modifiedby' => $promotion->get_modified_by(),
             'timecreated' => $promotion->get_time_created(),

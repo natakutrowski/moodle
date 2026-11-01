@@ -12963,3 +12963,12 @@ $string['h5p_audio_campusfr_enabled'] = 'Enable CampusFR H5P.Audio';
 $string['h5p_audio_campusfr_enabled_desc'] = 'Load the shared audio player script (based on CampusFR Audio 1.5.37) after the official H5P.Audio 1.5 library.';
 $string['h5p_memory_campusfr_enabled'] = 'Enable CampusFR H5P.MemoryGame';
 $string['h5p_memory_campusfr_enabled_desc'] = 'Load the shared Memory Game card-audio script (based on CampusFR Memory Game 1.3.55) after the official H5P.MemoryGame 1.3 library. Validate compatibility with the installed original library before enabling in PROD.';
+
+// Promotion XP: competition start / leaderboard reveal.
+$string['commerce_education_xp_settings_title'] = 'Competition XP and leaderboard';
+$string['commerce_education_xp_settings_help'] = 'Independent of the pedagogical opening calendar. Points can only count from the configured start; hiding the leaderboard does not stop scoring.';
+$string['commerce_education_xp_start_label'] = 'Start counting promotion XP';
+$string['commerce_education_xp_start_help'] = 'Optional for existing promotions (no additional start gate). Set the exact competition start independently of the promotion start or lesson release schedule. Time zone: Europe/Paris.';
+$string['commerce_education_xp_hide_hours_label'] = 'Hide leaderboard for (hours)';
+$string['commerce_education_xp_hide_hours_help'] = '0 = show immediately. The duration starts at the XP counting date, not at purchase or enrolment. Maximum 2160 hours (90 days).';
+$string['commerce_education_xp_reveal_notice'] = 'The promotion leaderboard will be revealed on {$a}. You can keep earning eligible XP in the meantime.';

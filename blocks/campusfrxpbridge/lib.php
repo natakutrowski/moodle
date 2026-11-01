@@ -96,15 +96,7 @@ function block_campusfrxpbridge_xp_points_suppressed_by_reason_limit(
     }
 
     try {
-        $reasonclass = get_class($reason);
-        $reasonname = $reasonclass;
-        $prefix = 'block_xp\\local\\reason\\';
-        if (str_starts_with($reasonname, $prefix)) {
-            $reasonname = substr($reasonname, strlen($prefix));
-            if (str_ends_with($reasonname, '_reason')) {
-                $reasonname = substr($reasonname, 0, -7);
-            }
-        }
+        $reasonname = \local_subscriptions\commerce\education\xp\CommercePedagogicalActivityXpGate::normalise_reason_name(get_class($reason));
 
         $subtype = $reason instanceof \block_xp\local\reason\reason_with_subtype
             ? $reason->get_subtype()
@@ -162,5 +154,50 @@ function block_campusfrxpbridge_xp_points_suppressed_by_reason_limit(
         );
     } catch (\Throwable $e) {
         debugging('CampusFR Level Up XP team-only replay bridge failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
+    }
+}
+
+/**
+ * Award promotion-only XP with authoritative Level Up action provenance.
+ * Only opt-in promotions with configured XP start use this callback. No
+ * personal XP is changed. Unknown/non-module origins are refused by the gate.
+ *
+ * @param \context $sourcecontext The ORIGINAL activity context (not the world).
+ * @param int $id Learner user id.
+ * @param int $points XP personally awarded by Level Up.
+ * @param int $ruleid Matched Level Up rule id.
+ * @param \block_xp\local\reason\reason $reason Matched reward reason.
+ */
+function block_campusfrxpbridge_xp_points_awarded_with_source(
+    \context $sourcecontext,
+    $id,
+    $points,
+    $ruleid,
+    \block_xp\local\reason\reason $reason
+): void {
+    $userid = (int)$id;
+    $points = (int)$points;
+    $ruleid = (int)$ruleid;
+    if ($userid <= 0 || $points <= 0 || $ruleid <= 0) {
+        return;
+    }
+    try {
+        $reasonname = \local_subscriptions\commerce\education\xp\CommercePedagogicalActivityXpGate::normalise_reason_name(get_class($reason));
+        $subtype = $reason instanceof \block_xp\local\reason\reason_with_subtype
+            ? $reason->get_subtype()
+            : null;
+        $sourcecontextid = (int)$sourcecontext->id;
+        // Some actions are course-context events but the reason identifies
+        // a precise module context. Prefer the module context when available.
+        if ($sourcecontext->contextlevel !== CONTEXT_MODULE &&
+                $reason instanceof \block_xp\local\reason\reason_with_tracking) {
+            $sourcecontextid = (int)($reason->get_env_id() ?? 0);
+        }
+        \local_subscriptions\commerce\education\xp\CommercePedagogicalLevelupXpBridgeService::create()
+            ->record_qualified_activity_gain(
+                $userid, $points, time(), $sourcecontextid, $ruleid, $reasonname, $subtype
+            );
+    } catch (\Throwable $e) {
+        debugging('CampusFR provenance-aware XP bridge failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
     }
 }

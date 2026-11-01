@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026102802" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026110101" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
         <TABLE NAME="user_subscription" COMMENT="Table storing user subscription data">
             <FIELDS>
@@ -2482,6 +2482,8 @@
                 <FIELD NAME="salesclosesat" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="startsat" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="endsat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="xpstartsat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="leaderboardhidehours" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
                 <FIELD NAME="capacitytotal" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="modifiedby" TYPE="int" LENGTH="10" NOTNULL="false" />

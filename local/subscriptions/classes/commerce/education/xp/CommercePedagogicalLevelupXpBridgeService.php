@@ -66,6 +66,10 @@ final class CommercePedagogicalLevelupXpBridgeService {
         }
 
         $promotionid = (int)$access->promotionid;
+        // A configured competition uses the provenance-aware callback instead.
+        if ($this->db->get_field('local_subs_commerce_ped_promo', 'xpstartsat', ['id' => $promotionid]) !== null) {
+            return null;
+        }
         if (!$this->is_current_active_participation($promotionid, $courseid, $userid, $timeearned)) {
             return null;
         }
@@ -117,7 +121,8 @@ final class CommercePedagogicalLevelupXpBridgeService {
         $rows = $this->db->get_records_sql(
             "SELECT pa.id,
                     pa.courseid,
-                    pa.promotionid
+                    pa.promotionid,
+                    pp.xpstartsat
                FROM {local_subs_commerce_ped_access} pa
                JOIN {local_subs_commerce_ped_join} pj
                  ON pj.userid = pa.userid
@@ -142,6 +147,11 @@ final class CommercePedagogicalLevelupXpBridgeService {
                 continue;
             }
             $seen[$promotionid] = true;
+            // Generic points_increased has no activity provenance. Never trust
+            // it for a promotion using an explicit scoring start/calendar.
+            if ($row->xpstartsat !== null) {
+                continue;
+            }
             $results[$promotionid] = $this->xpservice->record_once(
                 $promotionid,
                 $userid,
@@ -154,6 +164,66 @@ final class CommercePedagogicalLevelupXpBridgeService {
         }
 
         return $results;
+    }
+
+    /**
+     * Score a positive Level Up rule from a known Moodle activity context.
+     * This hook runs only after Level Up awarded the personal points.
+     *
+     * @return array<int,CommercePedagogicalXpRecordResult>
+     */
+    public function record_qualified_activity_gain(
+        int $userid,
+        int $points,
+        int $timeearned,
+        int $sourcecontextid,
+        int $ruleid,
+        string $reason,
+        ?string $subtype
+    ): array {
+        if ($userid <= 0 || $points <= 0 || $timeearned <= 0 || $sourcecontextid <= 0 || $ruleid <= 0) {
+            return [];
+        }
+        [$statussql, $statusparams] = $this->db->get_in_or_equal(
+            self::SCORING_STATUSES, SQL_PARAMS_NAMED, 'eligiblexpstatus'
+        );
+        $rows = $this->db->get_records_sql(
+            "SELECT pj.id, pj.promotionid, pj.courseid, pp.xpstartsat
+               FROM {local_subs_commerce_ped_access} pa
+               JOIN {local_subs_commerce_ped_join} pj
+                 ON pj.userid = pa.userid AND pj.courseid = pa.courseid
+                AND pj.promotionid = pa.promotionid AND pj.state = :joinstate
+               JOIN {local_subs_commerce_ped_promo} pp ON pp.id = pj.promotionid
+              WHERE pa.userid = :userid AND pa.promotionid IS NOT NULL
+                AND pp.xpstartsat IS NOT NULL
+                AND pp.status {$statussql}
+                AND (pp.endsat IS NULL OR pp.endsat >= :timeearned)
+           ORDER BY pj.id ASC",
+            ['userid' => $userid, 'joinstate' => 'active', 'timeearned' => $timeearned] + $statusparams
+        );
+        $gate = new CommercePedagogicalActivityXpGate($this->db);
+        $results = [];
+        foreach ($rows as $row) {
+            $promotionid = (int)$row->promotionid;
+            if ($timeearned < (int)$row->xpstartsat || isset($results[$promotionid])) {
+                continue;
+            }
+            $cmid = $gate->eligible_cmid($promotionid, (int)$row->courseid, $sourcecontextid, $timeearned);
+            if ($cmid === null) {
+                continue;
+            }
+            $results[$promotionid] = $this->xpservice->record_once(
+                $promotionid, $userid, 'block_xp', 'eligible_activity',
+                CommercePedagogicalActivityXpGate::source_key($cmid, $ruleid, $reason, $subtype),
+                $points, $timeearned
+            );
+        }
+        return $results;
+    }
+
+    private function is_after_start(int $promotionid, int $timeearned): bool {
+        $start = $this->db->get_field('local_subs_commerce_ped_promo', 'xpstartsat', ['id' => $promotionid]);
+        return $start === false || $start === null || $timeearned >= (int)$start;
     }
 
     private function validate_gain(

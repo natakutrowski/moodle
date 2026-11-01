@@ -10723,5 +10723,20 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         );
     }
 
+    if ($oldversion < 2026110101) {
+        // Independent promotion XP scoring start and delayed leaderboard reveal.
+        $table = new xmldb_table('local_subs_commerce_ped_promo');
+        $field = new xmldb_field('xpstartsat', XMLDB_TYPE_INTEGER, '10', null, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('leaderboardhidehours', XMLDB_TYPE_INTEGER, '10', null,
+            XMLDB_NOTNULL, null, 0, 'xpstartsat');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026110101, 'local', 'subscriptions');
+    }
+
     return true;
 }

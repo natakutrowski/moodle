@@ -12798,3 +12798,12 @@ $string['h5p_audio_campusfr_enabled'] = 'Activer H5P.Audio (CampusFR)';
 $string['h5p_audio_campusfr_enabled_desc'] = 'Charger le lecteur audio partagé CampusFR (base 1.5.37) après le script officiel H5P.Audio 1.5.';
 $string['h5p_memory_campusfr_enabled'] = 'Activer Memory Game (CampusFR)';
 $string['h5p_memory_campusfr_enabled_desc'] = 'Charger le lecteur audio partagé des cartes CampusFR (base 1.3.55) après le script officiel H5P.MemoryGame 1.3. Vérifier la compatibilité avec la bibliothèque de production avant activation.';
+
+// Promotion XP: competition start / leaderboard reveal.
+$string['commerce_education_xp_settings_title'] = 'XP de promotion et classement';
+$string['commerce_education_xp_settings_help'] = 'Indépendants du calendrier pédagogique. Le masquage du classement n’arrête pas le comptage des points.';
+$string['commerce_education_xp_start_label'] = 'Début du comptage des XP de promotion';
+$string['commerce_education_xp_start_help'] = 'Facultatif pour les promotions existantes (aucun verrou supplémentaire). Définis la date du concours indépendamment du début de la promotion ou des leçons. Fuseau horaire : Europe/Paris.';
+$string['commerce_education_xp_hide_hours_label'] = 'Masquer le classement pendant (heures)';
+$string['commerce_education_xp_hide_hours_help'] = '0 = classement visible immédiatement. La durée commence au début du comptage XP, pas à l’achat ni à l’inscription. Maximum 2160 heures (90 jours).';
+$string['commerce_education_xp_reveal_notice'] = 'Le classement de la promotion sera dévoilé le {$a}. Tu peux déjà gagner des XP éligibles.';
