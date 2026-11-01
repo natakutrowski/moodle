@@ -7,10 +7,8 @@
                 form.querySelector('input[name="campusremember"]')) {
             return;
         }
-        var lang = (document.documentElement.lang || 'en').toLowerCase();
-        var text = lang.startsWith('ru') ? 'Оставаться в системе 30 дней на этом устройстве' :
-            lang.startsWith('fr') ? 'Rester connecté pendant 30 jours sur cet appareil' :
-            'Keep me signed in for 30 days on this device';
+        // Translations are supplied by Moodle's language-string API.
+        var text = M.util.get_string('rememberme', 'auth_campusremember');
         var box = document.createElement('div');
         box.className = 'form-check mb-3 campusremember-optin';
         var input = document.createElement('input');

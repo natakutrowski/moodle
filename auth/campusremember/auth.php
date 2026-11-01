@@ -24,7 +24,8 @@ class auth_plugin_campusremember extends auth_plugin_base {
         global $PAGE;
         // Restore only on GET; never intercept a submitted login form.
         \auth_campusremember\manager::try_restore();
-        $PAGE->requires->js(new moodle_url('/auth/campusremember/js/login.js'));
+        $PAGE->requires->string_for_js('rememberme', 'auth_campusremember');
+        $PAGE->requires->js(new moodle_url('/auth/campusremember/js/login.js', ['v' => '2026110100']));
     }
 
     public function prelogout_hook() {

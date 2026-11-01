@@ -6,3 +6,4 @@ $string['privacy:metadata:userid'] = 'Utilisateur lié à cet appareil';
 $string['privacy:metadata:token'] = 'Jeton haché et vérificateur de changement de mot de passe';
 $string['privacy:metadata:timestamp'] = 'Date associée à la connexion persistante';
 $string['privacy:metadata:table'] = 'Jetons des appareils dont la connexion est mémorisée';
+$string['rememberme'] = 'Se souvenir de moi';

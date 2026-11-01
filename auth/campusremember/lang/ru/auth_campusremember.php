@@ -6,3 +6,4 @@ $string['privacy:metadata:userid'] = 'Пользователь этого уст
 $string['privacy:metadata:token'] = 'Хеш токена и контроль изменения пароля';
 $string['privacy:metadata:timestamp'] = 'Дата, связанная с автоматическим входом';
 $string['privacy:metadata:table'] = 'Токены для запомненных устройств';
+$string['rememberme'] = 'Запомнить меня';
