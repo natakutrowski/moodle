@@ -35,6 +35,11 @@ foreach ($definitions as $shortname => $definition) {
             cli_error('Role shortname collision: ' . $shortname . '. Resolve manually before applying.');
         }
     }
+    if ($role) {
+        // Do not overwrite administrator customisations made in the Moodle roles UI.
+        mtrace('  Existing role: preserving all live capability assignments.');
+        continue;
+    }
     $wanted = array_fill_keys($definition['capabilities'], true);
     foreach ($DB->get_records('capabilities', ['component' => 'local_subscriptions']) as $record) {
         $capability = $record->name;

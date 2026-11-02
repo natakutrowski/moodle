@@ -372,4 +372,21 @@ final class commerce_797m53_student_team_leaderboard_test extends advanced_testc
             count($service->recent_for_target($promotionid, 'group', $groupid)));
         self::assertSame($personalbefore, $DB->count_records('block_xp_logs', ['userid' => $user->id]));
     }
+    public function test_crm_group_podium_and_roster_use_promotion_xp_only(): void {
+        $root = dirname(__DIR__, 3);
+        $source = file_get_contents($root . '/admin/commerce/education/groups.php');
+        $css = file_get_contents($root . '/styles.css');
+        self::assertStringContainsString('CommercePedagogicalXpRepository::create($DB)->points_by_user($promotionid)', $source);
+        self::assertStringContainsString('commerce-ped-m74-group-roster', $source);
+        self::assertStringContainsString("'/local/subscriptions/admin/users/view.php'", $source);
+        self::assertStringContainsString('is-podium-', $source);
+        self::assertStringContainsString('commerce_education_medal_gold', $source);
+        $hub = file_get_contents($root . '/templates/customer/hub.mustache');
+        self::assertStringContainsString('{{#isgold}}', $hub);
+        self::assertStringContainsString('{{#mygold}}', $hub);
+        $student = file_get_contents($root . '/classes/commerce/education/xp/CommercePedagogicalStudentLeaderboardService.php');
+        self::assertStringContainsString("'isgold' =>", $student);
+        self::assertStringContainsString('.commerce-ped-m74-group-card.is-podium-gold', $css);
+    }
+
 }

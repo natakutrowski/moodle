@@ -91,11 +91,41 @@ final class CommercePedagogicalPromotionRepository {
             );
     }
 
+    /**
+     * Fail-closed deletion policy: only genuinely unused, unpublished drafts.
+     * Do not orphan student accesses, purchases, timetables, scores or groups.
+     */
+    public function is_deletable(int $id): bool {
+        $promotion = $this->get_by_id($id);
+        if ($promotion === null || $promotion->get_status() !== CommercePedagogicalPromotionStatus::DRAFT
+                || $promotion->is_published()) {
+            return false;
+        }
+
+        foreach ([
+            'local_subs_commerce_ped_join',
+            'local_subs_commerce_ped_access',
+            'local_subs_commerce_ped_group',
+            'local_subs_commerce_ped_gcfg',
+            'local_subs_commerce_ped_cal',
+            'local_subs_commerce_ped_offer',
+            'local_subs_commerce_ped_jprice',
+            'local_subs_commerce_ped_resv',
+            'local_subs_commerce_ped_xp',
+            'local_subs_commerce_ped_xpadj',
+        ] as $table) {
+            if ($this->db->record_exists($table, ['promotionid' => $id])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public function delete(int $id): void {
-        $this->db->delete_records(
-            self::TABLE,
-            ['id' => $id]
-        );
+        if (!$this->is_deletable($id)) {
+            throw new \moodle_exception('commerce_education_delete_protected', 'local_subscriptions');
+        }
+        $this->db->delete_records(self::TABLE, ['id' => $id]);
     }
 
     private function hydrate(

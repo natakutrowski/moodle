@@ -15,6 +15,7 @@ use local_subscriptions\commerce\education\promotion\CommercePedagogicalPromotio
 use local_subscriptions\commerce\education\lifecycle\CommercePedagogicalParticipationRepository;
 use local_subscriptions\commerce\education\promotion\CommercePedagogicalPromotionRepository;
 use local_subscriptions\commerce\education\xp\CommercePedagogicalGroupLeaderboardService;
+use local_subscriptions\commerce\education\xp\CommercePedagogicalXpRepository;
 use local_subscriptions\commerce\education\xp\CommercePedagogicalXpAdjustmentService;
 use local_subscriptions\commerce\education\xp\CommercePedagogicalXpBonusHistoryRenderer;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
@@ -27,7 +28,7 @@ use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 global $DB, $OUTPUT, $PAGE, $USER;
 
-$context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
+$context = AdminSecurity::require(Capabilities::MANAGE_PROMOTIONS);
 $promotionid = required_param('promotionid', PARAM_INT);
 
 $promotion = CommercePedagogicalPromotionRepository::create($DB)->get_by_id($promotionid);
@@ -57,6 +58,7 @@ if (data_submitted()) {
     $action = required_param('action', PARAM_ALPHA);
 
     if ($action === 'xpcancel') {
+        require_capability(Capabilities::MANAGE_PROMOTION_XP, $context);
         if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
             throw new \coding_exception('Manual XP cancellation requires POST.');
         }
@@ -70,6 +72,7 @@ if (data_submitted()) {
     }
 
     if ($action === 'xpbonus') {
+        require_capability(Capabilities::MANAGE_PROMOTION_XP, $context);
         if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
             throw new \coding_exception('Manual XP grants require POST.');
         }
@@ -242,6 +245,7 @@ foreach ($offerlinks as $offerlink) {
     $offernames[(int)$offerlink->productid] = $label;
 }
 
+$canmanagexp = has_capability(Capabilities::MANAGE_PROMOTION_XP, $context);
 $xpbonusservice = CommercePedagogicalXpAdjustmentService::create($DB);
 $xpbonusallowed = ($promotion->get_xp_starts_at() === null || time() >= $promotion->get_xp_starts_at())
     && ($promotion->get_ends_at() === null || time() <= $promotion->get_ends_at())
@@ -262,6 +266,31 @@ foreach ($activejoinrecords as $join) {
     $activeuserids[(int)$join->userid] = true;
 }
 $activeparticipants = count($activeuserids);
+
+// One batched query for all visible groups: only active members with active joins.
+// Use the same promotion-only XP repository as the participant and group rankings.
+$membersbygroup = [];
+$memberpoints = CommercePedagogicalXpRepository::create($DB)->points_by_user($promotionid);
+$memberrows = $DB->get_recordset_sql(
+    "SELECT m.id, m.groupid, m.userid, u.firstname, u.lastname,
+              u.firstnamephonetic, u.lastnamephonetic, u.middlename, u.alternatename
+       FROM {local_subs_commerce_ped_gmem} m
+       JOIN {local_subs_commerce_ped_group} g ON g.id = m.groupid
+       JOIN {user} u ON u.id = m.userid AND u.deleted = 0
+      WHERE g.promotionid = :promotionid
+        AND m.active = 1
+        AND EXISTS (
+            SELECT 1 FROM {local_subs_commerce_ped_join} j
+             WHERE j.promotionid = :joinpromotionid
+               AND j.userid = m.userid AND j.state = 'active'
+        )
+   ORDER BY g.position, u.lastname, u.firstname, m.id",
+    ['promotionid' => $promotionid, 'joinpromotionid' => $promotionid]
+);
+foreach ($memberrows as $member) {
+    $membersbygroup[(int)$member->groupid][] = $member;
+}
+$memberrows->close();
 
 $assigneduserids = [];
 $occupied = 0;
@@ -526,10 +555,27 @@ if ($groups === []) {
             ? $offernames[$productid]
             : get_string('commerce_education_m74_offer_unbound', 'local_subscriptions');
 
-        echo html_writer::start_div('commerce-ped-m74-group-card' . ($group->is_active() ? '' : ' is-inactive'));
+        // Ties share a medal. Do not decorate zero-point groups before competition starts.
+        $rank = $entry !== null && $entry->get_points() > 0 ? (int)$entry->get_rank() : 0;
+        $medal = match ($rank) {
+            1 => ['gold', '🥇', 'commerce_education_medal_gold'],
+            2 => ['silver', '🥈', 'commerce_education_medal_silver'],
+            3 => ['bronze', '🥉', 'commerce_education_medal_bronze'],
+            default => null,
+        };
+        echo html_writer::start_div('commerce-ped-m74-group-card'
+            . ($group->is_active() ? '' : ' is-inactive')
+            . ($medal !== null ? ' is-podium-' . $medal[0] : ''));
         echo html_writer::start_div('commerce-ped-m74-group-card-head');
         echo html_writer::start_div('commerce-ped-m74-group-title-wrap');
         echo html_writer::tag('h4', s($group->get_display_name()), ['class' => 'commerce-ped-m74-group-title']);
+        if ($medal !== null) {
+            echo html_writer::span(
+                html_writer::span($medal[1], '', ['aria-hidden' => 'true'])
+                . ' ' . get_string($medal[2], 'local_subscriptions'),
+                'commerce-ped-m74-medal is-' . $medal[0]
+            );
+        }
         echo html_writer::div(s($offername), 'commerce-ped-m74-group-offer');
         echo html_writer::end_div();
         echo html_writer::span(
@@ -593,6 +639,38 @@ if ($groups === []) {
         echo html_writer::end_div();
         echo html_writer::end_div();
         echo html_writer::end_div();
+
+        // Collapsible roster: members and their *promotion* scores, not personal XP.
+        $roster = $membersbygroup[$groupid] ?? [];
+        echo html_writer::start_tag('details', ['class' => 'commerce-ped-m74-group-roster']);
+        echo html_writer::tag('summary',
+            html_writer::tag('i', '', ['class' => 'fa fa-users', 'aria-hidden' => 'true'])
+            . ' ' . get_string('commerce_education_group_roster_title', 'local_subscriptions')
+            . ' (' . count($roster) . ')',
+            ['class' => 'commerce-ped-m74-group-roster-summary']
+        );
+        if (!$roster) {
+            echo html_writer::div(get_string('commerce_education_group_roster_empty', 'local_subscriptions'),
+                'small text-muted commerce-ped-m74-roster-empty');
+        } else {
+            echo html_writer::start_tag('ul', ['class' => 'commerce-ped-m74-roster-list']);
+            foreach ($roster as $member) {
+                $userid = (int)$member->userid;
+                echo html_writer::tag('li',
+                    html_writer::link(
+                        new moodle_url('/local/subscriptions/admin/users/view.php', ['id' => $userid]),
+                        s(fullname($member)),
+                        ['title' => get_string('commerce_education_xp_user360_link', 'local_subscriptions')]
+                    ) . html_writer::span(
+                        (string)($memberpoints[$userid] ?? 0) . ' XP',
+                        'commerce-ped-m74-roster-xp'
+                    ),
+                    ['class' => 'commerce-ped-m74-roster-member']
+                );
+            }
+            echo html_writer::end_tag('ul');
+        }
+        echo html_writer::end_tag('details');
 
         echo html_writer::start_div('commerce-ped-m74-group-actions');
 
@@ -682,6 +760,7 @@ if ($groups === []) {
         echo html_writer::end_tag('details');
 
         if ($group->is_active()) {
+            if ($canmanagexp) {
             echo html_writer::start_tag('details', ['class' => 'commerce-ped-m741-group-edit commerce-ped-xp-bonus']);
             echo html_writer::tag('summary',
                 get_string('commerce_education_xp_manual_heading', 'local_subscriptions'),
@@ -728,6 +807,7 @@ if ($groups === []) {
                 }
             }
             echo html_writer::end_tag('details');
+            }
         }
 
         echo html_writer::start_tag('form', [

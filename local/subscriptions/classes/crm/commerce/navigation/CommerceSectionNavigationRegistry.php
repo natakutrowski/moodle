@@ -97,7 +97,7 @@ final class CommerceSectionNavigationRegistry {
                 get_string('crm_commerce_nav_education', 'local_subscriptions'),
                 'fa-graduation-cap',
                 new moodle_url('/local/subscriptions/admin/commerce/education/promotions.php'),
-                Capabilities::MANAGE_CONFIGURATION,
+                Capabilities::VIEW_PROMOTIONS,
                 45
             ),
             new CommerceSectionNavigationItem(

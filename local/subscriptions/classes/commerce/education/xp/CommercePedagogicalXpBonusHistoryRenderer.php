@@ -9,7 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 /** CRM-only accessible, audit-friendly presentation of manual promotion bonuses. */
 final class CommercePedagogicalXpBonusHistoryRenderer {
     public static function render(\stdClass $record, \moodle_url $actionurl,
-        string $targettype, int $targetid): string {
+        string $targettype, int $targetid, bool $cancancel = true): string {
         $cancelled = $record->cancelledat !== null;
         $actor = static function(int $userid): string {
             if ($userid <= 0) {
@@ -35,7 +35,7 @@ final class CommercePedagogicalXpBonusHistoryRenderer {
             );
         }
         $result = \html_writer::start_div('commerce-ped-xp-history-entry' . ($cancelled ? ' is-cancelled' : ''));
-        if (!$cancelled) {
+        if (!$cancelled && $cancancel) {
             $result .= \html_writer::start_tag('form', [
                 'method' => 'post', 'action' => $actionurl->out(false),
                 'class' => 'commerce-ped-xp-cancel-form',
@@ -61,7 +61,7 @@ final class CommercePedagogicalXpBonusHistoryRenderer {
                     'aria-label' => get_string('commerce_education_xp_manual_cancel', 'local_subscriptions'),
                 ]);
             $result .= \html_writer::end_tag('form');
-        } else {
+        } else if ($cancelled) {
             $result .= \html_writer::span(
                 \html_writer::tag('i', '', ['class' => 'fa fa-ban', 'aria-hidden' => 'true']),
                 'commerce-ped-xp-cancel-icon',

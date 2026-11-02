@@ -191,4 +191,48 @@ final class commerce_797c_pedagogical_promotion_test extends advanced_testcase {
             CommercePedagogicalPromotion::class
         );
     }
+    public function test_deletion_only_allows_unpublished_unlinked_drafts(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $now = time();
+        $repo = CommercePedagogicalPromotionRepository::create($DB);
+        $draft = $repo->save(new CommercePedagogicalPromotion(null, 'm8-empty-draft', 'Draft',
+            (int)$course->id, CommercePedagogicalPromotionStatus::DRAFT, false,
+            null, null, null, null, null, null, null, $now, $now));
+        $id = (int)$draft->get_id();
+        self::assertTrue($repo->is_deletable($id));
+        $DB->insert_record('local_subs_commerce_ped_cal', (object)[
+            'promotionid' => $id, 'itemtype' => 'course_section', 'itemid' => 7,
+            'position' => 0, 'unlocksat' => $now, 'timecreated' => $now,
+            'timemodified' => $now,
+        ]);
+        self::assertFalse($repo->is_deletable($id));
+        try {
+            $repo->delete($id);
+            self::fail('Linked promotion must not be deleted');
+        } catch (\moodle_exception $e) {
+            self::assertSame('commerce_education_delete_protected', $e->errorcode);
+        }
+        self::assertTrue($DB->record_exists('local_subs_commerce_ped_promo', ['id' => $id]));
+        $DB->delete_records('local_subs_commerce_ped_cal', ['promotionid' => $id]);
+        self::assertTrue($repo->is_deletable($id));
+        $repo->delete($id);
+        self::assertFalse($DB->record_exists('local_subs_commerce_ped_promo', ['id' => $id]));
+    }
+
+    public function test_promotion_deletion_is_not_exposed_by_get_and_is_admin_only(): void {
+        $root = dirname(__DIR__, 3);
+        $list = file_get_contents($root . '/admin/commerce/education/promotions.php');
+        $edit = file_get_contents($root . '/admin/commerce/education/promotion_edit.php');
+        self::assertStringNotContainsString("optional_param('delete'", $list);
+        self::assertStringNotContainsString('deleteurl', $list);
+        self::assertStringContainsString('is_siteadmin((int)$USER->id)', $edit);
+        self::assertStringContainsString('require_sesskey()', $edit);
+        self::assertStringContainsString("'REQUEST_METHOD'", $edit);
+        self::assertStringContainsString('hash_equals(', $edit);
+        self::assertStringContainsString("'method' => 'post'", $edit);
+        self::assertStringContainsString('commerce-ped-promotion-danger-zone', $edit);
+    }
+
 }

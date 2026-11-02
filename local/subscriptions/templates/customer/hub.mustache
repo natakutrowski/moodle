@@ -112,7 +112,12 @@
                                         <small>{{promotionname}}</small>
                                         <strong>{{groupname}}</strong>
                                     </div>
-                                    <div class="commerce-customer-hub__team-rank">#{{grouprank}}</div>
+                                    <div class="commerce-customer-hub__team-rank">
+                                        {{#mygold}}<span title="{{#str}}commerce_education_medal_gold, local_subscriptions{{/str}}">🥇</span>{{/mygold}}
+                                        {{#mysilver}}<span title="{{#str}}commerce_education_medal_silver, local_subscriptions{{/str}}">🥈</span>{{/mysilver}}
+                                        {{#mybronze}}<span title="{{#str}}commerce_education_medal_bronze, local_subscriptions{{/str}}">🥉</span>{{/mybronze}}
+                                        #{{grouprank}}
+                                    </div>
                                 </div>
                                 <div class="commerce-customer-hub__team-meta">
                                     <span><strong>{{grouppoints}}</strong> {{#str}}commerce_customer_hub_team_points, local_subscriptions{{/str}}</span>
@@ -121,7 +126,12 @@
                                 <ol class="commerce-customer-hub__team-ranking">
                                     {{#leaderboard}}
                                         <li class="{{#ismine}}is-mine{{/ismine}} {{#separated}}is-separated{{/separated}}">
-                                            <span class="commerce-customer-hub__team-position">#{{rank}}</span>
+                                            <span class="commerce-customer-hub__team-position">
+                                                {{#isgold}}<span title="{{#str}}commerce_education_medal_gold, local_subscriptions{{/str}}">🥇</span>{{/isgold}}
+                                                {{#issilver}}<span title="{{#str}}commerce_education_medal_silver, local_subscriptions{{/str}}">🥈</span>{{/issilver}}
+                                                {{#isbronze}}<span title="{{#str}}commerce_education_medal_bronze, local_subscriptions{{/str}}">🥉</span>{{/isbronze}}
+                                                #{{rank}}
+                                            </span>
                                             <span class="commerce-customer-hub__team-name">{{groupname}}{{#ismine}} <small>{{#str}}commerce_customer_hub_team_yours, local_subscriptions{{/str}}</small>{{/ismine}}</span>
                                             <strong>{{points}}</strong>
                                         </li>

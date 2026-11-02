@@ -23,7 +23,7 @@ use local_subscriptions\crm\navigation\CrmNavigationKeys;
 global $DB, $OUTPUT, $PAGE, $USER;
 
 $context = AdminSecurity::require(
-    Capabilities::MANAGE_CONFIGURATION
+    Capabilities::MANAGE_PROMOTIONS
 );
 
 $id = optional_param('id', 0, PARAM_INT);
@@ -106,6 +106,25 @@ $parsecompetitiondate = static function(string $name) use ($competitiontimezone)
     }
     return $date->getTimestamp();
 };
+
+// Deletion is never triggered by GET or by the regular save form.
+if (data_submitted() && optional_param('deletepromotion', 0, PARAM_BOOL)) {
+    require_sesskey();
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || !is_siteadmin((int)$USER->id)) {
+        throw new \moodle_exception('nopermissions', 'error', '', 'deletepromotion');
+    }
+    if ($existing === null || !$repository->is_deletable((int)$existing->get_id())) {
+        throw new \moodle_exception('commerce_education_delete_protected', 'local_subscriptions');
+    }
+    $confirmed = trim(required_param('confirmkey', PARAM_ALPHANUMEXT));
+    if (!hash_equals($existing->get_promotion_key(), $confirmed)) {
+        throw new \moodle_exception('commerce_education_delete_wrong_key', 'local_subscriptions');
+    }
+    $repository->delete((int)$existing->get_id());
+    redirect(new moodle_url('/local/subscriptions/admin/commerce/education/promotions.php'),
+        get_string('commerce_education_delete_success', 'local_subscriptions'),
+        null, \core\output\notification::NOTIFY_SUCCESS);
+}
 
 if (
     data_submitted()
@@ -688,6 +707,47 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 
 echo html_writer::end_tag('form');
+
+// Deliberately separated from the save form, at the very bottom of the editor.
+// Site administrators only; a confirmation key and POST/sesskey are mandatory.
+if ($existing !== null && is_siteadmin((int)$USER->id)) {
+    $deletable = $repository->is_deletable((int)$existing->get_id());
+    echo html_writer::start_tag('details', ['class' => 'commerce-ped-promotion-danger-zone']);
+    echo html_writer::tag('summary',
+        html_writer::tag('i', '', ['class' => 'fa fa-exclamation-triangle', 'aria-hidden' => 'true'])
+        . ' ' . get_string('commerce_education_delete_danger_title', 'local_subscriptions'));
+    echo html_writer::div(get_string('commerce_education_delete_danger_help', 'local_subscriptions'),
+        'commerce-ped-promotion-danger-help');
+    if ($deletable) {
+        echo html_writer::start_tag('form', [
+            'method' => 'post', 'action' => $pageurl->out(false),
+            'class' => 'commerce-ped-promotion-danger-form',
+            'onsubmit' => 'return confirm(' . json_encode(
+                get_string('commerce_education_delete_confirm', 'local_subscriptions'),
+                JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG
+            ) . ');',
+        ]);
+        foreach (['sesskey' => sesskey(), 'deletepromotion' => 1] as $key => $value) {
+            echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $key, 'value' => $value]);
+        }
+        echo html_writer::tag('label',
+            get_string('commerce_education_delete_key_label', 'local_subscriptions', $existing->get_promotion_key()),
+            ['for' => 'ped-promo-confirm-key', 'class' => 'form-label']);
+        echo html_writer::empty_tag('input', [
+            'id' => 'ped-promo-confirm-key', 'name' => 'confirmkey', 'type' => 'text',
+            'class' => 'form-control form-control-sm', 'required' => 'required',
+            'autocomplete' => 'off',
+        ]);
+        echo html_writer::tag('button', get_string('delete'), [
+            'type' => 'submit', 'class' => 'btn btn-sm btn-outline-danger',
+        ]);
+        echo html_writer::end_tag('form');
+    } else {
+        echo html_writer::div(get_string('commerce_education_delete_protected', 'local_subscriptions'),
+            'small text-muted');
+    }
+    echo html_writer::end_tag('details');
+}
 
 echo CrmWorkspaceRenderer::end();
 echo $OUTPUT->footer();

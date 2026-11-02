@@ -12989,3 +12989,24 @@ $string['commerce_education_xp_manual_cancel'] = 'Cancel this bonus';
 $string['commerce_education_xp_manual_cancel_confirm'] = 'Cancel this XP bonus? It will remain in the audit history but no longer count toward scores.';
 $string['commerce_education_xp_manual_cancelled'] = 'Cancelled';
 $string['commerce_education_xp_manual_cancel_success'] = 'XP bonus cancelled. Audit history retained.';
+
+// M8 — team podium and safe promotion administration.
+$string['commerce_education_group_roster_title'] = 'Group learners';
+$string['commerce_education_group_roster_empty'] = 'No active learners in this group.';
+$string['commerce_education_medal_gold'] = 'Gold · 1st place';
+$string['commerce_education_medal_silver'] = 'Silver · 2nd place';
+$string['commerce_education_medal_bronze'] = 'Bronze · 3rd place';
+$string['commerce_education_delete_danger_title'] = 'Danger zone · delete promotion';
+$string['commerce_education_delete_danger_help'] = 'Site administrators only. Only unpublished, empty drafts with no linked data may be deleted. This action cannot be undone.';
+$string['commerce_education_delete_protected'] = 'Deletion blocked: this promotion is not an empty draft. Keep it to preserve students, groups, timetables and XP audit history.';
+$string['commerce_education_delete_key_label'] = 'To confirm, enter the exact key “{$a}”:';
+$string['commerce_education_delete_wrong_key'] = 'The confirmation key does not match this promotion.';
+$string['commerce_education_delete_confirm'] = 'Permanently delete this empty draft promotion? This cannot be undone.';
+$string['commerce_education_delete_success'] = 'The draft promotion has been deleted.';
+
+// CampusFR pedagogical promotion permissions (independently assignable in Moodle roles UI).
+$string['subscriptions:view_promotions'] = 'View pedagogical promotions and leaderboards';
+$string['subscriptions:manage_promotions'] = 'Manage pedagogical promotions, calendars, groups and participants';
+$string['subscriptions:manage_promotion_xp'] = 'Grant and cancel promotion-only XP bonuses';
+$string['commerce_education_followup_title'] = 'Promotion follow-up';
+$string['commerce_education_followup_readonly'] = 'Read-only access. Changes require the permission to manage promotions.';

@@ -24,6 +24,7 @@ final class CrmRoleTemplates {
                     Capabilities::VIEW_DASHBOARD, Capabilities::VIEW_USERS,
                     Capabilities::VIEW_INBOX, Capabilities::MANAGE_INBOX,
                     Capabilities::VIEW_WORK_ITEMS, Capabilities::MANAGE_WORK_ITEMS,
+                    Capabilities::VIEW_PROMOTIONS,
                 ],
             ],
             'campus_crm_commerce' => [
@@ -52,6 +53,9 @@ final class CrmRoleTemplates {
                 'capabilities' => [
                     Capabilities::VIEW_DASHBOARD,
                     Capabilities::MANAGE_CONFIGURATION,
+                    Capabilities::VIEW_PROMOTIONS,
+                    Capabilities::MANAGE_PROMOTIONS,
+                    Capabilities::MANAGE_PROMOTION_XP,
                     Capabilities::MANAGE_WORK_CONFIGURATION,
                     Capabilities::MANAGE_CRM_ADMIN_TOOLS,
                 ],

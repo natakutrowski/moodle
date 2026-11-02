@@ -20,6 +20,9 @@ final class Capabilities {
     public const VIEW_INBOX = 'local/subscriptions:view_inbox';
     public const MANAGE_INBOX = 'local/subscriptions:manage_inbox';
     public const MANAGE_CONFIGURATION = 'local/subscriptions:manage_configuration';
+    public const VIEW_PROMOTIONS = 'local/subscriptions:view_promotions';
+    public const MANAGE_PROMOTIONS = 'local/subscriptions:manage_promotions';
+    public const MANAGE_PROMOTION_XP = 'local/subscriptions:manage_promotion_xp';
     public const MANAGE_CRM_ADMIN_TOOLS = 'local/subscriptions:manage_crm_admin_tools';
     public const USE_INBOX_AI = 'local/subscriptions:use_inbox_ai';
     public const VIEW_WORK_ITEMS = 'local/subscriptions:view_work_items';

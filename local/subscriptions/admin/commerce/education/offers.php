@@ -26,7 +26,7 @@ use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 global $DB, $OUTPUT, $PAGE, $USER;
 
-$context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
+$context = AdminSecurity::require(Capabilities::MANAGE_PROMOTIONS);
 $promotionid = required_param('promotionid', PARAM_INT);
 $promotion = CommercePedagogicalPromotionRepository::create($DB)->get_by_id($promotionid);
 if ($promotion === null) {

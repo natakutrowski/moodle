@@ -74,6 +74,24 @@ $capabilities = [
         'archetypes' => ['manager' => CAP_ALLOW],
     ],
 
+    'local/subscriptions:view_promotions' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [],
+    ],
+    'local/subscriptions:manage_promotions' => [
+        'riskbitmask' => RISK_CONFIG,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [],
+    ],
+    'local/subscriptions:manage_promotion_xp' => [
+        'riskbitmask' => RISK_PERSONAL,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [],
+    ],
+
     'local/subscriptions:manage_configuration' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,

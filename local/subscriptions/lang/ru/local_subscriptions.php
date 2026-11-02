@@ -13064,3 +13064,24 @@ $string['commerce_education_xp_manual_cancel'] = 'Отменить бонус';
 $string['commerce_education_xp_manual_cancel_confirm'] = 'Отменить этот бонус XP? Он останется в истории, но больше не будет учитываться в баллах.';
 $string['commerce_education_xp_manual_cancelled'] = 'Отменено';
 $string['commerce_education_xp_manual_cancel_success'] = 'Бонус XP отменён. История сохранена.';
+
+// M8 — team podium and safe promotion administration.
+$string['commerce_education_group_roster_title'] = 'Ученики группы';
+$string['commerce_education_group_roster_empty'] = 'В этой группе нет активных учеников.';
+$string['commerce_education_medal_gold'] = 'Золото · 1-е место';
+$string['commerce_education_medal_silver'] = 'Серебро · 2-е место';
+$string['commerce_education_medal_bronze'] = 'Бронза · 3-е место';
+$string['commerce_education_delete_danger_title'] = 'Опасная зона · удаление потока';
+$string['commerce_education_delete_danger_help'] = 'Только для суперадминистратора. Удалять можно лишь неопубликованные черновики без связанных данных. Отменить удаление нельзя.';
+$string['commerce_education_delete_protected'] = 'Удаление заблокировано: поток не является пустым черновиком. Сохраните его, чтобы не потерять участников, группы, расписание и историю XP.';
+$string['commerce_education_delete_key_label'] = 'Для подтверждения точно введите ключ «{$a}»:';
+$string['commerce_education_delete_wrong_key'] = 'Ключ подтверждения не совпадает с ключом потока.';
+$string['commerce_education_delete_confirm'] = 'Удалить этот пустой черновик навсегда? Отменить удаление нельзя.';
+$string['commerce_education_delete_success'] = 'Черновик потока удалён.';
+
+// CampusFR pedagogical promotion permissions (independently assignable in Moodle roles UI).
+$string['subscriptions:view_promotions'] = 'Просматривать потоки и их рейтинги';
+$string['subscriptions:manage_promotions'] = 'Управлять потоками, расписанием, группами и участниками';
+$string['subscriptions:manage_promotion_xp'] = 'Начислять и отменять бонусные XP потока';
+$string['commerce_education_followup_title'] = 'Мониторинг потока';
+$string['commerce_education_followup_readonly'] = 'Режим просмотра. Для изменений нужно право управления потоками.';

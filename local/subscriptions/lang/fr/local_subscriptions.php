@@ -12824,3 +12824,24 @@ $string['commerce_education_xp_manual_cancel'] = 'Annuler ce bonus';
 $string['commerce_education_xp_manual_cancel_confirm'] = 'Annuler ce bonus XP ? Il restera dans l’historique, mais ne comptera plus dans les scores.';
 $string['commerce_education_xp_manual_cancelled'] = 'Annulé';
 $string['commerce_education_xp_manual_cancel_success'] = 'Bonus XP annulé. Historique conservé.';
+
+// M8 — team podium and safe promotion administration.
+$string['commerce_education_group_roster_title'] = 'Élèves du groupe';
+$string['commerce_education_group_roster_empty'] = 'Aucun élève actif dans ce groupe.';
+$string['commerce_education_medal_gold'] = 'Or · 1re place';
+$string['commerce_education_medal_silver'] = 'Argent · 2e place';
+$string['commerce_education_medal_bronze'] = 'Bronze · 3e place';
+$string['commerce_education_delete_danger_title'] = 'Zone sensible · suppression de la promotion';
+$string['commerce_education_delete_danger_help'] = 'Réservée au superadministrateur. Seuls les brouillons non publiés, sans données liées, peuvent être supprimés. Cette action est irréversible.';
+$string['commerce_education_delete_protected'] = 'Suppression bloquée : cette promotion n’est pas un brouillon vide. Conserve-la pour préserver les élèves, les groupes, le calendrier et les historiques XP.';
+$string['commerce_education_delete_key_label'] = 'Pour confirmer, saisis exactement la clé « {$a} » :';
+$string['commerce_education_delete_wrong_key'] = 'La clé de confirmation ne correspond pas à cette promotion.';
+$string['commerce_education_delete_confirm'] = 'Supprimer définitivement cette promotion vide ? Cette action est irréversible.';
+$string['commerce_education_delete_success'] = 'La promotion brouillon a été supprimée.';
+
+// CampusFR pedagogical promotion permissions (independently assignable in Moodle roles UI).
+$string['subscriptions:view_promotions'] = 'Consulter les promotions pédagogiques et leurs classements';
+$string['subscriptions:manage_promotions'] = 'Piloter les promotions pédagogiques (calendriers, groupes, participants)';
+$string['subscriptions:manage_promotion_xp'] = 'Attribuer et annuler des bonus XP de promotion';
+$string['commerce_education_followup_title'] = 'Suivi de la promotion';
+$string['commerce_education_followup_readonly'] = 'Lecture seule. Les modifications nécessitent le droit de gestion des promotions.';

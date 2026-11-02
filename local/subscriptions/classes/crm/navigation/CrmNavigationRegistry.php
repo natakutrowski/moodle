@@ -167,7 +167,7 @@ final class CrmNavigationRegistry {
                     $child(
                         get_string('crm_commerce_nav_education', 'local_subscriptions'),
                         '/local/subscriptions/admin/commerce/education/promotions.php',
-                        Capabilities::MANAGE_CONFIGURATION,
+                        Capabilities::VIEW_PROMOTIONS,
                         'fa-graduation-cap'
                     ),
                     $child(

@@ -27,7 +27,7 @@ use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 global $DB, $OUTPUT, $PAGE, $USER;
 
-$context = AdminSecurity::require(Capabilities::MANAGE_CONFIGURATION);
+$context = AdminSecurity::require(Capabilities::MANAGE_PROMOTIONS);
 $promotionid = required_param('promotionid', PARAM_INT);
 $promotion = CommercePedagogicalPromotionRepository::create($DB)->get_by_id($promotionid);
 if ($promotion === null) {
@@ -54,6 +54,7 @@ if (data_submitted()) {
     $service = CommercePedagogicalParticipantService::create($DB);
 
     if ($action === 'xpcancel') {
+        require_capability(Capabilities::MANAGE_PROMOTION_XP, $context);
         if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
             throw new \coding_exception('Manual XP cancellation requires POST.');
         }
@@ -66,6 +67,7 @@ if (data_submitted()) {
     }
 
     if ($action === 'xpbonus') {
+        require_capability(Capabilities::MANAGE_PROMOTION_XP, $context);
         if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
             throw new \coding_exception('Manual XP grants require POST.');
         }
@@ -118,6 +120,7 @@ $groupconfiguration = $grouprepository->get_configuration($promotionid);
 $groups = $grouprepository->groups_for_promotion($promotionid, true);
 $promotionoffers = CommercePedagogicalPromotionOfferRepository::create($DB)->links_for_promotion($promotionid);
 $pointsbyuser = CommercePedagogicalXpRepository::create($DB)->points_by_user($promotionid);
+$canmanagexp = has_capability(Capabilities::MANAGE_PROMOTION_XP, $context);
 $xpbonusservice = CommercePedagogicalXpAdjustmentService::create($DB);
 $xpbonusallowed = ($promotion->get_xp_starts_at() === null || time() >= $promotion->get_xp_starts_at())
     && ($promotion->get_ends_at() === null || time() <= $promotion->get_ends_at())
@@ -408,6 +411,7 @@ if ($participants === []) {
         echo html_writer::end_div();
 
         // Manually granted XP are confined to this promotion; no personal XP change.
+        if ($canmanagexp) {
         echo html_writer::start_tag('details', ['class' => 'commerce-ped-m74-control-form commerce-ped-xp-bonus']);
         echo html_writer::tag('summary', get_string('commerce_education_xp_manual_heading', 'local_subscriptions'));
         echo html_writer::div(get_string('commerce_education_xp_manual_user_help', 'local_subscriptions'), 'small text-muted mb-2');
@@ -451,6 +455,7 @@ if ($participants === []) {
             }
         }
         echo html_writer::end_tag('details');
+        }
         echo html_writer::end_div();
     }
 

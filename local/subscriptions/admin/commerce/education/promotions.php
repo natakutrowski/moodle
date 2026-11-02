@@ -20,7 +20,7 @@ use local_subscriptions\crm\navigation\CrmNavigationKeys;
 global $DB, $OUTPUT, $PAGE;
 
 $context = AdminSecurity::require(
-    Capabilities::MANAGE_CONFIGURATION
+    Capabilities::VIEW_PROMOTIONS
 );
 
 $pageurl = new moodle_url(
@@ -41,18 +41,6 @@ CrmPageConfigurator::configure(
 
 $repository =
     CommercePedagogicalPromotionRepository::create($DB);
-
-$delete = optional_param('delete', 0, PARAM_INT);
-if ($delete > 0) {
-    require_sesskey();
-    $repository->delete($delete);
-    redirect(
-        $pageurl,
-        get_string('changessaved'),
-        null,
-        \core\output\notification::NOTIFY_SUCCESS
-    );
-}
 
 $promotions = $repository->all();
 
@@ -94,11 +82,12 @@ echo CrmBreadcrumbRenderer::render([
     ],
 ]);
 
-$actions = html_writer::link(
+$canmanagepromotions = has_capability(Capabilities::MANAGE_PROMOTIONS, $context);
+$actions = $canmanagepromotions ? html_writer::link(
     new moodle_url('/local/subscriptions/admin/commerce/education/promotion_edit.php'),
     get_string('commerce_education_promotion_create', 'local_subscriptions'),
     ['class' => 'btn btn-primary']
-);
+) : '';
 
 echo CrmPageHeader::render(
     $title,
@@ -203,17 +192,11 @@ if ($promotions === []) {
         );
 
         $editurl = new moodle_url(
-            '/local/subscriptions/admin/commerce/education/promotion_edit.php',
+            $canmanagepromotions
+                ? '/local/subscriptions/admin/commerce/education/promotion_edit.php'
+                : '/local/subscriptions/admin/commerce/education/followup.php',
             ['id' => $promotion->get_id()]
         );
-        $deleteurl = new moodle_url(
-            $pageurl,
-            [
-                'delete' => $promotion->get_id(),
-                'sesskey' => sesskey(),
-            ]
-        );
-
         $table->data[] = [
             html_writer::div(
                 s($promotion->get_name()),
@@ -264,13 +247,10 @@ if ($promotions === []) {
             html_writer::div(
                 html_writer::link(
                     $editurl,
-                    get_string('commerce_education_admin_manage', 'local_subscriptions'),
+                    $canmanagepromotions
+                        ? get_string('commerce_education_admin_manage', 'local_subscriptions')
+                        : get_string('commerce_education_followup_title', 'local_subscriptions'),
                     ['class' => 'btn btn-sm btn-primary']
-                )
-                . html_writer::link(
-                    $deleteurl,
-                    get_string('delete'),
-                    ['class' => 'btn btn-sm btn-outline-danger']
                 ),
                 'd-flex gap-2 flex-wrap justify-content-end'
             ),

@@ -29,6 +29,10 @@ final class CommerceEducationNavigationRenderer {
             throw new \coding_exception('Unknown Pedagogy navigation key: ' . $active);
         }
 
+        if (!has_capability(\local_subscriptions\admin\Capabilities::MANAGE_CONFIGURATION,
+                \context_system::instance())) {
+            unset($items[self::COURSES]);
+        }
         $links = '';
         foreach ($items as $key => [$label, $url, $icon]) {
             $links .= \html_writer::link(
