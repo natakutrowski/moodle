@@ -162,19 +162,26 @@ if ($canmanage) {
         ['id' => $promotionid]), get_string('commerce_education_admin_manage', 'local_subscriptions'),
         ['class' => 'btn btn-sm btn-outline-secondary mb-3']);
 }
-$calendarrows = $DB->get_records('local_subs_commerce_ped_cal',
-    ['promotionid' => $promotionid], 'position ASC', 'id,position,itemtype,itemid,unlocksat', 0, 12);
-if ($calendarrows) {
-    $calendaritems = [];
-    foreach ($calendarrows as $calendarrow) {
-        $calendaritems[] = s((string)$calendarrow->itemtype) . ' #' . (int)$calendarrow->itemid
-            . ' · ' . userdate((int)$calendarrow->unlocksat);
+// The support follow-up page should not expose raw Moodle calendar section IDs.
+// Reuse the translated status and badge palette from the promotion list.
+$status = $promotion->get_status();
+$statusbadge = html_writer::span(
+    get_string('commerce_education_promotion_status_' . $status, 'local_subscriptions'),
+    'badge rounded-pill ' . match ($status) {
+        'open' => 'text-bg-success',
+        'started' => 'text-bg-primary',
+        'scheduled' => 'text-bg-info',
+        'full' => 'text-bg-warning',
+        'finished' => 'text-bg-dark',
+        default => 'text-bg-secondary',
     }
-    echo html_writer::div(implode(' · ', $calendaritems), 'small text-muted mb-3');
-}
-echo html_writer::div(s($promotion->get_name()) . ' · ' . s($promotion->get_status())
-    . ' · ' . $totaljoined . ' ' . get_string('commerce_education_participants', 'local_subscriptions'),
-    'alert alert-light border mb-3');
+);
+echo html_writer::div(
+    html_writer::span(s($promotion->get_name()), 'fw-semibold')
+        . ' · ' . $statusbadge . ' · ' . (int)$totaljoined . ' '
+        . get_string('commerce_education_participants', 'local_subscriptions'),
+    'alert alert-light border mb-3'
+);
 $medals = [1 => '🥇', 2 => '🥈', 3 => '🥉'];
 foreach ($ranking as $entry) {
     $groupid = $entry->get_group_id();
