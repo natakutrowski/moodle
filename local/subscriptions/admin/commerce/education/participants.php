@@ -15,6 +15,7 @@ use local_subscriptions\commerce\education\participant\CommercePedagogicalPartic
 use local_subscriptions\commerce\education\promotion\CommercePedagogicalPromotionOfferRepository;
 use local_subscriptions\commerce\education\promotion\CommercePedagogicalPromotionRepository;
 use local_subscriptions\commerce\education\xp\CommercePedagogicalXpRepository;
+use local_subscriptions\commerce\education\xp\CommercePedagogicalCrmRanking;
 use local_subscriptions\commerce\education\xp\CommercePedagogicalXpAdjustmentService;
 use local_subscriptions\commerce\education\xp\CommercePedagogicalXpBonusHistoryRenderer;
 use local_subscriptions\crm\commerce\rendering\CommerceSectionNavigationRenderer;
@@ -27,7 +28,8 @@ use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 global $DB, $OUTPUT, $PAGE, $USER;
 
-$context = AdminSecurity::require(Capabilities::MANAGE_PROMOTIONS);
+$context = AdminSecurity::require(Capabilities::VIEW_PROMOTIONS);
+$canmanage = has_capability(Capabilities::MANAGE_PROMOTIONS, $context);
 $promotionid = required_param('promotionid', PARAM_INT);
 $promotion = CommercePedagogicalPromotionRepository::create($DB)->get_by_id($promotionid);
 if ($promotion === null) {
@@ -48,6 +50,7 @@ CrmPageConfigurator::configure(
 );
 
 if (data_submitted()) {
+    require_capability(Capabilities::MANAGE_PROMOTIONS, $context);
     require_sesskey();
     $action = required_param('action', PARAM_ALPHA);
     $userid = required_param('userid', PARAM_INT);
@@ -120,7 +123,7 @@ $groupconfiguration = $grouprepository->get_configuration($promotionid);
 $groups = $grouprepository->groups_for_promotion($promotionid, true);
 $promotionoffers = CommercePedagogicalPromotionOfferRepository::create($DB)->links_for_promotion($promotionid);
 $pointsbyuser = CommercePedagogicalXpRepository::create($DB)->points_by_user($promotionid);
-$canmanagexp = has_capability(Capabilities::MANAGE_PROMOTION_XP, $context);
+$canmanagexp = $canmanage && has_capability(Capabilities::MANAGE_PROMOTION_XP, $context);
 $xpbonusservice = CommercePedagogicalXpAdjustmentService::create($DB);
 $xpbonusallowed = ($promotion->get_xp_starts_at() === null || time() >= $promotion->get_xp_starts_at())
     && ($promotion->get_ends_at() === null || time() <= $promotion->get_ends_at())
@@ -162,6 +165,12 @@ foreach ($participants as $participant) {
 }
 
 $query = trim(optional_param('q', '', PARAM_TEXT));
+$sort = optional_param('sort', 'xp', PARAM_ALPHA);
+if (!in_array($sort, ['xp', 'joined', 'group'], true)) {
+    $sort = 'xp';
+}
+// Compute ranks on the entire promotion before filtering/pagination so medals remain stable.
+$userranks = CommercePedagogicalCrmRanking::user_ranks($participants, $pointsbyuser);
 $visibleparticipants = $participants;
 if ($query !== '') {
     $needle = core_text::strtolower($query);
@@ -181,6 +190,9 @@ if ($query !== '') {
     ));
 }
 
+$visibleparticipants = CommercePedagogicalCrmRanking::participants(
+    $visibleparticipants, $pointsbyuser, $joinbyuser, $sort
+);
 $participantperpage = 25;
 $participantpage = max(0, optional_param('page', 0, PARAM_INT));
 $filteredparticipantcount = count($visibleparticipants);
@@ -193,6 +205,7 @@ $pagedparticipants = array_slice($visibleparticipants, $participantoffset, $part
 $participantpagingurl = new moodle_url($pageurl, [
     'promotionid' => $promotionid,
     'q' => $query,
+    'sort' => $sort,
 ]);
 
 echo $OUTPUT->header();
@@ -204,7 +217,9 @@ echo CrmBreadcrumbRenderer::render([
     ],
     [
         'label' => $promotion->get_name(),
-        'url' => new moodle_url('/local/subscriptions/admin/commerce/education/promotion_edit.php', ['id' => $promotionid]),
+        'url' => $canmanage
+            ? new moodle_url('/local/subscriptions/admin/commerce/education/promotion_edit.php', ['id' => $promotionid])
+            : new moodle_url('/local/subscriptions/admin/commerce/education/followup.php', ['id' => $promotionid]),
     ],
     ['label' => get_string('commerce_education_participants', 'local_subscriptions'), 'url' => null],
 ]);
@@ -216,11 +231,19 @@ echo CrmPageHeader::render(
 );
 echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::EDUCATION, $context);
 
-echo CommercePedagogicalPromotionAdminRenderer::render(
-    $promotion,
-    CommercePedagogicalPromotionAdminRenderer::PARTICIPANTS,
-    $DB
-);
+if ($canmanage) {
+    echo CommercePedagogicalPromotionAdminRenderer::render(
+        $promotion,
+        CommercePedagogicalPromotionAdminRenderer::PARTICIPANTS,
+        $DB
+    );
+} else {
+    echo html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/education/followup.php', ['id' => $promotionid]),
+        get_string('commerce_education_followup_title', 'local_subscriptions'),
+        ['class' => 'btn btn-sm btn-outline-secondary mb-3']
+    );
+}
 
 // Participant metrics.
 echo html_writer::start_div('commerce-ped-m74-metrics');
@@ -252,6 +275,7 @@ if (!$groupconfiguration->is_enabled() && $groups !== []) {
 echo html_writer::start_div('commerce-ped-m74-participant-toolbar');
 echo html_writer::start_tag('form', ['method' => 'get', 'action' => $pageurl->out(false), 'class' => 'commerce-ped-m74-search']);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'promotionid', 'value' => $promotionid]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sort', 'value' => $sort]);
 echo html_writer::start_div('commerce-ped-m74-search-box');
 echo html_writer::tag('i', '', ['class' => 'fa fa-search', 'aria-hidden' => 'true']);
 echo html_writer::empty_tag('input', [
@@ -267,6 +291,25 @@ echo html_writer::tag('button', get_string('search'), ['type' => 'submit', 'clas
 if ($query !== '') {
     echo html_writer::link($pageurl, get_string('commerce_education_m74_clear_search', 'local_subscriptions'), ['class' => 'btn btn-link']);
 }
+echo html_writer::end_tag('form');
+echo html_writer::start_tag('form', [
+    'method' => 'get', 'action' => $pageurl->out(false), 'class' => 'commerce-ped-m74-sort-form',
+]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'promotionid', 'value' => $promotionid]);
+if ($query !== '') {
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'q', 'value' => $query]);
+}
+echo html_writer::tag('label', get_string('commerce_education_sort_label', 'local_subscriptions'), [
+    'for' => 'ped-participant-sort', 'class' => 'form-label',
+]);
+echo html_writer::select([
+    'xp' => get_string('commerce_education_sort_xp', 'local_subscriptions'),
+    'joined' => get_string('commerce_education_sort_joined', 'local_subscriptions'),
+    'group' => get_string('commerce_education_sort_group', 'local_subscriptions'),
+], 'sort', $sort, false, ['id' => 'ped-participant-sort', 'class' => 'form-select form-select-sm']);
+echo html_writer::tag('button', get_string('commerce_education_sort_apply', 'local_subscriptions'), [
+    'type' => 'submit', 'class' => 'btn btn-sm btn-outline-secondary',
+]);
 echo html_writer::end_tag('form');
 echo html_writer::div(
     get_string('commerce_education_m74_participant_count', 'local_subscriptions', (object)[
@@ -295,7 +338,11 @@ if ($participants === []) {
             ? get_string('commerce_education_profile_lifetime_full', 'local_subscriptions')
             : get_string('commerce_education_profile_promotion_progressive', 'local_subscriptions');
 
-        echo html_writer::start_div('commerce-ped-m74-participant-card');
+        $userplace = $userranks[$userid] ?? 0;
+        $userpodium = [1 => 'gold', 2 => 'silver', 3 => 'bronze'][$userplace] ?? null;
+        $usermedal = [1 => '🥇', 2 => '🥈', 3 => '🥉'][$userplace] ?? '';
+        echo html_writer::start_div('commerce-ped-m74-participant-card'
+            . ($userpodium !== null ? ' is-podium-' . $userpodium : ''));
         echo html_writer::start_div('commerce-ped-m74-participant-main');
         echo html_writer::start_div('commerce-ped-m74-participant-identity');
         echo html_writer::div(
@@ -308,6 +355,11 @@ if ($participants === []) {
             s(fullname($participant)),
             ['class' => 'text-decoration-none', 'title' => get_string('commerce_education_xp_user360_link', 'local_subscriptions')]
         ), ['class' => 'commerce-ped-m74-participant-name']);
+        if ($usermedal !== '') {
+            echo html_writer::span($usermedal . ' ' . get_string(
+                'commerce_education_medal_' . $userpodium, 'local_subscriptions'),
+                'commerce-ped-m74-medal is-' . $userpodium);
+        }
         echo html_writer::div(s((string)$participant->email), 'commerce-ped-m74-participant-email');
         echo html_writer::start_div('commerce-ped-m74-participant-badges');
         echo html_writer::span($profilelabel, 'commerce-ped-m74-participant-badge is-profile');
@@ -338,6 +390,7 @@ if ($participants === []) {
         echo html_writer::end_div();
         echo html_writer::end_div();
 
+        if ($canmanage) {
         echo html_writer::start_div('commerce-ped-m74-participant-controls');
 
         // Explicit access profile adjustment.
@@ -409,6 +462,7 @@ if ($participants === []) {
         }
 
         echo html_writer::end_div();
+        } // End manager-only participant controls.
 
         // Manually granted XP are confined to this promotion; no personal XP change.
         if ($canmanagexp) {

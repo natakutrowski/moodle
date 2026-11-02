@@ -22,7 +22,8 @@ use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 global $DB, $OUTPUT, $PAGE, $USER;
 
-$context = AdminSecurity::require(Capabilities::MANAGE_PROMOTIONS);
+$context = AdminSecurity::require(Capabilities::VIEW_PROMOTIONS);
+$canmanage = has_capability(Capabilities::MANAGE_PROMOTIONS, $context);
 $promotionid = required_param('promotionid', PARAM_INT);
 
 $promotionrepository = CommercePedagogicalPromotionRepository::create($DB);
@@ -50,11 +51,14 @@ CrmPageConfigurator::configure(
 
 $repository = CommercePedagogicalCalendarRepository::create($DB);
 
-CommercePedagogicalAvailabilitySynchronizer::create($DB)
-    ->sync_course((int)$course->id);
+// Synchronisation mutates the course; never execute on Support read-only requests.
+if ($canmanage) {
+    CommercePedagogicalAvailabilitySynchronizer::create($DB)->sync_course((int)$course->id);
+}
 
 $delete = optional_param('delete', 0, PARAM_INT);
 if ($delete > 0) {
+    require_capability(Capabilities::MANAGE_PROMOTIONS, $context);
     require_sesskey();
     $repository->delete($delete);
     redirect(
@@ -67,6 +71,7 @@ if ($delete > 0) {
 
 $update = optional_param('update', 0, PARAM_INT);
 if ($update > 0) {
+    require_capability(Capabilities::MANAGE_PROMOTIONS, $context);
     require_sesskey();
 
     $existingitem = null;
@@ -112,6 +117,7 @@ if ($update > 0) {
 }
 
 if (data_submitted() && optional_param('save', 0, PARAM_BOOL)) {
+    require_capability(Capabilities::MANAGE_PROMOTIONS, $context);
     require_sesskey();
 
     $sectionid = required_param('sectionid', PARAM_INT);
@@ -242,7 +248,9 @@ echo CrmBreadcrumbRenderer::render([
     ],
     [
         'label' => $promotion->get_name(),
-        'url' => new moodle_url('/local/subscriptions/admin/commerce/education/promotion_edit.php', ['id' => $promotionid]),
+        'url' => $canmanage
+            ? new moodle_url('/local/subscriptions/admin/commerce/education/promotion_edit.php', ['id' => $promotionid])
+            : new moodle_url('/local/subscriptions/admin/commerce/education/followup.php', ['id' => $promotionid]),
     ],
     ['label' => get_string('commerce_education_calendar', 'local_subscriptions'), 'url' => null],
 ]);
@@ -258,11 +266,19 @@ echo CommerceSectionNavigationRenderer::render(
     $context
 );
 
-echo CommercePedagogicalPromotionAdminRenderer::render(
-    $promotion,
-    CommercePedagogicalPromotionAdminRenderer::CALENDAR,
-    $DB
-);
+if ($canmanage) {
+    echo CommercePedagogicalPromotionAdminRenderer::render(
+        $promotion,
+        CommercePedagogicalPromotionAdminRenderer::CALENDAR,
+        $DB
+    );
+} else {
+    echo html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/education/followup.php', ['id' => $promotionid]),
+        get_string('commerce_education_followup_title', 'local_subscriptions'),
+        ['class' => 'btn btn-sm btn-outline-secondary mb-3']
+    );
+}
 
 // Calendar metrics.
 echo html_writer::start_div('commerce-ped-m73-metrics');
@@ -285,9 +301,10 @@ foreach ([
 }
 echo html_writer::end_div();
 
-echo html_writer::start_div('commerce-ped-m73-layout');
+echo html_writer::start_div('commerce-ped-m73-layout' . ($canmanage ? '' : ' is-readonly'));
 
 // Add milestone side panel.
+if ($canmanage) {
 echo html_writer::start_div('commerce-ped-m73-side');
 echo html_writer::start_div('commerce-ped-m73-panel');
 echo html_writer::start_div('commerce-ped-m73-panel-header');
@@ -379,6 +396,7 @@ echo html_writer::div(
 echo html_writer::end_div();
 
 echo html_writer::end_div();
+} // End manager-only calendar creation panel.
 
 // Timeline.
 echo html_writer::start_div('commerce-ped-m73-main');
@@ -399,10 +417,12 @@ if ($scheduled === []) {
         $sectionname = $sectionnames[$item->get_item_id()] ?? '#' . $item->get_item_id();
         $isopen = $item->is_unlocked_at($now);
         $isnext = $nextitem !== null && $item->get_id() === $nextitem->get_id();
+        if ($canmanage) {
         $deleteurl = new moodle_url($pageurl, [
             'delete' => $item->get_id(),
             'sesskey' => sesskey(),
         ]);
+        } // Support cannot access calendar deletion URLs.
 
         $itemclasses = 'commerce-ped-calendar-item ' . ($isopen ? 'is-open' : 'is-future');
         if ($isnext) {
@@ -437,6 +457,7 @@ if ($scheduled === []) {
         );
         echo html_writer::end_div();
 
+        if ($canmanage) {
         echo html_writer::start_div('commerce-ped-calendar-card-actions');
         echo html_writer::start_tag('form', [
             'method' => 'post',
@@ -469,6 +490,7 @@ if ($scheduled === []) {
             ['class' => 'btn btn-sm btn-outline-danger']
         );
         echo html_writer::end_div();
+        } // End manager-only edit/delete controls.
 
         echo html_writer::end_div();
         echo html_writer::end_div();

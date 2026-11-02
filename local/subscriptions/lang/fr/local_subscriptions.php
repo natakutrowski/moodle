@@ -12845,3 +12845,19 @@ $string['subscriptions:manage_promotions'] = 'Piloter les promotions pédagogiqu
 $string['subscriptions:manage_promotion_xp'] = 'Attribuer et annuler des bonus XP de promotion';
 $string['commerce_education_followup_title'] = 'Suivi de la promotion';
 $string['commerce_education_followup_readonly'] = 'Lecture seule. Les modifications nécessitent le droit de gestion des promotions.';
+
+// CRM pedagogical promotion ranks, sorting and operational group metadata.
+$string['commerce_education_group_technical_title'] = 'Informations techniques du groupe';
+$string['commerce_education_group_technical_id'] = 'ID du groupe CampusFR';
+$string['commerce_education_group_technical_moodle_id'] = 'ID du groupe Moodle';
+$string['commerce_education_group_technical_created'] = 'Créé le';
+$string['commerce_education_group_technical_updated'] = 'Dernière modification';
+$string['commerce_education_group_technical_position'] = 'Position de création';
+$string['commerce_education_group_technical_lastmember'] = 'Dernière affectation active';
+$string['commerce_education_group_technical_filled'] = 'Date de remplissage';
+$string['commerce_education_group_technical_not_recorded'] = 'Non enregistrée historiquement';
+$string['commerce_education_sort_label'] = 'Trier par';
+$string['commerce_education_sort_xp'] = 'XP décroissants';
+$string['commerce_education_sort_joined'] = 'Inscription (plus récente)';
+$string['commerce_education_sort_group'] = 'Groupe (A–Z)';
+$string['commerce_education_sort_apply'] = 'Appliquer';

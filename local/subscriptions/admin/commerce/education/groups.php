@@ -15,6 +15,7 @@ use local_subscriptions\commerce\education\promotion\CommercePedagogicalPromotio
 use local_subscriptions\commerce\education\lifecycle\CommercePedagogicalParticipationRepository;
 use local_subscriptions\commerce\education\promotion\CommercePedagogicalPromotionRepository;
 use local_subscriptions\commerce\education\xp\CommercePedagogicalGroupLeaderboardService;
+use local_subscriptions\commerce\education\xp\CommercePedagogicalCrmRanking;
 use local_subscriptions\commerce\education\xp\CommercePedagogicalXpRepository;
 use local_subscriptions\commerce\education\xp\CommercePedagogicalXpAdjustmentService;
 use local_subscriptions\commerce\education\xp\CommercePedagogicalXpBonusHistoryRenderer;
@@ -28,7 +29,8 @@ use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
 global $DB, $OUTPUT, $PAGE, $USER;
 
-$context = AdminSecurity::require(Capabilities::MANAGE_PROMOTIONS);
+$context = AdminSecurity::require(Capabilities::VIEW_PROMOTIONS);
+$canmanage = has_capability(Capabilities::MANAGE_PROMOTIONS, $context);
 $promotionid = required_param('promotionid', PARAM_INT);
 
 $promotion = CommercePedagogicalPromotionRepository::create($DB)->get_by_id($promotionid);
@@ -54,6 +56,7 @@ $orchestrator = CommercePedagogicalGroupOrchestrator::create($DB);
 $participations = CommercePedagogicalParticipationRepository::create($DB);
 
 if (data_submitted()) {
+    require_capability(Capabilities::MANAGE_PROMOTIONS, $context);
     require_sesskey();
     $action = required_param('action', PARAM_ALPHA);
 
@@ -222,6 +225,11 @@ if (data_submitted()) {
 
 $configuration = $repository->get_configuration($promotionid);
 $groups = $repository->groups_for_promotion($promotionid);
+$leaderboardbygroup = [];
+foreach (CommercePedagogicalGroupLeaderboardService::create($DB)->get_ranking($promotionid) as $entry) {
+    $leaderboardbygroup[$entry->get_group_id()] = $entry;
+}
+$groups = CommercePedagogicalCrmRanking::groups($groups, $leaderboardbygroup);
 $groupperpage = 12;
 $grouppage = max(0, optional_param('gpage', 0, PARAM_INT));
 $groupcount = count($groups);
@@ -250,11 +258,6 @@ $xpbonusservice = CommercePedagogicalXpAdjustmentService::create($DB);
 $xpbonusallowed = ($promotion->get_xp_starts_at() === null || time() >= $promotion->get_xp_starts_at())
     && ($promotion->get_ends_at() === null || time() <= $promotion->get_ends_at())
     && in_array($promotion->get_status(), ['scheduled', 'open', 'full', 'started'], true);
-$leaderboardbygroup = [];
-foreach (CommercePedagogicalGroupLeaderboardService::create($DB)->get_ranking($promotionid) as $entry) {
-    $leaderboardbygroup[$entry->get_group_id()] = $entry;
-}
-
 $activejoinrecords = $DB->get_records(
     'local_subs_commerce_ped_join',
     ['promotionid' => $promotionid, 'state' => 'active'],
@@ -270,9 +273,10 @@ $activeparticipants = count($activeuserids);
 // One batched query for all visible groups: only active members with active joins.
 // Use the same promotion-only XP repository as the participant and group rankings.
 $membersbygroup = [];
+$lastmemberbygroup = [];
 $memberpoints = CommercePedagogicalXpRepository::create($DB)->points_by_user($promotionid);
 $memberrows = $DB->get_recordset_sql(
-    "SELECT m.id, m.groupid, m.userid, u.firstname, u.lastname,
+    "SELECT m.id, m.groupid, m.userid, m.timecreated, u.firstname, u.lastname,
               u.firstnamephonetic, u.lastnamephonetic, u.middlename, u.alternatename
        FROM {local_subs_commerce_ped_gmem} m
        JOIN {local_subs_commerce_ped_group} g ON g.id = m.groupid
@@ -289,6 +293,8 @@ $memberrows = $DB->get_recordset_sql(
 );
 foreach ($memberrows as $member) {
     $membersbygroup[(int)$member->groupid][] = $member;
+    $gid = (int)$member->groupid;
+    $lastmemberbygroup[$gid] = max((int)($lastmemberbygroup[$gid] ?? 0), (int)$member->timecreated);
 }
 $memberrows->close();
 
@@ -325,7 +331,9 @@ echo CrmBreadcrumbRenderer::render([
     ],
     [
         'label' => $promotion->get_name(),
-        'url' => new moodle_url('/local/subscriptions/admin/commerce/education/promotion_edit.php', ['id' => $promotionid]),
+        'url' => $canmanage
+            ? new moodle_url('/local/subscriptions/admin/commerce/education/promotion_edit.php', ['id' => $promotionid])
+            : new moodle_url('/local/subscriptions/admin/commerce/education/followup.php', ['id' => $promotionid]),
     ],
     ['label' => get_string('commerce_education_groups', 'local_subscriptions'), 'url' => null],
 ]);
@@ -337,11 +345,19 @@ echo CrmPageHeader::render(
 );
 echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::EDUCATION, $context);
 
-echo CommercePedagogicalPromotionAdminRenderer::render(
-    $promotion,
-    CommercePedagogicalPromotionAdminRenderer::GROUPS,
-    $DB
-);
+if ($canmanage) {
+    echo CommercePedagogicalPromotionAdminRenderer::render(
+        $promotion,
+        CommercePedagogicalPromotionAdminRenderer::GROUPS,
+        $DB
+    );
+} else {
+    echo html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/education/followup.php', ['id' => $promotionid]),
+        get_string('commerce_education_followup_title', 'local_subscriptions'),
+        ['class' => 'btn btn-sm btn-outline-secondary mb-3']
+    );
+}
 
 // Operational summary.
 echo html_writer::start_div('commerce-ped-m74-metrics');
@@ -384,13 +400,13 @@ foreach ($metrics as [$icon, $label, $value, $state]) {
 }
 echo html_writer::end_div();
 
-if (!$configuration->is_enabled() && $activegroups !== []) {
+if ($canmanage && !$configuration->is_enabled() && $activegroups !== []) {
     echo html_writer::div(
         html_writer::tag('i', '', ['class' => 'fa fa-exclamation-triangle', 'aria-hidden' => 'true'])
         . html_writer::span(get_string('commerce_education_m74_groups_disabled_warning', 'local_subscriptions')),
         'commerce-ped-m74-callout is-warning'
     );
-} else if ($configuration->is_enabled() && $unassigned > 0) {
+} else if ($canmanage && $configuration->is_enabled() && $unassigned > 0) {
     $backfill = html_writer::start_tag('form', [
         'method' => 'post',
         'action' => $pageurl->out(false),
@@ -414,9 +430,10 @@ if (!$configuration->is_enabled() && $activegroups !== []) {
     );
 }
 
-echo html_writer::start_div('commerce-ped-m74-layout');
+echo html_writer::start_div('commerce-ped-m74-layout' . ($canmanage ? '' : ' is-readonly'));
 
 // Configuration + creation rail.
+if ($canmanage) {
 echo html_writer::start_div('commerce-ped-m74-side');
 
 echo html_writer::start_tag('form', [
@@ -528,6 +545,7 @@ if ($offeroptions === []) {
 echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
+} // End manager-only configuration rail.
 
 // Existing groups.
 echo html_writer::start_div('commerce-ped-m74-main');
@@ -642,6 +660,26 @@ if ($groups === []) {
 
         // Collapsible roster: members and their *promotion* scores, not personal XP.
         $roster = $membersbygroup[$groupid] ?? [];
+        usort($roster, static function($a, $b) use ($memberpoints): int {
+            return ((int)($memberpoints[(int)$b->userid] ?? 0) <=> (int)($memberpoints[(int)$a->userid] ?? 0))
+                ?: strnatcasecmp(fullname($a), fullname($b))
+                ?: ((int)$a->userid <=> (int)$b->userid);
+        });
+        $rosterranks = [];
+        $lastscore = null;
+        $lastrank = 0;
+        foreach ($roster as $index => $member) {
+            $score = (int)($memberpoints[(int)$member->userid] ?? 0);
+            if ($score <= 0) {
+                $rosterranks[(int)$member->userid] = 0;
+                continue;
+            }
+            if ($lastscore === null || $score !== $lastscore) {
+                $lastrank = $index + 1;
+                $lastscore = $score;
+            }
+            $rosterranks[(int)$member->userid] = $lastrank;
+        }
         echo html_writer::start_tag('details', ['class' => 'commerce-ped-m74-group-roster']);
         echo html_writer::tag('summary',
             html_writer::tag('i', '', ['class' => 'fa fa-users', 'aria-hidden' => 'true'])
@@ -656,8 +694,13 @@ if ($groups === []) {
             echo html_writer::start_tag('ul', ['class' => 'commerce-ped-m74-roster-list']);
             foreach ($roster as $member) {
                 $userid = (int)$member->userid;
+                $memberrank = $rosterranks[$userid] ?? 0;
+                $membermedal = [1 => '🥇', 2 => '🥈', 3 => '🥉'][$memberrank] ?? '';
                 echo html_writer::tag('li',
-                    html_writer::link(
+                    ($membermedal !== '' ? html_writer::span($membermedal, 'commerce-ped-m74-roster-medal',
+                        ['aria-label' => get_string('commerce_education_m74_group_rank', 'local_subscriptions')
+                            . ' ' . $memberrank]) : '')
+                    . html_writer::link(
                         new moodle_url('/local/subscriptions/admin/users/view.php', ['id' => $userid]),
                         s(fullname($member)),
                         ['title' => get_string('commerce_education_xp_user360_link', 'local_subscriptions')]
@@ -672,6 +715,28 @@ if ($groups === []) {
         }
         echo html_writer::end_tag('details');
 
+        // Operational metadata available in the existing schema. No historical filled_at is stored.
+        echo html_writer::start_tag('details', ['class' => 'commerce-ped-m74-group-technical']);
+        echo html_writer::tag('summary', get_string('commerce_education_group_technical_title', 'local_subscriptions'));
+        echo html_writer::start_tag('dl', ['class' => 'commerce-ped-m74-tech-grid']);
+        foreach ([
+            ['commerce_education_group_technical_id', (string)$groupid],
+            ['commerce_education_group_technical_moodle_id', (string)$group->get_moodle_group_id()],
+            ['commerce_education_group_technical_created', userdate($group->get_time_created())],
+            ['commerce_education_group_technical_updated', userdate($group->get_time_modified())],
+            ['commerce_education_group_technical_position', (string)$group->get_position()],
+            ['commerce_education_group_technical_lastmember', isset($lastmemberbygroup[$groupid])
+                ? userdate((int)$lastmemberbygroup[$groupid]) : '—'],
+            ['commerce_education_group_technical_filled', get_string(
+                'commerce_education_group_technical_not_recorded', 'local_subscriptions')],
+        ] as [$label, $value]) {
+            echo html_writer::tag('dt', get_string($label, 'local_subscriptions'));
+            echo html_writer::tag('dd', s((string)$value));
+        }
+        echo html_writer::end_tag('dl');
+        echo html_writer::end_tag('details');
+
+        if ($canmanage) {
         echo html_writer::start_div('commerce-ped-m74-group-actions');
 
         echo html_writer::start_tag('details', ['class' => 'commerce-ped-m741-group-edit']);
@@ -832,6 +897,7 @@ if ($groups === []) {
         echo html_writer::end_tag('form');
 
         echo html_writer::end_div();
+        } // End manager-only group actions.
         echo html_writer::end_div();
     }
     echo html_writer::end_div();

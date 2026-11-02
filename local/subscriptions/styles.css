@@ -42894,3 +42894,25 @@ body.local-subscriptions-dashboard-page
 .commerce-ped-promotion-danger-zone > summary { color: #974343; font-weight: 700; cursor: pointer; }
 .commerce-ped-promotion-danger-help { margin: .8rem 0; color: #746d72; }
 .commerce-ped-promotion-danger-form { display: grid; justify-items: start; gap: .7rem; max-width: 28rem; }
+
+/* Promotion CRM ordering, operations metadata, participant podium (M8.2). */
+.commerce-ped-m74-group-technical {
+    padding: .65rem 1rem; border-bottom: 1px solid #e6e8ee;
+    font-size: .75rem; color: #625b6a;
+}
+.commerce-ped-m74-group-technical > summary { cursor: pointer; font-weight: 650; color: #514282; }
+.commerce-ped-m74-tech-grid { display: grid; grid-template-columns: minmax(10rem, 1fr) 2fr;
+    gap: .35rem 1rem; margin: .75rem 0 0; }
+.commerce-ped-m74-tech-grid dt { font-weight: 600; color: #716b7a; }
+.commerce-ped-m74-tech-grid dd { margin: 0; overflow-wrap: anywhere; }
+.commerce-ped-m74-roster-medal { flex: 0 0 1.5rem; font-size: 1rem; }
+.commerce-ped-m74-participant-card.is-podium-gold { background: #fffaf0; border-color: #e8d3a0; }
+.commerce-ped-m74-participant-card.is-podium-silver { background: #f7f9fc; border-color: #c9d1db; }
+.commerce-ped-m74-participant-card.is-podium-bronze { background: #fff8f2; border-color: #dcbda6; }
+.commerce-ped-m74-sort-form { display: flex; gap: .5rem; align-items: end; flex-wrap: wrap; }
+.commerce-ped-m74-sort-form label { margin-bottom: 0; font-size: .74rem; }
+.commerce-ped-m74-sort-form select { width: auto; max-width: 15rem; }
+.commerce-ped-followup-links { display: flex; gap: .5rem; flex-wrap: wrap; }
+@media (max-width: 560px) { .commerce-ped-m74-tech-grid { grid-template-columns: 1fr; } }
+
+.commerce-ped-m73-layout.is-readonly, .commerce-ped-m74-layout.is-readonly { grid-template-columns: minmax(0, 1fr); }

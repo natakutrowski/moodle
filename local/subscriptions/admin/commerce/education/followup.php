@@ -182,12 +182,44 @@ echo html_writer::div(
         . get_string('commerce_education_participants', 'local_subscriptions'),
     'alert alert-light border mb-3'
 );
+$supportnav = [
+    ['groups.php', get_string('commerce_education_groups', 'local_subscriptions')],
+    ['participants.php', get_string('commerce_education_participants', 'local_subscriptions')],
+    ['calendar.php', get_string('commerce_education_calendar', 'local_subscriptions')],
+];
+$navlinks = [];
+foreach ($supportnav as [$path, $label]) {
+    $navlinks[] = html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/education/' . $path,
+            ['promotionid' => $promotionid]),
+        s($label), ['class' => 'btn btn-sm btn-outline-secondary']
+    );
+}
+echo html_writer::div(implode(' ', $navlinks), 'commerce-ped-followup-links mb-3');
 $medals = [1 => '🥇', 2 => '🥈', 3 => '🥉'];
 foreach ($ranking as $entry) {
     $groupid = $entry->get_group_id();
     $rank = $entry->get_points() > 0 ? $entry->get_rank() : 0;
     $medal = $medals[$rank] ?? '';
     $roster = $membersbygroup[$groupid] ?? [];
+    usort($roster, static fn($a, $b): int =>
+        ((int)($pointsbyuser[(int)$b->userid] ?? 0) <=> (int)($pointsbyuser[(int)$a->userid] ?? 0))
+        ?: strnatcasecmp(fullname($a), fullname($b)));
+    $memberranks = [];
+    $lastscore = null;
+    $lastrank = 0;
+    foreach ($roster as $index => $member) {
+        $score = (int)($pointsbyuser[(int)$member->userid] ?? 0);
+        if ($score <= 0) {
+            $memberranks[(int)$member->userid] = 0;
+            continue;
+        }
+        if ($lastscore === null || $lastscore !== $score) {
+            $lastrank = $index + 1;
+            $lastscore = $score;
+        }
+        $memberranks[(int)$member->userid] = $lastrank;
+    }
     echo html_writer::start_div('card mb-3 commerce-ped-m74-group-card'
         . ($rank === 1 ? ' is-podium-gold' : ($rank === 2 ? ' is-podium-silver'
             : ($rank === 3 ? ' is-podium-bronze' : ''))));
@@ -204,7 +236,8 @@ foreach ($ranking as $entry) {
         foreach ($roster as $member) {
             $userid = (int)$member->userid;
             echo html_writer::start_tag('li', ['class' => 'mb-2']);
-            echo $profilelink($member) . ' · ' . (int)($pointsbyuser[$userid] ?? 0) . ' XP';
+            echo ([1 => '🥇 ', 2 => '🥈 ', 3 => '🥉 '][$memberranks[$userid] ?? 0] ?? '')
+                . $profilelink($member) . ' · ' . (int)($pointsbyuser[$userid] ?? 0) . ' XP';
             echo $bonusform('user', $userid);
             echo $history('user', $userid);
             echo html_writer::end_tag('li');

@@ -13085,3 +13085,19 @@ $string['subscriptions:manage_promotions'] = 'Управлять потокам�
 $string['subscriptions:manage_promotion_xp'] = 'Начислять и отменять бонусные XP потока';
 $string['commerce_education_followup_title'] = 'Мониторинг потока';
 $string['commerce_education_followup_readonly'] = 'Режим просмотра. Для изменений нужно право управления потоками.';
+
+// CRM pedagogical promotion ranks, sorting and operational group metadata.
+$string['commerce_education_group_technical_title'] = 'Технические сведения о группе';
+$string['commerce_education_group_technical_id'] = 'ID группы CampusFR';
+$string['commerce_education_group_technical_moodle_id'] = 'ID группы Moodle';
+$string['commerce_education_group_technical_created'] = 'Дата создания';
+$string['commerce_education_group_technical_updated'] = 'Последнее изменение';
+$string['commerce_education_group_technical_position'] = 'Исходная позиция';
+$string['commerce_education_group_technical_lastmember'] = 'Последнее активное назначение';
+$string['commerce_education_group_technical_filled'] = 'Дата заполнения';
+$string['commerce_education_group_technical_not_recorded'] = 'Исторически не сохранялась';
+$string['commerce_education_sort_label'] = 'Сортировать по';
+$string['commerce_education_sort_xp'] = 'XP по убыванию';
+$string['commerce_education_sort_joined'] = 'Дата записи (новые сначала)';
+$string['commerce_education_sort_group'] = 'Группа (А–Я)';
+$string['commerce_education_sort_apply'] = 'Применить';
