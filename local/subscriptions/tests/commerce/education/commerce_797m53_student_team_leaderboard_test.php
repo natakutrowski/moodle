@@ -183,6 +183,9 @@ final class commerce_797m53_student_team_leaderboard_test extends advanced_testc
         self::assertNotEmpty($hidden[0]['revealdate']);
         self::assertFalse($hidden[0]['isxpnotstarted']);
         self::assertTrue($hidden[0]['isxpstarted']);
+        // Hidden group ranking never hides the learner's own promotion XP.
+        self::assertSame(10, $hidden[0]['userpoints']);
+        self::assertArrayHasKey('historyurl', $hidden[0]);
         $beforestart = $service->get_for_user((int)$user->id, $start - 1);
         self::assertTrue($beforestart[0]['isxpnotstarted']);
         self::assertNotEmpty($beforestart[0]['xpstartdate']);

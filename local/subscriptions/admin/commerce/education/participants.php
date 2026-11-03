@@ -245,6 +245,13 @@ if ($canmanage) {
     );
 }
 
+echo html_writer::link(
+    new moodle_url('/local/subscriptions/admin/commerce/education/xp_history.php',
+        ['promotionid' => $promotionid]),
+    get_string('commerce_education_xp_history_crm_title', 'local_subscriptions'),
+    ['class' => 'btn btn-sm btn-outline-primary mb-3']
+);
+
 // Participant metrics.
 echo html_writer::start_div('commerce-ped-m74-metrics');
 foreach ([
@@ -361,6 +368,12 @@ if ($participants === []) {
                 'commerce-ped-m74-medal is-' . $userpodium);
         }
         echo html_writer::div(s((string)$participant->email), 'commerce-ped-m74-participant-email');
+        echo html_writer::link(
+            new moodle_url('/local/subscriptions/admin/commerce/education/xp_history.php',
+                ['promotionid' => $promotionid, 'userid' => $userid]),
+            get_string('commerce_education_xp_history_crm_short', 'local_subscriptions'),
+            ['class' => 'small d-inline-block mt-1']
+        );
         echo html_writer::start_div('commerce-ped-m74-participant-badges');
         echo html_writer::span($profilelabel, 'commerce-ped-m74-participant-badge is-profile');
         echo html_writer::span(

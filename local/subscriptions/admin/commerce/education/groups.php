@@ -707,6 +707,11 @@ if ($groups === []) {
                     ) . html_writer::span(
                         (string)($memberpoints[$userid] ?? 0) . ' XP',
                         'commerce-ped-m74-roster-xp'
+                    ) . ' ' . html_writer::link(
+                        new moodle_url('/local/subscriptions/admin/commerce/education/xp_history.php',
+                            ['promotionid' => $promotionid, 'userid' => $userid]),
+                        get_string('commerce_education_xp_history_crm_short', 'local_subscriptions'),
+                        ['class' => 'small']
                     ),
                     ['class' => 'commerce-ped-m74-roster-member']
                 );

@@ -111,6 +111,10 @@ final class CommercePedagogicalStudentLeaderboardService {
                     'groupid' => (int)$group->get_id(),
                     'groupname' => format_string($group->get_display_name()),
                     'isleaderboardhidden' => true,
+                    // Personal XP are never a group ranking and remain visible during the reveal delay.
+                    'userpoints' => $this->xp->user_points($promotionid, $userid),
+                    'historyurl' => new \moodle_url('/local/subscriptions/my_promotion_xp.php',
+                        ['promotionid' => $promotionid])->out(false),
                     'revealdate' => userdate($revealat, get_string('strftimedatetime', 'langconfig')),
                     'isxpnotstarted' => $relation->xpstartsat !== null && $now < (int)$relation->xpstartsat,
                     'isxpstarted' => $relation->xpstartsat === null || $now >= (int)$relation->xpstartsat,
@@ -162,6 +166,8 @@ final class CommercePedagogicalStudentLeaderboardService {
                 'mybronze' => $mine->get_points() > 0 && $mine->get_rank() === 3,
                 'groupmembers' => $mine->get_member_count(),
                 'userpoints' => $this->xp->user_points($promotionid, $userid),
+                'historyurl' => new \moodle_url('/local/subscriptions/my_promotion_xp.php',
+                    ['promotionid' => $promotionid])->out(false),
                 'leaderboard' => $rows,
             ];
         }

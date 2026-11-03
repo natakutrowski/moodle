@@ -186,6 +186,7 @@ $supportnav = [
     ['groups.php', get_string('commerce_education_groups', 'local_subscriptions')],
     ['participants.php', get_string('commerce_education_participants', 'local_subscriptions')],
     ['calendar.php', get_string('commerce_education_calendar', 'local_subscriptions')],
+    ['xp_history.php', get_string('commerce_education_xp_history_crm_title', 'local_subscriptions')],
 ];
 $navlinks = [];
 foreach ($supportnav as [$path, $label]) {
@@ -237,7 +238,11 @@ foreach ($ranking as $entry) {
             $userid = (int)$member->userid;
             echo html_writer::start_tag('li', ['class' => 'mb-2']);
             echo ([1 => '🥇 ', 2 => '🥈 ', 3 => '🥉 '][$memberranks[$userid] ?? 0] ?? '')
-                . $profilelink($member) . ' · ' . (int)($pointsbyuser[$userid] ?? 0) . ' XP';
+                . $profilelink($member) . ' · ' . (int)($pointsbyuser[$userid] ?? 0) . ' XP'
+                . ' · ' . html_writer::link(new moodle_url(
+                    '/local/subscriptions/admin/commerce/education/xp_history.php',
+                    ['promotionid' => $promotionid, 'userid' => $userid]),
+                    get_string('commerce_education_xp_history_crm_short', 'local_subscriptions'));
             echo $bonusform('user', $userid);
             echo $history('user', $userid);
             echo html_writer::end_tag('li');
@@ -271,7 +276,11 @@ if ($unassigned) {
     foreach ($unassigned as $member) {
         $userid = (int)$member->userid;
         echo html_writer::start_div('card card-body mb-2');
-        echo $profilelink($member) . ' · ' . (int)($pointsbyuser[$userid] ?? 0) . ' XP';
+        echo $profilelink($member) . ' · ' . (int)($pointsbyuser[$userid] ?? 0) . ' XP'
+            . ' · ' . html_writer::link(new moodle_url(
+                '/local/subscriptions/admin/commerce/education/xp_history.php',
+                ['promotionid' => $promotionid, 'userid' => $userid]),
+                get_string('commerce_education_xp_history_crm_short', 'local_subscriptions'));
         echo $bonusform('user', $userid);
         echo $history('user', $userid);
         echo html_writer::end_div();

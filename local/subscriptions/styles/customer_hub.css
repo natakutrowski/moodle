@@ -160,3 +160,31 @@
         font-size: .72rem;
     }
 }
+
+/* Promotion XP: personal XP visible during the delayed group reveal. */
+.commerce-customer-hub__team-my-xp { display:flex;justify-content:space-between;align-items:center;gap:.7rem;margin:.65rem 0;color:#4e3975;font-size:.9rem; }
+.commerce-customer-hub__team-my-xp strong { font-size:1.1rem; }
+.commerce-customer-hub__team-history-link { display:inline-flex;align-items:center;gap:.4rem;margin-top:.75rem;color:#5c38b4;font-weight:700;font-size:.85rem;text-decoration:none; }
+.commerce-customer-hub__team-history-link:hover { text-decoration:underline;color:#402182; }
+
+/* Learner's read-only promotion XP ledger. */
+.commerce-promo-xp-history { max-width:1080px;margin:1.4rem auto 3rem; }
+.commerce-promo-xp-history__back { display:inline-block;margin-bottom:1.1rem;color:#6842d9;font-weight:700; }
+.commerce-promo-xp-history__hero { display:flex;gap:1.5rem;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:1.8rem;border:1px solid #e9e2ff;border-radius:1.3rem;background:linear-gradient(110deg,#faf6ff,#f4f8ff); }
+.commerce-promo-xp-history__hero h1 { font-size:clamp(1.6rem,3vw,2.25rem);margin:.35rem 0 .7rem; }
+.commerce-promo-xp-history__hero p { max-width:36rem;margin:0;color:#6a6476; }
+.commerce-promo-xp-history__stats { display:flex;gap:.8rem;flex-wrap:wrap; }
+.commerce-promo-xp-history__stats > div { min-width:140px;display:flex;flex-direction:column;gap:.25rem;background:#fff;border:1px solid #eae6f6;border-radius:.9rem;padding:1rem; }
+.commerce-promo-xp-history__stats span { font-size:.78rem;color:#726980; }
+.commerce-promo-xp-history__stats strong { font-size:1.45rem;color:#5737ae; }
+.commerce-promo-xp-history__explainer { margin:1.15rem 0;padding:1.1rem 1.25rem;display:flex;align-items:flex-start;gap:.7rem;background:#fff9eb;border-radius:.9rem;color:#634d26; }
+.commerce-promo-xp-history__explainer p { margin:0; }
+.commerce-promo-xp-history__ledger { background:#fff;border:1px solid #e7e9ef;border-radius:1rem;padding:1.3rem; }
+.commerce-promo-xp-history__ledger h2 { font-size:1.25rem;margin:0 0 .9rem; }
+.commerce-promo-xp-history__table td,.commerce-promo-xp-history__table th { padding:.75rem;vertical-align:middle; }
+.commerce-promo-xp-history__points { text-align:right;white-space:nowrap;font-weight:800;color:#24764d; }
+.commerce-promo-xp-history__table th:last-child { text-align:right; }
+.commerce-promo-xp-history__table tr.is-cancelled .commerce-promo-xp-history__points { color:#777; }
+.commerce-promo-xp-history__cancelled { display:block;font-size:.78rem;color:#886138; }
+.commerce-promo-xp-history__privacy { margin-top:1rem;color:#777285;font-size:.83rem; }
+@media(max-width:600px){.commerce-promo-xp-history__hero{padding:1.15rem}.commerce-promo-xp-history__stats{width:100%}.commerce-promo-xp-history__stats>div{flex:1;min-width:120px}.commerce-promo-xp-history__ledger{padding:.8rem}.commerce-promo-xp-history__table td,.commerce-promo-xp-history__table th{padding:.5rem;font-size:.85rem}}

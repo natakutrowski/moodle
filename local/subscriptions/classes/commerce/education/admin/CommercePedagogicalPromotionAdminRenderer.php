@@ -22,6 +22,7 @@ final class CommercePedagogicalPromotionAdminRenderer {
     public const CALENDAR = 'calendar';
     public const GROUPS = 'groups';
     public const PARTICIPANTS = 'participants';
+    public const XP_HISTORY = 'xp_history';
 
     public static function render(
         CommercePedagogicalPromotion $promotion,
@@ -164,6 +165,14 @@ final class CommercePedagogicalPromotionAdminRenderer {
                     ['promotionid' => $promotionid]
                 ),
                 $counts[self::PARTICIPANTS],
+            ],
+            self::XP_HISTORY => [
+                get_string('commerce_education_xp_history_crm_title', 'local_subscriptions'),
+                new \moodle_url(
+                    '/local/subscriptions/admin/commerce/education/xp_history.php',
+                    ['promotionid' => $promotionid]
+                ),
+                null,
             ],
         ];
 
