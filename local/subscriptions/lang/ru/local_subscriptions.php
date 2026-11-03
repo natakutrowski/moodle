@@ -7195,7 +7195,7 @@ $string['commerce_promo_xp_history_title'] = 'Мои XP потока';
 $string['commerce_promo_xp_history_intro'] = 'Здесь показаны только XP, начисленные в рамках этого потока. Твои личные XP за курс учитываются отдельно. Бонусы, начисленные группе, не входят в твой индивидуальный счёт. Свои баллы можно видеть сразу, даже пока рейтинг групп скрыт.';
 $string['commerce_promo_xp_history_replay'] = 'Ты проходил задание ещё до начала потока? За некоторые задания можно получить XP потока после новой, действительно завершённой попытки — если соблюдены правила начисления и урок уже открыт. Просто открыть задание недостаточно. Одну и ту же награду потока нельзя получить дважды.';
 $string['commerce_promo_xp_history_total'] = 'Мои XP потока';
-$string['commerce_promo_xp_history_count'] = 'Записей в истории';
+$string['commerce_promo_xp_history_count'] = 'Начислений XP';
 $string['commerce_promo_xp_history_heading'] = 'История начислений';
 $string['commerce_promo_xp_history_date'] = 'Дата';
 $string['commerce_promo_xp_history_source'] = 'За что';
@@ -13146,3 +13146,12 @@ $string['crm_login_as_student_started'] = 'Вы вошли как {$a}.';
 
 $string['crm_login_as_admin_preview'] = 'Симуляция супер-администратора: у аккаунта Support есть разрешение на вход от имени этого пользователя, и пользователь доступен для такой операции. Moodle не поддерживает повторный Login as внутри существующего сеанса подмены. Для проверки реального входа авторизуйтесь под аккаунтом Support напрямую.';
 $string['crm_login_as_admin_preview_tile'] = 'Проверить вход (симуляция)';
+
+// Promotion XP learner interface and read-only activity indicators.
+$string['commerce_promo_xp_history_tip'] = 'Ты уже проходил это задание до начала конкурса?';
+$string['commerce_promo_xp_badge_earned'] = 'XP потока получены';
+$string['commerce_promo_xp_badge_retry'] = 'Можно попробовать ещё раз';
+$string['commerce_promo_xp_badge_potential'] = 'Возможны XP потока';
+$string['commerce_promo_xp_badge_earned_help'] = 'Начисление XP за это задание подтверждено в истории текущего потока.';
+$string['commerce_promo_xp_badge_retry_help'] = 'Ранее ты уже получал личные XP за это задание. Новая успешная попытка может дать XP потока, если соблюдены правила конкурса.';
+$string['commerce_promo_xp_badge_potential_help'] = 'Задание уже открыто, но XP не гарантированы. Баллы начисляются только за подходящую попытку, подтверждённую правилами конкурса.';

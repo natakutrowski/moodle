@@ -7120,7 +7120,7 @@ $string['commerce_promo_xp_history_title'] = 'My promotion XP';
 $string['commerce_promo_xp_history_intro'] = 'Only XP recorded for this promotion appears here. Your personal course XP is tracked separately. Bonuses awarded directly to your team are not included in your individual total. Your own points remain visible while the group ranking is hidden.';
 $string['commerce_promo_xp_history_replay'] = 'Completed an activity before the promotion? Some activities may earn promotion XP after a new, genuinely completed attempt, subject to the activity rules and lesson release date. Opening an activity is not enough. The same promotion reward cannot be earned twice.';
 $string['commerce_promo_xp_history_total'] = 'My promotion XP';
-$string['commerce_promo_xp_history_count'] = 'Ledger entries';
+$string['commerce_promo_xp_history_count'] = 'XP rewards recorded';
 $string['commerce_promo_xp_history_heading'] = 'My XP history';
 $string['commerce_promo_xp_history_date'] = 'Date';
 $string['commerce_promo_xp_history_source'] = 'Source';
@@ -13071,3 +13071,12 @@ $string['crm_login_as_student_started'] = 'You are now logged in as {$a}.';
 
 $string['crm_login_as_admin_preview'] = 'Super Admin simulation: the impersonated Support account has permission to log in as this user, and this target is eligible. Moodle does not support a second nested Login as. To test the real session switch, sign in directly as a Support operator.';
 $string['crm_login_as_admin_preview_tile'] = 'Check Login as (simulation)';
+
+// Promotion XP learner interface and read-only activity indicators.
+$string['commerce_promo_xp_history_tip'] = 'Already completed this activity before the contest?';
+$string['commerce_promo_xp_badge_earned'] = 'Promotion XP earned';
+$string['commerce_promo_xp_badge_retry'] = 'New attempt possible';
+$string['commerce_promo_xp_badge_potential'] = 'Promotion XP possible';
+$string['commerce_promo_xp_badge_earned_help'] = 'An XP award from this activity is confirmed in your promotion history.';
+$string['commerce_promo_xp_badge_retry_help'] = 'You earned personal XP on this activity previously. A genuinely completed new attempt may earn promotion XP if the contest rules permit it.';
+$string['commerce_promo_xp_badge_potential_help'] = 'This activity is available, but XP are not guaranteed. Only an eligible attempt validated by the rules will earn points.';

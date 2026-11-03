@@ -30,7 +30,7 @@ $PAGE->set_url($url);
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title($title);
 $PAGE->set_heading($title);
-$PAGE->requires->css(new moodle_url('/local/subscriptions/styles/customer_hub.css'));
+$PAGE->requires->css(new moodle_url('/local/subscriptions/styles/customer_hub.css', ['v' => '2026110303']));
 $PAGE->navbar->add(get_string('commerce_customer_hub_title', 'local_subscriptions'), UrlFactory::my_campus());
 $PAGE->navbar->add($title);
 

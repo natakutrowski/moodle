@@ -6956,7 +6956,7 @@ $string['commerce_promo_xp_history_title'] = 'Mes XP de promotion';
 $string['commerce_promo_xp_history_intro'] = 'Voici uniquement les XP enregistrés pour cette promotion. Tes XP personnels du cours sont comptés séparément. Les bonus attribués directement au clan ne sont pas inclus dans ton total individuel. Tu peux consulter tes propres points même lorsque le classement des groupes reste masqué.';
 $string['commerce_promo_xp_history_replay'] = 'Tu avais déjà terminé une activité avant la promotion ? Certaines activités peuvent rapporter des XP de promotion après une nouvelle tentative réellement validée, selon les règles et la date d’ouverture de la leçon. Le simple fait de rouvrir une activité ne suffit pas. Une même récompense de promotion ne peut pas être obtenue deux fois.';
 $string['commerce_promo_xp_history_total'] = 'Mes XP promotion';
-$string['commerce_promo_xp_history_count'] = 'Écritures enregistrées';
+$string['commerce_promo_xp_history_count'] = 'Gains d\'XP enregistrés';
 $string['commerce_promo_xp_history_heading'] = 'Historique de mes gains';
 $string['commerce_promo_xp_history_date'] = 'Date';
 $string['commerce_promo_xp_history_source'] = 'Origine';
@@ -12906,3 +12906,12 @@ $string['crm_login_as_student_started'] = 'Tu es maintenant connecté en tant qu
 
 $string['crm_login_as_admin_preview'] = 'Simulation Super Admin : le compte Support possède bien la permission de se connecter en tant que cet utilisateur et la cible est autorisée. Moodle interdit de lancer un second « Login as » dans une session déjà usurpée. Pour tester le basculement réel, connecte-toi directement avec un compte Support.';
 $string['crm_login_as_admin_preview_tile'] = 'Vérifier « Login as » (simulation)';
+
+// Promotion XP learner interface and read-only activity indicators.
+$string['commerce_promo_xp_history_tip'] = 'Déjà réalisé cette activité avant le concours ?';
+$string['commerce_promo_xp_badge_earned'] = 'XP Promo obtenus';
+$string['commerce_promo_xp_badge_retry'] = 'Nouvelle tentative possible';
+$string['commerce_promo_xp_badge_potential'] = 'XP Promo possibles';
+$string['commerce_promo_xp_badge_earned_help'] = 'Un gain de XP de cette activité est confirmé dans ton historique de promotion.';
+$string['commerce_promo_xp_badge_retry_help'] = 'Tu as déjà reçu des XP personnels pour cette activité. Une nouvelle tentative réellement validée peut donner des XP de promotion si elle respecte les règles du concours.';
+$string['commerce_promo_xp_badge_potential_help'] = 'Cette activité est ouverte et peut être prise en compte par la promotion, mais les XP ne sont pas garantis. Seule une tentative admissible, validée par les règles, rapporte des points.';

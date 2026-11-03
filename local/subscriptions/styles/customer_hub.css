@@ -188,3 +188,73 @@
 .commerce-promo-xp-history__cancelled { display:block;font-size:.78rem;color:#886138; }
 .commerce-promo-xp-history__privacy { margin-top:1rem;color:#777285;font-size:.83rem; }
 @media(max-width:600px){.commerce-promo-xp-history__hero{padding:1.15rem}.commerce-promo-xp-history__stats{width:100%}.commerce-promo-xp-history__stats>div{flex:1;min-width:120px}.commerce-promo-xp-history__ledger{padding:.8rem}.commerce-promo-xp-history__table td,.commerce-promo-xp-history__table th{padding:.5rem;font-size:.85rem}}
+
+
+/* Promotion XP: independent styles in the Moodle-combined plugin CSS.
+   These complement customer_hub.css; the history remains styled if the
+   page-specific stylesheet is cached or delayed. */
+.commerce-promo-xp-history { max-width: 1080px; margin: 1.5rem auto 3rem; }
+.commerce-promo-xp-history__back.btn { display: inline-flex; align-items: center; gap: .45rem;
+    margin: 0 0 1.2rem; padding: .55rem .95rem; border: 1px solid #ed77a8;
+    border-radius: .75rem; background: #fff; color: #bd347c; font-weight: 700;
+    text-decoration: none; box-shadow: none; }
+.commerce-promo-xp-history__back.btn:hover, .commerce-promo-xp-history__back.btn:focus-visible {
+    border-color: #d94c90; background: #fff0f7; color: #ad256e; text-decoration: none; }
+.commerce-promo-xp-history__hero { display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 1.5rem; padding: 1.6rem;
+    background: linear-gradient(112deg, #faf6ff 10%, #f3f8ff 100%);
+    border: 1px solid #eee2ff; border-radius: 1.25rem; }
+.commerce-promo-xp-history__hero h1 { font-size: clamp(1.6rem, 3vw, 2.2rem);
+    margin: .45rem 0 .7rem; color: #342057; }
+.commerce-promo-xp-history__hero p { max-width: 36rem; color: #625d6f; line-height: 1.55; margin: 0; }
+.commerce-promo-xp-history__stats { display: flex; gap: .9rem; flex-wrap: wrap; }
+.commerce-promo-xp-history__stats .commerce-promo-xp-history__stat { display: flex;
+    flex-direction: column; gap: .45rem; min-width: 160px; padding: 1.05rem 1.15rem;
+    background: #fff; border: 1px solid #e9e4f4; border-radius: .95rem;
+    box-shadow: 0 5px 15px rgba(62, 38, 92, .045); }
+.commerce-promo-xp-history__stats .commerce-promo-xp-history__stat > span {
+    display: block; color: #756a85; font-size: .85rem; line-height: 1.4; }
+.commerce-promo-xp-history__stats .commerce-promo-xp-history__stat > strong {
+    display: block; color: #5931a2; font-size: 1.7rem; line-height: 1.2; white-space: nowrap; }
+.commerce-promo-xp-history__stats .commerce-promo-xp-history__stat > strong small {
+    font-size: .8rem; font-weight: 700; }
+.commerce-promo-xp-history__explainer { display: flex; align-items: flex-start; gap: .95rem;
+    margin: 1.6rem 0 2rem; padding: 1.15rem 1.35rem; background: #edf6ff;
+    border: 1px solid #cfe3fc; border-radius: 1rem; color: #254b78; }
+.commerce-promo-xp-history__explainer-icon { display: grid; flex: 0 0 2.5rem;
+    width: 2.5rem; height: 2.5rem; place-items: center; background: #d9ecff;
+    border-radius: .8rem; font-size: 1.2rem; }
+.commerce-promo-xp-history__explainer-copy { min-width: 0; }
+.commerce-promo-xp-history__explainer-copy strong { display: block; margin-bottom: .4rem; }
+.commerce-promo-xp-history__explainer-copy p { margin: 0; line-height: 1.55; }
+.commerce-promo-xp-history__ledger { padding: 1.45rem; border: 1px solid #e6e8ef;
+    border-radius: 1.05rem; background: #fff; }
+.commerce-promo-xp-history__ledger h2 { margin: .3rem 0 1.35rem;
+    font-size: 1.3rem; color: #382257; }
+.commerce-promo-xp-history__table th, .commerce-promo-xp-history__table td {
+    padding: .8rem; vertical-align: middle; }
+.commerce-promo-xp-history__points { text-align: right; color: #23764b; font-weight: 800; white-space: nowrap; }
+.commerce-promo-xp-history__table th:last-child { text-align: right; }
+.commerce-promo-xp-history__table tr.is-cancelled .commerce-promo-xp-history__points { color: #817988; }
+.commerce-promo-xp-history__cancelled { display: block; color: #93704a; font-size: .8rem; }
+.commerce-promo-xp-history__privacy { margin-top: 1.3rem; color: #776f84; font-size: .83rem; }
+@media (max-width: 680px) {
+    .commerce-promo-xp-history__hero { padding: 1.1rem; }
+    .commerce-promo-xp-history__stats { width: 100%; }
+    .commerce-promo-xp-history__stats .commerce-promo-xp-history__stat { min-width: 125px; flex: 1; }
+    .commerce-promo-xp-history__explainer { padding: .95rem; gap: .7rem; }
+    .commerce-promo-xp-history__ledger { padding: .9rem; }
+    .commerce-promo-xp-history__table th, .commerce-promo-xp-history__table td { padding: .55rem; }
+}
+
+/* Stage 2: contextual promotion XP indicators on course cards and activity headings. */
+.commerce-promo-xp-activity-badge { display: inline-flex; align-items: center;
+    gap: .25rem; margin: .35rem .4rem .25rem .15rem; padding: .22rem .55rem;
+    font-size: .74rem; font-weight: 700; line-height: 1.4; border-radius: 2rem;
+    border: 1px solid transparent; white-space: normal; vertical-align: middle; }
+.commerce-promo-xp-activity-badge--earned { color: #226a46; background: #eaf7ee; border-color: #bce3c9; }
+.commerce-promo-xp-activity-badge--earned::before { content: "✓"; margin-right: .2rem; }
+.commerce-promo-xp-activity-badge--retry { color: #835b23; background: #fff5e4; border-color: #f0d9ac; }
+.commerce-promo-xp-activity-badge--retry::before { content: "↻"; margin-right: .2rem; }
+.commerce-promo-xp-activity-badge--potential { color: #365b93; background: #edf4ff; border-color: #cadcf5; }
+.commerce-promo-xp-activity-badge--potential::before { content: "✦"; margin-right: .2rem; }

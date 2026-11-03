@@ -1,5 +1,7 @@
 <div class="commerce-promo-xp-history">
-    <a class="commerce-promo-xp-history__back" href="{{backurl}}">← {{#str}}commerce_promo_xp_history_back, local_subscriptions{{/str}}</a>
+    <a class="commerce-promo-xp-history__back btn btn-outline-primary" href="{{backurl}}">
+        <span aria-hidden="true">←</span> {{#str}}commerce_promo_xp_history_back, local_subscriptions{{/str}}
+    </a>
     <header class="commerce-promo-xp-history__hero">
         <div>
             <span class="commerce-customer-hub__team-kicker">🏆 {{promotionname}}</span>
@@ -7,13 +9,22 @@
             <p>{{#str}}commerce_promo_xp_history_intro, local_subscriptions{{/str}}</p>
         </div>
         <div class="commerce-promo-xp-history__stats">
-            <div><span>{{#str}}commerce_promo_xp_history_total, local_subscriptions{{/str}}</span><strong>{{totalpoints}} XP</strong></div>
-            <div><span>{{#str}}commerce_promo_xp_history_count, local_subscriptions{{/str}}</span><strong>{{rewardcount}}</strong></div>
+            <div class="commerce-promo-xp-history__stat">
+                <span>{{#str}}commerce_promo_xp_history_total, local_subscriptions{{/str}}</span>
+                <strong>{{totalpoints}} <small>XP</small></strong>
+            </div>
+            <div class="commerce-promo-xp-history__stat">
+                <span>{{#str}}commerce_promo_xp_history_count, local_subscriptions{{/str}}</span>
+                <strong>{{rewardcount}}</strong>
+            </div>
         </div>
     </header>
     <section class="commerce-promo-xp-history__explainer">
-        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-        <p>{{#str}}commerce_promo_xp_history_replay, local_subscriptions{{/str}}</p>
+        <span class="commerce-promo-xp-history__explainer-icon" aria-hidden="true">💡</span>
+        <div class="commerce-promo-xp-history__explainer-copy">
+            <strong>{{#str}}commerce_promo_xp_history_tip, local_subscriptions{{/str}}</strong>
+            <p>{{#str}}commerce_promo_xp_history_replay, local_subscriptions{{/str}}</p>
+        </div>
     </section>
     <section class="commerce-promo-xp-history__ledger">
         <h2>{{#str}}commerce_promo_xp_history_heading, local_subscriptions{{/str}}</h2>

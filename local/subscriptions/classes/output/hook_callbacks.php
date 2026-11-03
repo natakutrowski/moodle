@@ -17,6 +17,40 @@ final class hook_callbacks {
 
         self::register_direct_purchase_nav_badge($page);
         self::add_provisional_login_notice($hook, $page);
+        self::add_promotion_activity_badges($page);
+    }
+
+    /** Show promotion XP signals on relevant course pages without ever writing XP. */
+    private static function add_promotion_activity_badges(\moodle_page $page): void {
+        global $USER;
+        if (!isloggedin() || isguestuser() || !isset($USER->id) || (int)$USER->id <= 1) {
+            return;
+        }
+        $script = (string)($_SERVER['SCRIPT_NAME'] ?? '');
+        $iscourse = str_ends_with($script, '/course/view.php') ||
+            str_ends_with($script, '/course/section.php');
+        $ismodule = (bool)preg_match('~/mod/[^/]+/view\.php$~D', $script);
+        if (!$iscourse && !$ismodule) {
+            return;
+        }
+        $courseid = (int)($page->course->id ?? 0);
+        if ($courseid <= SITEID) {
+            return;
+        }
+        // Emergency display-only switch; no change to XP awarding.
+        if (get_config('local_subscriptions', 'promo_xp_badges_disabled')) {
+            return;
+        }
+        try {
+            $badges = \local_subscriptions\commerce\education\xp\CommercePedagogicalActivityXpDisplayService::create()
+                ->for_user_course((int)$USER->id, $courseid);
+            if ($badges) {
+                $page->requires->js_call_amd('local_subscriptions/promo_xp_activity_badges', 'init', [$badges]);
+            }
+        } catch (\Throwable $e) {
+            // Optional read-only UI must never break access to a lesson.
+            debugging('Promotion XP badges unavailable: ' . $e->getMessage(), DEBUG_DEVELOPER);
+        }
     }
 
     private static function register_direct_purchase_nav_badge(\moodle_page $page): void {
