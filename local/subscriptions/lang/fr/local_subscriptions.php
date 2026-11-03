@@ -12861,3 +12861,14 @@ $string['commerce_education_sort_xp'] = 'XP décroissants';
 $string['commerce_education_sort_joined'] = 'Inscription (plus récente)';
 $string['commerce_education_sort_group'] = 'Groupe (A–Z)';
 $string['commerce_education_sort_apply'] = 'Appliquer';
+
+$string['subscriptions:login_as_student'] = 'Se connecter comme un utilisateur non administrateur depuis le CRM';
+$string['crm_user360_login_as_student'] = 'Se connecter en tant que cet utilisateur';
+$string['crm_login_as_student_title'] = 'Connexion en tant qu’utilisateur';
+$string['crm_login_as_student_warning'] = 'Tu vas accéder à ce compte utilisateur, avec ses droits et ses données. Tu pourras agir en son nom. Cette opération est journalisée. Pour retrouver ton compte, déconnecte-toi puis reconnecte-toi. Les autres onglets du navigateur utiliseront également cette session.';
+$string['crm_login_as_student_confirm'] = 'Confirmer et accéder au compte utilisateur';
+$string['crm_login_as_student_cancel'] = 'Retour à User 360';
+$string['crm_login_as_student_started'] = 'Tu es maintenant connecté en tant que {$a}.';
+
+$string['crm_login_as_admin_preview'] = 'Simulation Super Admin : le compte Support possède bien la permission de se connecter en tant que cet utilisateur et la cible est autorisée. Moodle interdit de lancer un second « Login as » dans une session déjà usurpée. Pour tester le basculement réel, connecte-toi directement avec un compte Support.';
+$string['crm_login_as_admin_preview_tile'] = 'Vérifier « Login as » (simulation)';

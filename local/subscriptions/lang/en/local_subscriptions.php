@@ -13026,3 +13026,14 @@ $string['commerce_education_sort_xp'] = 'XP descending';
 $string['commerce_education_sort_joined'] = 'Enrolment (newest)';
 $string['commerce_education_sort_group'] = 'Group (A–Z)';
 $string['commerce_education_sort_apply'] = 'Apply';
+
+$string['subscriptions:login_as_student'] = 'Log in as a non-admin user (CRM)';
+$string['crm_user360_login_as_student'] = 'Log in as this user';
+$string['crm_login_as_student_title'] = 'Log in as a user';
+$string['crm_login_as_student_warning'] = 'You are about to access this user account with its permissions and personal data. You can act on the user’s behalf. This action is logged. To return to your account, log out and log back in. Other tabs in this browser will also use the impersonated session.';
+$string['crm_login_as_student_confirm'] = 'Confirm and log in as this user';
+$string['crm_login_as_student_cancel'] = 'Back to User 360';
+$string['crm_login_as_student_started'] = 'You are now logged in as {$a}.';
+
+$string['crm_login_as_admin_preview'] = 'Super Admin simulation: the impersonated Support account has permission to log in as this user, and this target is eligible. Moodle does not support a second nested Login as. To test the real session switch, sign in directly as a Support operator.';
+$string['crm_login_as_admin_preview_tile'] = 'Check Login as (simulation)';

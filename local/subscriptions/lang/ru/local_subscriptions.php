@@ -13101,3 +13101,14 @@ $string['commerce_education_sort_xp'] = 'XP по убыванию';
 $string['commerce_education_sort_joined'] = 'Дата записи (новые сначала)';
 $string['commerce_education_sort_group'] = 'Группа (А–Я)';
 $string['commerce_education_sort_apply'] = 'Применить';
+
+$string['subscriptions:login_as_student'] = 'Входить как пользователь, не являющийся администратором, из CRM';
+$string['crm_user360_login_as_student'] = 'Войти как этот пользователь';
+$string['crm_login_as_student_title'] = 'Вход в аккаунт пользователя';
+$string['crm_login_as_student_warning'] = 'Вы собираетесь открыть аккаунт пользователя с его правами и персональными данными. Вы сможете выполнять действия от его имени. Действие будет записано в журнал. Чтобы вернуться к своему аккаунту, выйдите и войдите снова. Остальные вкладки браузера тоже будут использовать этот сеанс.';
+$string['crm_login_as_student_confirm'] = 'Подтвердить и войти как пользователь';
+$string['crm_login_as_student_cancel'] = 'Вернуться к User 360';
+$string['crm_login_as_student_started'] = 'Вы вошли как {$a}.';
+
+$string['crm_login_as_admin_preview'] = 'Симуляция супер-администратора: у аккаунта Support есть разрешение на вход от имени этого пользователя, и пользователь доступен для такой операции. Moodle не поддерживает повторный Login as внутри существующего сеанса подмены. Для проверки реального входа авторизуйтесь под аккаунтом Support напрямую.';
+$string['crm_login_as_admin_preview_tile'] = 'Проверить вход (симуляция)';

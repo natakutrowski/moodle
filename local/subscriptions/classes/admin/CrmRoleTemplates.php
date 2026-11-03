@@ -25,6 +25,7 @@ final class CrmRoleTemplates {
                     Capabilities::VIEW_INBOX, Capabilities::MANAGE_INBOX,
                     Capabilities::VIEW_WORK_ITEMS, Capabilities::MANAGE_WORK_ITEMS,
                     Capabilities::VIEW_PROMOTIONS,
+                    Capabilities::LOGIN_AS_STUDENT,
                 ],
             ],
             'campus_crm_commerce' => [

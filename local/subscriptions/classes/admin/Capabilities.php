@@ -10,6 +10,7 @@ final class Capabilities {
     public const MANAGE_CRM_ROLES = 'local/subscriptions:manage_crm_roles';
     public const VIEW_DASHBOARD = 'local/subscriptions:view_dashboard';
     public const VIEW_USERS = 'local/subscriptions:view_users';
+    public const LOGIN_AS_STUDENT = 'local/subscriptions:login_as_student';
     public const MANAGE_USERS = 'local/subscriptions:manage_users';
     public const MANAGE_SUBSCRIPTIONS = 'local/subscriptions:manage_subscriptions';
     public const VIEW_DIGITAL = 'local/subscriptions:view_digital';

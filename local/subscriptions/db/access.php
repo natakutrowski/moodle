@@ -15,6 +15,14 @@ $capabilities = [
         'archetypes' => ['manager' => CAP_ALLOW],
     ],
 
+    // A CRM-only right: never grant Moodle's system-wide user:loginas right to Support.
+    'local/subscriptions:login_as_student' => [
+        'riskbitmask' => RISK_PERSONAL | RISK_DATALOSS,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [],
+    ],
+
     'local/subscriptions:manage_users' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,

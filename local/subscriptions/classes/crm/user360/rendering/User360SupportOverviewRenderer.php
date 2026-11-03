@@ -918,6 +918,22 @@ final class User360SupportOverviewRenderer {
             );
         }
 
+        // This is only a display check; login_as_student.php repeats authorization.
+        if (empty($profile->iscommerceguest)
+                && !empty($user->id)
+                && \local_subscriptions\crm\user\CrmStudentImpersonation::can_show($user)) {
+            $items[] = self::action_tile(
+                new \moodle_url('/local/subscriptions/admin/users/login_as_student.php',
+                    ['id' => (int)$user->id]),
+                'fa fa-sign-in',
+                get_string(
+                    \local_subscriptions\crm\user\CrmStudentImpersonation::can_preview($user)
+                        ? 'crm_login_as_admin_preview_tile' : 'crm_user360_login_as_student',
+                    'local_subscriptions'
+                )
+            );
+        }
+
         if (empty($profile->iscommerceguest) && !empty($user->id)) {
             $items[] = self::action_tile(
                 new \moodle_url('/user/profile.php', ['id' => (int)$user->id]),
