@@ -122,6 +122,7 @@ final class CommercePedagogicalXpHistoryService {
                 'date' => userdate((int)$record->timeearned, get_string('strftimedatetime', 'langconfig')),
                 'points' => (int)$record->points,
                 'isactive' => $cancelledat === 0,
+                'isbonus' => $ismannual,
                 'iscancelled' => $cancelledat !== 0,
                 'cancelledlabel' => $cancelledat ? get_string('commerce_promo_xp_history_cancelled',
                     'local_subscriptions', userdate($cancelledat, get_string('strftimedatetime', 'langconfig'))) : '',
@@ -143,7 +144,8 @@ final class CommercePedagogicalXpHistoryService {
 
         return [
             'promotionid' => $promotionid,
-            'promotionname' => format_string((string)$promotion->name),
+            'promotionname' => format_string((string)$promotion->name, true,
+                ['context' => \context_course::instance((int)$promotion->courseid)]),
             'totalpoints' => $this->repository->user_points($promotionid, $userid),
             'rewardcount' => (int)$count,
             'hasrewards' => $rows !== [],
@@ -234,7 +236,8 @@ final class CommercePedagogicalXpHistoryService {
         }
         return [
             'promotionid' => $promotionid,
-            'promotionname' => format_string((string)$promotion->name),
+            'promotionname' => format_string((string)$promotion->name, true,
+                ['context' => \context_system::instance()]),
             'totalpoints' => array_sum($this->repository->points_by_user($promotionid)),
             'rewardcount' => $count,
             'hasrewards' => $rows !== [],
@@ -294,7 +297,8 @@ final class CommercePedagogicalXpHistoryService {
                     continue;
                 }
                 $resolved[$sourcekey] = [
-                    'name' => format_string((string)$cm->name),
+                    'name' => format_string((string)$cm->name, true,
+                        ['context' => \context_module::instance((int)$cm->id)]),
                     'url' => $cm->url ? $cm->url->out(false) : '',
                 ];
             } catch (\Throwable) {

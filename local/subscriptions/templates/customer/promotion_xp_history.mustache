@@ -11,7 +11,7 @@
         <div class="commerce-promo-xp-history__stats">
             <div class="commerce-promo-xp-history__stat">
                 <span>{{#str}}commerce_promo_xp_history_total, local_subscriptions{{/str}}</span>
-                <strong>{{totalpoints}} <small>XP</small></strong>
+                <strong>{{totalpoints}} <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"></strong>
             </div>
             <div class="commerce-promo-xp-history__stat">
                 <span>{{#str}}commerce_promo_xp_history_count, local_subscriptions{{/str}}</span>
@@ -45,8 +45,16 @@
                                 {{#iscancelled}}<small class="commerce-promo-xp-history__cancelled">{{cancelledlabel}}</small>{{/iscancelled}}
                             </td>
                             <td class="commerce-promo-xp-history__points">
-                                {{#isactive}}+{{points}}{{/isactive}}
-                                {{#iscancelled}}<s>+{{points}}</s> 0{{/iscancelled}}
+                                {{#isactive}}
+                                    <span class="{{#isbonus}}commerce-promo-xp-history__bonus-amount{{/isbonus}}">+{{points}}</span>
+                                    <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20">
+                                {{/isactive}}
+                                {{#iscancelled}}
+                                    <del class="commerce-promo-xp-history__cancelled-amount">+{{points}}</del>
+                                    <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20">
+                                    <span class="commerce-promo-xp-history__kept-amount">0</span>
+                                    <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20">
+                                {{/iscancelled}}
                             </td>
                         </tr>{{/rows}}
                     </tbody>

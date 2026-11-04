@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once(__DIR__ . '/../../../../../config.php');
 
+use local_subscriptions\commerce\education\xp\CommercePedagogicalPointsPresenter;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\education\admin\CommercePedagogicalPromotionAdminRenderer;
@@ -390,13 +391,15 @@ if ($participants === []) {
         foreach ([
             ['fa-shopping-bag', get_string('commerce_education_group_offer', 'local_subscriptions'), $offername],
             ['fa-clock-o', get_string('commerce_education_participant_since', 'local_subscriptions'), userdate($joinedat)],
-            ['fa-star', get_string('commerce_education_m74_participant_xp', 'local_subscriptions'), (string)$userpoints],
+            ['fa-star', get_string('commerce_education_m74_participant_xp', 'local_subscriptions'),
+                CommercePedagogicalPointsPresenter::promotion((int)$userpoints)],
         ] as [$icon, $label, $value]) {
             echo html_writer::start_div('commerce-ped-m74-participant-meta-item');
             echo html_writer::tag('i', '', ['class' => 'fa ' . $icon, 'aria-hidden' => 'true']);
             echo html_writer::start_div();
             echo html_writer::div($label, 'commerce-ped-m74-participant-meta-label');
-            echo html_writer::div(s((string)$value), 'commerce-ped-m74-participant-meta-value');
+            echo html_writer::div($icon === 'fa-star' ? $value : s((string)$value),
+                'commerce-ped-m74-participant-meta-value');
             echo html_writer::end_div();
             echo html_writer::end_div();
         }

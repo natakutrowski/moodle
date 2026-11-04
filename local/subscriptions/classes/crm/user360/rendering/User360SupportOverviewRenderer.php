@@ -1268,7 +1268,7 @@ final class User360SupportOverviewRenderer {
 
         if ($site !== null) {
             return [
-                'value' => number_format((int)($site->xp ?? 0), 0, ',', ' ') . ' XP',
+                'value' => number_format((int)($site->xp ?? 0), 0, ',', ' ') . ' 🥐',
                 'sub' => (int)($site->xplevel ?? 0) > 0
                     ? get_string(
                         'crm_user360_n114_xp_level',
@@ -1280,7 +1280,7 @@ final class User360SupportOverviewRenderer {
         }
 
         return [
-            'value' => number_format($sum, 0, ',', ' ') . ' XP',
+            'value' => number_format($sum, 0, ',', ' ') . ' 🥐',
             'sub' => $enabledcourses > 0
                 ? get_string(
                     'crm_user360_n114b_xp_courses_sub',

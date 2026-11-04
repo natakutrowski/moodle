@@ -42986,3 +42986,50 @@ body.local-subscriptions-dashboard-page
 .commerce-promo-xp-activity-badge--retry::before { content: "↻"; margin-right: .2rem; }
 .commerce-promo-xp-activity-badge--potential { color: #365b93; background: #edf4ff; border-color: #cadcf5; }
 .commerce-promo-xp-activity-badge--potential::before { content: "✦"; margin-right: .2rem; }
+
+
+/* CampusFR point denomination, read-only presentation. */
+.campusfr-points-promo { display: inline-flex; align-items: center; gap: .22em; white-space: nowrap; vertical-align: baseline; }
+.campusfr-points-choco-icon { width: 1.5em; height: 1.5em; min-width: 1.35rem; min-height: 1.35rem; object-fit: contain; display: inline-block; vertical-align: -.24em; flex: 0 0 auto; }
+.commerce-promo-xp-history__points .campusfr-points-choco-icon { width: 1.45em; height: 1.45em; }
+
+/* Mon Campus: promotion ranking badge and spacing (presentation only). */
+.commerce-customer-hub__team-rank { min-width: 3rem; width: 3rem; height: 3rem; flex: 0 0 3rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .05rem; line-height: 1; border-radius: 50%; }
+.commerce-customer-hub__team-rank > span:not(.commerce-customer-hub__team-rank-number) { font-size: 1.15rem; line-height: 1.1; }
+.commerce-customer-hub__team-rank-number { font-size: .79rem; line-height: 1.1; }
+.commerce-customer-hub__team-meta { justify-content: flex-end; }
+.commerce-customer-hub__team-history-link { display: flex; margin-top: 1.1rem; padding-top: .8rem; border-top: 1px solid #ebe3fb; }
+
+/* Visual polish: promotion points (no change to XP accounting). */
+.commerce-promo-xp-history__table td.commerce-promo-xp-history__points {
+    color: #312b3b;
+}
+.commerce-customer-hub__team-history-link .commerce-customer-hub__team-history-text {
+    display: inline-block;
+    margin-inline-start: .45rem;
+}
+.commerce-promo-xp-history__bonus-amount {
+    color: #167546;
+    font-weight: 800;
+}
+.commerce-promo-xp-history__cancelled-amount {
+    position: relative;
+    display: inline-block;
+    color: #826b72;
+    font-weight: 800;
+    text-decoration: none;
+}
+.commerce-promo-xp-history__cancelled-amount::after {
+    content: "";
+    position: absolute;
+    left: -.08em;
+    right: -.08em;
+    top: 51%;
+    border-top: 3px solid #d22138;
+    transform: rotate(-5deg);
+    pointer-events: none;
+}
+.commerce-promo-xp-history__kept-amount {
+    color: #5f6270;
+    margin-inline-start: .35rem;
+}

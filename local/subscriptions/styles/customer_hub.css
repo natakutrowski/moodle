@@ -120,8 +120,10 @@
 .commerce-customer-hub__team-summary > div:first-child { display:flex; flex-direction:column; min-width:0; }
 .commerce-customer-hub__team-summary small { color:#7a718f; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .commerce-customer-hub__team-summary strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.commerce-customer-hub__team-rank { min-width:2.5rem; height:2.5rem; display:grid; place-items:center; border-radius:50%; background:#6842d9; color:#fff; font-weight:800; }
-.commerce-customer-hub__team-meta { display:flex; justify-content:space-between; gap:.75rem; flex-wrap:wrap; margin:.7rem 0; font-size:.82rem; color:#6e667c; }
+.commerce-customer-hub__team-rank { min-width:3rem; width:3rem; height:3rem; flex:0 0 3rem; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.05rem; line-height:1; border-radius:50%; background:#6842d9; color:#fff; font-weight:800; }
+.commerce-customer-hub__team-rank > span:not(.commerce-customer-hub__team-rank-number) { font-size:1.15rem; line-height:1.1; }
+.commerce-customer-hub__team-rank-number { font-size:.79rem; line-height:1.1; }
+.commerce-customer-hub__team-meta { display:flex; justify-content:flex-end; gap:.75rem; flex-wrap:wrap; margin:.7rem 0; font-size:.82rem; color:#6e667c; }
 .commerce-customer-hub__team-ranking { list-style:none; margin:0; padding:0; display:grid; gap:.3rem; }
 .commerce-customer-hub__team-ranking li { display:grid; grid-template-columns:2.2rem minmax(0,1fr) auto; align-items:center; gap:.45rem; padding:.42rem .5rem; border-radius:.55rem; font-size:.84rem; }
 .commerce-customer-hub__team-ranking li.is-mine { background:#eee8ff; color:#4d2bb8; }
@@ -164,7 +166,7 @@
 /* Promotion XP: personal XP visible during the delayed group reveal. */
 .commerce-customer-hub__team-my-xp { display:flex;justify-content:space-between;align-items:center;gap:.7rem;margin:.65rem 0;color:#4e3975;font-size:.9rem; }
 .commerce-customer-hub__team-my-xp strong { font-size:1.1rem; }
-.commerce-customer-hub__team-history-link { display:inline-flex;align-items:center;gap:.4rem;margin-top:.75rem;color:#5c38b4;font-weight:700;font-size:.85rem;text-decoration:none; }
+.commerce-customer-hub__team-history-link { display:flex;align-items:center;gap:.4rem;margin-top:1.1rem;padding-top:.8rem;border-top:1px solid #ebe3fb;color:#5c38b4;font-weight:700;font-size:.85rem;text-decoration:none; }
 .commerce-customer-hub__team-history-link:hover { text-decoration:underline;color:#402182; }
 
 /* Learner's read-only promotion XP ledger. */
@@ -258,3 +260,43 @@
 .commerce-promo-xp-activity-badge--retry::before { content: "↻"; margin-right: .2rem; }
 .commerce-promo-xp-activity-badge--potential { color: #365b93; background: #edf4ff; border-color: #cadcf5; }
 .commerce-promo-xp-activity-badge--potential::before { content: "✦"; margin-right: .2rem; }
+
+
+/* CampusFR point denomination, read-only presentation. */
+.campusfr-points-promo { display: inline-flex; align-items: center; gap: .22em; white-space: nowrap; vertical-align: baseline; }
+.campusfr-points-choco-icon { width: 1.5em; height: 1.5em; min-width: 1.35rem; min-height: 1.35rem; object-fit: contain; display: inline-block; vertical-align: -.24em; flex: 0 0 auto; }
+.commerce-promo-xp-history__points .campusfr-points-choco-icon { width: 1.45em; height: 1.45em; }
+
+/* Visual polish: promotion points (no change to XP accounting). */
+.commerce-promo-xp-history__table td.commerce-promo-xp-history__points {
+    color: #312b3b;
+}
+.commerce-customer-hub__team-history-link .commerce-customer-hub__team-history-text {
+    display: inline-block;
+    margin-inline-start: .45rem;
+}
+.commerce-promo-xp-history__bonus-amount {
+    color: #167546;
+    font-weight: 800;
+}
+.commerce-promo-xp-history__cancelled-amount {
+    position: relative;
+    display: inline-block;
+    color: #826b72;
+    font-weight: 800;
+    text-decoration: none;
+}
+.commerce-promo-xp-history__cancelled-amount::after {
+    content: "";
+    position: absolute;
+    left: -.08em;
+    right: -.08em;
+    top: 51%;
+    border-top: 3px solid #d22138;
+    transform: rotate(-5deg);
+    pointer-events: none;
+}
+.commerce-promo-xp-history__kept-amount {
+    color: #5f6270;
+    margin-inline-start: .35rem;
+}

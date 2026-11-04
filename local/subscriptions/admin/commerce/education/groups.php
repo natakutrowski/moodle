@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once(__DIR__ . '/../../../../../config.php');
 
+use local_subscriptions\commerce\education\xp\CommercePedagogicalPointsPresenter;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\education\admin\CommercePedagogicalPromotionAdminRenderer;
@@ -619,7 +620,8 @@ if ($groups === []) {
         $groupmeta = [
             ['fa-user', get_string('commerce_education_group_tutor_name', 'local_subscriptions'), $group->get_tutor_name() ?? '—'],
             ['fa-language', get_string('commerce_education_group_support_language', 'local_subscriptions'), $languageLabel($group->get_support_language())],
-            ['fa-trophy', get_string('commerce_education_m74_group_score', 'local_subscriptions'), $entry !== null ? (string)$entry->get_points() : '0'],
+            ['fa-trophy', get_string('commerce_education_m74_group_score', 'local_subscriptions'), $entry !== null ? CommercePedagogicalPointsPresenter::promotion((int)$entry->get_points())
+                : CommercePedagogicalPointsPresenter::promotion(0)],
             ['fa-list-ol', get_string('commerce_education_m74_group_rank', 'local_subscriptions'), $entry !== null ? '#' . $entry->get_rank() : '—'],
         ];
         foreach ($groupmeta as [$icon, $label, $value]) {
@@ -627,7 +629,8 @@ if ($groups === []) {
             echo html_writer::tag('i', '', ['class' => 'fa ' . $icon, 'aria-hidden' => 'true']);
             echo html_writer::start_div();
             echo html_writer::div($label, 'commerce-ped-m74-group-meta-label');
-            echo html_writer::div(s((string)$value), 'commerce-ped-m74-group-meta-value');
+            echo html_writer::div($icon === 'fa-trophy' ? $value : s((string)$value),
+                'commerce-ped-m74-group-meta-value');
             echo html_writer::end_div();
             echo html_writer::end_div();
         }
@@ -705,7 +708,7 @@ if ($groups === []) {
                         s(fullname($member)),
                         ['title' => get_string('commerce_education_xp_user360_link', 'local_subscriptions')]
                     ) . html_writer::span(
-                        (string)($memberpoints[$userid] ?? 0) . ' XP',
+                        CommercePedagogicalPointsPresenter::promotion((int)($memberpoints[$userid] ?? 0)),
                         'commerce-ped-m74-roster-xp'
                     ) . ' ' . html_writer::link(
                         new moodle_url('/local/subscriptions/admin/commerce/education/xp_history.php',

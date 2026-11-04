@@ -70,6 +70,7 @@ final class CommerceCustomerHubService {
             'resourcecount' => $resourcecount,
             'xpavailable' => $xp['available'],
             'totalxp' => $xp['totalxp'],
+            'promoiconurl' => (new \moodle_url('/local/subscriptions/pix/pain_au_chocolat.png'))->out(false),
             'highestlevel' => $xp['highestlevel'],
             'xpprogress' => $xp['progress'],
             'xpprogressstyle' => 'width: ' . $xp['progress'] . '%;',

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once(__DIR__ . '/../../../../../config.php');
 
+use local_subscriptions\commerce\education\xp\CommercePedagogicalPointsPresenter;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\education\promotion\CommercePedagogicalPromotionRepository;
@@ -227,7 +228,7 @@ foreach ($ranking as $entry) {
     echo html_writer::start_div('card-body');
     echo html_writer::tag('h3', ($medal ? $medal . ' ' : '') . s($entry->get_display_name()),
         ['class' => 'h5']);
-    echo html_writer::div((string)$entry->get_points() . ' XP · ' . count($roster)
+    echo html_writer::div(CommercePedagogicalPointsPresenter::promotion((int)$entry->get_points()) . ' · ' . count($roster)
         . ' ' . get_string('commerce_education_participants', 'local_subscriptions'), 'small text-muted mb-2');
     echo html_writer::start_tag('details', ['class' => 'commerce-ped-m74-group-roster']);
     echo html_writer::tag('summary', get_string('commerce_education_group_roster_title', 'local_subscriptions')
@@ -238,7 +239,7 @@ foreach ($ranking as $entry) {
             $userid = (int)$member->userid;
             echo html_writer::start_tag('li', ['class' => 'mb-2']);
             echo ([1 => '🥇 ', 2 => '🥈 ', 3 => '🥉 '][$memberranks[$userid] ?? 0] ?? '')
-                . $profilelink($member) . ' · ' . (int)($pointsbyuser[$userid] ?? 0) . ' XP'
+                . $profilelink($member) . ' · ' . CommercePedagogicalPointsPresenter::promotion((int)($pointsbyuser[$userid] ?? 0))
                 . ' · ' . html_writer::link(new moodle_url(
                     '/local/subscriptions/admin/commerce/education/xp_history.php',
                     ['promotionid' => $promotionid, 'userid' => $userid]),
@@ -276,7 +277,7 @@ if ($unassigned) {
     foreach ($unassigned as $member) {
         $userid = (int)$member->userid;
         echo html_writer::start_div('card card-body mb-2');
-        echo $profilelink($member) . ' · ' . (int)($pointsbyuser[$userid] ?? 0) . ' XP'
+        echo $profilelink($member) . ' · ' . CommercePedagogicalPointsPresenter::promotion((int)($pointsbyuser[$userid] ?? 0))
             . ' · ' . html_writer::link(new moodle_url(
                 '/local/subscriptions/admin/commerce/education/xp_history.php',
                 ['promotionid' => $promotionid, 'userid' => $userid]),

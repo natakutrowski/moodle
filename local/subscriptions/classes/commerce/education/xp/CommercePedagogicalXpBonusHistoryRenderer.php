@@ -22,7 +22,7 @@ final class CommercePedagogicalXpBonusHistoryRenderer {
                     'title' => get_string('commerce_education_xp_user360_link', 'local_subscriptions')]
             );
         };
-        $text = \html_writer::span('+' . (int)$record->points . ' XP',
+        $text = \html_writer::span(CommercePedagogicalPointsPresenter::promotion((int)$record->points, true),
             'commerce-ped-xp-amount') . ' · ' . s((string)$record->reason)
             . ' · ' . userdate((int)$record->timecreated)
             . ' · ' . $actor((int)$record->actorid);

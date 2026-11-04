@@ -85,7 +85,7 @@
                 </div>
                 <dl class="commerce-customer-hub__xp-stats">
                     <div><dt>{{#str}}commerce_customer_hub_total_xp, local_subscriptions{{/str}}</dt><dd>{{totalxp}} <span aria-hidden="true">🥐</span></dd></div>
-                    <div><dt>{{#str}}commerce_customer_hub_xp_30d, local_subscriptions{{/str}}</dt><dd>+{{xp30d}}</dd></div>
+                    <div><dt>{{#str}}commerce_customer_hub_xp_30d, local_subscriptions{{/str}}</dt><dd>+{{xp30d}} <span aria-hidden="true">🥐</span></dd></div>
                     {{#hasxprank}}<div><dt>{{#str}}commerce_customer_hub_xp_ranking, local_subscriptions{{/str}}</dt><dd>#{{xprank}}{{#xpparticipants}} / {{xpparticipants}}{{/xpparticipants}}</dd></div>{{/hasxprank}}
                     <div><dt>{{#str}}commerce_customer_hub_last_activity, local_subscriptions{{/str}}</dt><dd>{{lastreward}}</dd></div>
                 </dl>
@@ -110,7 +110,7 @@
                                 </p>
                                 <div class="commerce-customer-hub__team-my-xp">
                                     <span>{{#str}}commerce_promo_xp_history_mine, local_subscriptions{{/str}}</span>
-                                    <strong>{{userpoints}} XP</strong>
+                                    <strong>{{userpoints}} <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"></strong>
                                 </div>
                                 {{/isleaderboardhidden}}
                                 {{^isleaderboardhidden}}
@@ -123,12 +123,11 @@
                                         {{#mygold}}<span title="{{#str}}commerce_education_medal_gold, local_subscriptions{{/str}}">🥇</span>{{/mygold}}
                                         {{#mysilver}}<span title="{{#str}}commerce_education_medal_silver, local_subscriptions{{/str}}">🥈</span>{{/mysilver}}
                                         {{#mybronze}}<span title="{{#str}}commerce_education_medal_bronze, local_subscriptions{{/str}}">🥉</span>{{/mybronze}}
-                                        #{{grouprank}}
+                                        <span class="commerce-customer-hub__team-rank-number">#{{grouprank}}</span>
                                     </div>
                                 </div>
                                 <div class="commerce-customer-hub__team-meta">
-                                    <span><strong>{{grouppoints}}</strong> {{#str}}commerce_customer_hub_team_points, local_subscriptions{{/str}}</span>
-                                    <span>{{#str}}commerce_customer_hub_team_my_contribution, local_subscriptions{{/str}} <strong>{{userpoints}}</strong></span>
+                                    <span>{{#str}}commerce_customer_hub_team_my_contribution, local_subscriptions{{/str}} <strong>{{userpoints}} <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"></strong></span>
                                 </div>
                                 <ol class="commerce-customer-hub__team-ranking">
                                     {{#leaderboard}}
@@ -139,15 +138,15 @@
                                                 {{#isbronze}}<span title="{{#str}}commerce_education_medal_bronze, local_subscriptions{{/str}}">🥉</span>{{/isbronze}}
                                                 #{{rank}}
                                             </span>
-                                            <span class="commerce-customer-hub__team-name">{{groupname}}{{#ismine}} <small>{{#str}}commerce_customer_hub_team_yours, local_subscriptions{{/str}}</small>{{/ismine}}</span>
-                                            <strong>{{points}}</strong>
+                                            <span class="commerce-customer-hub__team-name">{{groupname}}{{#ismine}} <small>({{#str}}commerce_customer_hub_team_yours, local_subscriptions{{/str}})</small>{{/ismine}}</span>
+                                            <strong>{{points}} <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"></strong>
                                         </li>
                                     {{/leaderboard}}
                                 </ol>
                                 {{/isleaderboardhidden}}
                                 <a class="commerce-customer-hub__team-history-link" href="{{historyurl}}">
                                     <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
-                                    {{#str}}commerce_promo_xp_history_link, local_subscriptions{{/str}}
+                                    <span class="commerce-customer-hub__team-history-text">{{#str}}commerce_promo_xp_history_link, local_subscriptions{{/str}}</span>
                                 </a>
                             </div>
                         {{/teamchallenges}}

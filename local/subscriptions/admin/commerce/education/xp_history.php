@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once(__DIR__ . '/../../../../../config.php');
 
+use local_subscriptions\commerce\education\xp\CommercePedagogicalPointsPresenter;
 use local_subscriptions\admin\AdminSecurity;
 use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\education\admin\CommerceEducationNavigationRenderer;
@@ -134,7 +135,7 @@ echo html_writer::start_div('row g-3 mb-3');
 foreach ([
     [get_string($userid === 0 ? 'commerce_education_xp_history_crm_total_all'
         : 'commerce_education_xp_history_crm_total_user', 'local_subscriptions'),
-        (int)$data['totalpoints'] . ' XP'],
+        CommercePedagogicalPointsPresenter::promotion((int)$data['totalpoints'])],
     [get_string('commerce_promo_xp_history_count', 'local_subscriptions'),
         (string)$data['rewardcount']],
 ] as [$label, $value]) {
@@ -142,7 +143,8 @@ foreach ([
     echo html_writer::start_div('card h-100');
     echo html_writer::start_div('card-body');
     echo html_writer::div(s($label), 'text-muted small');
-    echo html_writer::div(s($value), 'h4 mb-0');
+    echo html_writer::div($label === get_string(
+        'commerce_promo_xp_history_count', 'local_subscriptions') ? s($value) : $value, 'h4 mb-0');
     echo html_writer::end_div();
     echo html_writer::end_div();
     echo html_writer::end_div();
@@ -204,8 +206,9 @@ if (!$data['rows']) {
         }
         echo html_writer::tag('td', $source);
         $points = $row['iscancelled']
-            ? html_writer::tag('s', '+' . (int)$row['points']) . ' → 0'
-            : '+' . (int)$row['points'];
+            ? html_writer::tag('s', CommercePedagogicalPointsPresenter::promotion((int)$row['points'], true))
+                . ' → ' . CommercePedagogicalPointsPresenter::promotion(0)
+            : CommercePedagogicalPointsPresenter::promotion((int)$row['points'], true);
         echo html_writer::tag('td', $points, ['class' => 'text-nowrap']);
         echo html_writer::end_tag('tr');
     }
@@ -256,8 +259,9 @@ if ($userid === 0) {
             $label = (string)($bonus->groupname ?: ('#' . (int)$bonus->groupid));
             $line = s(userdate((int)$bonus->timecreated)) . ' · ' . s($label) . ' · ';
             $line .= $bonus->cancelledat !== null
-                ? html_writer::tag('s', '+' . (int)$bonus->points . ' XP') . ' → 0 XP'
-                : '+' . (int)$bonus->points . ' XP';
+                ? html_writer::tag('s', CommercePedagogicalPointsPresenter::promotion((int)$bonus->points, true))
+                    . ' → ' . CommercePedagogicalPointsPresenter::promotion(0)
+                : CommercePedagogicalPointsPresenter::promotion((int)$bonus->points, true);
             $line .= html_writer::div(s((string)$bonus->reason), 'small text-muted');
             if ($bonus->cancelledat !== null) {
                 $line .= html_writer::div(s(get_string('commerce_promo_xp_history_cancelled',

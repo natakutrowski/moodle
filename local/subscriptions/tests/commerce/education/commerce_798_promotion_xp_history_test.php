@@ -84,6 +84,7 @@ final class commerce_798_promotion_xp_history_test extends advanced_testcase {
         self::assertSame(12, $summary['rows'][1]['points']);
         self::assertSame(0, $summary['page']);
         self::assertTrue($summary['rows'][0]['isactive']);
+        self::assertFalse($summary['rows'][0]['isbonus']);
         // An out-of-range page is clamped to the last available page.
         self::assertSame(0, CommercePedagogicalXpHistoryService::create($DB)
             ->get_for_user($promotionid, $userid, 123)['page']);
@@ -157,6 +158,7 @@ final class commerce_798_promotion_xp_history_test extends advanced_testcase {
         self::assertSame(0, $summary['totalpoints']);
         self::assertSame(1, $summary['rewardcount']);
         self::assertTrue($summary['rows'][0]['iscancelled']);
+        self::assertTrue($summary['rows'][0]['isbonus']);
         self::assertFalse($summary['rows'][0]['isactive']);
         self::assertStringNotContainsString('private CRM', json_encode($summary));
     }
