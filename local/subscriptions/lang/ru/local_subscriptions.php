@@ -13164,3 +13164,15 @@ $string['commerce_points_badge_personal_locked_help'] = 'Личные баллы
 $string['commerce_points_badge_promotion_earned_help'] = 'Ты уже получил(а) {$a->points} баллов потока за это задание.';
 $string['commerce_points_badge_promotion_available_help'] = 'Можно попробовать получить {$a->points} баллов потока после подходящей засчитанной попытки. Если задание выполнялось раньше, может потребоваться новая попытка.';
 $string['commerce_points_badge_promotion_locked_help'] = 'Эти {$a->points} баллов потока пока недоступны. Открытие запланировано на {$a->date}. Затем потребуется подходящая попытка.';
+
+// CAMPUSFR_POINTS_HISTORY_PHASE4: learner Level Up XP and archived promotion ledgers.
+$string['commerce_points_history_title'] = 'История моих баллов';
+$string['commerce_points_history_link'] = 'Посмотреть историю моих баллов';
+$string['commerce_points_history_tabs'] = 'История начисления баллов';
+$string['commerce_points_history_personal'] = 'Личные баллы';
+$string['commerce_points_history_personal_intro'] = 'Здесь собраны баллы за твои занятия. Баллы акций, если они есть, отображаются на отдельных вкладках.';
+$string['commerce_points_history_personal_total'] = 'Мои личные баллы сейчас';
+$string['commerce_points_history_personal_note'] = 'Текущий баланс берётся из Level Up XP. После сброса или корректировки он может отличаться от суммы всех начислений в истории.';
+$string['commerce_points_history_personal_other'] = 'Награда Level Up XP';
+$string['commerce_points_history_personal_empty'] = 'Пока нет начислений личных баллов.';
+$string['commerce_points_history_private'] = 'Здесь показана только твоя история. Рейтинги других участников остаются отдельно.';

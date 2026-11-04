@@ -13089,3 +13089,15 @@ $string['commerce_points_badge_personal_locked_help'] = 'Personal points are not
 $string['commerce_points_badge_promotion_earned_help'] = 'You already earned {$a->points} promotion points for this activity.';
 $string['commerce_points_badge_promotion_available_help'] = 'You may earn {$a->points} promotion points after an eligible validated attempt. Previously completed activities may require a new attempt.';
 $string['commerce_points_badge_promotion_locked_help'] = 'These {$a->points} promotion points are not available yet. Scheduled unlock: {$a->date}. An eligible attempt will then be required.';
+
+// CAMPUSFR_POINTS_HISTORY_PHASE4: learner Level Up XP and archived promotion ledgers.
+$string['commerce_points_history_title'] = 'My points history';
+$string['commerce_points_history_link'] = 'View my points history';
+$string['commerce_points_history_tabs'] = 'My points histories';
+$string['commerce_points_history_personal'] = 'Personal points';
+$string['commerce_points_history_personal_intro'] = 'See the points earned from your activities. Points from promotions, when available, have separate tabs.';
+$string['commerce_points_history_personal_total'] = 'My current personal points';
+$string['commerce_points_history_personal_note'] = 'The current balance is read from Level Up XP. It may differ from the sum of historical rewards after resets or adjustments.';
+$string['commerce_points_history_personal_other'] = 'Level Up XP reward';
+$string['commerce_points_history_personal_empty'] = 'No personal points earned yet.';
+$string['commerce_points_history_private'] = 'Only your own history is shown. Other participants’ rankings remain separate.';

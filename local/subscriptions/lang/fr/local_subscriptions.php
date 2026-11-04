@@ -12924,3 +12924,15 @@ $string['commerce_points_badge_personal_locked_help'] = 'Les points personnels n
 $string['commerce_points_badge_promotion_earned_help'] = 'Tu as déjà gagné {$a->points} points de promotion pour cette activité.';
 $string['commerce_points_badge_promotion_available_help'] = 'Tu peux tenter de gagner {$a->points} points de promotion. Ils sont attribués seulement après une tentative admissible et validée. Une ancienne activité terminée peut nécessiter une nouvelle tentative.';
 $string['commerce_points_badge_promotion_locked_help'] = 'Ces {$a->points} points de promotion ne sont pas encore disponibles. Déblocage prévu le {$a->date}. Une tentative admissible sera nécessaire ensuite.';
+
+// CAMPUSFR_POINTS_HISTORY_PHASE4: learner Level Up XP and archived promotion ledgers.
+$string['commerce_points_history_title'] = 'Historique de mes points';
+$string['commerce_points_history_link'] = 'Voir l’historique de mes points';
+$string['commerce_points_history_tabs'] = 'Mes historiques de points';
+$string['commerce_points_history_personal'] = 'Points personnels';
+$string['commerce_points_history_personal_intro'] = 'Retrouve les points gagnés au fil de tes activités. Tes points de promotion, si tu en as, sont séparés dans leurs propres onglets.';
+$string['commerce_points_history_personal_total'] = 'Mon solde de points personnels';
+$string['commerce_points_history_personal_note'] = 'Le solde affiché est celui de Level Up XP. Après une réinitialisation ou un ajustement, il peut être différent de la somme des gains historiques.';
+$string['commerce_points_history_personal_other'] = 'Récompense Level Up XP';
+$string['commerce_points_history_personal_empty'] = 'Aucun gain de points personnels enregistré pour le moment.';
+$string['commerce_points_history_private'] = 'Seul ton propre historique est affiché. Les classements des autres participants restent indépendants.';

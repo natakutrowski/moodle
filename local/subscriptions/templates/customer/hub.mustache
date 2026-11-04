@@ -89,6 +89,12 @@
                     {{#hasxprank}}<div><dt>{{#str}}commerce_customer_hub_xp_ranking, local_subscriptions{{/str}}</dt><dd>#{{xprank}}{{#xpparticipants}} / {{xpparticipants}}{{/xpparticipants}}</dd></div>{{/hasxprank}}
                     <div><dt>{{#str}}commerce_customer_hub_last_activity, local_subscriptions{{/str}}</dt><dd>{{lastreward}}</dd></div>
                 </dl>
+                <div class="commerce-customer-hub__xp-history-row">
+                    <a class="commerce-customer-hub__xp-history-row-link" href="{{mypointshistoryurl}}">
+                        <span>{{#str}}commerce_points_history_link, local_subscriptions{{/str}}</span>
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+                </div>
                 {{#hasteamchallenges}}
                     <section class="commerce-customer-hub__team-challenges" aria-label="{{#str}}commerce_customer_hub_team_title, local_subscriptions{{/str}}">
                         <header class="commerce-customer-hub__team-heading">
@@ -110,7 +116,7 @@
                                 </p>
                                 <div class="commerce-customer-hub__team-my-xp">
                                     <span>{{#str}}commerce_promo_xp_history_mine, local_subscriptions{{/str}}</span>
-                                    <strong>{{userpoints}} <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"></strong>
+                                    <strong class="campusfr-points-promo">{{userpoints}} <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"></strong>
                                 </div>
                                 {{/isleaderboardhidden}}
                                 {{^isleaderboardhidden}}
@@ -127,7 +133,7 @@
                                     </div>
                                 </div>
                                 <div class="commerce-customer-hub__team-meta">
-                                    <span>{{#str}}commerce_customer_hub_team_my_contribution, local_subscriptions{{/str}} <strong>{{userpoints}} <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"></strong></span>
+                                    <span>{{#str}}commerce_customer_hub_team_my_contribution, local_subscriptions{{/str}} <strong class="campusfr-points-promo">{{userpoints}} <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"></strong></span>
                                 </div>
                                 <ol class="commerce-customer-hub__team-ranking">
                                     {{#leaderboard}}
@@ -139,7 +145,7 @@
                                                 #{{rank}}
                                             </span>
                                             <span class="commerce-customer-hub__team-name">{{groupname}}{{#ismine}} <small>({{#str}}commerce_customer_hub_team_yours, local_subscriptions{{/str}})</small>{{/ismine}}</span>
-                                            <strong>{{points}} <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"></strong>
+                                            <strong class="campusfr-points-promo">{{points}} <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"></strong>
                                         </li>
                                     {{/leaderboard}}
                                 </ol>

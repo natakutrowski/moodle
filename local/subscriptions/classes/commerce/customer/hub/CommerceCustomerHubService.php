@@ -71,6 +71,7 @@ final class CommerceCustomerHubService {
             'xpavailable' => $xp['available'],
             'totalxp' => $xp['totalxp'],
             'promoiconurl' => (new \moodle_url('/local/subscriptions/pix/pain_au_chocolat.png'))->out(false),
+            'mypointshistoryurl' => (new \moodle_url('/local/subscriptions/my_points.php'))->out(false),
             'highestlevel' => $xp['highestlevel'],
             'xpprogress' => $xp['progress'],
             'xpprogressstyle' => 'width: ' . $xp['progress'] . '%;',

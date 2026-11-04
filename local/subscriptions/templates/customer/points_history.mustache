@@ -1,0 +1,107 @@
+<div class="commerce-promo-xp-history commerce-points-history">
+    <a class="commerce-promo-xp-history__back btn btn-outline-primary" href="{{backurl}}">
+        <span aria-hidden="true">←</span> {{#str}}commerce_promo_xp_history_back, local_subscriptions{{/str}}
+    </a>
+    <header class="commerce-promo-xp-history__hero">
+        <div>
+            <span class="commerce-customer-hub__team-kicker">
+                {{#ispersonal}}🥐 {{#str}}commerce_points_history_personal, local_subscriptions{{/str}}{{/ispersonal}}
+                {{#ispromotion}}<img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"> {{promotionname}}{{/ispromotion}}
+            </span>
+            <h1>{{title}}</h1>
+            {{#ispersonal}}<p>{{#str}}commerce_points_history_personal_intro, local_subscriptions{{/str}}</p>{{/ispersonal}}
+            {{#ispromotion}}<p>{{#str}}commerce_promo_xp_history_intro, local_subscriptions{{/str}}</p>{{/ispromotion}}
+        </div>
+    </header>
+
+    {{#hastabs}}
+    <nav class="commerce-points-history__tabs" aria-label="{{#str}}commerce_points_history_tabs, local_subscriptions{{/str}}">
+        <a href="{{personalurl}}" class="commerce-points-history__tab {{#personalactive}}is-active{{/personalactive}}"
+            {{#personalactive}}aria-current="page"{{/personalactive}}>
+            <span aria-hidden="true">🥐</span> {{#str}}commerce_points_history_personal, local_subscriptions{{/str}}
+        </a>
+        {{#tabs}}
+        <a href="{{url}}" class="commerce-points-history__tab {{#isactive}}is-active{{/isactive}}"
+            {{#isactive}}aria-current="page"{{/isactive}}>
+            <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"> {{name}}
+        </a>
+        {{/tabs}}
+    </nav>
+    {{/hastabs}}
+
+    <div class="commerce-promo-xp-history__stats commerce-points-history__stats">
+        <div class="commerce-promo-xp-history__stat">
+            <span>
+                {{#ispersonal}}{{#str}}commerce_points_history_personal_total, local_subscriptions{{/str}}{{/ispersonal}}
+                {{#ispromotion}}{{#str}}commerce_promo_xp_history_total, local_subscriptions{{/str}}{{/ispromotion}}
+            </span>
+            <strong>{{totalpoints}}
+                {{#ispersonal}}<span aria-label="{{#str}}commerce_points_badge_personal, local_subscriptions{{/str}}">🥐</span>{{/ispersonal}}
+                {{#ispromotion}}<img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20">{{/ispromotion}}
+            </strong>
+        </div>
+        <div class="commerce-promo-xp-history__stat">
+            <span>{{#str}}commerce_promo_xp_history_count, local_subscriptions{{/str}}</span>
+            <strong>{{rewardcount}}</strong>
+        </div>
+    </div>
+
+    {{#ispersonal}}
+    <p class="commerce-points-history__note">{{#str}}commerce_points_history_personal_note, local_subscriptions{{/str}}</p>
+    {{/ispersonal}}
+
+    {{#ispromotion}}
+    <section class="commerce-promo-xp-history__explainer">
+        <span class="commerce-promo-xp-history__explainer-icon" aria-hidden="true">💡</span>
+        <div class="commerce-promo-xp-history__explainer-copy">
+            <strong>{{#str}}commerce_promo_xp_history_tip, local_subscriptions{{/str}}</strong>
+            <p>{{#str}}commerce_promo_xp_history_replay, local_subscriptions{{/str}}</p>
+        </div>
+    </section>
+    {{/ispromotion}}
+
+    <section class="commerce-promo-xp-history__ledger">
+        <h2>{{#str}}commerce_promo_xp_history_heading, local_subscriptions{{/str}}</h2>
+        {{#hasrewards}}
+        <div class="table-responsive">
+            <table class="table commerce-promo-xp-history__table">
+                <thead><tr>
+                    <th scope="col">{{#str}}commerce_promo_xp_history_date, local_subscriptions{{/str}}</th>
+                    <th scope="col">{{#str}}commerce_promo_xp_history_source, local_subscriptions{{/str}}</th>
+                    <th scope="col">{{#str}}commerce_promo_xp_history_points, local_subscriptions{{/str}}</th>
+                </tr></thead>
+                <tbody>{{#rows}}
+                    <tr class="{{#iscancelled}}is-cancelled{{/iscancelled}}">
+                        <td>{{date}}</td>
+                        <td>
+                            {{#hasactivityurl}}<a href="{{activityurl}}">{{source}}</a>{{/hasactivityurl}}
+                            {{^hasactivityurl}}{{source}}{{/hasactivityurl}}
+                            {{#iscancelled}}<small class="commerce-promo-xp-history__cancelled">{{cancelledlabel}}</small>{{/iscancelled}}
+                        </td>
+                        <td class="commerce-promo-xp-history__points">
+                            {{#ispersonal}}+{{points}} <span aria-hidden="true">🥐</span>{{/ispersonal}}
+                            {{#ispromotion}}
+                                {{#isactive}}
+                                    <span class="{{#isbonus}}commerce-promo-xp-history__bonus-amount{{/isbonus}}">+{{points}}</span>
+                                    <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20">
+                                {{/isactive}}
+                                {{#iscancelled}}
+                                    <del class="commerce-promo-xp-history__cancelled-amount">+{{points}}</del>
+                                    <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20">
+                                    <span class="commerce-promo-xp-history__kept-amount">0</span>
+                                    <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20">
+                                {{/iscancelled}}
+                            {{/ispromotion}}
+                        </td>
+                    </tr>
+                {{/rows}}</tbody>
+            </table>
+        </div>
+        {{/hasrewards}}
+        {{^hasrewards}}
+        <p>{{#ispersonal}}{{#str}}commerce_points_history_personal_empty, local_subscriptions{{/str}}{{/ispersonal}}
+           {{#ispromotion}}{{#str}}commerce_promo_xp_history_empty, local_subscriptions{{/str}}{{/ispromotion}}</p>
+        {{/hasrewards}}
+    </section>
+    <p class="commerce-promo-xp-history__privacy">🔒 {{#str}}commerce_points_history_private, local_subscriptions{{/str}}</p>
+</div>

@@ -300,3 +300,135 @@
     color: #5f6270;
     margin-inline-start: .35rem;
 }
+
+/* CAMPUSFR_POINTS_HISTORY_PHASE4: read-only multi-promotion history. */
+.commerce-points-history__tabs { display:flex; gap:.55rem; align-items:stretch; overflow-x:auto;
+    padding:.35rem 0 .85rem; margin:1rem 0 1.2rem; scrollbar-width:thin; }
+.commerce-points-history__tab { display:inline-flex; align-items:center; gap:.4rem; flex:0 0 auto;
+    max-width:26rem; padding:.65rem .9rem; border-radius:.75rem; border:1px solid #e4ddec;
+    color:#544675; background:#fff; font-weight:650; text-decoration:none; }
+.commerce-points-history__tab:hover { background:#f6f1ff; text-decoration:none; }
+.commerce-points-history__tab.is-active { color:#492ba0; background:#f0eaff;
+    border-color:#bda8ef; box-shadow:inset 0 -2px #7049c5; }
+.commerce-points-history__tab:focus-visible { outline:3px solid #7049c5; outline-offset:2px; }
+.commerce-points-history__stats { margin:1.15rem 0; }
+.commerce-points-history__note { color:#686078; max-width:52rem; margin:0 0 1.2rem; }
+.commerce-customer-hub__xp-history-link { display:inline-flex; margin-top:1.2rem; }
+@media (max-width:600px) {
+    .commerce-points-history__tab { max-width:80vw; font-size:.88rem; }
+    .commerce-points-history__stats { flex-direction:row; flex-wrap:wrap; }
+}
+
+
+/* CAMPUSFR_PHASE4_UX_HOTFIX */
+.commerce-points-history .commerce-promo-xp-history__hero p,
+.commerce-points-history .commerce-points-history__note {
+    max-width: none;
+}
+
+.commerce-customer-hub__team-meta .campusfr-points-promo,
+.commerce-customer-hub__team-ranking .campusfr-points-promo,
+.commerce-customer-hub__team-my-xp .campusfr-points-promo {
+    display: inline-flex;
+    align-items: center;
+    gap: .22rem;
+    vertical-align: middle;
+    line-height: 1;
+}
+
+.commerce-customer-hub__team-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    flex-wrap: wrap;
+}
+
+.commerce-customer-hub__team-ranking li > strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    line-height: 1;
+}
+
+.commerce-customer-hub__team-history-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+}
+
+.commerce-customer-hub__team-history-link > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.commerce-customer-hub__team-history-link .commerce-customer-hub__team-history-text {
+    display: inline-flex;
+    align-items: center;
+    margin-inline-start: 0;
+}
+
+.commerce-customer-hub__xp-history-link {
+    margin-top: .35rem;
+    margin-bottom: 1rem;
+    padding-top: 0;
+    border-top: 0;
+}
+
+.commerce-points-history__tab,
+.commerce-customer-hub__team-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+}
+
+.commerce-points-history__tab .campusfr-points-choco-icon,
+.commerce-customer-hub__team-kicker .campusfr-points-choco-icon {
+    width: 1.2em;
+    height: 1.2em;
+    min-width: 1.2em;
+    min-height: 1.2em;
+    vertical-align: middle;
+}
+
+
+/* CAMPUSFR_POINTS_HISTORY_UX_V2 */
+.commerce-customer-hub__xp-history-row {
+    padding: .7rem 0;
+    border-bottom: 1px solid #eceef3;
+}
+.commerce-customer-hub__xp-history-row-link {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    color: #717784;
+    font-size: inherit;
+    font-weight: 400;
+    line-height: inherit;
+    text-decoration: none;
+}
+.commerce-customer-hub__xp-history-row-link:hover {
+    color: #6842d9;
+    text-decoration: underline;
+}
+.commerce-customer-hub__xp-history-row-link:focus-visible {
+    outline: 2px solid #6842d9;
+    outline-offset: 3px;
+    border-radius: 3px;
+}
+.commerce-customer-hub__xp-history-row-link > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .85em;
+    line-height: 1;
+    flex: 0 0 auto;
+}
+/* Uniquement le total « Mes points de promotion » sur la page d'historique. */
+.commerce-points-history__stats .commerce-promo-xp-history__stat > strong > img.campusfr-points-choco-icon {
+    position: relative;
+    top: .16em;
+}

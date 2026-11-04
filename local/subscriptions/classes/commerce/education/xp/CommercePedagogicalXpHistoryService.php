@@ -8,7 +8,8 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Read-only history of promotion XP. Never calls the XP awarding bridge.
- * The learner entry point is restricted to active membership by its own controller.
+ * The live learner entry point is restricted to active membership; a separate
+ * archive method permits only documented former participants to see their own ledger.
  * The CRM entry points must require VIEW_PROMOTIONS in the calling controller.
  */
 final class CommercePedagogicalXpHistoryService {
@@ -33,16 +34,69 @@ final class CommercePedagogicalXpHistoryService {
     }
 
     /**
+     * Historic learner view: active join OR own recorded promotion XP.
+     * CRM notes are never returned, including for former participants.
+     * @return array<string,mixed>|null
+     */
+    public function get_for_learner_archive(int $promotionid, int $userid, int $page = 0): ?array {
+        if ($promotionid <= 0 || $userid <= 1 || !$this->can_see_archive($promotionid, $userid)) {
+            return null;
+        }
+        return $this->get_member_history($promotionid, $userid, $page, false, false);
+    }
+
+    /**
+     * Promotions to which this learner currently belongs or previously earned XP.
+     * Closed/archived promotions remain listed; a revoked, zero-XP join does not.
+     * @return array<int,array{id:int,name:string}>
+     */
+    public function list_for_learner(int $userid): array {
+        if ($userid <= 1) {
+            return [];
+        }
+        $promotions = $this->db->get_records_sql(
+            "SELECT p.id, p.name, p.courseid
+               FROM {local_subs_commerce_ped_promo} p
+              WHERE EXISTS (SELECT 1 FROM {local_subs_commerce_ped_join} j
+                             WHERE j.promotionid = p.id AND j.userid = :joineduserid
+                               AND j.state = :active)
+                 OR EXISTS (SELECT 1 FROM {local_subs_commerce_ped_xp} x
+                             WHERE x.promotionid = p.id AND x.userid = :xpuserid)
+           ORDER BY p.startsat DESC, p.id DESC",
+            ['joineduserid' => $userid, 'active' => 'active', 'xpuserid' => $userid]
+        );
+        $results = [];
+        foreach ($promotions as $promotion) {
+            $results[] = [
+                'id' => (int)$promotion->id,
+                'name' => format_string((string)$promotion->name, true, [
+                    'context' => \context_course::instance((int)$promotion->courseid),
+                ]),
+            ];
+        }
+        return $results;
+    }
+
+    private function can_see_archive(int $promotionid, int $userid): bool {
+        return $this->db->record_exists('local_subs_commerce_ped_join', [
+            'promotionid' => $promotionid, 'userid' => $userid, 'state' => 'active',
+        ]) || $this->db->record_exists(CommercePedagogicalXpRepository::TABLE, [
+            'promotionid' => $promotionid, 'userid' => $userid,
+        ]);
+    }
+
+    /**
      * CRM-only view, including former members. Callers MUST check VIEW_PROMOTIONS.
      * @return array<string,mixed>|null
      */
     public function get_for_crm_user(int $promotionid, int $userid, int $page = 0): ?array {
         require_capability(\local_subscriptions\admin\Capabilities::VIEW_PROMOTIONS,
             \context_system::instance());
-        return $this->get_member_history($promotionid, $userid, $page, false);
+        return $this->get_member_history($promotionid, $userid, $page, false, true);
     }
 
-    private function get_member_history(int $promotionid, int $userid, int $page, bool $activeonly): ?array {
+    private function get_member_history(int $promotionid, int $userid, int $page, bool $activeonly,
+            bool $includecrmreason = false): ?array {
         if ($promotionid <= 0 || $userid <= 1) {
             return null;
         }
@@ -135,8 +189,8 @@ final class CommercePedagogicalXpHistoryService {
                 'hasactivityurl' => $activity !== null && $activity['url'] !== '',
                 'activityurl' => $activity['url'] ?? '',
             ];
-            if (!$activeonly) {
-                // Private CRM note: deliberately absent from the learner's returned data.
+            if ($includecrmreason) {
+                // Private CRM note: deliberately absent from both learner history views.
                 $entry['crmreason'] = $adjustment ? (string)$adjustment->reason : '';
             }
             $rows[] = $entry;
