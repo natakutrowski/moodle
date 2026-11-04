@@ -18,17 +18,20 @@
     <nav class="commerce-points-history__tabs" aria-label="{{#str}}commerce_points_history_tabs, local_subscriptions{{/str}}">
         <a href="{{personalurl}}" class="commerce-points-history__tab {{#personalactive}}is-active{{/personalactive}}"
             {{#personalactive}}aria-current="page"{{/personalactive}}>
-            <span aria-hidden="true">🥐</span> {{#str}}commerce_points_history_personal, local_subscriptions{{/str}}
+            <span class="commerce-points-history__tab-icon" aria-hidden="true">🥐</span>
+            <span class="commerce-points-history__tab-label">{{#str}}commerce_points_history_personal, local_subscriptions{{/str}}</span>
         </a>
         {{#tabs}}
         <a href="{{url}}" class="commerce-points-history__tab {{#isactive}}is-active{{/isactive}}"
             {{#isactive}}aria-current="page"{{/isactive}}>
-            <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"> {{name}}
+            <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="" aria-hidden="true" width="20" height="20">
+            <span class="commerce-points-history__tab-label">{{name}}</span>
         </a>
         {{/tabs}}
     </nav>
     {{/hastabs}}
 
+    <div class="commerce-points-history__panel{{#hastabs}} is-tabbed{{/hastabs}}">
     <div class="commerce-promo-xp-history__stats commerce-points-history__stats">
         <div class="commerce-promo-xp-history__stat">
             <span>
@@ -104,4 +107,5 @@
         {{/hasrewards}}
     </section>
     <p class="commerce-promo-xp-history__privacy">🔒 {{#str}}commerce_points_history_private, local_subscriptions{{/str}}</p>
+    </div>
 </div>
