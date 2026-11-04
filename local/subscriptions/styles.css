@@ -43036,7 +43036,7 @@ body.local-subscriptions-dashboard-page
 
 /* Compact course rewards: grey available, pale green earned, pastel blue calendar-locked. */
 .campusfr-course-points-badges { display: inline-flex; align-items: center; flex-wrap: wrap; gap: .38rem; margin: .4rem 0 .2rem .55rem; vertical-align: middle; }
-.campusfr-course-points-badge { display: inline-flex; align-items: center; justify-content: center; gap: .36rem; padding: .18rem .5rem; min-height: 1.9rem; border-radius: 999px; border: 1px solid #d6d9df; background: #f3f4f6; color: #5b606b; font-size: .83rem; font-weight: 750; line-height: 1; white-space: nowrap; vertical-align: middle; cursor: help; }
+.campusfr-course-points-badge { display: inline-flex; align-items: center; justify-content: center; gap: .36rem; padding: .18rem .5rem; min-height: 1.9rem; border-radius: 999px; border: 1px solid #d6d9df; background: #f3f4f6; color: #5b606b; font-size: .83rem; font-weight: 750; line-height: 1; white-space: nowrap; vertical-align: middle; cursor: default; }
 .campusfr-course-points-badge--earned { background: #e9f7ef; color: #236946; border-color: #b7dec7; }
 .campusfr-course-points-badge--locked { background: #f2f3f5; color: #5e626a; border-color: #d9dde3; }
 .campusfr-course-points-badge--available { background: #eaf3ff; color: #355e92; border-color: #c8dcf4; }
@@ -43044,3 +43044,11 @@ body.local-subscriptions-dashboard-page
 .campusfr-course-points-badge__number { font-variant-numeric: tabular-nums; }
 .campusfr-course-points-badge__choco { width: 1.5rem; height: 1.5rem; object-fit: contain; display: inline-block; vertical-align: middle; }
 .campusfr-course-points-badge__croissant { font-size: 1.2rem; line-height: 1; }
+
+/* Course reward badges beside the completion control, responsive on narrow screens. */
+.campusfr-course-points-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: .5rem; }
+.campusfr-course-points-actions > .campusfr-course-points-badges { margin: 0; }
+@media (max-width: 767.98px) {
+    .campusfr-course-points-actions { flex-direction: column; align-items: stretch; }
+    .campusfr-course-points-actions > .campusfr-course-points-badges { align-self: flex-end; order: 1; }
+}

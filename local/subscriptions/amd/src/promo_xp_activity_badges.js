@@ -16,9 +16,7 @@ export const init = (activities) => {
         const badge = document.createElement('span');
         badge.className = 'campusfr-course-points-badge campusfr-course-points-badge--' + item.state;
         badge.dataset.campusfrPointsBadge = cmid + ':' + item.kind;
-        badge.title = item.title;
-        badge.setAttribute('aria-label', item.title);
-        badge.tabIndex = 0;
+        // No tooltip: the points and pastry icon are self-explanatory.
         const number = document.createElement('span');
         number.className = 'campusfr-course-points-badge__number';
         number.textContent = '+' + String(item.points);
@@ -66,7 +64,7 @@ export const init = (activities) => {
                 }
                 anchor = target.querySelector('.activityname, .activity-name-area, .activityname > a') ||
                     target.querySelector('.activity-item') || target;
-                // Keep the tooltip badge outside clickable activity links.
+                // Keep badges outside clickable activity links.
                 if (anchor.tagName === 'A' && anchor.parentElement) {
                     anchor = anchor.parentElement;
                 }
@@ -81,7 +79,10 @@ export const init = (activities) => {
             if (!anchor) {
                 continue;
             }
-            let group = anchor.querySelector('.campusfr-course-points-badges');
+            const target = coursePage ? findCard(activity.cmid) : null;
+            const completion = target && target.querySelector('.activity-completion, [data-region="completion-info"]');
+            const placement = completion && completion.parentElement ? completion.parentElement : anchor;
+            let group = placement.querySelector('.campusfr-course-points-badges');
             for (const item of activity.badges) {
                 if (document.querySelector('[data-campusfr-points-badge="' + activity.cmid + ':' + item.kind + '"]')) {
                     continue;
@@ -91,7 +92,12 @@ export const init = (activities) => {
                     if (!group) {
                         group = document.createElement('span');
                         group.className = 'campusfr-course-points-badges';
-                        anchor.appendChild(group);
+                        if (completion) {
+                            completion.before(group);
+                            placement.classList.add('campusfr-course-points-actions');
+                        } else {
+                            placement.appendChild(group);
+                        }
                     }
                     group.appendChild(badge);
                 }
