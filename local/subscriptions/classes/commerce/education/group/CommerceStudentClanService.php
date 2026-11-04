@@ -169,7 +169,7 @@ final class CommerceStudentClanService {
                 'isactive' => (int)$candidate['promotionid'] === $promotionid,
             ];
         }
-        $dateformat = get_string('strftimedateshort', 'langconfig');
+        $dateformat = get_string('strftimedate', 'langconfig');
         $lessondateformat = get_string('strftimedatetimeshort', 'langconfig');
         $calendar = $this->lesson_milestones($promotionid, (int)$promotion->courseid, $now);
         $photourl = CommerceClanPhotoService::create($this->db)
