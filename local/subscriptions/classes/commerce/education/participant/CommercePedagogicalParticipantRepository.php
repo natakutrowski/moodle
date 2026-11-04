@@ -33,6 +33,7 @@ final class CommercePedagogicalParticipantRepository {
                        u.middlename,
                        u.alternatename,
                        u.email,
+                       u.picture,
                        pg.id AS pedagogicalgroupid,
                        pg.displayname AS groupname,
                        pg.moodlegroupid

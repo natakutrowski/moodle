@@ -353,28 +353,31 @@ if ($participants === []) {
             . ($userpodium !== null ? ' is-podium-' . $userpodium : ''));
         echo html_writer::start_div('commerce-ped-m74-participant-main');
         echo html_writer::start_div('commerce-ped-m74-participant-identity');
-        echo html_writer::div(
-            html_writer::tag('i', '', ['class' => 'fa fa-user-circle', 'aria-hidden' => 'true']),
-            'commerce-ped-m74-avatar'
-        );
+        // Use the real Moodle profile picture when configured; otherwise retain
+        // the original person icon as an explicit, larger fallback.
+        $avatarcontent = html_writer::tag('i', '', [
+            'class' => 'fa fa-user-circle', 'aria-hidden' => 'true',
+        ]);
+        if ((int)($participant->picture ?? 0) > 0) {
+            $pictureuser = clone $participant;
+            $pictureuser->id = $userid;
+            $userpicture = new \user_picture($pictureuser);
+            $userpicture->size = 100;
+            $avatarcontent = html_writer::empty_tag('img', [
+                'src' => $userpicture->get_url($PAGE)->out(false),
+                'class' => 'commerce-ped-m74-avatar-image',
+                'alt' => '',
+                'loading' => 'lazy',
+            ]);
+        }
+        echo html_writer::div($avatarcontent, 'commerce-ped-m74-avatar');
         echo html_writer::start_div('commerce-ped-m74-participant-copy');
         echo html_writer::tag('h4', html_writer::link(
             new moodle_url('/local/subscriptions/admin/users/view.php', ['id' => $userid]),
             s(fullname($participant)),
             ['class' => 'text-decoration-none', 'title' => get_string('commerce_education_xp_user360_link', 'local_subscriptions')]
         ), ['class' => 'commerce-ped-m74-participant-name']);
-        if ($usermedal !== '') {
-            echo html_writer::span($usermedal . ' ' . get_string(
-                'commerce_education_medal_' . $userpodium, 'local_subscriptions'),
-                'commerce-ped-m74-medal is-' . $userpodium);
-        }
         echo html_writer::div(s((string)$participant->email), 'commerce-ped-m74-participant-email');
-        echo html_writer::link(
-            new moodle_url('/local/subscriptions/admin/commerce/education/xp_history.php',
-                ['promotionid' => $promotionid, 'userid' => $userid]),
-            get_string('commerce_education_xp_history_crm_short', 'local_subscriptions'),
-            ['class' => 'small d-inline-block mt-1']
-        );
         echo html_writer::start_div('commerce-ped-m74-participant-badges');
         echo html_writer::span($profilelabel, 'commerce-ped-m74-participant-badge is-profile');
         echo html_writer::span(
@@ -387,12 +390,25 @@ if ($participants === []) {
         echo html_writer::end_div();
         echo html_writer::end_div();
 
+        // Keep the score and its detailed history on the same line.
+        $historyurl = new moodle_url('/local/subscriptions/admin/commerce/education/xp_history.php', [
+            'promotionid' => $promotionid,
+            'userid' => $userid,
+        ]);
+        $pointshistorylink = html_writer::link(
+            $historyurl,
+            '(' . get_string('commerce_education_xp_history_crm_short', 'local_subscriptions') . ')',
+            ['class' => 'commerce-ped-m74-points-history-link']
+        );
+        $pointsvalue = html_writer::span(
+            CommercePedagogicalPointsPresenter::promotion((int)$userpoints) . $pointshistorylink,
+            'commerce-ped-m74-points-inline'
+        );
         echo html_writer::start_div('commerce-ped-m74-participant-meta');
         foreach ([
             ['fa-shopping-bag', get_string('commerce_education_group_offer', 'local_subscriptions'), $offername],
             ['fa-clock-o', get_string('commerce_education_participant_since', 'local_subscriptions'), userdate($joinedat)],
-            ['fa-star', get_string('commerce_education_m74_participant_xp', 'local_subscriptions'),
-                CommercePedagogicalPointsPresenter::promotion((int)$userpoints)],
+            ['fa-star', get_string('commerce_education_m74_participant_xp', 'local_subscriptions'), $pointsvalue],
         ] as [$icon, $label, $value]) {
             echo html_writer::start_div('commerce-ped-m74-participant-meta-item');
             echo html_writer::tag('i', '', ['class' => 'fa ' . $icon, 'aria-hidden' => 'true']);
@@ -403,6 +419,23 @@ if ($participants === []) {
             echo html_writer::end_div();
             echo html_writer::end_div();
         }
+        // Ranks are computed for the entire promotion, before filtering or pagination.
+        // Ties share their rank; participants with zero points are unranked.
+        if ($userpodium !== null) {
+            $rankvalue = html_writer::span($usermedal . ' ' . get_string(
+                'commerce_education_medal_' . $userpodium, 'local_subscriptions'),
+                'commerce-ped-m74-medal is-' . $userpodium);
+        } else {
+            $rankvalue = $userplace > 0 ? '#' . $userplace : '—';
+        }
+        echo html_writer::start_div('commerce-ped-m74-participant-meta-item');
+        echo html_writer::tag('i', '', ['class' => 'fa fa-trophy', 'aria-hidden' => 'true']);
+        echo html_writer::start_div();
+        echo html_writer::div(get_string('commerce_education_m74_group_rank', 'local_subscriptions'),
+            'commerce-ped-m74-participant-meta-label');
+        echo html_writer::div($rankvalue, 'commerce-ped-m74-participant-meta-value commerce-ped-m74-rank-value');
+        echo html_writer::end_div();
+        echo html_writer::end_div();
         echo html_writer::end_div();
         echo html_writer::end_div();
 
