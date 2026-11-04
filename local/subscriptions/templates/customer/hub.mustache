@@ -13,6 +13,12 @@
             <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
             <span><strong>{{#str}}commerce_customer_hub_courses, local_subscriptions{{/str}}</strong><small>{{coursecount}} {{#str}}commerce_customer_hub_available, local_subscriptions{{/str}}</small></span>
         </a>
+        {{#hasclan}}
+        <a href="{{myclanurl}}" class="commerce-customer-hub__shortcut commerce-customer-hub__shortcut--clan">
+            <i class="fa-solid fa-people-group" aria-hidden="true"></i>
+            <span><strong>{{#str}}commerce_my_clan_shortcut, local_subscriptions{{/str}}</strong><small>{{#str}}commerce_my_clan_shortcut_help, local_subscriptions{{/str}}</small></span>
+        </a>
+        {{/hasclan}}
         <a href="{{myresourcesurl}}" class="commerce-customer-hub__shortcut">
             <i class="fa-solid fa-folder-open" aria-hidden="true"></i>
             <span><strong>{{#str}}commerce_customer_hub_resources, local_subscriptions{{/str}}</strong><small>{{resourcecount}} {{#str}}commerce_customer_hub_available, local_subscriptions{{/str}}</small></span>
@@ -150,6 +156,10 @@
                                     {{/leaderboard}}
                                 </ol>
                                 {{/isleaderboardhidden}}
+                                <a class="commerce-customer-hub__team-history-link commerce-customer-hub__team-clan-link" href="/local/subscriptions/my_clan.php?promotionid={{promotionid}}">
+                                    <i class="fa-solid fa-users" aria-hidden="true"></i>
+                                    <span class="commerce-customer-hub__team-history-text">{{#str}}commerce_my_clan_discover, local_subscriptions{{/str}}</span>
+                                </a>
                                 <a class="commerce-customer-hub__team-history-link" href="{{historyurl}}">
                                     <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
                                     <span class="commerce-customer-hub__team-history-text">{{#str}}commerce_promo_xp_history_link, local_subscriptions{{/str}}</span>

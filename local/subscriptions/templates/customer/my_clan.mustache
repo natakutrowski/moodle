@@ -1,0 +1,121 @@
+<div class="commerce-my-clan">
+    <a href="{{backurl}}" class="commerce-my-clan__back btn btn-outline-primary">
+        <span aria-hidden="true">←</span> {{#str}}commerce_my_clan_back, local_subscriptions{{/str}}
+    </a>
+
+    {{#hasmultipleclans}}
+        <nav class="commerce-my-clan__switcher" aria-label="{{#str}}commerce_my_clan_switch_label, local_subscriptions{{/str}}">
+            {{#clans}}
+                <a href="{{url}}" class="commerce-my-clan__switch {{#isactive}}is-active{{/isactive}}"
+                    {{#isactive}}aria-current="page"{{/isactive}}>{{name}}</a>
+            {{/clans}}
+        </nav>
+    {{/hasmultipleclans}}
+
+    <section class="commerce-my-clan__hero">
+        <div class="commerce-my-clan__hero-copy">
+            <div class="commerce-my-clan__eyebrow"><i class="fa-solid fa-people-group" aria-hidden="true"></i> {{#str}}commerce_my_clan_eyebrow, local_subscriptions{{/str}}</div>
+            <h1>{{groupname}}</h1>
+            <p class="commerce-my-clan__promotion">{{promotionname}}</p>
+            <p class="commerce-my-clan__welcome">{{#str}}commerce_my_clan_welcome, local_subscriptions{{/str}}</p>
+            <div class="commerce-my-clan__hero-actions">
+                {{#hastelegram}}
+                    <a href="{{telegramurl}}" target="_blank" rel="noopener noreferrer" class="commerce-my-clan__telegram">
+                        <i class="fa-brands fa-telegram" aria-hidden="true"></i>
+                        {{#str}}commerce_my_clan_telegram, local_subscriptions{{/str}}
+                        <span aria-hidden="true">↗</span>
+                    </a>
+                {{/hastelegram}}
+                <span class="commerce-my-clan__membership"><i class="fa-solid fa-user-group" aria-hidden="true"></i> {{membercountlabel}}</span>
+            </div>
+        </div>
+        {{#hasclanphoto}}<div class="commerce-my-clan__hero-photo"><img src="{{clanphotourl}}" alt="{{#str}}commerce_my_clan_photo_alt, local_subscriptions{{/str}}" loading="lazy"></div>{{/hasclanphoto}}
+        {{^hasclanphoto}}<div class="commerce-my-clan__hero-art" aria-hidden="true"><span>✨</span><i class="fa-solid fa-users-viewfinder"></i></div>{{/hasclanphoto}}
+    </section>
+
+    <section class="commerce-my-clan__score-grid" aria-label="{{#str}}commerce_my_clan_points_section, local_subscriptions{{/str}}">
+        <div class="commerce-my-clan__score">
+            <span class="commerce-my-clan__score-label">{{#str}}commerce_my_clan_group_points, local_subscriptions{{/str}}</span>
+            {{#hasscore}}<strong>{{grouppoints}} <img src="{{promoiconurl}}" alt="" aria-hidden="true" width="28" height="28"></strong>{{/hasscore}}
+            {{#ishidden}}<span class="commerce-my-clan__score-pending"><i class="fa-solid fa-lock" aria-hidden="true"></i> {{#str}}commerce_my_clan_hidden, local_subscriptions{{/str}}</span>{{/ishidden}}
+        </div>
+        <div class="commerce-my-clan__score">
+            <span class="commerce-my-clan__score-label">{{#str}}commerce_my_clan_rank, local_subscriptions{{/str}}</span>
+            {{#hasrank}}<strong>{{#rankgold}}🥇{{/rankgold}}{{#ranksilver}}🥈{{/ranksilver}}{{#rankbronze}}🥉{{/rankbronze}} #{{grouprank}} <small>/ {{groupcount}}</small></strong>{{/hasrank}}
+            {{#hasscore}}{{^hasrank}}<strong aria-label="{{#str}}commerce_my_clan_unranked, local_subscriptions{{/str}}">—</strong>{{/hasrank}}{{/hasscore}}
+            {{#ishidden}}<span class="commerce-my-clan__score-pending">{{#str}}commerce_my_clan_hidden, local_subscriptions{{/str}}</span>{{/ishidden}}
+        </div>
+    </section>
+    {{#ishidden}}
+        <p class="commerce-my-clan__reveal"><i class="fa-solid fa-clock" aria-hidden="true"></i> {{#str}}commerce_my_clan_reveal, local_subscriptions, {{revealdate}}{{/str}}</p>
+    {{/ishidden}}
+
+    <div class="commerce-my-clan__details-grid">
+        <section class="commerce-my-clan__panel">
+            <h2><i class="fa-solid fa-heart" aria-hidden="true"></i> {{#str}}commerce_my_clan_life, local_subscriptions{{/str}}</h2>
+            <dl class="commerce-my-clan__details">
+                {{#hastutor}}<div><dt>{{#str}}commerce_my_clan_tutor, local_subscriptions{{/str}}</dt><dd>{{tutorname}}</dd></div>{{/hastutor}}
+                {{#haslanguage}}<div><dt>{{#str}}commerce_my_clan_language, local_subscriptions{{/str}}</dt><dd>{{supportlanguage}}</dd></div>{{/haslanguage}}
+                <div><dt>{{#str}}commerce_my_clan_our_members, local_subscriptions{{/str}}</dt><dd>{{membercountlabel}}</dd></div>
+            </dl>
+        </section>
+        <section class="commerce-my-clan__panel">
+            <h2><i class="fa-solid fa-calendar-days" aria-hidden="true"></i> {{#str}}commerce_my_clan_promotion, local_subscriptions{{/str}}</h2>
+            <dl class="commerce-my-clan__details">
+                <div><dt>{{startlabel}}</dt><dd>{{startdate}}</dd></div>
+                <div><dt>{{#str}}commerce_my_clan_end, local_subscriptions{{/str}}</dt><dd>{{enddate}}</dd></div>
+                <div><dt>{{#str}}commerce_my_clan_group_count, local_subscriptions{{/str}}</dt><dd>{{groupcountlabel}}</dd></div>
+                <div><dt>{{#str}}commerce_my_clan_participants, local_subscriptions{{/str}}</dt><dd>{{participantcountlabel}}</dd></div>
+            </dl>
+        </section>
+    </div>
+
+    <section class="commerce-my-clan__lessons" aria-label="{{#str}}commerce_my_clan_lessons_title, local_subscriptions{{/str}}">
+        <div class="commerce-my-clan__lessons-heading"><i class="fa-solid fa-route" aria-hidden="true"></i> {{#str}}commerce_my_clan_lessons_title, local_subscriptions{{/str}}</div>
+        <div class="commerce-my-clan__lesson-cards">
+            <article class="commerce-my-clan__lesson-card">
+                <span class="commerce-my-clan__lesson-label"><i class="fa-solid fa-unlock" aria-hidden="true"></i> {{#str}}commerce_my_clan_last_lesson, local_subscriptions{{/str}}</span>
+                {{#haslastlesson}}
+                    <a href="{{lastlessonurl}}" class="commerce-my-clan__lesson-name">{{lastlesson}} <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+                    <small>{{lastlessondate}}</small>
+                {{/haslastlesson}}
+                {{^haslastlesson}}<span class="commerce-my-clan__lesson-empty">{{#str}}commerce_my_clan_no_last, local_subscriptions{{/str}}</span>{{/haslastlesson}}
+            </article>
+            <article class="commerce-my-clan__lesson-card commerce-my-clan__lesson-card--next">
+                <span class="commerce-my-clan__lesson-label"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i> {{#str}}commerce_my_clan_next_lesson, local_subscriptions{{/str}}</span>
+                {{#hasnextlesson}}
+                    <strong class="commerce-my-clan__lesson-name">{{nextlesson}}</strong>
+                    <small>{{nextlessondate}}</small>
+                {{/hasnextlesson}}
+                {{^hasnextlesson}}<span class="commerce-my-clan__lesson-empty">{{#str}}commerce_my_clan_no_next, local_subscriptions{{/str}}</span>{{/hasnextlesson}}
+            </article>
+        </div>
+    </section>
+
+    <section class="commerce-my-clan__member-section" aria-labelledby="commerce-my-clan-members-title">
+        <div class="commerce-my-clan__member-heading">
+            <div>
+                <span class="commerce-my-clan__section-kicker">{{#str}}commerce_my_clan_our_team, local_subscriptions{{/str}}</span>
+                <h2 id="commerce-my-clan-members-title">{{#str}}commerce_my_clan_people_title, local_subscriptions{{/str}}</h2>
+            </div>
+            <span class="commerce-my-clan__headcount">{{membercountlabel}}</span>
+        </div>
+        <div class="commerce-my-clan__members">
+            {{#members}}
+                <article class="commerce-my-clan__member {{#ismine}}is-mine{{/ismine}}">
+                    <div class="commerce-my-clan__member-avatar">
+                        {{#hasavatar}}<img src="{{avatarurl}}" alt="" loading="lazy" width="88" height="88">{{/hasavatar}}
+                        {{^hasavatar}}<i class="fa-solid fa-user" aria-hidden="true"></i>{{/hasavatar}}
+                    </div>
+                    <h3>{{firstname}}</h3>
+                    {{#ismine}}<span class="commerce-my-clan__me">{{#str}}commerce_my_clan_you, local_subscriptions{{/str}}</span>{{/ismine}}
+                    {{#hascountry}}<p class="commerce-my-clan__country"><span aria-hidden="true">{{flag}}</span> {{country}}</p>{{/hascountry}}
+                    {{^hascountry}}<p class="commerce-my-clan__country commerce-my-clan__country--empty">{{#str}}commerce_my_clan_country_missing, local_subscriptions{{/str}}</p>{{/hascountry}}
+                    {{#hasscore}}<div class="commerce-my-clan__member-points"><strong>{{points}}</strong><img src="{{promoiconurl}}" alt="" aria-hidden="true" width="24" height="24"><span class="visually-hidden">{{#str}}commerce_my_clan_group_points, local_subscriptions{{/str}}</span></div>{{/hasscore}}
+                    {{^hasscore}}<div class="commerce-my-clan__member-points commerce-my-clan__member-points--hidden"><i class="fa-solid fa-lock" aria-hidden="true"></i> {{#str}}commerce_my_clan_hidden, local_subscriptions{{/str}}</div>{{/hasscore}}
+                </article>
+            {{/members}}
+        </div>
+        <p class="commerce-my-clan__privacy"><i class="fa-solid fa-shield-heart" aria-hidden="true"></i> {{#str}}commerce_my_clan_privacy, local_subscriptions{{/str}}</p>
+    </section>
+</div>

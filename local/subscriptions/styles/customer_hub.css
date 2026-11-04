@@ -581,3 +581,9 @@
     width: 1.38em;
     height: 1.38em;
 }
+
+/* CAMPUSFR_MY_CLAN_V1: quick access from Mon Campus. */
+.commerce-customer-hub__shortcut--clan{border-color:#dbc8ff;background:linear-gradient(145deg,#fcf8ff,#f7f2ff)}
+.commerce-customer-hub__shortcut--clan>i{color:#864ccc}
+.commerce-customer-hub__team-clan-link{border-top:1px solid #e9e1f7;margin-top:.65rem;padding-top:.8rem}
+.commerce-customer-hub__team-clan-link + .commerce-customer-hub__team-history-link{margin-top:.45rem;padding-top:0;border-top:0;font-weight:500}

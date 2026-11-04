@@ -12,6 +12,7 @@ use local_subscriptions\commerce\education\group\CommercePedagogicalGroupConfigu
 use local_subscriptions\commerce\education\group\CommercePedagogicalGroupOrchestrator;
 use local_subscriptions\commerce\education\group\CommercePedagogicalGroupRepository;
 use local_subscriptions\commerce\education\group\CommercePedagogicalGroupOfferService;
+use local_subscriptions\commerce\education\group\CommerceClanPhotoService;
 use local_subscriptions\commerce\education\promotion\CommercePedagogicalPromotionOfferRepository;
 use local_subscriptions\commerce\education\lifecycle\CommercePedagogicalParticipationRepository;
 use local_subscriptions\commerce\education\promotion\CommercePedagogicalPromotionRepository;
@@ -87,6 +88,21 @@ if (data_submitted()) {
             required_param('requestkey', PARAM_ALPHANUMEXT)
         );
         redirect($pageurl, get_string('commerce_education_xp_manual_added', 'local_subscriptions'),
+            null, \core\output\notification::NOTIFY_SUCCESS);
+    }
+
+    if ($action === 'photo') {
+        // An isolated upload action: it does not save or mutate any other group settings.
+        $groupid = required_param('groupid', PARAM_INT);
+        $targetgroup = $repository->get_group($groupid);
+        if (!$targetgroup || $targetgroup->get_promotion_id() !== $promotionid) {
+            throw new moodle_exception('invalidrecord', 'error');
+        }
+        CommerceClanPhotoService::create($DB)->save(
+            $groupid, $promotion->get_course_id(), $_FILES['clanphoto'] ?? null,
+            optional_param('removephoto', 0, PARAM_BOOL) === 1, (int)$USER->id
+        );
+        redirect($pageurl, get_string('commerce_my_clan_photo_saved', 'local_subscriptions'),
             null, \core\output\notification::NOTIFY_SUCCESS);
     }
 
@@ -829,6 +845,42 @@ if ($groups === []) {
             'type' => 'submit',
             'class' => 'btn btn-sm btn-primary',
         ]);
+        echo html_writer::end_tag('form');
+        echo html_writer::end_tag('details');
+
+        // Keep the optional photo administrable without changing normal group edit forms.
+        $clanphotourl = CommerceClanPhotoService::create($DB)->url($groupid, $promotion->get_course_id());
+        echo html_writer::start_tag('details', ['class' => 'commerce-ped-m741-group-edit commerce-ped-clan-photo']);
+        echo html_writer::tag('summary',
+            html_writer::tag('i', '', ['class' => 'fa fa-image', 'aria-hidden' => 'true'])
+            . ' ' . get_string('commerce_my_clan_photo_label', 'local_subscriptions'),
+            ['class' => 'commerce-ped-m741-group-edit-summary']);
+        echo html_writer::start_tag('form', [
+            'method' => 'post', 'enctype' => 'multipart/form-data',
+            'action' => $pageurl->out(false), 'class' => 'commerce-ped-m741-group-edit-form',
+        ]);
+        foreach (['sesskey' => sesskey(), 'action' => 'photo', 'groupid' => $groupid] as $name => $value) {
+            echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
+        }
+        if ($clanphotourl !== '') {
+            echo html_writer::empty_tag('img', [
+                'src' => $clanphotourl, 'alt' => '',
+                'style' => 'display:block;width:180px;height:105px;object-fit:cover;border-radius:12px;margin:.7rem 0;',
+            ]);
+        }
+        echo html_writer::tag('label', get_string('commerce_my_clan_photo_label', 'local_subscriptions'),
+            ['class' => 'form-label', 'for' => 'clan-photo-' . $groupid]);
+        echo html_writer::empty_tag('input', [
+            'type' => 'file', 'name' => 'clanphoto', 'id' => 'clan-photo-' . $groupid,
+            'accept' => 'image/jpeg,image/png,image/webp', 'class' => 'form-control form-control-sm',
+        ]);
+        echo html_writer::div(get_string('commerce_my_clan_photo_help', 'local_subscriptions'), 'form-text');
+        if ($clanphotourl !== '') {
+            echo html_writer::div(html_writer::checkbox('removephoto', '1', false,
+                get_string('commerce_my_clan_photo_remove', 'local_subscriptions')), 'my-2');
+        }
+        echo html_writer::tag('button', get_string('commerce_my_clan_photo_save', 'local_subscriptions'),
+            ['type' => 'submit', 'class' => 'btn btn-sm btn-primary mt-2']);
         echo html_writer::end_tag('form');
         echo html_writer::end_tag('details');
 

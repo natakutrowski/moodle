@@ -83,6 +83,10 @@ final class CommerceCustomerHubService {
             'xpbadgeurl' => $xp['badgeurl'],
             'hasxpbadge' => $xp['badgeurl'] !== '',
             'teamchallenges' => $teamchallenges,
+            // CAMPUSFR_MY_CLAN_V1
+            'hasclan' => $teamchallenges !== [],
+            'myclanurl' => (new \moodle_url('/local/subscriptions/my_clan.php',
+                $teamchallenges !== [] ? ['promotionid' => (int)$teamchallenges[0]['promotionid']] : []))->out(false),
             'hasteamchallenges' => $teamchallenges !== [],
             'mycoursesurl' => UrlFactory::my_courses()->out(false),
             'myresourcesurl' => UrlFactory::my_digital_products()->out(false),
