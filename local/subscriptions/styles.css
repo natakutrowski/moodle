@@ -43045,50 +43045,66 @@ body.local-subscriptions-dashboard-page
 .campusfr-course-points-badge__choco { width: 1.5rem; height: 1.5rem; object-fit: contain; display: inline-block; vertical-align: middle; }
 .campusfr-course-points-badge__croissant { font-size: 1.2rem; line-height: 1; }
 
-/* Course reward badges beside the completion control, responsive on narrow screens. */
-.campusfr-course-points-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: .5rem; }
-.campusfr-course-points-actions > .campusfr-course-points-badges { margin: 0; }
-@media (max-width: 767.98px) {
-    .campusfr-course-points-actions { flex-direction: column; align-items: stretch; }
-    .campusfr-course-points-actions > .campusfr-course-points-badges { align-self: flex-end; order: 1; }
+/* CAMPUSFR_XP_BADGES_LAYOUT_V4 — layout explicite de la grille Moodle. */
+.activity-grid.campusfr-course-points-actions {
+    display: grid !important;
+    grid-template-columns: max-content minmax(0, 1fr) max-content max-content !important;
+    grid-template-areas: "icon name badges completion" !important;
+    grid-template-rows: auto !important;
+    align-items: center !important;
+    column-gap: .5rem;
+    row-gap: .5rem;
 }
-
-
-/* CAMPUSFR_XP_BADGES_LAYOUT_V3 */
-
-/* Desktop : badges et bouton sur une seule ligne. */
-.campusfr-course-points-actions {
-    flex-wrap: nowrap;
+.activity-grid.campusfr-course-points-actions > .activity-icon {
+    grid-area: icon !important;
+    align-self: center !important;
 }
-
-.campusfr-course-points-actions > .campusfr-course-points-badges {
-    display: inline-flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: flex-end;
-    flex: 0 0 auto;
+.activity-grid.campusfr-course-points-actions > .activity-name-area {
+    grid-area: name !important;
+    min-width: 0;
+}
+.activity-grid.campusfr-course-points-actions > .campusfr-course-points-badges {
+    grid-area: badges !important;
+    display: inline-flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    justify-self: end !important;
+    align-self: center !important;
+    gap: .38rem !important;
+    width: max-content !important;
+    margin: 0 !important;
+}
+.activity-grid.campusfr-course-points-actions > .campusfr-course-points-badges > .campusfr-course-points-badge {
+    box-sizing: border-box;
+    width: 4.3rem;
+    flex: 0 0 4.3rem !important;
     white-space: nowrap;
 }
-
-/* Mobile : bouton au-dessus, badges dessous à droite. */
+.activity-grid.campusfr-course-points-actions > .activity-completion {
+    grid-area: completion !important;
+    justify-self: end;
+    align-self: center !important;
+}
 @media (max-width: 767.98px) {
-    .campusfr-course-points-actions {
-        flex-direction: column;
-        align-items: stretch;
-        flex-wrap: nowrap;
+    .activity-grid.campusfr-course-points-actions {
+        grid-template-columns: max-content minmax(0, 1fr) !important;
+        grid-template-areas: "icon name" "completion completion" "badges badges" !important;
+        grid-template-rows: auto auto auto !important;
     }
-
-    .campusfr-course-points-actions > .activity-completion,
-    .campusfr-course-points-actions > [data-region="completion-info"] {
-        order: 1;
-        width: 100%;
+    .activity-grid.campusfr-course-points-actions > .activity-completion {
+        width: 100% !important;
+        justify-self: stretch !important;
+        margin: 0 !important;
     }
-
-    .campusfr-course-points-actions > .campusfr-course-points-badges {
-        order: 2;
-        align-self: flex-end;
-        width: auto;
-        margin: 0;
+    .activity-grid.campusfr-course-points-actions > .activity-completion .activity-information,
+    .activity-grid.campusfr-course-points-actions > .activity-completion [data-region="completion-info"],
+    .activity-grid.campusfr-course-points-actions > .activity-completion .completion-dropdown,
+    .activity-grid.campusfr-course-points-actions > .activity-completion .completion-dropdown > .btn {
+        width: 100% !important;
+    }
+    .activity-grid.campusfr-course-points-actions > .campusfr-course-points-badges {
+        justify-self: end !important;
     }
 }
