@@ -42,7 +42,12 @@ final class hook_callbacks {
             return;
         }
         try {
-            $badges = \local_subscriptions\commerce\education\xp\CommercePedagogicalActivityXpDisplayService::create()
+            // Both point systems are read-only. Enrolment is required even when
+            // the course page itself is publicly visible.
+            if (!is_enrolled(\context_course::instance($courseid), $USER)) {
+                return;
+            }
+            $badges = \local_subscriptions\commerce\education\xp\CommercePedagogicalCompactPointsBadgeService::create()
                 ->for_user_course((int)$USER->id, $courseid);
             if ($badges) {
                 $page->requires->js_call_amd('local_subscriptions/promo_xp_activity_badges', 'init', [$badges]);

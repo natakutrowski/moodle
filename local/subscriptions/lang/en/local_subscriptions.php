@@ -13079,3 +13079,13 @@ $string['commerce_promo_xp_badge_earned_help'] = 'A point award from this activi
 $string['commerce_promo_xp_badge_retry_help'] = 'You earned personal points on this activity previously. A genuinely completed new attempt may earn promotion points if the competition rules permit it.';
 $string['commerce_promo_xp_badge_potential_help'] = 'This activity is available and may count toward the promotion, but points are not guaranteed. Only an eligible attempt validated by the rules earns points.';
 $string['commerce_points_promo_unit'] = 'promotion points';
+
+// Compact per-activity personal / promotion points, display only.
+$string['commerce_points_badge_personal'] = 'personal points';
+$string['commerce_points_badge_promo'] = 'promotion points';
+$string['commerce_points_badge_personal_earned_help'] = 'You already earned {$a->points} personal points for this activity.';
+$string['commerce_points_badge_personal_available_help'] = 'This activity may award {$a->points} personal points, subject to Level Up rules and successful completion.';
+$string['commerce_points_badge_personal_locked_help'] = 'Personal points are not available yet.';
+$string['commerce_points_badge_promotion_earned_help'] = 'You already earned {$a->points} promotion points for this activity.';
+$string['commerce_points_badge_promotion_available_help'] = 'You may earn {$a->points} promotion points after an eligible validated attempt. Previously completed activities may require a new attempt.';
+$string['commerce_points_badge_promotion_locked_help'] = 'These {$a->points} promotion points are not available yet. Scheduled unlock: {$a->date}. An eligible attempt will then be required.';

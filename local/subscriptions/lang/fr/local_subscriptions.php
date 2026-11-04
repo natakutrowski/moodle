@@ -12914,3 +12914,13 @@ $string['commerce_promo_xp_badge_earned_help'] = 'Un gain de points pour cette a
 $string['commerce_promo_xp_badge_retry_help'] = 'Tu as déjà reçu des points personnels pour cette activité. Une nouvelle tentative réellement validée peut donner des points de promotion si elle respecte les règles du concours.';
 $string['commerce_promo_xp_badge_potential_help'] = 'Cette activité est ouverte et peut être prise en compte par la promotion, mais les points ne sont pas garantis. Seule une tentative admissible, validée par les règles, rapporte des points.';
 $string['commerce_points_promo_unit'] = 'points de promotion';
+
+// Compact per-activity personal / promotion points, display only.
+$string['commerce_points_badge_personal'] = 'points personnels';
+$string['commerce_points_badge_promo'] = 'points de promotion';
+$string['commerce_points_badge_personal_earned_help'] = 'Tu as déjà gagné {$a->points} points personnels pour cette activité.';
+$string['commerce_points_badge_personal_available_help'] = 'Cette activité peut rapporter {$a->points} points personnels, sous réserve des règles Level Up et de la validation de l’activité.';
+$string['commerce_points_badge_personal_locked_help'] = 'Les points personnels ne sont pas disponibles pour le moment.';
+$string['commerce_points_badge_promotion_earned_help'] = 'Tu as déjà gagné {$a->points} points de promotion pour cette activité.';
+$string['commerce_points_badge_promotion_available_help'] = 'Tu peux tenter de gagner {$a->points} points de promotion. Ils sont attribués seulement après une tentative admissible et validée. Une ancienne activité terminée peut nécessiter une nouvelle tentative.';
+$string['commerce_points_badge_promotion_locked_help'] = 'Ces {$a->points} points de promotion ne sont pas encore disponibles. Déblocage prévu le {$a->date}. Une tentative admissible sera nécessaire ensuite.';

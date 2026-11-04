@@ -43033,3 +43033,14 @@ body.local-subscriptions-dashboard-page
     color: #5f6270;
     margin-inline-start: .35rem;
 }
+
+/* Compact course rewards: grey available, pale green earned, pastel blue calendar-locked. */
+.campusfr-course-points-badges { display: inline-flex; align-items: center; flex-wrap: wrap; gap: .38rem; margin: .4rem 0 .2rem .55rem; vertical-align: middle; }
+.campusfr-course-points-badge { display: inline-flex; align-items: center; justify-content: center; gap: .36rem; padding: .18rem .5rem; min-height: 1.9rem; border-radius: 999px; border: 1px solid #d6d9df; background: #f3f4f6; color: #5b606b; font-size: .83rem; font-weight: 750; line-height: 1; white-space: nowrap; vertical-align: middle; cursor: help; }
+.campusfr-course-points-badge--earned { background: #e9f7ef; color: #236946; border-color: #b7dec7; }
+.campusfr-course-points-badge--locked { background: #f2f3f5; color: #5e626a; border-color: #d9dde3; }
+.campusfr-course-points-badge--available { background: #eaf3ff; color: #355e92; border-color: #c8dcf4; }
+.campusfr-course-points-badge:focus-visible { outline: 2px solid #b54a86; outline-offset: 2px; }
+.campusfr-course-points-badge__number { font-variant-numeric: tabular-nums; }
+.campusfr-course-points-badge__choco { width: 1.5rem; height: 1.5rem; object-fit: contain; display: inline-block; vertical-align: middle; }
+.campusfr-course-points-badge__croissant { font-size: 1.2rem; line-height: 1; }

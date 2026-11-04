@@ -1,25 +1,49 @@
 /**
- * Learner-only, read-only badges in Moodle 5 course activity cards / activity header.
- * Values are prepared by a server-side service from the current learner's XP ledger.
+ * Compact, read-only personal and promotion points on course cards / activity pages.
+ * Data is prepared server-side; this script never requests or awards points.
  */
-export const init = (badges) => {
-    if (!Array.isArray(badges) || !badges.length) {
+export const init = (activities) => {
+    if (!Array.isArray(activities) || !activities.length) {
         return;
     }
 
-    const makeBadge = (item) => {
+    const makeBadge = (item, cmid) => {
+        if (!item || !['personal', 'promotion'].includes(item.kind) ||
+                !['available', 'earned', 'locked'].includes(item.state) ||
+                !Number.isSafeInteger(item.points) || item.points <= 0) {
+            return null;
+        }
         const badge = document.createElement('span');
-        badge.className = 'commerce-promo-xp-activity-badge commerce-promo-xp-activity-badge--' + item.state;
-        badge.dataset.commercePromoXpBadge = String(item.cmid);
-        badge.textContent = item.label;
+        badge.className = 'campusfr-course-points-badge campusfr-course-points-badge--' + item.state;
+        badge.dataset.campusfrPointsBadge = cmid + ':' + item.kind;
         badge.title = item.title;
         badge.setAttribute('aria-label', item.title);
+        badge.tabIndex = 0;
+        const number = document.createElement('span');
+        number.className = 'campusfr-course-points-badge__number';
+        number.textContent = '+' + String(item.points);
+        badge.appendChild(number);
+        if (item.kind === 'promotion') {
+            const pastry = document.createElement('img');
+            pastry.className = 'campusfr-course-points-badge__choco';
+            pastry.src = item.iconurl;
+            pastry.alt = '';
+            pastry.setAttribute('aria-hidden', 'true');
+            pastry.width = 22;
+            pastry.height = 22;
+            badge.appendChild(pastry);
+        } else {
+            const pastry = document.createElement('span');
+            pastry.className = 'campusfr-course-points-badge__croissant';
+            pastry.textContent = '🥐';
+            pastry.setAttribute('aria-hidden', 'true');
+            badge.appendChild(pastry);
+        }
         return badge;
     };
 
     const findCard = (cmid) => {
         const id = String(cmid);
-        // Moodle course formats differ: prefer the actual course module list item.
         return document.getElementById('module-' + id) ||
             document.querySelector('.activity[data-cmid="' + id + '"]') ||
             document.querySelector('.activity[data-id="' + id + '"]') ||
@@ -29,32 +53,47 @@ export const init = (badges) => {
     const render = () => {
         const coursePage = document.body.classList.contains('path-course') ||
             document.body.id.startsWith('page-course-');
-        for (const item of badges) {
-            if (!Number.isInteger(item.cmid) || !['earned', 'retry', 'potential'].includes(item.state)) {
+        const url = coursePage ? null : new URL(window.location.href);
+        for (const activity of activities) {
+            if (!activity || !Number.isInteger(activity.cmid) || !Array.isArray(activity.badges)) {
                 continue;
             }
-            if (document.querySelector('[data-commerce-promo-xp-badge="' + item.cmid + '"]')) {
-                continue;
-            }
-            const target = findCard(item.cmid);
-            if (target && coursePage) {
-                const anchor = target.querySelector('.activityname, .activity-name-area, .activityname > a') ||
-                    target.querySelector('.activity-item') || target;
-                anchor.appendChild(makeBadge(item));
-                continue;
-            }
-            // A module view has one Moodle context, supplied by body data attribute
-            // on versions where present, or by the module's URL query parameter.
-            if (!coursePage) {
-                const url = new URL(window.location.href);
-                if (Number(url.searchParams.get('id')) !== item.cmid) {
+            let anchor;
+            if (coursePage) {
+                const target = findCard(activity.cmid);
+                if (!target) {
                     continue;
                 }
-                const header = document.querySelector('.activity-header') ||
+                anchor = target.querySelector('.activityname, .activity-name-area, .activityname > a') ||
+                    target.querySelector('.activity-item') || target;
+                // Keep the tooltip badge outside clickable activity links.
+                if (anchor.tagName === 'A' && anchor.parentElement) {
+                    anchor = anchor.parentElement;
+                }
+            } else {
+                if (Number(url.searchParams.get('id')) !== activity.cmid) {
+                    continue;
+                }
+                anchor = document.querySelector('.activity-header') ||
                     document.querySelector('#page-header .page-header-headings') ||
                     document.querySelector('#region-main .page-header-headings');
-                if (header) {
-                    header.appendChild(makeBadge(item));
+            }
+            if (!anchor) {
+                continue;
+            }
+            let group = anchor.querySelector('.campusfr-course-points-badges');
+            for (const item of activity.badges) {
+                if (document.querySelector('[data-campusfr-points-badge="' + activity.cmid + ':' + item.kind + '"]')) {
+                    continue;
+                }
+                const badge = makeBadge(item, activity.cmid);
+                if (badge) {
+                    if (!group) {
+                        group = document.createElement('span');
+                        group.className = 'campusfr-course-points-badges';
+                        anchor.appendChild(group);
+                    }
+                    group.appendChild(badge);
                 }
             }
         }
@@ -65,7 +104,6 @@ export const init = (badges) => {
     } else {
         render();
     }
-    // Moodle formats may asynchronously add activity cards when sections expand.
     const container = document.getElementById('page-content') || document.getElementById('region-main');
     if (container && typeof MutationObserver !== 'undefined') {
         const observer = new MutationObserver(render);

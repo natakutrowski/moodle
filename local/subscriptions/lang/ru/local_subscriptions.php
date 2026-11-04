@@ -13154,3 +13154,13 @@ $string['commerce_promo_xp_badge_earned_help'] = 'Начисление балл�
 $string['commerce_promo_xp_badge_retry_help'] = 'Ранее ты уже получал личные баллы за это задание. Новая успешная попытка может дать баллы потока, если соблюдены правила конкурса.';
 $string['commerce_promo_xp_badge_potential_help'] = 'Задание уже открыто, но баллы не гарантированы. Они начисляются только за подходящую попытку, подтверждённую правилами конкурса.';
 $string['commerce_points_promo_unit'] = 'баллы потока';
+
+// Compact per-activity personal / promotion points, display only.
+$string['commerce_points_badge_personal'] = 'личные баллы';
+$string['commerce_points_badge_promo'] = 'баллы потока';
+$string['commerce_points_badge_personal_earned_help'] = 'Ты уже получил(а) {$a->points} личных баллов за это задание.';
+$string['commerce_points_badge_personal_available_help'] = 'За это задание можно получить {$a->points} личных баллов, если выполнены правила Level Up и задание успешно засчитано.';
+$string['commerce_points_badge_personal_locked_help'] = 'Личные баллы пока недоступны.';
+$string['commerce_points_badge_promotion_earned_help'] = 'Ты уже получил(а) {$a->points} баллов потока за это задание.';
+$string['commerce_points_badge_promotion_available_help'] = 'Можно попробовать получить {$a->points} баллов потока после подходящей засчитанной попытки. Если задание выполнялось раньше, может потребоваться новая попытка.';
+$string['commerce_points_badge_promotion_locked_help'] = 'Эти {$a->points} баллов потока пока недоступны. Открытие запланировано на {$a->date}. Затем потребуется подходящая попытка.';
