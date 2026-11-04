@@ -43052,3 +43052,43 @@ body.local-subscriptions-dashboard-page
     .campusfr-course-points-actions { flex-direction: column; align-items: stretch; }
     .campusfr-course-points-actions > .campusfr-course-points-badges { align-self: flex-end; order: 1; }
 }
+
+
+/* CAMPUSFR_XP_BADGES_LAYOUT_V3 */
+
+/* Desktop : badges et bouton sur une seule ligne. */
+.campusfr-course-points-actions {
+    flex-wrap: nowrap;
+}
+
+.campusfr-course-points-actions > .campusfr-course-points-badges {
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+/* Mobile : bouton au-dessus, badges dessous à droite. */
+@media (max-width: 767.98px) {
+    .campusfr-course-points-actions {
+        flex-direction: column;
+        align-items: stretch;
+        flex-wrap: nowrap;
+    }
+
+    .campusfr-course-points-actions > .activity-completion,
+    .campusfr-course-points-actions > [data-region="completion-info"] {
+        order: 1;
+        width: 100%;
+    }
+
+    .campusfr-course-points-actions > .campusfr-course-points-badges {
+        order: 2;
+        align-self: flex-end;
+        width: auto;
+        margin: 0;
+    }
+}
