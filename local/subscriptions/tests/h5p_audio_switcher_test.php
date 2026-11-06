@@ -34,7 +34,7 @@ final class h5p_audio_switcher_test extends \advanced_testcase {
         $scripts = $this->scripts();
         $this->resolve($scripts, $this->libraries());
         $this->assertCount(2, $scripts);
-        $this->assertStringContainsString('audio-campusfr-1.5.37.js', $scripts[1]->path);
+        $this->assertStringContainsString('audio-campusfr-1.5.37-ui3.js', $scripts[1]->path);
     }
     public function test_memory_on_adds_only_memory(): void {
         $this->resetAfterTest();
@@ -53,7 +53,7 @@ final class h5p_audio_switcher_test extends \advanced_testcase {
         $this->resolve($scripts, $this->libraries());
         $this->resolve($scripts, $this->libraries());
         $this->assertCount(3, $scripts);
-        $this->assertStringContainsString('audio-campusfr-1.5.37.js', $scripts[1]->path);
+        $this->assertStringContainsString('audio-campusfr-1.5.37-ui3.js', $scripts[1]->path);
         $this->assertStringContainsString('memory-card-campusfr-1.3.55.js', $scripts[2]->path);
     }
     public function test_unrelated_library_and_editor_not_modified(): void {

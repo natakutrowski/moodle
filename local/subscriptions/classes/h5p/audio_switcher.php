@@ -16,7 +16,7 @@ final class audio_switcher {
             return;
         }
         if (self::enabled('h5p_audio_campusfr_enabled') && self::matches($libraries, 'H5P.Audio', 1, 5)) {
-            self::append($scripts, 'audio-campusfr-1.5.37.js', 'a1537r1');
+            self::append($scripts, 'audio-campusfr-1.5.37-ui3.js', 'a1537ui3');
         }
         if (self::enabled('h5p_memory_campusfr_enabled') && self::matches($libraries, 'H5P.MemoryGame', 1, 3)) {
             self::append($scripts, 'memory-card-campusfr-1.3.55.js', 'm1355r1');
