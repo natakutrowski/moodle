@@ -15,6 +15,11 @@ final class audio_switcher {
         if (!is_array($scripts) || !in_array($embedtype, ['iframe', 'div', 'external'], true)) {
             return;
         }
+        // Optional safe fallback when DragText saved indices no longer match exercise content.
+        if (self::enabled('h5p_dragtext_state_guard_enabled') &&
+                self::matches($libraries, 'H5P.DragText', 1, 10)) {
+            self::append($scripts, 'dragtext-campusfr-state-guard-1.js', 'dtstate1');
+        }
         if (self::enabled('h5p_audio_campusfr_enabled') && self::matches($libraries, 'H5P.Audio', 1, 5)) {
             self::append($scripts, 'audio-campusfr-1.5.37-ui3-spacing6.js', 'a1537ui3s6');
         }

@@ -29,7 +29,7 @@ final class CommercePedagogicalCompactPointsBadgeService {
      *
      * @param array<int,object> $rules Recordset values from block_xp_rule.
      */
-    public static function nominal_points(array $rules, int $cmid): ?int {
+    public static function nominal_points(array $rules, int $cmid, ?string $cmname = null): ?int {
         $matches = [];
         foreach ($rules as $rule) {
             if ((string)$rule->type !== 'cm_completion' || (int)$rule->points <= 0) {
@@ -38,6 +38,21 @@ final class CommercePedagogicalCompactPointsBadgeService {
             $filter = (string)$rule->filter;
             if ($filter === 'cm' && (int)$rule->filtercmid === $cmid) {
                 $matches[9000][] = (int)$rule->points;
+            } else if ($filter === 'cmname' && $cmname !== null &&
+                    isset($rule->filterchar1, $rule->filterint1) &&
+                    in_array((int)$rule->filterint1, [0, 1], true)) {
+                // Level Up XP: 0 = name equals, 1 = name contains.
+                // Fail closed if the filter configuration is missing or empty.
+                $needle = trim((string)$rule->filterchar1);
+                if ($needle !== '') {
+                    $actual = \core_text::strtolower($cmname);
+                    $expected = \core_text::strtolower($needle);
+                    $applies = (int)$rule->filterint1 === 0
+                        ? $actual === $expected : str_contains($actual, $expected);
+                    if ($applies) {
+                        $matches[2000][] = (int)$rule->points;
+                    }
+                }
             } else if ($filter === 'anycm') {
                 $matches[9][] = (int)$rule->points;
             }
@@ -66,10 +81,12 @@ final class CommercePedagogicalCompactPointsBadgeService {
         }
         $modules = $this->db->get_records('course_modules', ['course' => $courseid], '', 'id,section');
         $cms = [];
+        $cmnames = [];
         foreach ($modinfo->cms as $cm) {
             if (in_array($cm->modname, self::MODULES, true) && (bool)$cm->visible &&
                     isset($modules[(int)$cm->id])) {
                 $cms[(int)$cm->id] = (int)$modules[(int)$cm->id]->section;
+                $cmnames[(int)$cm->id] = (string)$cm->name;
             }
         }
         if (!$cms) {
@@ -81,7 +98,8 @@ final class CommercePedagogicalCompactPointsBadgeService {
         // or omits a badge instead of displaying an inaccurate number.
         $systemcontextid = (int)\context_system::instance()->id;
         $rules = $this->db->get_records_sql(
-            "SELECT id, contextid, childcontextid, points, type, filter, filtercmid
+            "SELECT id, contextid, childcontextid, points, type, filter, filtercmid,
+                   filterint1, filterchar1
                FROM {block_xp_rule}
               WHERE ((contextid = :coursectx AND childcontextid = 0)
                   OR (contextid = :systemctx AND childcontextid IN (0, :systemcoursectx)))
@@ -98,7 +116,7 @@ final class CommercePedagogicalCompactPointsBadgeService {
         $effectiverules = $courseworld ?: ($coursescoped ?: $rules);
         $amounts = [];
         foreach ($cms as $cmid => $_) {
-            $amounts[$cmid] = self::nominal_points($effectiverules, $cmid);
+            $amounts[$cmid] = self::nominal_points($effectiverules, $cmid, $cmnames[$cmid]);
         }
 
         $logs = $this->db->get_recordset_sql(

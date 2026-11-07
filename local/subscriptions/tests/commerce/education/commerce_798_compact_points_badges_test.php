@@ -28,6 +28,48 @@ final class commerce_798_compact_points_badges_test extends \advanced_testcase {
         ], 71));
     }
 
+
+    public function test_cmname_exact_and_contains_rules_use_real_names(): void {
+        $rules = [
+            (object)['type' => 'cm_completion', 'points' => 3, 'filter' => 'cmname',
+                'filterint1' => 0, 'filterchar1' => 'Jour 1 · Grammaire'],
+            (object)['type' => 'cm_completion', 'points' => 9, 'filter' => 'cmname',
+                'filterint1' => 1, 'filterchar1' => 'АУДИРОВАНИЕ'],
+        ];
+        $this->assertSame(3, Badges::nominal_points($rules, 7, 'jour 1 · grammaire'));
+        $this->assertNull(Badges::nominal_points($rules, 7, 'jour 1 · grammaire extra'));
+        $this->assertSame(9, Badges::nominal_points($rules, 8, 'День 1 · Аудирование'));
+        $this->assertNull(Badges::nominal_points($rules, 8, 'День 1 · Грамматика'));
+        $this->assertNull(Badges::nominal_points($rules, 8));
+    }
+
+    public function test_cmname_priority_ambiguity_and_missing_filter_are_safe(): void {
+        $name = 'Jour 1 · Texte et exercices';
+        $rules = [
+            (object)['type' => 'cm_completion', 'points' => 2, 'filter' => 'anycm'],
+            (object)['type' => 'cm_completion', 'points' => 9, 'filter' => 'cmname',
+                'filterint1' => 1, 'filterchar1' => 'Texte'],
+        ];
+        $this->assertSame(9, Badges::nominal_points($rules, 70, $name));
+        $rules[] = (object)['type' => 'cm_completion', 'points' => 12, 'filter' => 'cm',
+            'filtercmid' => 70];
+        $this->assertSame(12, Badges::nominal_points($rules, 70, $name));
+        $this->assertSame(9, Badges::nominal_points($rules, 71, $name));
+        $rules[] = (object)['type' => 'cm_completion', 'points' => 7, 'filter' => 'cmname',
+            'filterint1' => 1, 'filterchar1' => 'exercices'];
+        $this->assertNull(Badges::nominal_points($rules, 71, $name));
+        $this->assertSame(12, Badges::nominal_points($rules, 70, $name));
+        $this->assertSame(2, Badges::nominal_points($rules, 71, 'Activité sans mots clés'));
+        $this->assertNull(Badges::nominal_points([
+            (object)['type' => 'cm_completion', 'points' => 50, 'filter' => 'cmname',
+                'filterint1' => 1, 'filterchar1' => ''],
+        ], 70, $name));
+        $this->assertNull(Badges::nominal_points([
+            (object)['type' => 'cm_completion', 'points' => 50, 'filter' => 'cmname',
+                'filterchar1' => 'Texte'],
+        ], 70, $name));
+    }
+
     public function test_badge_states_and_kind_stay_distinct(): void {
         $personal = Badges::badge('personal', 12, 'earned', 0);
         $this->assertSame('personal', $personal['kind']);
