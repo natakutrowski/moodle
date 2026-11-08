@@ -19,7 +19,7 @@ final class commerce_798x412_dev_shadow_checkout_test extends advanced_testcase 
         self::assertStringContainsString('sesskey', $cart);
         self::assertStringContainsString('priceid', $cart);
         $gate = (string)file_get_contents($root . '/classes/commerce/showroom/bridge/CommerceShowroomDevCheckoutTestGate.php');
-        self::assertStringContainsString("public const DESIGN_VERSION = '0.4.11'", $gate);
+        self::assertStringContainsString("public const DESIGN_VERSION = '0.4.13'", $gate);
         self::assertStringContainsString('eligible_published_pilot', $gate);
     }
 }

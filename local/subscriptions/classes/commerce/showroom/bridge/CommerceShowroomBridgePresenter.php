@@ -121,8 +121,18 @@ final class CommerceShowroomBridgePresenter {
                 'ischeckouttest' => $checkouttest,
                 'isdevpublishedpilot' => $publicpilot],
             'content' => $copy,
-            'media' => ['presentationVideoUrl' => (new CommerceShowroomBridgeVideoService(\context_system::instance()))
-                ->get_url((int)$record->id)?->out(false) ?? $settings['videoUrl']],
+            'media' => [
+                'presentationVideoUrl' => (new CommerceShowroomBridgeVideoService(\context_system::instance()))
+                    ->get_url((int)$record->id)?->out(false) ?? $settings['videoUrl'],
+                // A configurable HTTPS image overrides the design's bundled Alf cover.
+                // The fallback is a static, versioned, trusted resource (no CMS migration).
+                'presentationPosterUrl' => $settings['posterUrl'] !== ''
+                    ? $settings['posterUrl']
+                    : ($id === 'articles_alf_reimport'
+                        ? (new \moodle_url('/local/subscriptions/designs/articles_alf_reimport/dist/assets/video-cover-alf.webp',
+                            ['v' => $manifest['version']]))->out(false)
+                        : ''),
+            ],
             'commerce' => [
                 'offers' => $offers,
                 'currency' => $data['currency'] ?? '',

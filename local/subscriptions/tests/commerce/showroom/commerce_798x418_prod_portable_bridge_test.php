@@ -38,7 +38,7 @@ final class commerce_798x418_prod_portable_bridge_test extends advanced_testcase
 
     public function test_portable_manifest_is_trusted_and_no_longer_dev_labelled(): void {
         $manifest = CommerceShowroomBridgePackageRegistry::require_manifest('articles_alf_reimport');
-        self::assertSame('0.4.11', $manifest['version']);
+        self::assertSame('0.4.13', $manifest['version']);
         self::assertSame('Articles / Alf', $manifest['label']);
         self::assertSame('dist/main.js', $manifest['entry']);
     }
