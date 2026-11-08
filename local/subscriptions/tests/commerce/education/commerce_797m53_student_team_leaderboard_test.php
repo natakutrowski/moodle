@@ -147,6 +147,52 @@ final class commerce_797m53_student_team_leaderboard_test extends advanced_testc
         self::assertSame(7, $mine[0]['points']);
     }
 
+    public function test_six_clans_show_five_around_user_and_allow_full_ranking(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course();
+        $productid = $this->create_product();
+        $promotionid = $this->create_promotion((int)$course->id, 'Six clans');
+        $users = [];
+        $groupids = [];
+        $now = time();
+        $xp = CommercePedagogicalXpService::create($DB);
+        for ($i = 1; $i <= 6; $i++) {
+            $groupids[$i] = $this->create_group($promotionid, (int)$course->id, 'Clan ' . $i, $i);
+            $users[$i] = $this->getDataGenerator()->create_user();
+            $this->attach_user($promotionid, (int)$course->id, (int)$users[$i]->id,
+                $productid, $groupids[$i]);
+            $xp->record_once($promotionid, (int)$users[$i]->id,
+                'block_xp', 'points_increased', 'rank:' . $i,
+                70 - 10 * $i, $now, $now);
+        }
+
+        $service = CommercePedagogicalStudentLeaderboardService::create($DB);
+        foreach ([
+            1 => [1, 2, 3, 4, 5],
+            2 => [1, 2, 3, 4, 5],
+            3 => [1, 2, 3, 4, 5],
+            4 => [2, 3, 4, 5, 6],
+            5 => [2, 3, 4, 5, 6],
+            6 => [2, 3, 4, 5, 6],
+        ] as $myrank => $expectedranks) {
+            $challenges = $service->get_for_user((int)$users[$myrank]->id, $now);
+            self::assertCount(1, $challenges);
+            $challenge = $challenges[0];
+            self::assertTrue($challenge['hasmoreteams']);
+            self::assertSame($expectedranks, array_column($challenge['leaderboard'], 'rank'));
+            self::assertSame([1, 2, 3, 4, 5, 6], array_column($challenge['leaderboardfull'], 'rank'));
+            self::assertCount(1, array_filter($challenge['leaderboard'],
+                static fn(array $row): bool => $row['ismine']));
+            self::assertCount(1, array_filter($challenge['leaderboardfull'],
+                static fn(array $row): bool => $row['ismine']));
+            self::assertSame($groupids[$myrank], $challenge['groupid']);
+            self::assertSame($myrank, $challenge['grouprank']);
+            self::assertSame(70 - 10 * $myrank, $challenge['grouppoints']);
+        }
+    }
+
     public function test_competition_start_blocks_early_xp_and_hides_leaderboard_until_reveal(): void {
         global $DB;
         $this->resetAfterTest(true);
@@ -180,6 +226,8 @@ final class commerce_797m53_student_team_leaderboard_test extends advanced_testc
         self::assertArrayNotHasKey('grouppoints', $hidden[0]);
         self::assertArrayNotHasKey('grouprank', $hidden[0]);
         self::assertArrayNotHasKey('leaderboard', $hidden[0]);
+        self::assertArrayNotHasKey('leaderboardfull', $hidden[0]);
+        self::assertArrayNotHasKey('hasmoreteams', $hidden[0]);
         self::assertNotEmpty($hidden[0]['revealdate']);
         self::assertFalse($hidden[0]['isxpnotstarted']);
         self::assertTrue($hidden[0]['isxpstarted']);
@@ -317,6 +365,9 @@ final class commerce_797m53_student_team_leaderboard_test extends advanced_testc
         self::assertStringContainsString('commerce-customer-hub__team-challenges', $template);
         self::assertStringContainsString('{{#teamchallenges}}', $template);
         self::assertStringContainsString('{{#ismine}}', $template);
+        self::assertStringContainsString('<details class="commerce-customer-hub__team-ranking-disclosure">', $template);
+        self::assertStringContainsString('{{#leaderboardfull}}', $template);
+        self::assertStringContainsString('{{#hasmoreteams}}', $template);
     }
 
     public function test_cancelling_bonuses_preserves_audit_and_removes_only_promotion_scores(): void {

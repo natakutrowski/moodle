@@ -6988,6 +6988,8 @@ $string['commerce_customer_hub_team_title'] = 'Classement des clans';
 $string['commerce_customer_hub_team_points'] = 'pts';
 $string['commerce_customer_hub_team_my_contribution'] = 'Votre contribution :';
 $string['commerce_customer_hub_team_yours'] = 'votre clan';
+$string['commerce_customer_hub_team_show_all'] = 'Voir les {$a} clans';
+$string['commerce_customer_hub_team_show_less'] = 'Réduire le classement';
 
 // J10A.1 — Navigation du parcours étudiant.
 $string['commerce_customer_hub_shop'] = 'Boutique';

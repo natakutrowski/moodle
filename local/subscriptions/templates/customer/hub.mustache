@@ -141,7 +141,31 @@
                                 <div class="commerce-customer-hub__team-meta">
                                     <span>{{#str}}commerce_customer_hub_team_my_contribution, local_subscriptions{{/str}} <strong class="campusfr-points-promo">{{userpoints}} <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"></strong></span>
                                 </div>
-                                <ol class="commerce-customer-hub__team-ranking">
+                                <div class="commerce-customer-hub__team-ranking-container">
+                                    {{#hasmoreteams}}
+                                    <details class="commerce-customer-hub__team-ranking-disclosure">
+                                        <summary class="commerce-customer-hub__team-ranking-toggle">
+                                            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                                            <span class="commerce-customer-hub__team-ranking-show">{{showalllabel}}</span>
+                                            <span class="commerce-customer-hub__team-ranking-hide">{{#str}}commerce_customer_hub_team_show_less, local_subscriptions{{/str}}</span>
+                                        </summary>
+                                        <ol class="commerce-customer-hub__team-ranking commerce-customer-hub__team-ranking--full">
+                                            {{#leaderboardfull}}
+                                            <li class="{{#ismine}}is-mine{{/ismine}} {{#separated}}is-separated{{/separated}}">
+                                                <span class="commerce-customer-hub__team-position">
+                                                    {{#isgold}}<span title="{{#str}}commerce_education_medal_gold, local_subscriptions{{/str}}">🥇</span>{{/isgold}}
+                                                    {{#issilver}}<span title="{{#str}}commerce_education_medal_silver, local_subscriptions{{/str}}">🥈</span>{{/issilver}}
+                                                    {{#isbronze}}<span title="{{#str}}commerce_education_medal_bronze, local_subscriptions{{/str}}">🥉</span>{{/isbronze}}
+                                                    #{{rank}}
+                                                </span>
+                                                <span class="commerce-customer-hub__team-name">{{groupname}}{{#ismine}} <small>({{#str}}commerce_customer_hub_team_yours, local_subscriptions{{/str}})</small>{{/ismine}}</span>
+                                                <strong class="campusfr-points-promo">{{points}} <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"></strong>
+                                            </li>
+                                            {{/leaderboardfull}}
+                                        </ol>
+                                    </details>
+                                    {{/hasmoreteams}}
+                                    <ol class="commerce-customer-hub__team-ranking commerce-customer-hub__team-ranking--preview">
                                     {{#leaderboard}}
                                         <li class="{{#ismine}}is-mine{{/ismine}} {{#separated}}is-separated{{/separated}}">
                                             <span class="commerce-customer-hub__team-position">
@@ -154,7 +178,8 @@
                                             <strong class="campusfr-points-promo">{{points}} <img class="campusfr-points-choco-icon" src="{{promoiconurl}}" alt="{{#str}}commerce_points_promo_unit, local_subscriptions{{/str}}" width="20" height="20"></strong>
                                         </li>
                                     {{/leaderboard}}
-                                </ol>
+                                    </ol>
+                                </div>
                                 {{/isleaderboardhidden}}
                                 <a class="commerce-customer-hub__team-history-link commerce-customer-hub__team-clan-link" href="/local/subscriptions/my_clan.php?promotionid={{promotionid}}">
                                     <i class="fa-solid fa-users" aria-hidden="true"></i>

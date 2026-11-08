@@ -143,15 +143,32 @@ final class CommercePedagogicalStudentLeaderboardService {
                 continue;
             }
 
-            $rows = [];
-            $mineincluded = false;
-            foreach (array_slice($ranking, 0, self::VISIBLE_ROWS) as $entry) {
-                $ismine = $entry->get_group_id() === $mygroupid;
-                $mineincluded = $mineincluded || $ismine;
-                $rows[] = $this->row($entry, $ismine, false);
+            // Keep the condensed ranking close to the learner's own group,
+            // rather than always showing the top five. The full ranking is
+            // supplied separately for the user-controlled, collapsed-by-default
+            // disclosure. Rank/points are still computed by the existing service.
+            $myindex = null;
+            foreach ($ranking as $index => $entry) {
+                if ($entry->get_group_id() === $mygroupid) {
+                    $myindex = $index;
+                    break;
+                }
             }
-            if (!$mineincluded) {
-                $rows[] = $this->row($mine, true, true);
+            if ($myindex === null) {
+                continue;
+            }
+            $start = max(0, min($myindex - 2, count($ranking) - self::VISIBLE_ROWS));
+            $previewentries = array_slice($ranking, $start, self::VISIBLE_ROWS);
+            $rows = [];
+            foreach ($previewentries as $entry) {
+                $rows[] = $this->row($entry, $entry->get_group_id() === $mygroupid, false);
+            }
+            $hasmoreteams = count($ranking) > self::VISIBLE_ROWS;
+            $allrows = [];
+            if ($hasmoreteams) {
+                foreach ($ranking as $entry) {
+                    $allrows[] = $this->row($entry, $entry->get_group_id() === $mygroupid, false);
+                }
             }
 
             $result[] = [
@@ -169,6 +186,11 @@ final class CommercePedagogicalStudentLeaderboardService {
                 'historyurl' => new \moodle_url('/local/subscriptions/my_points.php',
                     ['promotionid' => $promotionid])->out(false),
                 'leaderboard' => $rows,
+                'leaderboardfull' => $allrows,
+                'hasmoreteams' => $hasmoreteams,
+                'showalllabel' => $hasmoreteams
+                    ? get_string('commerce_customer_hub_team_show_all', 'local_subscriptions', count($ranking))
+                    : '',
             ];
         }
 

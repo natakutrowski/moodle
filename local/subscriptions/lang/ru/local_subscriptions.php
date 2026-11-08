@@ -7227,6 +7227,8 @@ $string['commerce_customer_hub_team_title'] = 'Рейтинг команд';
 $string['commerce_customer_hub_team_points'] = 'очк.';
 $string['commerce_customer_hub_team_my_contribution'] = 'Твой вклад:';
 $string['commerce_customer_hub_team_yours'] = 'твоя команда';
+$string['commerce_customer_hub_team_show_all'] = 'Показать все команды ({$a})';
+$string['commerce_customer_hub_team_show_less'] = 'Свернуть рейтинг';
 
 // J10A.1 — Navigation du parcours étudiant.
 $string['commerce_customer_hub_shop'] = 'Магазин';

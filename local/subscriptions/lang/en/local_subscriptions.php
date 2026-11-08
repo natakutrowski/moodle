@@ -7152,6 +7152,8 @@ $string['commerce_customer_hub_team_title'] = 'Team ranking';
 $string['commerce_customer_hub_team_points'] = 'pts';
 $string['commerce_customer_hub_team_my_contribution'] = 'Your contribution:';
 $string['commerce_customer_hub_team_yours'] = 'your team';
+$string['commerce_customer_hub_team_show_all'] = 'Show all {$a} teams';
+$string['commerce_customer_hub_team_show_less'] = 'Collapse ranking';
 
 // J10A.1 — Navigation du parcours étudiant.
 $string['commerce_customer_hub_shop'] = 'Shop';

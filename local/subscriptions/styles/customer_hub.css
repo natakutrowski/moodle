@@ -587,3 +587,47 @@
 .commerce-customer-hub__shortcut--clan>i{color:#864ccc}
 .commerce-customer-hub__team-clan-link{border-top:1px solid #e9e1f7;margin-top:.65rem;padding-top:.8rem}
 .commerce-customer-hub__team-clan-link + .commerce-customer-hub__team-history-link{margin-top:.45rem;padding-top:0;border-top:0;font-weight:500}
+
+/* CAMPUSFR_TEAM_RANKING_WINDOW_V1 — five nearby clans, with native disclosure of all clans. */
+.commerce-customer-hub__team-ranking-container {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+.commerce-customer-hub__team-ranking--preview { order: 1; }
+.commerce-customer-hub__team-ranking-disclosure { order: 2; min-width: 0; }
+.commerce-customer-hub__team-ranking-disclosure[open] { order: 1; }
+.commerce-customer-hub__team-ranking-disclosure[open] + .commerce-customer-hub__team-ranking--preview {
+    display: none;
+}
+.commerce-customer-hub__team-ranking-toggle {
+    display: flex;
+    gap: .45rem;
+    align-items: center;
+    justify-content: center;
+    margin: .35rem 0 0;
+    padding: .45rem .65rem;
+    border-radius: .5rem;
+    color: #5c38b4;
+    font-size: .84rem;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+.commerce-customer-hub__team-ranking-toggle::-webkit-details-marker { display: none; }
+.commerce-customer-hub__team-ranking-toggle:hover { background: #f0eaff; }
+.commerce-customer-hub__team-ranking-toggle:focus-visible {
+    outline: 2px solid #6842d9;
+    outline-offset: 2px;
+}
+.commerce-customer-hub__team-ranking-toggle i { transition: transform .18s ease; }
+.commerce-customer-hub__team-ranking-hide { display: none; }
+.commerce-customer-hub__team-ranking-disclosure[open] .commerce-customer-hub__team-ranking-toggle {
+    margin: 0 0 .4rem;
+}
+.commerce-customer-hub__team-ranking-disclosure[open] .commerce-customer-hub__team-ranking-toggle i {
+    transform: rotate(180deg);
+}
+.commerce-customer-hub__team-ranking-disclosure[open] .commerce-customer-hub__team-ranking-show { display: none; }
+.commerce-customer-hub__team-ranking-disclosure[open] .commerce-customer-hub__team-ranking-hide { display: inline; }
