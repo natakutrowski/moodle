@@ -10778,5 +10778,46 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110104, 'local', 'subscriptions');
     }
 
+    if ($oldversion < 2026110801) {
+        // Bulk grant: a campaign may now target a Legacy Plan instead of a Native product.
+        $campaign = new xmldb_table('local_subs_commerce_grant_campaign');
+        $field = new xmldb_field('targettype', XMLDB_TYPE_CHAR, '32', null,
+            XMLDB_NOTNULL, null, 'native_product', 'sourcejson');
+        if (!$dbman->field_exists($campaign, $field)) {
+            $dbman->add_field($campaign, $field);
+        }
+        $field = new xmldb_field('targetproductid', XMLDB_TYPE_INTEGER, '10', null,
+            null, null, null, 'targettype');
+        $nativekey = new xmldb_key('targetproduct_fk', XMLDB_KEY_FOREIGN,
+            ['targetproductid'], 'local_subs_commerce_product', ['id']);
+        if ($dbman->field_exists($campaign, $field)) {
+            // MySQL/MariaDB requires dropping this FK before altering NULLability.
+            if ($dbman->find_key_name($campaign, $nativekey) !== false) {
+                $dbman->drop_key($campaign, $nativekey);
+            }
+            $dbman->change_field_notnull($campaign, $field);
+            if ($dbman->find_key_name($campaign, $nativekey) === false) {
+                $dbman->add_key($campaign, $nativekey);
+            }
+        }
+        $field = new xmldb_field('targetplanid', XMLDB_TYPE_INTEGER, '10', null,
+            null, null, null, 'targetproductid');
+        if (!$dbman->field_exists($campaign, $field)) {
+            $dbman->add_field($campaign, $field);
+        }
+        $key = new xmldb_key('targetplan_fk', XMLDB_KEY_FOREIGN, ['targetplanid'],
+            'subscription_plan', ['id']);
+        if (!$dbman->find_key_name($campaign, $key)) {
+            $dbman->add_key($campaign, $key);
+        }
+        $member = new xmldb_table('local_subs_commerce_grant_campaign_member');
+        $field = new xmldb_field('legacyresultjson', XMLDB_TYPE_TEXT, null, null,
+            null, null, null, 'plannedgrantcount');
+        if (!$dbman->field_exists($member, $field)) {
+            $dbman->add_field($member, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026110801, 'local', 'subscriptions');
+    }
+
     return true;
 }

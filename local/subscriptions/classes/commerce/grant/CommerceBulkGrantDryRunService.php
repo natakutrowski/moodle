@@ -39,7 +39,8 @@ final class CommerceBulkGrantDryRunService {
         int $sourceid,
         int $targetproductid,
         int $actoruserid,
-        ?int $now = null
+        ?int $now = null,
+        string $targettype = CommerceBulkLegacyPlanGrantService::TARGET_NATIVE_PRODUCT
     ): array {
         $sourcetype = strtolower(trim($sourcetype));
         if (!in_array($sourcetype, [self::SOURCE_LEGACY_PLAN, self::SOURCE_NATIVE_PRODUCT], true)) {
@@ -50,10 +51,19 @@ final class CommerceBulkGrantDryRunService {
         }
 
         $now ??= time();
+        if (!in_array($targettype, [
+            CommerceBulkLegacyPlanGrantService::TARGET_NATIVE_PRODUCT,
+            CommerceBulkLegacyPlanGrantService::TARGET_LEGACY_PLAN,
+        ], true)) {
+            throw new \invalid_parameter_exception('Invalid bulk grant target type.');
+        }
+        $legacyservice = new CommerceBulkLegacyPlanGrantService($this->db);
+        $legacytarget = $targettype === CommerceBulkLegacyPlanGrantService::TARGET_LEGACY_PLAN
+            ? $legacyservice->describe($targetproductid) : null;
         $hydrator = new CommerceCatalogHydrator();
         $products = new CommerceProductRepository($this->db, $hydrator);
-        $target = $products->find_by_id($targetproductid);
-        if ($target === null || !$target->is_active()) {
+        $target = $legacytarget === null ? $products->find_by_id($targetproductid) : null;
+        if ($legacytarget === null && ($target === null || !$target->is_active())) {
             throw new \moodle_exception('commerce_manual_grant_product_unavailable', 'local_subscriptions');
         }
 
@@ -103,23 +113,39 @@ final class CommerceBulkGrantDryRunService {
                 $decision = self::DECISION_IDENTITY_REVIEW;
                 $reason = 'invalid_email';
             } else {
-                $ownershipsource = $ownership->resolve_source($userid, $target->get_sku());
-                if ($ownershipsource !== 'none') {
-                    $decision = self::DECISION_ALREADY_OWNED;
-                    $reason = 'target_already_owned';
-                } else {
-                    try {
-                        $plan = $grantservice->plan(
-                            $userid,
-                            $targetproductid,
-                            $actoruserid,
-                            'bulk_dry_run',
-                            $now
-                        );
-                        $grantcount = $plan->count();
-                    } catch (\Throwable $exception) {
+                if ($legacytarget !== null) {
+                    $existing = $legacyservice->existing($userid, $targetproductid, $now);
+                    if ($existing) {
+                        $decision = self::DECISION_ALREADY_OWNED;
+                        $reason = 'target_already_owned';
+                        $ownershipsource = 'legacy_plan';
+                    } else if ($this->db->record_exists('user_subscription', [
+                        'userid' => $userid, 'planid' => $targetproductid, 'status' => 'active',
+                    ])) {
                         $decision = self::DECISION_ERROR;
-                        $reason = $exception->getMessage();
+                        $reason = 'expired_active_legacy';
+                    } else {
+                        $grantcount = count($legacytarget['courses']);
+                    }
+                } else {
+                    $ownershipsource = $ownership->resolve_source($userid, $target->get_sku());
+                    if ($ownershipsource !== 'none') {
+                        $decision = self::DECISION_ALREADY_OWNED;
+                        $reason = 'target_already_owned';
+                    } else {
+                        try {
+                            $plan = $grantservice->plan(
+                                $userid,
+                                $targetproductid,
+                                $actoruserid,
+                                'bulk_dry_run',
+                                $now
+                            );
+                            $grantcount = $plan->count();
+                        } catch (\Throwable $exception) {
+                            $decision = self::DECISION_ERROR;
+                            $reason = $exception->getMessage();
+                        }
                     }
                 }
             }
@@ -144,7 +170,7 @@ final class CommerceBulkGrantDryRunService {
                 'reason' => $reason,
                 'ownershipsource' => $ownershipsource,
                 'grantcount' => $grantcount,
-                'targetsku' => $target->get_sku(),
+                'targetsku' => $legacytarget !== null ? '' : $target->get_sku(),
             ];
         }
 
@@ -156,7 +182,7 @@ final class CommerceBulkGrantDryRunService {
 
         return [
             'source' => $source,
-            'target' => [
+            'target' => $legacytarget ?? [
                 'id' => $targetproductid,
                 'sku' => $target->get_sku(),
                 'name' => $target->get_name(),

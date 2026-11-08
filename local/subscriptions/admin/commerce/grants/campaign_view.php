@@ -207,12 +207,13 @@ if (
     }
 }
 
-$targetbusinesslabel = (int)$campaign->targetproductid > 0
-    ? CommercePersonalOfferCrmPresentation::business_product_label(
-        $DB,
-        (int)$campaign->targetproductid
-    )
-    : (string)($target['name'] ?? '—');
+$islegacytarget = (string)($campaign->targettype ?? '') === 'legacy_plan';
+$targetbusinesslabel = $islegacytarget
+    ? (string)($target['name'] ?? '—')
+    : ((int)$campaign->targetproductid > 0
+        ? CommercePersonalOfferCrmPresentation::business_product_label(
+            $DB, (int)$campaign->targetproductid
+        ) : (string)($target['name'] ?? '—'));
 
 echo $OUTPUT->header();
 echo CrmWorkspaceRenderer::start(CrmNavigationKeys::COMMERCE, $context);
@@ -346,7 +347,8 @@ $sourcehtml = html_writer::div(
     )
     . html_writer::div(
         html_writer::span(
-            get_string('commerce_offers_access_config_product', 'local_subscriptions'),
+            get_string($islegacytarget ? 'commerce_bulk_grant_target_plan'
+                : 'commerce_offers_access_config_product', 'local_subscriptions'),
             'crm-offers-access-campaign-summary-label'
         )
         . html_writer::span(
@@ -430,8 +432,13 @@ $technical = html_writer::tag(
     'dl',
     html_writer::tag('dt', get_string('commerce_bulk_grant_campaign_source', 'local_subscriptions'))
     . html_writer::tag('dd', html_writer::tag('code', s((string)($source['sku'] ?? ('#' . $campaign->sourceid)))))
-    . html_writer::tag('dt', get_string('commerce_bulk_grant_target_product', 'local_subscriptions'))
-    . html_writer::tag('dd', html_writer::tag('code', s((string)($target['sku'] ?? '—'))))
+    . html_writer::tag('dt', get_string(
+        $islegacytarget ? 'commerce_bulk_grant_target_plan' : 'commerce_bulk_grant_target_product',
+        'local_subscriptions'
+    ))
+    . html_writer::tag('dd', $islegacytarget
+        ? s((string)($target['name'] ?? '—') . ' · ' . (string)($target['durationkey'] ?? ''))
+        : html_writer::tag('code', s((string)($target['sku'] ?? '—'))))
     . html_writer::tag('dt', get_string('commerce_bulk_grant_campaign_reason', 'local_subscriptions'))
     . html_writer::tag('dd', trim((string)$campaign->reason) !== '' ? s((string)$campaign->reason) : '—'),
     ['class' => 'mb-0']
@@ -928,6 +935,9 @@ foreach ($pagedmembers as $member) {
             'mb-2'
         )
         . html_writer::div($evidencehtml, 'mb-2')
+        . ($islegacytarget && !empty($member->legacyresultjson)
+            ? html_writer::div(s((string)$member->legacyresultjson), 'small text-muted mb-2')
+            : '')
         . (trim((string)$member->lasterror) !== ''
             ? html_writer::div(s((string)$member->lasterror), 'text-danger')
             : '')
