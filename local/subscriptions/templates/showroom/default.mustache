@@ -1717,62 +1717,7 @@
             </div>
         </div>
 
-        <footer class="commerce-showroom-final__legal" data-showroom-final-legal>
-            <div class="commerce-showroom-container commerce-showroom-final__legal-inner">
-                <div class="commerce-showroom-final__company">
-                    {{#finallegalshowname}}
-                    <strong class="commerce-showroom-final__company-name"
-                        data-showroom-legal-field="name" {{^hasfinallegalname}}hidden{{/hasfinallegalname}}>{{finallegalname}}</strong>
-                    {{/finallegalshowname}}
-
-                    {{#finallegalshowaddress}}
-                    <span class="commerce-showroom-final__company-detail"
-                        data-showroom-legal-field="address" {{^hasfinallegaladdress}}hidden{{/hasfinallegaladdress}}>{{finallegaladdress}}</span>
-                    {{/finallegalshowaddress}}
-
-                    {{#finallegalshowlegal}}
-                    <span class="commerce-showroom-final__company-detail"
-                        data-showroom-legal-field="legal" {{^hasfinallegallegal}}hidden{{/hasfinallegallegal}}>{{finallegallegal}}</span>
-                    {{/finallegalshowlegal}}
-
-                    {{#finallegalshowemail}}
-                    <span class="commerce-showroom-final__company-detail"
-                        data-showroom-legal-field="email" {{^hasfinallegalemail}}hidden{{/hasfinallegalemail}}>{{finallegalemail}}</span>
-                    {{/finallegalshowemail}}
-
-                    {{#finallegalshowphone}}
-                    <span class="commerce-showroom-final__company-detail"
-                        data-showroom-legal-field="phone" {{^hasfinallegalphone}}hidden{{/hasfinallegalphone}}>{{finallegalphone}}</span>
-                    {{/finallegalshowphone}}
-
-                    {{#finallegalshowwebsite}}
-                    <span class="commerce-showroom-final__company-detail"
-                        data-showroom-legal-field="website" {{^hasfinallegalwebsite}}hidden{{/hasfinallegalwebsite}}>{{finallegalwebsite}}</span>
-                    {{/finallegalshowwebsite}}
-
-                    {{#finallegalshowtaxnotice}}
-                    <small class="commerce-showroom-final__company-note"
-                        data-showroom-legal-field="taxnotice" {{^hasfinallegaltaxnotice}}hidden{{/hasfinallegaltaxnotice}}>{{finallegaltaxnotice}}</small>
-                    {{/finallegalshowtaxnotice}}
-
-                    {{#finallegalshowfooter}}
-                    <small class="commerce-showroom-final__company-note"
-                        data-showroom-legal-field="footer" {{^hasfinallegalfooter}}hidden{{/hasfinallegalfooter}}>{{finallegalfooter}}</small>
-                    {{/finallegalshowfooter}}
-                </div>
-                <nav class="commerce-showroom-final__legal-links" aria-label="{{finallegalnavlabel}}">
-                    {{#finallegalshowprivacy}}
-                    <a href="{{finallegalprivacyurl}}" target="_blank" rel="noopener noreferrer">{{finallegalprivacylabel}}</a>
-                    {{/finallegalshowprivacy}}
-                    {{#finallegalshowterms}}
-                    <a href="{{finallegaltermsurl}}" target="_blank" rel="noopener noreferrer">{{finallegaltermslabel}}</a>
-                    {{/finallegalshowterms}}
-                    {{#finallegalshowoffer}}
-                    <a href="{{finallegalofferurl}}" target="_blank" rel="noopener noreferrer">{{finallegalofferlabel}}</a>
-                    {{/finallegalshowoffer}}
-                </nav>
-            </div>
-        </footer>
+        {{> local_subscriptions/showroom/legal_footer}}
     </section>
     {{/isfinalcta}}
     {{/showroomorderedblocks}}

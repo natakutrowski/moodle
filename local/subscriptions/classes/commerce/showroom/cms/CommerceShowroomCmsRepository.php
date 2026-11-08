@@ -6,6 +6,9 @@ namespace local_subscriptions\commerce\showroom\cms;
 
 defined('MOODLE_INTERNAL') || die();
 
+// X1.3.1: Explicit load for video management in web and CLI contexts.
+require_once(__DIR__ . '/../bridge/CommerceShowroomBridgeVideoService.php');
+
 /** Persistence gateway for editable showroom definitions and blocks. */
 final class CommerceShowroomCmsRepository {
     public function __construct(private readonly \moodle_database $db) {
@@ -182,6 +185,9 @@ final class CommerceShowroomCmsRepository {
         (new CommerceShowroomSocialImageService(
             \context_system::instance()
         ))->delete($id);
+        (new \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgeVideoService(
+            \context_system::instance()
+        ))->delete($id);
 
         foreach ($this->blocks($id) as $block) {
             $this->delete_block_media((int)$block->id);
@@ -203,6 +209,15 @@ final class CommerceShowroomCmsRepository {
         );
 
         $transaction->allow_commit();
+
+        // The compiled Lovable ZIP is private File API content, not block media.
+        // Existing Bridge video cleanup earlier in this method is preserved.
+        try {
+            get_file_storage()->delete_area_files((int)\context_system::instance()->id,
+                'local_subscriptions', 'lovablecmsdraft', $id);
+        } catch (\Throwable $exception) {
+            debugging('Lovable draft file cleanup failed: ' . $exception->getMessage(), DEBUG_DEVELOPER);
+        }
     }
 
     /**
@@ -308,6 +323,9 @@ final class CommerceShowroomCmsRepository {
             ], $userid);
         }
         (new CommerceShowroomSocialImageService(
+            \context_system::instance()
+        ))->duplicate($showroomid, $newid);
+        (new \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgeVideoService(
             \context_system::instance()
         ))->duplicate($showroomid, $newid);
         return $newid;

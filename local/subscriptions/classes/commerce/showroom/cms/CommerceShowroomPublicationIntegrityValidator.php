@@ -45,6 +45,17 @@ final class CommerceShowroomPublicationIntegrityValidator {
             }
         }
 
+        // Bridge pages are driven by their own code/data contract, not legacy blocks.
+        if ((string)$showroom->template === \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgePackageRegistry::TEMPLATE) {
+            $bridge = \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgeSettings::from_json(
+                (string)$showroom->settingsjson
+            );
+            \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgePackageRegistry::require_manifest(
+                $bridge['id']
+            );
+            return;
+        }
+
         $blocks = $this->repository->blocks($showroomid);
         $hasenabled = false;
         $keys = [];

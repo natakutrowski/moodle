@@ -12,6 +12,7 @@ use local_subscriptions\commerce\catalog\rendering\CommerceProductEditorNavigati
 use local_subscriptions\commerce\catalog\service\CommerceCatalogFactory;
 use local_subscriptions\commerce\storefront\admin\CommerceStorefrontDistributionService;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomCmsRepository;
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomStatus;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomPublishedDefinitionResolver;
 use local_subscriptions\commerce\storefront\admin\CommerceStorefrontPageEditor;
 use local_subscriptions\commerce\storefront\experience\CommerceStorefrontExperienceResolver;
@@ -66,6 +67,27 @@ CrmPageConfigurator::configure(
 );
 
 if (data_submitted() && confirm_sesskey()) {
+    // A product may be linked before showroom publication. The public resolver
+    // keeps returning its Storefront until the selected CMS showroom is public.
+    $requestedshowroomkey = strtolower(trim(optional_param('showroomkey', '', PARAM_ALPHANUMEXT)));
+    $requestedmode = CommerceProductDiscoveryUrlResolver::normalise_mode(
+        optional_param('discoverymode', 'storefront', PARAM_ALPHA)
+    );
+    if ($requestedmode === CommerceProductDiscoveryUrlResolver::MODE_SHOWROOM) {
+        $candidate = (new CommerceShowroomCmsRepository($DB))->get_by_key($requestedshowroomkey);
+        if (!$candidate || !in_array((string)$candidate->status, [
+            CommerceShowroomStatus::DRAFT,
+            CommerceShowroomStatus::REVIEW,
+            CommerceShowroomStatus::PUBLISHED,
+        ], true)) {
+            throw new \invalid_parameter_exception('Choose an existing, non-archived CMS Showroom.');
+        }
+        if ((string)$candidate->status === CommerceShowroomStatus::PUBLISHED) {
+            // A published destination must also satisfy the real public resolver.
+            (new CommerceShowroomPublishedDefinitionResolver($DB))->require($requestedshowroomkey);
+        }
+    }
+
     $service = new CommerceStorefrontDistributionService();
     $metadata = $service->apply(
         $product->get_metadata(),
@@ -141,16 +163,8 @@ if (data_submitted() && confirm_sesskey()) {
                 '',
                 PARAM_RAW_TRIMMED
             ),
-            'showroomkey' => optional_param(
-                'showroomkey',
-                '',
-                PARAM_ALPHANUMEXT
-            ),
-            'discoverymode' => optional_param(
-                'discoverymode',
-                'storefront',
-                PARAM_ALPHA
-            ),
+            'showroomkey' => $requestedshowroomkey,
+            'discoverymode' => $requestedmode,
             'showstorefrontcta' => optional_param(
                 'showstorefrontcta',
                 0,
@@ -262,8 +276,13 @@ $showroomoptions = [
 $showroomrepository = new CommerceShowroomCmsRepository($DB);
 $showroomresolver = new CommerceShowroomPublishedDefinitionResolver($DB);
 foreach ($showroomrepository->all() as $candidate) {
-    if ((string)$candidate->status !== 'published') {
-        continue;
+    $status = (string)$candidate->status;
+    if (!in_array($status, [
+        CommerceShowroomStatus::DRAFT,
+        CommerceShowroomStatus::REVIEW,
+        CommerceShowroomStatus::PUBLISHED,
+    ], true)) {
+        continue; // Archived showrooms cannot be newly linked.
     }
 
     $key = strtolower(trim((string)$candidate->showroomkey));
@@ -271,16 +290,18 @@ foreach ($showroomrepository->all() as $candidate) {
         continue;
     }
 
-    try {
-        // Keep the selector aligned with the public resolver: only genuinely
-        // public Showrooms with at least one enabled block are selectable.
-        $showroomresolver->require($key);
-    } catch (\moodle_exception $exception) {
-        continue;
+    if ($status === CommerceShowroomStatus::PUBLISHED) {
+        try {
+            // Don't offer a broken destination as if it were public.
+            $showroomresolver->require($key);
+        } catch (\moodle_exception $exception) {
+            continue;
+        }
     }
 
     $label = trim((string)$candidate->name);
-    $showroomoptions[$key] = $label !== '' ? $label : $key;
+    $showroomoptions[$key] = ($label !== '' ? $label : $key)
+        . ' · ' . CommerceShowroomStatus::label($status);
 }
 asort($showroomoptions, SORT_NATURAL | SORT_FLAG_CASE);
 

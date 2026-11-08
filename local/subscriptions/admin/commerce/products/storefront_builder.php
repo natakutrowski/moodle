@@ -18,7 +18,9 @@ use local_subscriptions\commerce\storefront\transfer\CommerceStorefrontPackageSe
 use local_subscriptions\commerce\storefront\localisation\CommerceStorefrontLocaleTransferService;
 use local_subscriptions\commerce\storefront\translation\CommerceStorefrontAiTranslationService;
 use local_subscriptions\commerce\storefront\page\CommerceStorefrontLayoutContract;
-use local_subscriptions\commerce\showroom\CommerceShowroomRegistry;
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomCmsRepository;
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomPublishedDefinitionResolver;
+use local_subscriptions\commerce\showroom\cms\CommerceShowroomStatus;
 use local_subscriptions\commerce\showroom\CommerceShowroomMediaService;
 use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
 use local_subscriptions\crm\commerce\presentation\CommerceProductPageHeaderRenderer;
@@ -254,6 +256,22 @@ if (data_submitted() && confirm_sesskey()) {
         'showroom_mediaitemid' => optional_param('storefront_showroom_mediaitemid', 0, PARAM_INT),
         'showroom_alt' => optional_param('storefront_showroom_alt', '', PARAM_TEXT),
     ];
+    // Reject stale or forged links. Prepublication linking is allowed, but
+    // publication still exclusively controls whether a showroom is public.
+    if ($submitted['showroom_discoverymode'] === 'showroom') {
+        $requestedshowroomkey = strtolower(trim((string)$submitted['showroom_key']));
+        $candidate = (new CommerceShowroomCmsRepository($DB))->get_by_key($requestedshowroomkey);
+        if (!$candidate || !in_array((string)$candidate->status, [
+            CommerceShowroomStatus::DRAFT,
+            CommerceShowroomStatus::REVIEW,
+            CommerceShowroomStatus::PUBLISHED,
+        ], true)) {
+            throw new \invalid_parameter_exception('Choose an existing, non-archived CMS Showroom.');
+        }
+        if ((string)$candidate->status === CommerceShowroomStatus::PUBLISHED) {
+            (new CommerceShowroomPublishedDefinitionResolver($DB))->require($requestedshowroomkey);
+        }
+    }
     for ($index = 0; $index < CommerceStorefrontPageEditor::MAX_SECTIONS; $index++) {
         $submitted['section_id_' . $index] = optional_param(
             'section_id_' . $index,
@@ -1274,9 +1292,33 @@ $showroomdefinition = $showroommedia->definition(
     $editlanguage
 );
 $showroomoptions = ['' => get_string('none')];
-foreach (CommerceShowroomRegistry::definitions() as $showroomkey => $registeredshowroom) {
-    $showroomoptions[$showroomkey] = $showroomkey;
+$showroomrepository = new CommerceShowroomCmsRepository($DB);
+$showroomresolver = new CommerceShowroomPublishedDefinitionResolver($DB);
+foreach ($showroomrepository->all() as $candidate) {
+    $status = (string)$candidate->status;
+    if (!in_array($status, [
+        CommerceShowroomStatus::DRAFT,
+        CommerceShowroomStatus::REVIEW,
+        CommerceShowroomStatus::PUBLISHED,
+    ], true)) {
+        continue;
+    }
+    $key = strtolower(trim((string)$candidate->showroomkey));
+    if ($key === '') {
+        continue;
+    }
+    if ($status === CommerceShowroomStatus::PUBLISHED) {
+        try {
+            $showroomresolver->require($key);
+        } catch (\moodle_exception $exception) {
+            continue;
+        }
+    }
+    $label = trim((string)$candidate->name);
+    $showroomoptions[$key] = ($label !== '' ? $label : $key)
+        . ' · ' . CommerceShowroomStatus::label($status);
 }
+asort($showroomoptions, SORT_NATURAL | SORT_FLAG_CASE);
 echo html_writer::start_div('card card-body mb-4 commerce-storefront-showroom-media');
 echo html_writer::tag('h3', get_string('commerce_storefront_showroom_media_title', 'local_subscriptions'), ['class' => 'h5']);
 echo html_writer::tag('p', get_string('commerce_storefront_showroom_media_help', 'local_subscriptions'), ['class' => 'text-muted']);

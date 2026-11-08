@@ -242,7 +242,8 @@ final class CommerceShowroomPublicationService {
             }
         }
 
-        if (!$hasenabledblock) {
+        if (!$hasenabledblock && (string)$showroom->template !==
+                \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgePackageRegistry::TEMPLATE) {
             throw new \moodle_exception(
                 'commerce_showroom_publish_requires_block',
                 'local_subscriptions'
@@ -276,6 +277,15 @@ final class CommerceShowroomPublicationService {
         string $note,
         ?\Closure $precondition = null
     ): int {
+        // Imported Lovable designs are editable draft-only, irrespective of the
+        // native Bridge template exception in require_publishable().
+        if (in_array($status, [CommerceShowroomStatus::REVIEW, CommerceShowroomStatus::PUBLISHED], true)) {
+            $candidate = $this->repository->get($showroomid);
+            if ($candidate !== null && (str_starts_with((string)$candidate->showroomkey, 'lovable_') ||
+                    str_contains((string)$candidate->settingsjson, 'campusfr_lovable_draft'))) {
+                throw new \invalid_parameter_exception('Brouillon Lovable : validation et publication interdites.');
+            }
+        }
         $transaction = $this->db->start_delegated_transaction();
 
         if ($precondition !== null) {

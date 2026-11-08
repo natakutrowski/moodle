@@ -7,7 +7,7 @@ namespace local_subscriptions\tests\commerce\storefront;
 defined('MOODLE_INTERNAL') || die();
 
 final class commerce_storefront_distribution_dynamic_showrooms_798c48_test extends \advanced_testcase {
-    public function test_distribution_selector_uses_published_cms_showrooms(): void {
+    public function test_distribution_selector_supports_prepublication_cms_showrooms(): void {
         global $CFG;
 
         $source = file_get_contents(
@@ -16,7 +16,11 @@ final class commerce_storefront_distribution_dynamic_showrooms_798c48_test exten
 
         self::assertStringContainsString('CommerceShowroomCmsRepository', $source);
         self::assertStringContainsString('CommerceShowroomPublishedDefinitionResolver', $source);
-        self::assertStringContainsString("(string)\$candidate->status !== 'published'", $source);
+        self::assertStringContainsString('CommerceShowroomStatus::DRAFT', $source);
+        self::assertStringContainsString('CommerceShowroomStatus::REVIEW', $source);
+        self::assertStringContainsString('CommerceShowroomStatus::PUBLISHED', $source);
+        self::assertStringContainsString('CommerceShowroomStatus::label($status)', $source);
+        self::assertStringContainsString('Choose an existing, non-archived CMS Showroom.', $source);
         self::assertStringNotContainsString('CommerceShowroomRegistry::definitions()', $source);
     }
 

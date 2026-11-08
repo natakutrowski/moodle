@@ -1,0 +1,36 @@
+/* V4.4: restore ONE native top-to-bottom browser scrollbar; keep the opaque iframe.
+   This stylesheet overrides V4.3 only in the private CMS draft preview. */
+body.campusfr-lovable-canvas-preview.campusfr-lovable-cms-preview {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  height: auto !important;
+  min-height: 100dvh !important;
+}
+body.campusfr-lovable-cms-preview .showroom-shell__topbar {
+  position: sticky !important;
+  top: 0 !important;
+  left: auto !important;
+  right: auto !important;
+  width: 100% !important;
+  z-index: 8100 !important;
+}
+body.campusfr-lovable-cms-preview .storefront-shell,
+body.campusfr-lovable-cms-preview .showroom-shell__main,
+body.campusfr-lovable-cms-preview #page-content {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+body.campusfr-lovable-cms-preview .campusfr-lovable-campus-canvas-preview-frame {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: max(480px, calc(100dvh - 70px)) !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+  display: block !important;
+  z-index: auto !important;
+}

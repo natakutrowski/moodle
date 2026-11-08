@@ -1,0 +1,12 @@
+{{! X0: only trusted Git-deployed design assets. No CDN and no iframe. }}
+<main id="campusfr-bridge" data-campusfr-bridge="{{bridgeid}}" data-bridge-css="{{bridgecssurl}}" data-bridge-payload="campusfr-bridge-data" class="campusfr-bridge-host">
+    <div class="campusfr-bridge-prerender">
+        <h1>{{bridgefallbacktitle}}</h1><p>{{bridgefallbackdescription}}</p>
+    </div>
+    <noscript>JavaScript est nécessaire pour afficher cette présentation interactive.</noscript>
+</main>
+<script id="campusfr-bridge-data" type="application/json">{{{bridgepayloadjson}}}</script>
+<script type="module" src="{{bridgescripturl}}"></script>
+{{#shownativelegalfooter}}
+{{> local_subscriptions/showroom/legal_footer}}
+{{/shownativelegalfooter}}

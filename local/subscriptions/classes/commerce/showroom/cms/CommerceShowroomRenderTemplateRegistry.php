@@ -27,6 +27,11 @@ final class CommerceShowroomRenderTemplateRegistry {
                 'titlekey' => 'commerce_showroom_generic_title',
                 'descriptionkey' => 'commerce_showroom_generic_description',
             ],
+            'local_subscriptions/showroom/bridge' => [
+                'label' => 'Showroom — Design Lovable',
+                'titlekey' => 'commerce_showroom_generic_title',
+                'descriptionkey' => 'commerce_showroom_generic_description',
+            ],
             'local_subscriptions/showroom/third_group_verbs' => [
                 'label' => 'Showroom — Verbes du 3e groupe',
                 'titlekey' => 'commerce_showroom_third_group_verbs_title',

@@ -1,0 +1,8 @@
+{
+  "id": "articles_alf_reimport",
+  "label": "Articles / Alf",
+  "version": "0.4.11",
+  "entry": "dist/main.js",
+  "css": "dist/style.css",
+  "content": "content/ru.json"
+}

@@ -1,0 +1,7 @@
+{
+  "id": "articles_alf",
+  "version": "0.3.4",
+  "entry": "dist/main.js",
+  "css": "dist/style.css",
+  "content": "content/ru.json"
+}

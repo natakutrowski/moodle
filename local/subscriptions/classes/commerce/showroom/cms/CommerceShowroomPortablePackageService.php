@@ -6,6 +6,9 @@ namespace local_subscriptions\commerce\showroom\cms;
 
 defined('MOODLE_INTERNAL') || die();
 
+// X1.3.1: Explicit load for video management in web and CLI contexts.
+require_once(__DIR__ . '/../bridge/CommerceShowroomBridgeVideoService.php');
+
 /**
  * Portable DEV -> PROD showroom package: JSON definition + Moodle File API media.
  */
@@ -14,6 +17,9 @@ final class CommerceShowroomPortablePackageService {
     public const MAX_ARCHIVE_FILES = 1000;
     public const MAX_ARCHIVE_BYTES = 8 * 1024 * 1024 * 1024; // 8 GiB.
     public const MAX_SINGLE_FILE_BYTES = 2 * 1024 * 1024 * 1024; // 2 GiB.
+    /** Reserved portable manifest slot for the showroom-level Lovable presentation video. */
+    private const BRIDGE_VIDEO_BLOCKKEY = '__campusfr_bridge_video__';
+    private const BRIDGE_VIDEO_FIELD = 'presentation';
 
     /**
      * Temporary disk headroom multiplier.
@@ -145,6 +151,38 @@ final class CommerceShowroomPortablePackageService {
             }
         }
 
+        // A Bridge video belongs to the showroom itself, not to a legacy block.
+        $bridgevideo = (new \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgeVideoService(
+            $this->context
+        ))->get_file($showroomid);
+        if ($bridgevideo !== null) {
+            $size = (int)$bridgevideo->get_filesize();
+            if ($size <= 0 || $size > self::MAX_SINGLE_FILE_BYTES || $totalbytes + $size > self::MAX_ARCHIVE_BYTES) {
+                throw new \invalid_parameter_exception('Bridge video exceeds portable archive limits.');
+            }
+            $name = clean_filename($bridgevideo->get_filename());
+            $archivepath = 'media/' . self::BRIDGE_VIDEO_BLOCKKEY . '/' . self::BRIDGE_VIDEO_FIELD . '/' . $name;
+            $url = \moodle_url::make_pluginfile_url(
+                $this->context->id,
+                \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgeVideoService::COMPONENT,
+                \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgeVideoService::FILEAREA,
+                $showroomid, '/', $name, false
+            )->out(false);
+            $manifestmedia[] = [
+                'blockkey' => self::BRIDGE_VIDEO_BLOCKKEY,
+                'field' => self::BRIDGE_VIDEO_FIELD,
+                'filename' => $name,
+                'archivepath' => $archivepath,
+                'mimetype' => (string)$bridgevideo->get_mimetype(),
+                'filesize' => $size,
+                'contenthash' => (string)$bridgevideo->get_contenthash(),
+                'sourceurl' => $url,
+                'sourcefileid' => (int)$bridgevideo->get_id(),
+            ];
+            $totalbytes += $size;
+            $mediacount++;
+        }
+
         if ($mediacount > self::MAX_ARCHIVE_FILES) {
             throw new \invalid_parameter_exception(
                 'Showroom package contains too many media files.'
@@ -194,7 +232,7 @@ final class CommerceShowroomPortablePackageService {
 
             foreach ($manifestmedia as $index => $entry) {
                 $block = $blockrecords[$entry['blockkey']] ?? null;
-                if ($block === null) {
+                if ($block === null && $entry['blockkey'] !== self::BRIDGE_VIDEO_BLOCKKEY) {
                     throw new \invalid_parameter_exception(
                         'Showroom media block disappeared during export.'
                     );
@@ -310,6 +348,16 @@ final class CommerceShowroomPortablePackageService {
                 $largest = max($largest, $size);
                 $count++;
             }
+        }
+
+        $bridgevideo = (new \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgeVideoService(
+            $this->context
+        ))->get_file($showroomid);
+        if ($bridgevideo !== null) {
+            $size = (int)$bridgevideo->get_filesize();
+            $total += $size;
+            $largest = max($largest, $size);
+            $count++;
         }
 
         $required = (int)ceil(
@@ -531,6 +579,20 @@ final class CommerceShowroomPortablePackageService {
 
                 foreach ($media as $index => $entry) {
                     $sourceblockkey = (string)$entry['blockkey'];
+                    if ($sourceblockkey === self::BRIDGE_VIDEO_BLOCKKEY) {
+                        if ((string)$entry['field'] !== self::BRIDGE_VIDEO_FIELD) {
+                            throw new \invalid_parameter_exception('Invalid Bridge video portable field.');
+                        }
+                        $storage->create_file_from_pathname([
+                            'contextid' => $this->context->id,
+                            'component' => \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgeVideoService::COMPONENT,
+                            'filearea' => \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgeVideoService::FILEAREA,
+                            'itemid' => (int)$result['showroomid'],
+                            'filepath' => '/',
+                            'filename' => $entry['filename'],
+                        ], $staged[$index]);
+                        continue;
+                    }
                     $targetblockid = $result['blockmap'][$sourceblockkey]
                         ?? null;
                     if ($targetblockid === null) {
@@ -634,6 +696,11 @@ final class CommerceShowroomPortablePackageService {
                     'unresolvedcount' => $unresolvedcount,
                 ];
             } catch (\Throwable $exception) {
+                if (isset($result['showroomid'])) {
+                    (new \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgeVideoService(
+                        $this->context
+                    ))->delete((int)$result['showroomid']);
+                }
                 foreach ($createdblockids as $blockid) {
                     get_file_storage()->delete_area_files(
                         $this->context->id,
@@ -787,6 +854,12 @@ final class CommerceShowroomPortablePackageService {
                 throw new \invalid_parameter_exception(
                     'Invalid portable media manifest entry.'
                 );
+            }
+
+            if ($blockkey === self::BRIDGE_VIDEO_BLOCKKEY
+                && ($field !== self::BRIDGE_VIDEO_FIELD
+                    || !in_array($extension, ['mp4', 'webm'], true))) {
+                throw new \invalid_parameter_exception('Invalid Bridge video portable manifest.');
             }
 
             $declaredsize = (int)($entry['filesize'] ?? 0);

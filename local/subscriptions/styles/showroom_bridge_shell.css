@@ -1,0 +1,33 @@
+/* 7.98X.0 — Moodle outer shell only. The Lovable CSS lives in a ShadowRoot. */
+.commerce-showroom-bridge-page #page-header,
+.commerce-showroom-bridge-page .secondary-navigation {
+    display: none;
+}
+.commerce-showroom-bridge-page #page,
+.commerce-showroom-bridge-page #page-content,
+.commerce-showroom-bridge-page #region-main,
+.commerce-showroom-bridge-page [role="main"] {
+    max-width: none;
+    padding: 0;
+    margin: 0;
+}
+.commerce-showroom-bridge-page #region-main {
+    border: 0;
+    background: transparent;
+}
+.commerce-showroom-bridge-page #campusfr-bridge {
+    display: block;
+    width: 100%;
+    min-height: 95vh;
+    background: #171222;
+}
+.commerce-showroom-bridge-page .campusfr-bridge-prerender {
+    max-width: 45rem;
+    padding: 5rem 1.5rem;
+    margin: 0 auto;
+    color: #fff;
+}
+.commerce-showroom-bridge-page .campusfr-bridge-prerender h1 {
+    font-size: clamp(1.7rem, 4vw, 3.5rem);
+    color: inherit;
+}

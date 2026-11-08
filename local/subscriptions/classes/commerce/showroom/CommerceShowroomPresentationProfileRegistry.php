@@ -16,7 +16,8 @@ final class CommerceShowroomPresentationProfileRegistry {
 
     public static function for_template(string $template): CommerceShowroomPresentationProfile {
         return match (trim($template)) {
-            'local_subscriptions/showroom/default' =>
+            'local_subscriptions/showroom/default',
+            \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgePackageRegistry::TEMPLATE =>
                 new CommerceShowroomDefaultPresentationProfile(),
             'local_subscriptions/showroom/third_group_verbs' =>
                 new CommerceShowroomThirdGroupVerbsPresentationProfile(),

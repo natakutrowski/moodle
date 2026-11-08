@@ -1,0 +1,91 @@
+/* Gustave Builder — normal CampusFR showroom canvas, private compiled design.
+   This stylesheet is requested ONLY by the authenticated temporary preview. */
+body.campusfr-lovable-canvas-preview { overflow: hidden !important; }
+.campusfr-lovable-campus-canvas-preview-frame {
+  position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh;
+  border: 0; background: #101020; z-index: 8000; display: block;
+}
+.campusfr-lovable-campus-toolbar {
+  position: fixed; right: 12px; bottom: 12px; z-index: 8001;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  padding: 9px 12px; max-width: calc(100% - 24px); border-radius: 12px;
+  background: rgba(20,24,37,.95); color: #fff;
+  box-shadow: 0 4px 22px rgba(0,0,0,.4);
+  font: 500 12px/1.35 system-ui,sans-serif;
+}
+.campusfr-lovable-campus-toolbar a {
+  color: #fff !important; font: 600 12px/1.35 system-ui,sans-serif;
+  text-decoration: underline !important; text-underline-offset: 3px;
+}
+.campusfr-lovable-campus-toolbar span { white-space: nowrap; }
+@media(max-width:600px) {
+  .campusfr-lovable-campus-toolbar {
+    left: 9px; right: 9px; bottom: 9px;
+    padding: 8px 10px; gap: 7px; justify-content: center;
+  }
+}
+
+/* Gustave Builder V2 · native CampusFR topbar remains visible.
+   The iframe stays opaque-origin and sandboxed; only its viewport placement changes. */
+body.campusfr-lovable-canvas-preview.campusfr-lovable-cms-preview { overflow-x: hidden !important; overflow-y: auto !important; }
+body.campusfr-lovable-cms-preview .campusfr-lovable-campus-toolbar {
+  position: relative; inset: auto; z-index: 2;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end;
+  gap: 10px; width: 100%; max-width: none; margin: 0;
+  padding: 10px clamp(14px, 3vw, 32px); border-radius: 0;
+  background: #1e1a2e; color: #fff; box-shadow: none;
+  font: 600 13px/1.4 Nunito,system-ui,sans-serif;
+}
+body.campusfr-lovable-cms-preview .campusfr-lovable-campus-toolbar > span { margin-right: auto; white-space: normal; }
+body.campusfr-lovable-cms-preview .campusfr-lovable-campus-toolbar a {
+  color: #fff !important; font: 600 13px/1.4 Nunito,system-ui,sans-serif;
+  text-decoration: none !important; padding: 8px 10px;
+  border: 1px solid #777187; border-radius: 9px; white-space: nowrap;
+}
+body.campusfr-lovable-cms-preview .campusfr-lovable-campus-toolbar a:hover,
+body.campusfr-lovable-cms-preview .campusfr-lovable-campus-toolbar a:focus-visible { border-color: #f92691; color:#fff!important; }
+body.campusfr-lovable-cms-preview .campusfr-lovable-currency-form { display: flex; align-items: center; gap: 8px; margin:0; }
+body.campusfr-lovable-cms-preview .campusfr-lovable-currency-form label { color:#fff; margin:0; }
+body.campusfr-lovable-cms-preview .campusfr-lovable-currency-form select { width:auto; min-width:100px; max-width:160px; height:36px;
+  padding:6px 26px 6px 10px; color:#1e1a2e; background:#fff; border:1px solid #a9a4b4;
+  border-radius:8px; cursor:pointer; font:600 13px/1.2 Nunito,system-ui,sans-serif; }
+body.campusfr-lovable-cms-preview .campusfr-lovable-currency-apply { padding:8px 12px; border:1px solid #898294; border-radius:8px;
+  color:#fff; background:transparent; cursor:pointer; font:600 13px/1.2 Nunito,system-ui,sans-serif; }
+body.campusfr-lovable-cms-preview .campusfr-lovable-campus-canvas-preview-frame {
+  position: relative; inset: auto; z-index: auto; width: 100%;
+  height: max(550px, calc(100dvh - 160px));
+  border: 0; background: #101020; display: block;
+}
+@media(max-width:700px) {
+  body.campusfr-lovable-cms-preview .campusfr-lovable-campus-toolbar { justify-content:flex-start; gap:8px; padding:10px 12px; }
+  body.campusfr-lovable-cms-preview .campusfr-lovable-campus-toolbar > span { flex-basis:100%; margin-right:0; }
+  body.campusfr-lovable-cms-preview .campusfr-lovable-currency-form { max-width:100%; }
+  body.campusfr-lovable-cms-preview .campusfr-lovable-campus-canvas-preview-frame {height:max(480px,calc(100dvh - 190px));}
+}
+
+/* Gustave Commerce V3: native CampusFR topbar + full-page Lovable layout.
+   The obsolete V2 control bar is entirely removed from the PHP view.
+   Temporary private preview retains its legacy full-screen overlay. */
+body.campusfr-lovable-canvas-preview.campusfr-lovable-cms-preview {
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+body.campusfr-lovable-cms-preview .campusfr-lovable-campus-canvas-preview-frame {
+  display: block;
+  position: relative;
+  z-index: auto;
+  inset: auto;
+  margin: 0;
+  width: 100%;
+  height: calc(100vh - 76px);
+  height: calc(100dvh - 76px);
+  min-height: 480px;
+  border: 0;
+}
+@media (max-width: 700px) {
+  body.campusfr-lovable-cms-preview .campusfr-lovable-campus-canvas-preview-frame {
+    height: calc(100vh - 68px);
+    height: calc(100dvh - 68px);
+    min-height: 380px;
+  }
+}

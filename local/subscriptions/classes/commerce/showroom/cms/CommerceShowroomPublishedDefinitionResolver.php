@@ -47,6 +47,9 @@ final class CommerceShowroomPublishedDefinitionResolver {
         CommerceShowroomCmsRepository $repository,
         \stdClass $record
     ): bool {
+        if ((string)$record->template === \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgePackageRegistry::TEMPLATE) {
+            return true; // A Bridge package does not require legacy CMS blocks.
+        }
         foreach ($repository->blocks((int)$record->id) as $block) {
             if ((int)$block->enabled === 1) {
                 return true;

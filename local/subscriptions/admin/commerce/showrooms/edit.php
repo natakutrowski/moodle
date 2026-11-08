@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 require_once(__DIR__ . '/../../../../../config.php');
 
+// X1.3.1: Guarantee loading of a new class even with a stale web classmap/opcache.
+require_once(__DIR__ . '/../../../classes/commerce/showroom/bridge/CommerceShowroomBridgeVideoService.php');
+// X2: load the schema-driven content editor explicitly (no stale web classmap).
+require_once(__DIR__ . '/../../../classes/commerce/showroom/bridge/CommerceShowroomBridgeContentEditor.php');
+
+use local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgeSettings;
+use local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgeContentEditor;
+use local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgeVideoService;
+use local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgePackageRegistry;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomAliasConfig;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomBlockTypeRegistry;
 use local_subscriptions\commerce\showroom\cms\CommerceShowroomCmsRepository;
@@ -59,6 +68,14 @@ if ($id > 0 && $record === null) {
     throw new moodle_exception('invalidrecord');
 }
 
+// Lovable CMS imports are edited with the dedicated multilingual text editor,
+// not the generic block builder, which cannot represent their JSX contract.
+if ($record !== null &&
+        \local_subscriptions\commerce\showroom\bridge\CommerceShowroomLovableDraftService::metadata($record) !== null) {
+    redirect(new moodle_url('/local/subscriptions/admin/commerce/showrooms/lovable_cms_edit.php',
+        ['id' => (int)$record->id]));
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_sesskey();
 
@@ -91,6 +108,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $settingsjson = CommerceShowroomAliasConfig::merge_into_settings_json(
             $settingsjson,
             optional_param('shortalias', '', PARAM_ALPHANUMEXT)
+        );
+    }
+    if ($showroomsection === 'information') {
+        $selecteddesign = optional_param('bridgedesign', '', PARAM_ALPHANUMEXT);
+        $savedbridgesettings = CommerceShowroomBridgeSettings::from_json($settingsjson);
+        $editormode = optional_param('bridge_editor_x2', 0, PARAM_BOOL) === 1;
+        $bridgejson = [];
+        if ($editormode && $selecteddesign !== '' && $selecteddesign === $savedbridgesettings['id']) {
+            // One flat language array: optional_param_array does NOT support nested arrays.
+            // Never trust a partial request: the editor rejects missing/unknown fields.
+            $language = optional_param('bridge_edit_lang', 'fr', PARAM_ALPHA);
+            $submitted = optional_param_array('bridgefields', [], PARAM_RAW);
+            $overrides = CommerceShowroomBridgeContentEditor::merge_language(
+                $selecteddesign, $language, $submitted, $savedbridgesettings['content']
+            );
+            foreach (CommerceShowroomBridgeSettings::LANGUAGES as $lang) {
+                $bridgejson[$lang] = json_encode(
+                    $overrides[$lang], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+                );
+            }
+        } else {
+            // First-time design selection: save its ID and start with empty overrides.
+            // The form must then be reopened to edit its newly generated fields.
+            foreach (CommerceShowroomBridgeSettings::LANGUAGES as $lang) {
+                $bridgejson[$lang] = $selecteddesign !== $savedbridgesettings['id']
+                    ? '{}'
+                    : optional_param('bridgecontent_' . $lang, '{}', PARAM_RAW);
+            }
+        }
+        $hasbridgeupload = CommerceShowroomBridgeVideoService::has_upload();
+        $removebridgevideo = optional_param('bridgevideo_remove', 0, PARAM_BOOL) === 1;
+        if ($hasbridgeupload && $removebridgevideo) {
+            throw new invalid_parameter_exception('Choose either replacement or removal of the presentation video.');
+        }
+        if ($hasbridgeupload) {
+            CommerceShowroomBridgeVideoService::validate_upload();
+        }
+        $settingsjson = CommerceShowroomBridgeSettings::merge_into_settings_json(
+            $settingsjson, optional_param('bridgedesign', '', PARAM_ALPHANUMEXT), $bridgejson,
+            $hasbridgeupload || $removebridgevideo ? '' : null
         );
     }
     $productsjson = (string)($record->productsjson ?? '{}');
@@ -149,6 +206,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'settingsjson' => $settingsjson,
     ], (int)$USER->id);
 
+    if ($showroomsection === 'information') {
+        $bridgevideoservice = new CommerceShowroomBridgeVideoService($context);
+        if ($removebridgevideo) {
+            $bridgevideoservice->delete($savedid);
+        } else if ($hasbridgeupload) {
+            $bridgevideoservice->store_uploaded_video($savedid);
+        }
+    }
+
     $socialimageservice = new CommerceShowroomSocialImageService($context);
     if ($showroomsection === 'seo' && optional_param('socialimage_remove', 0, PARAM_BOOL) === 1) {
         $socialimageservice->delete($savedid);
@@ -173,6 +239,10 @@ $defaults = $record ?: (object)[
     'settingsjson' => '{}',
 ];
 
+$currentbridge = CommerceShowroomBridgeSettings::from_json((string)$defaults->settingsjson);
+$currentbridgevideourl = $id > 0
+    ? (new CommerceShowroomBridgeVideoService($context))->get_url($id)
+    : null;
 $currentseo = CommerceShowroomSeoConfig::from_settings_json(
     (string)$defaults->settingsjson
 );
@@ -617,6 +687,234 @@ echo html_writer::tag(
 echo html_writer::end_div();
 
 echo html_writer::end_div();
+echo html_writer::end_div();
+// Optional settings for the new renderer. Does not modify old CMS blocks.
+echo html_writer::start_div('mt-4 p-3 border rounded');
+echo html_writer::tag('h4', 'Design Lovable');
+echo html_writer::tag('p', 'Configuration du design Lovable, des médias et des textes multilingues. Les traductions originales restent dans le package ; seules tes modifications sont enregistrées par le CMS.', ['class' => 'form-text']);
+echo html_writer::tag('label', 'Design déployé', ['for' => 'bridgedesign', 'class' => 'form-label']);
+echo html_writer::select(
+    ['' => 'Aucun'] + CommerceShowroomBridgePackageRegistry::options(),
+    'bridgedesign', $currentbridge['id'], false,
+    ['id' => 'bridgedesign', 'class' => 'form-select mb-2']
+);
+echo html_writer::tag('label', 'Vidéo de présentation du cours (Moodle)',
+    ['for' => 'bridgevideo_upload', 'class' => 'form-label']);
+echo html_writer::empty_tag('input', [
+    'type' => 'file',
+    'id' => 'bridgevideo_upload',
+    'name' => 'bridgevideo_upload',
+    'accept' => '.mp4,.webm,video/mp4,video/webm',
+    'class' => 'form-control mb-1',
+]);
+if ($currentbridgevideourl !== null) {
+    echo html_writer::tag('p', html_writer::link($currentbridgevideourl,
+        'Vidéo actuelle : voir / lire', ['target' => '_blank', 'rel' => 'noopener']),
+        ['class' => 'form-text mb-2']);
+    echo html_writer::start_div('form-check mb-2');
+    echo html_writer::checkbox('bridgevideo_remove', '1', false,
+        'Supprimer la vidéo actuelle', ['class' => 'form-check-input']);
+    echo html_writer::end_div();
+} else if ($currentbridge['videoUrl'] !== '') {
+    echo html_writer::tag('p',
+        'Une ancienne URL vidéo est toujours configurée. Elle restera utilisée tant qu’aucune vidéo n’est déposée.',
+        ['class' => 'form-text mb-2']);
+    echo html_writer::start_div('form-check mb-2');
+    echo html_writer::checkbox('bridgevideo_remove', '1', false,
+        'Supprimer l’ancienne vidéo externe', ['class' => 'form-check-input']);
+    echo html_writer::end_div();
+}
+echo html_writer::tag('div',
+    'Dépose ici une vidéo MP4 ou WebM (500 Mo maximum). Le fichier est hébergé dans Moodle et remplace le visuel d’attente. '
+    . 'Les limites PHP upload_max_filesize et post_max_size du serveur doivent également permettre cette taille.',
+    ['class' => 'form-text mb-3']
+);
+// X2: any trusted design with language catalogues receives the same editor.
+if ($currentbridge['id'] !== '') {
+    $bridgeeditormodel = CommerceShowroomBridgeContentEditor::model(
+        $currentbridge['id'], $currentbridge['content']
+    );
+    echo html_writer::start_div('mt-4 border-top pt-3', ['id' => 'campusfr-bridge-x2-editor']);
+    echo html_writer::tag('h5', 'Textes du design · RU / FR / EN');
+    echo html_writer::tag('p',
+        count($bridgeeditormodel['fields']) . ' champs issus du package Lovable. '
+        . 'Une langue à la fois ; seules les différences sont stockées dans le CMS. '
+        . 'Le texte russe original reste disponible comme référence.',
+        ['class' => 'form-text']
+    );
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'bridge_editor_x2', 'value' => '1',
+    ]);
+    echo html_writer::start_div('row g-2 mb-3');
+    echo html_writer::start_div('col-md-4');
+    echo html_writer::tag('label', 'Langue à modifier',
+        ['for' => 'bridge_edit_lang', 'class' => 'form-label']);
+    echo html_writer::select(
+        ['fr' => '🇫🇷 Français', 'ru' => '🇷🇺 Русский', 'en' => '🇬🇧 English'],
+        'bridge_edit_lang', 'fr', false,
+        ['id' => 'bridge_edit_lang', 'class' => 'form-select']
+    );
+    echo html_writer::end_div();
+    echo html_writer::start_div('col-md-5');
+    echo html_writer::tag('label', 'Rechercher une section, une clé ou un texte',
+        ['for' => 'bridge_x2_search', 'class' => 'form-label']);
+    echo html_writer::empty_tag('input', [
+        'type' => 'search', 'id' => 'bridge_x2_search', 'class' => 'form-control',
+        'placeholder' => 'Ex. offre, FAQ, première énigme…',
+        'autocomplete' => 'off',
+    ]);
+    echo html_writer::end_div();
+    echo html_writer::start_div('col-md-3 d-flex align-items-end');
+    echo html_writer::start_div('form-check mb-2');
+    echo html_writer::empty_tag('input', [
+        'id' => 'bridge_x2_only_modified', 'type' => 'checkbox', 'class' => 'form-check-input',
+    ]);
+    echo html_writer::tag('label', 'Modifications seulement',
+        ['for' => 'bridge_x2_only_modified', 'class' => 'form-check-label']);
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+
+    foreach (['fr', 'ru', 'en'] as $lang) {
+        $fieldsetattributes = [
+            'data-bridge-x2-lang' => $lang,
+            'class' => 'mb-3',
+        ];
+        if ($lang !== 'fr') {
+            $fieldsetattributes['disabled'] = true;
+            $fieldsetattributes['style'] = 'display:none';
+        }
+        echo html_writer::start_tag('fieldset', $fieldsetattributes);
+        foreach ($bridgeeditormodel['groups'] as $groupid => $group) {
+            $changedcount = 0;
+            foreach ($group['fields'] as $fieldid) {
+                if ($bridgeeditormodel['fields'][$fieldid]['modified'][$lang]) {
+                    $changedcount++;
+                }
+            }
+            $groupattributes = [
+                'class' => 'border rounded p-3 mb-2',
+                'data-bridge-x2-group' => $groupid,
+            ];
+            if ($groupid === 'hero' && $lang === 'fr') {
+                $groupattributes['open'] = true;
+            }
+            echo html_writer::start_tag('details', $groupattributes);
+            echo html_writer::tag('summary',
+                s($group['label']) . ' · ' . count($group['fields']) . ' champs'
+                . ($changedcount ? ' · ' . $changedcount . ' modifié(s)' : ''),
+                ['class' => 'fw-semibold mb-2']
+            );
+            foreach ($group['fields'] as $fieldid) {
+                $field = $bridgeeditormodel['fields'][$fieldid];
+                $modified = $field['modified'][$lang];
+                $fieldhtmlid = 'bridge_x2_' . $lang . '_' . $fieldid;
+                echo html_writer::start_div('mb-3 border-bottom pb-2', [
+                    'data-bridge-x2-field' => $fieldid,
+                    'data-bridge-x2-modified' => $modified ? '1' : '0',
+                    'data-bridge-x2-searchtext' => mb_strtolower(
+                        $fieldid . ' ' . $group['label'] . ' ' . $field['reference']
+                        . ' ' . $field['value'][$lang], 'UTF-8'
+                    ),
+                ]);
+                echo html_writer::tag('label', s($field['label']), [
+                    'for' => $fieldhtmlid, 'class' => 'form-label fw-semibold',
+                ]);
+                echo html_writer::tag('div',
+                    s(implode('.', $field['path'])),
+                    ['class' => 'text-muted small font-monospace mb-1']
+                );
+                if ($lang !== 'ru') {
+                    echo html_writer::tag('div',
+                        'RU : ' . s($field['reference']),
+                        ['class' => 'small text-muted mb-2']
+                    );
+                }
+                echo html_writer::tag('textarea', s($field['value'][$lang]), [
+                    'id' => $fieldhtmlid,
+                    'name' => 'bridgefields[' . $fieldid . ']',
+                    'rows' => str_contains($field['value'][$lang], "\n") ? 3 : 2,
+                    'maxlength' => 5000,
+                    'class' => 'form-control',
+                    'data-bridge-x2-original' => $field['default'][$lang],
+                    'data-bridge-x2-initial' => $field['value'][$lang],
+                ]);
+                echo html_writer::end_div();
+            }
+            echo html_writer::end_tag('details');
+        }
+        echo html_writer::end_tag('fieldset');
+    }
+    echo html_writer::tag('p',
+        'Pour changer de design : sélectionne un autre package, enregistre, puis rouvre la fiche. '
+        . 'Les anciennes surcharges de texte sont alors réinitialisées pour le nouveau design.',
+        ['class' => 'form-text']
+    );
+    echo html_writer::end_div();
+    $PAGE->requires->js_init_code(<<<'JS'
+(function() {
+    var root = document.getElementById('campusfr-bridge-x2-editor');
+    if (!root) { return; }
+    var language = document.getElementById('bridge_edit_lang');
+    var search = document.getElementById('bridge_x2_search');
+    var changed = document.getElementById('bridge_x2_only_modified');
+    var fieldsets = Array.from(root.querySelectorAll('fieldset[data-bridge-x2-lang]'));
+    function refresh() {
+        var active = language.value;
+        var query = (search.value || '').trim().toLocaleLowerCase();
+        fieldsets.forEach(function(fieldset) {
+            var visible = fieldset.getAttribute('data-bridge-x2-lang') === active;
+            fieldset.disabled = !visible;
+            fieldset.style.display = visible ? '' : 'none';
+            if (!visible) { return; }
+            fieldset.querySelectorAll('[data-bridge-x2-group]').forEach(function(group) {
+                var count = 0;
+                group.querySelectorAll('[data-bridge-x2-field]').forEach(function(field) {
+                    var textarea = field.querySelector('textarea');
+                    var text = (field.getAttribute('data-bridge-x2-searchtext') || '') + ' ' +
+                        (textarea ? textarea.value.toLocaleLowerCase() : '');
+                    var ismodified = field.getAttribute('data-bridge-x2-modified') === '1' ||
+                        (textarea && textarea.value !== textarea.getAttribute('data-bridge-x2-original'));
+                    var show = (!query || text.includes(query)) && (!changed.checked || ismodified);
+                    field.style.display = show ? '' : 'none';
+                    if (show) { count++; }
+                });
+                group.style.display = count ? '' : 'none';
+                if (query || changed.checked) { group.open = count > 0; }
+            });
+        });
+    }
+    var previousLanguage = language.value;
+    language.addEventListener('change', function() {
+        var currentPanel = fieldsets.find(function(panel) {
+            return panel.getAttribute('data-bridge-x2-lang') === previousLanguage;
+        });
+        var dirty = currentPanel && Array.from(currentPanel.querySelectorAll('textarea')).some(function(field) {
+            return field.value !== field.getAttribute('data-bridge-x2-initial');
+        });
+        if (dirty && !window.confirm('Les modifications de cette langue ne sont pas enregistrées. Changer de langue ?')) {
+            language.value = previousLanguage;
+            return;
+        }
+        previousLanguage = language.value;
+        refresh();
+    });
+    search.addEventListener('input', refresh);
+    changed.addEventListener('change', refresh);
+    root.addEventListener('input', function(event) {
+        if (event.target && event.target.matches('textarea') && (search.value || changed.checked)) {
+            refresh();
+        }
+    });
+    refresh();
+})();
+JS);
+} else {
+    echo html_writer::tag('p',
+        'Sélectionne et enregistre un design pour afficher automatiquement tous ses champs de texte.',
+        ['class' => 'form-text']
+    );
+}
 echo html_writer::end_div();
 echo html_writer::end_tag('section');
 

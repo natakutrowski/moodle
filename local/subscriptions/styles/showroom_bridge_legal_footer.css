@@ -1,0 +1,126 @@
+/* CampusFR P2H — footer Commerce natif BELOW Gustave et Alf.
+ * Dark Liquid Glass must have a dark opaque base, since there is NO IMAGE
+ * behind this footer in the document flow. Only presentation is affected. */
+body.commerce-showroom-bridge-page #page-content.showroom-shell__main {
+  position: relative;
+}
+body.commerce-showroom-bridge-page .campusfr-native-legal-footer {
+  position: relative;
+  z-index: 1;
+  left: auto;
+  right: auto;
+  top: auto;
+  bottom: auto;
+  inset: auto;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1.25rem 1.5rem calc(1.35rem + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(255,255,255,.22);
+  /* IMPORTANT: a dark fallback base prevents a white Moodle background
+     shining through the transparent glass when the footer is BELOW the scene. */
+  background-color: #000;
+  background-image:
+    linear-gradient(105deg, rgba(129,99,172,.11), rgba(0,0,0,.01) 44%, rgba(155,86,146,.08)),
+    linear-gradient(to top, rgba(0,0,0,.36), rgba(0,0,0,.08));
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
+  backdrop-filter: blur(12px) saturate(130%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 -10px 32px rgba(8,4,24,.12);
+  color: rgba(255,255,255,.82);
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-size: .76rem;
+  line-height: 1.5;
+}
+body.commerce-showroom-bridge-page .campusfr-native-legal-footer .commerce-showroom-final__legal-inner {
+  width: min(100%, 1180px);
+  margin-inline: auto;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.18fr);
+  align-items: start;
+  gap: 1.5rem 3rem;
+}
+/* One genuinely vertical company column — no sideways flex wrapping. */
+body.commerce-showroom-bridge-page .campusfr-native-legal-footer .commerce-showroom-final__company {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  gap: .16rem;
+  text-align: left;
+  font-size: .76rem;
+  line-height: 1.5;
+}
+body.commerce-showroom-bridge-page .campusfr-native-legal-footer .commerce-showroom-final__company-name {
+  display: block;
+  color: #fff;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+body.commerce-showroom-bridge-page .campusfr-native-legal-footer .commerce-showroom-final__company-detail,
+body.commerce-showroom-bridge-page .campusfr-native-legal-footer .commerce-showroom-final__company-note {
+  display: block;
+  max-width: 100%;
+  color: rgba(255,255,255,.79);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+body.commerce-showroom-bridge-page .campusfr-native-legal-footer [hidden] {
+  display: none !important;
+}
+body.commerce-showroom-bridge-page .campusfr-native-legal-footer .commerce-showroom-final__legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: .5rem 1.1rem;
+  min-width: 0;
+  padding-top: .08rem;
+}
+body.commerce-showroom-bridge-page .campusfr-native-legal-footer .commerce-showroom-final__legal-links a {
+  color: rgba(255,255,255,.86);
+  text-decoration: none;
+  font-size: .76rem;
+}
+body.commerce-showroom-bridge-page .campusfr-native-legal-footer .commerce-showroom-final__legal-links a:hover,
+body.commerce-showroom-bridge-page .campusfr-native-legal-footer .commerce-showroom-final__legal-links a:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+}
+@media (max-width: 900px) {
+  body.commerce-showroom-bridge-page .campusfr-native-legal-footer .commerce-showroom-final__legal-inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+  body.commerce-showroom-bridge-page .campusfr-native-legal-footer .commerce-showroom-final__legal-links {
+    justify-content: flex-start;
+  }
+}
+@media (max-width: 480px) {
+  body.commerce-showroom-bridge-page .campusfr-native-legal-footer {
+    padding: 1.15rem 1.15rem calc(1.35rem + env(safe-area-inset-bottom));
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  body.commerce-showroom-bridge-page .campusfr-native-legal-footer {
+    background: #000;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Exclusive to the opt-in admin checkout test; no public/published layout changes. */
+body.commerce-showroom-bridge-page .campusfr-dev-commerce-test-banner {
+  position: relative;
+  z-index: 3;
+  background: #34152b;
+  color: #fff;
+  text-align: center;
+  padding: .55rem 1rem;
+  font: 800 .78rem/1.5 Nunito, system-ui, sans-serif;
+  border-block: 1px solid rgba(255,255,255,.3);
+}

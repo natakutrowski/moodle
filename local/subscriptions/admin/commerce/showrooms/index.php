@@ -40,6 +40,21 @@ CrmPageConfigurator::configure(
 
 $repository = new CommerceShowroomCmsRepository($DB);
 
+// Duplicate from the CRM menu, never through an unsafe GET request.
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    $duplicateid = optional_param('duplicate_showroom', 0, PARAM_INT);
+    if ($duplicateid > 0) {
+        require_sesskey();
+        $newid = $repository->duplicate_showroom($duplicateid, (int)$USER->id);
+        redirect(
+            new moodle_url('/local/subscriptions/admin/commerce/showrooms/edit.php', ['id' => $newid]),
+            get_string('changessaved'),
+            null,
+            \core\output\notification::NOTIFY_SUCCESS
+        );
+    }
+}
+
 $delete = optional_param('delete', 0, PARAM_INT);
 if ($delete > 0 && confirm_sesskey()) {
     $repository->delete($delete);
@@ -525,6 +540,12 @@ echo html_writer::div(
             'local_subscriptions'
         ),
         ['class' => 'btn btn-outline-primary']
+    )
+    . html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/showrooms/lovable.php'),
+        html_writer::tag('i', '', ['class' => 'fa fa-magic me-1', 'aria-hidden' => 'true'])
+        . 'Importer depuis Lovable',
+        ['class' => 'btn btn-outline-primary']
     ),
     'crm-showrooms-top-actions'
 );
@@ -860,7 +881,28 @@ if ($pagedrows === []) {
                 ),
                 'crm-sales-row-menu-section'
             )
-            . $adminactions,
+            . $adminactions
+            . html_writer::start_tag('form', [
+                'method' => 'post',
+                'action' => (new moodle_url('/local/subscriptions/admin/commerce/showrooms/index.php'))->out(false),
+                'class' => 'm-0',
+            ])
+            . html_writer::empty_tag('input', [
+                'type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey(),
+            ])
+            . html_writer::empty_tag('input', [
+                'type' => 'hidden', 'name' => 'duplicate_showroom', 'value' => (int)$showroom->id,
+            ])
+            . html_writer::tag('button',
+                html_writer::tag('i', '', [
+                    'class' => 'fa fa-copy me-2', 'aria-hidden' => 'true',
+                ]) . get_string('duplicate'),
+                [
+                    'type' => 'submit',
+                    'class' => 'crm-sales-row-menu-link btn btn-link text-start w-100 border-0',
+                ]
+            )
+            . html_writer::end_tag('form'),
             'crm-sales-row-menu-group'
         );
 

@@ -448,6 +448,7 @@ function local_subscriptions_pluginfile(
         \local_subscriptions\commerce\personaloffer\campaign\CommercePersonalOfferCampaignMailFooterImageService::FILEAREA,
         \local_subscriptions\commerce\showroom\cms\CommerceShowroomBlockMediaManager::FILEAREA,
         \local_subscriptions\commerce\showroom\cms\CommerceShowroomSocialImageService::FILEAREA,
+        'showroom_bridge_video',
     ];
 
     if (!in_array($filearea, $allowedareas, true)) {
@@ -509,6 +510,38 @@ function local_subscriptions_pluginfile(
             return false;
         }
         send_stored_file($file, 86400, 0, false, $options + ['cacheability' => 'public']);
+        return true;
+    }
+
+    if ($filearea === 'showroom_bridge_video') {
+        global $DB;
+        if (count($args) !== 2) {
+            return false;
+        }
+        $itemid = (int)array_shift($args);
+        $filename = clean_param((string)array_shift($args), PARAM_FILE);
+        if ($itemid <= 0 || $filename === '') {
+            return false;
+        }
+        $status = $DB->get_field('local_subs_showroom', 'status', ['id' => $itemid]);
+        if ($status === false) {
+            return false;
+        }
+        // Draft/review videos are visible only to showroom administrators.
+        if ($status !== 'published') {
+            require_login();
+            require_capability('local/subscriptions:manage_showrooms', $context);
+        }
+        $file = get_file_storage()->get_file(
+            $context->id, 'local_subscriptions', $filearea, $itemid, '/', $filename
+        );
+        if (!$file || $file->is_directory()) {
+            return false;
+        }
+        // send_stored_file delivers through Moodle and supports HTTP range requests for video playback.
+        send_stored_file($file, 86400, 0, false, $options + [
+            'cacheability' => $status === 'published' ? 'public' : 'private',
+        ]);
         return true;
     }
 
