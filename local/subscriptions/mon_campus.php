@@ -20,7 +20,10 @@ $PAGE->set_url(UrlFactory::my_campus());
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('commerce_customer_hub_title', 'local_subscriptions'));
 $PAGE->set_heading(get_string('commerce_customer_hub_title', 'local_subscriptions'));
-$PAGE->requires->css(new moodle_url('/local/subscriptions/styles/customer_hub.css'));
+// Refresh the browser/CDN cache key whenever this stylesheet is deployed.
+$PAGE->requires->css(new moodle_url('/local/subscriptions/styles/customer_hub.css', [
+    'v' => (string)filemtime(__DIR__ . '/styles/customer_hub.css'),
+]));
 $PAGE->navbar->add(get_string('commerce_customer_hub_title', 'local_subscriptions'));
 
 $data = CommerceCustomerHubService::create()->build($USER, $PAGE);
