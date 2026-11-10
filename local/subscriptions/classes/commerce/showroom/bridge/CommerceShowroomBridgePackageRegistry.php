@@ -158,6 +158,13 @@ final class CommerceShowroomBridgePackageRegistry {
         }
         $url = new \moodle_url('/local/subscriptions/designs/' . $id . '/' . $relative);
         if ($version !== '') {
+            // Version asset URLs using file modification time, not commerce manifest version.
+            if ($id === 'articles_alf_reimport') {
+                $mtime = filemtime(self::design_root() . '/' . $id . '/' . $relative);
+                if ($mtime !== false) {
+                    $version .= '-' . (string)$mtime;
+                }
+            }
             $url->param('v', $version);
         }
         return $url->out(false);

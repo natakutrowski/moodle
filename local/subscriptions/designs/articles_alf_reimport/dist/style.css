@@ -404,3 +404,52 @@ section.night-scope.bg-stars.relative.flex.flex-col.overflow-hidden > div:first-
               0 0 64px 12px color-mix(in oklab, var(--night-foreground) 18%, transparent),
               0 0 96px 18px color-mix(in oklab, var(--primary) 8%, transparent);
 }
+
+
+/* CampusFR: three synced currency selectors under offers */
+#offers.night-scope .campusfr-v3-currency-footer {
+  margin-top: .9rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: .35rem;
+}
+#offers.night-scope .campusfr-v3-currency-footer > .flex.w-fit.items-center {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  gap: .4rem;
+  padding: .25rem .65rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--night-foreground) 4%, transparent);
+  box-shadow: none;
+}
+#offers.night-scope .campusfr-v3-currency-footer label {
+  font-size: .68rem;
+  letter-spacing: .025em;
+}
+#offers.night-scope .campusfr-v3-currency-footer .campusfr-v3-currency-select {
+  box-sizing: border-box;
+  min-width: 7.25rem;
+  max-width: 12rem;
+  min-height: 2.3rem;
+  padding: .37rem .65rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  border-radius: 999px;
+  background: var(--night-deep);
+  color: var(--night-foreground);
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+#offers.night-scope .campusfr-v3-currency-footer .campusfr-v3-currency-select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+#offers.night-scope .campusfr-v3-currency-footer [role="alert"] {
+  max-width: 16rem;
+  font-size: .72rem;
+  text-align: center;
+}

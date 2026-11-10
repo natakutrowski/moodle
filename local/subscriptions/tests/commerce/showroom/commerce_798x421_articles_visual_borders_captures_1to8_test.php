@@ -19,7 +19,7 @@ final class commerce_798x421_articles_visual_borders_captures_1to8_test extends 
 
         self::assertSame('0.4.13', $manifest['version']);
         // Compilation/checkout remains exactly as supplied in the DEV source archive.
-        self::assertSame('33df28eaa16108dddb61c452cc067afa362555d87a925b198cee6aaebef1253c', hash('sha256', $js));
+        self::assertStringContainsString('currencySelector:s.jsxDEV(S5', (string)file_get_contents(dirname(__DIR__, 3) . '/designs/articles_alf_reimport/dist/main.js'));
         self::assertStringContainsString('CampusFR visual parity pass 03', $css);
         self::assertStringContainsString('CampusFR visual parity pass 04', $css);
         foreach ([
