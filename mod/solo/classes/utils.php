@@ -678,8 +678,14 @@ class utils
         // if we have an ungraded activity, lets grade it
         if ($hastranscripts && $requiresgrading) {
             $stats = self::fetch_stats($attempt, $moduleinstance);
-            self::autograde_attempt($attempt->id, $stats);
-            $attempt = $DB->get_record(constants::M_ATTEMPTSTABLE, ['id' => $attempt->id]);
+            // A transcript can arrive before its statistics are ready. Do not try to
+            // grade a missing statistics record: leave the attempt pending instead.
+            if ($stats) {
+                self::autograde_attempt($attempt->id, $stats);
+                $attempt = $DB->get_record(constants::M_ATTEMPTSTABLE, ['id' => $attempt->id]);
+            } else if ($trace) {
+                $trace->output('Solo statistics not ready. Automatic grading deferred.');
+            }
         }
 
         return $attempt;
@@ -1413,6 +1419,16 @@ class utils
             return;
         }
         */
+
+        // This method can also be called directly (for example after an AI
+        // accuracy update). Fetch missing statistics, but never grade while the
+        // record is unavailable or incomplete. A missing record is not a score 0.
+        if (!$stats) {
+            $stats = self::fetch_stats($attempt, $moduleinstance);
+        }
+        if (!is_object($stats) || !isset($stats->words, $stats->uniquewords)) {
+            return;
+        }
 
         // We might need AI table data too.
         $airesult = $DB->get_record(constants::M_AITABLE, ['attemptid' => $attemptid]);
