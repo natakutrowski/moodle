@@ -48,6 +48,22 @@
         root.classList.toggle('campus-dark', dark);
     }());
     </script>
+    {{! Critical first-paint guard: Edly includes both logo images in the navbar.
+        Keep the non-matching one hidden BEFORE Moodle's cached theme CSS loads. }}
+    <style id="campusfr-navbar-logo-first-paint">
+        .navbar-area .main-navbar .navbar-brand > img.campus-night-logo,
+        .navbar-area .main-responsive-menu .logo a > img.campus-night-logo {
+            display: none !important;
+        }
+        html.campus-dark[data-campus-dark-allowed="1"] .navbar-area .main-navbar .navbar-brand > :is(img:not(.campus-night-logo), h2),
+        html.campus-dark[data-campus-dark-allowed="1"] .navbar-area .main-responsive-menu .logo a > :is(img:not(.campus-night-logo), h2) {
+            display: none !important;
+        }
+        html.campus-dark[data-campus-dark-allowed="1"] .navbar-area .main-navbar .navbar-brand > img.campus-night-logo,
+        html.campus-dark[data-campus-dark-allowed="1"] .navbar-area .main-responsive-menu .logo a > img.campus-night-logo {
+            display: block !important;
+        }
+    </style>
     <title>{{{ output.page_title }}}</title>
     <link rel="shortcut icon" href="{{{ favicon }}}" />
     {{{ output.standard_head_html }}}
