@@ -28,7 +28,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $THEME->name = 'edly';
-$THEME->sheets = [ 'bootstrap-select', 'owl-carousel', 'owl-theme-default', 'magnific-popup', 'fancybox', 'animate', 'aos', 'boxicons', 'remixicon', 'meanmenu', 'odometer', 'style', 'edly-mdl-core', 'responsive', 'dashboard', 'storefront', 'customer-navigation' ];
+$THEME->sheets = [ 'bootstrap-select', 'owl-carousel', 'owl-theme-default', 'magnific-popup', 'fancybox', 'animate', 'aos', 'boxicons', 'remixicon', 'meanmenu', 'odometer', 'style', 'edly-mdl-core', 'responsive', 'dashboard', 'storefront', 'customer-navigation', 'campus-dark-mode' ];
 $THEME->editor_sheets = [];
 $THEME->parents = ['boost'];
 
@@ -202,7 +202,7 @@ $THEME->scss = function($theme) {
 };
 
 //$THEME->javascripts = array( 'bootstrap-select.min', 'magnific-popup.min', 'edly.dashboard.preprocess', 'meanmenu.min', 'jquery.appear', 'masonry.pkgd.min', 'fancybox.min', 'aos', 'odometer.min', 'wow.min', 'owl.carousel.min', 'main');
-$THEME->javascripts = array( 'magnific-popup.min', 'edly.dashboard.preprocess', 'meanmenu.min', 'jquery.appear', 'masonry.pkgd.min', 'fancybox.min', 'aos', 'odometer.min', 'wow.min', 'owl.carousel.min', 'main', 'stickyfooter-fix');
+$THEME->javascripts = array( 'magnific-popup.min', 'edly.dashboard.preprocess', 'meanmenu.min', 'jquery.appear', 'masonry.pkgd.min', 'fancybox.min', 'aos', 'odometer.min', 'wow.min', 'owl.carousel.min', 'main', 'stickyfooter-fix', 'campus-dark-mode');
 
 $THEME->iconsystem = '\\theme_edly\\output\\icon_system_fontawesome';
 $THEME->csspostprocess = 'theme_edly_process_css';

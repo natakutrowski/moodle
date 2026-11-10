@@ -38,9 +38,24 @@
                             {{^mobile_logo}}
                                 <h2 {{#mobile_logo_styles}} style="{{{mobile_logo_styles}}}" {{/mobile_logo_styles}}>{{sitename}}</h2>
                             {{/mobile_logo}}
+                            <img class="campus-night-logo" src="{{{config.wwwroot}}}/theme/edly/pix/campusfr-night-logo-v8.png" alt="CampusFR" loading="eager" decoding="async">
                         </a>
                     </div>
                 {{/logo_visibility}}
+
+                {{#campusdarkshowtoggle}}
+                <button type="button" class="campus-dark-toggle campus-dark-toggle--mobile" data-campus-dark-toggle
+                        data-campus-dark-url="{{{config.wwwroot}}}/theme/edly/dark_mode.php"
+                        data-campus-dark-sesskey="{{campusdarksesskey}}"
+                        data-campus-dark-label-on="{{#str}}darkmode_enable, theme_edly{{/str}}"
+                        data-campus-dark-label-off="{{#str}}darkmode_disable, theme_edly{{/str}}"
+                        aria-pressed="false"
+                        aria-label="{{#str}}darkmode_enable, theme_edly{{/str}}"
+                        title="{{#str}}darkmode_enable, theme_edly{{/str}}">
+                    <svg class="campus-dark-toggle__moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.6 8.6 0 1 0 20.5 14Z"/></svg>
+                    <svg class="campus-dark-toggle__sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+                </button>
+                {{/campusdarkshowtoggle}}
 
                 {{! -- CONNECTÉ (non-invité) : on affiche directement le menu utilisateur }}
                 {{#isloggedin}}
@@ -85,6 +100,7 @@
                         {{^main_logo}}
                             <h2 {{#logo_styles}} style="{{{logo_styles}}}" {{/logo_styles}}>{{sitename}}</h2>
                         {{/main_logo}}
+                        <img class="campus-night-logo" src="{{{config.wwwroot}}}/theme/edly/pix/campusfr-night-logo-v8.png" alt="CampusFR" loading="eager" decoding="async">
                     </a>
                 {{/logo_visibility}}
 
@@ -97,6 +113,41 @@
                         <!-- custom_menu -->
                         {{ ! output.custom_menu }}
                     </ul>
+
+                    {{#campusdarkshowtoggle}}
+                    <button type="button" class="campus-dark-toggle campus-dark-toggle--desktop" data-campus-dark-toggle
+                            data-campus-dark-url="{{{config.wwwroot}}}/theme/edly/dark_mode.php"
+                            data-campus-dark-sesskey="{{campusdarksesskey}}"
+                            data-campus-dark-label-on="{{#str}}darkmode_enable, theme_edly{{/str}}"
+                            data-campus-dark-label-off="{{#str}}darkmode_disable, theme_edly{{/str}}"
+                            aria-pressed="false"
+                            aria-label="{{#str}}darkmode_enable, theme_edly{{/str}}"
+                            title="{{#str}}darkmode_enable, theme_edly{{/str}}">
+                        <svg class="campus-dark-toggle__moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.6 8.6 0 1 0 20.5 14Z"/></svg>
+                        <svg class="campus-dark-toggle__sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+                    </button>
+                    {{#campusdarkhintshow}}
+                    <div class="campus-dark-hint" data-campus-dark-hint
+                         data-campus-dark-hint-dismiss-url="{{campusdarkhintdismissurl}}"
+                         data-campus-dark-hint-sesskey="{{campusdarksesskey}}"
+                         hidden>
+                        <button type="button" class="campus-dark-hint__close" data-campus-dark-hint-close
+                                aria-label="{{#str}}darkmode_hint_close, theme_edly{{/str}}">×</button>
+                        <div class="campus-dark-hint__badge">✨ {{#str}}darkmode_hint_badge, theme_edly{{/str}}</div>
+                        <div class="campus-dark-hint__title">{{#str}}darkmode_hint_title, theme_edly{{/str}}</div>
+                        <p class="campus-dark-hint__text">{{#str}}darkmode_hint_text, theme_edly{{/str}}</p>
+                        <div class="campus-dark-hint__actions">
+                            <button type="button" class="campus-dark-hint__cta" data-campus-dark-hint-try>
+                                {{#str}}darkmode_hint_try, theme_edly{{/str}}
+                            </button>
+                            <button type="button" class="campus-dark-hint__dismiss" data-campus-dark-hint-dismiss>
+                                {{#str}}darkmode_hint_dismiss, theme_edly{{/str}}
+                            </button>
+                        </div>
+                        <div class="campus-dark-hint__arrow" aria-hidden="true"></div>
+                    </div>
+                    {{/campusdarkhintshow}}
+                    {{/campusdarkshowtoggle}}
 
                     {{> theme_edly/guest_navigation }}
 

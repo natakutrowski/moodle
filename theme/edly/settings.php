@@ -41,6 +41,18 @@ if ($ADMIN->fulltree) {
     */
     $page = new admin_settingpage('theme_edly_general', get_string('generalsettings', 'theme_edly'));
 
+    // CampusFR night skin: site-level feature flag, enabled by default.
+    // When disabled, all page contexts and the preference endpoint stay light.
+    $setting = new admin_setting_configcheckbox(
+        'theme_edly/campus_dark_mode_available',
+        get_string('campus_dark_mode_available', 'theme_edly'),
+        get_string('campus_dark_mode_available_desc', 'theme_edly'),
+        1
+    );
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $page->add($setting);
+
+
         // Preloader
         $setting = new admin_setting_configselect('theme_edly/preloader', get_string('preloader', 'theme_edly') , get_string('preloader_desc', 'theme_edly') , null, array(
             '0' => 'Visible',

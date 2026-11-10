@@ -360,3 +360,15 @@ $string['customernavigation_admin_subscriptions'] = 'Configure local/subscriptio
 $string['customernavigation_admin_campus'] = 'Configure local/campus';
 $string['coursesection_complete_previous'] = 'Complete step {$a} to unlock this step';
 $string['coursesection_available_soon'] = 'Available soon';
+$string['darkmode_enable'] = 'Enable dark mode';
+$string['darkmode_disable'] = 'Enable light mode';
+
+// CampusFR V13 — global dark-mode availability.
+$string['campus_dark_mode_available'] = 'Allow CampusFR dark mode';
+$string['campus_dark_mode_available_desc'] = 'Enable the day/night switch for users. When disabled, CampusFR stays in light mode and the switch disappears from the topbar (including Showroom Articles / Alf). Existing user preferences are preserved for later reactivation.';
+$string['darkmode_hint_badge'] = 'New';
+$string['darkmode_hint_title'] = 'Discover dark mode';
+$string['darkmode_hint_text'] = 'Prefer a softer evening look? Try CampusFR dark mode by clicking the Night button.';
+$string['darkmode_hint_try'] = 'Try it now';
+$string['darkmode_hint_dismiss'] = 'Do not show again';
+$string['darkmode_hint_close'] = 'Close this hint';

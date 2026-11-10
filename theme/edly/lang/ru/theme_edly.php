@@ -359,3 +359,15 @@ $string['customernavigation_admin_subscriptions'] = 'Настройки local/su
 $string['customernavigation_admin_campus'] = 'Настройки local/campus';
 $string['coursesection_complete_previous'] = 'Завершите этап {$a}, чтобы разблокировать этот этап';
 $string['coursesection_available_soon'] = 'Скоро будет доступно';
+$string['darkmode_enable'] = 'Включить тёмную тему';
+$string['darkmode_disable'] = 'Включить светлую тему';
+
+// CampusFR V13 — global dark-mode availability.
+$string['campus_dark_mode_available'] = 'Разрешить тёмный режим CampusFR';
+$string['campus_dark_mode_available_desc'] = 'Показывать переключатель светлой и тёмной темы. Если отключено, CampusFR работает только в светлом режиме, а переключатель скрыт, включая витрину Articles / Alf. Выбор пользователей сохраняется для повторного включения.';
+$string['darkmode_hint_badge'] = 'Новинка';
+$string['darkmode_hint_title'] = 'Откройте тёмный режим';
+$string['darkmode_hint_text'] = 'Хотите более мягкое оформление вечером? Попробуйте тёмный режим CampusFR, нажав на кнопку «Ночь».';
+$string['darkmode_hint_try'] = 'Попробовать сейчас';
+$string['darkmode_hint_dismiss'] = 'Больше не показывать';
+$string['darkmode_hint_close'] = 'Закрыть подсказку';

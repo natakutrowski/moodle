@@ -334,3 +334,15 @@ $string['customernavigation_admin_subscriptions'] = 'Configuration local/subscri
 $string['customernavigation_admin_campus'] = 'Configuration local/campus';
 $string['coursesection_complete_previous'] = 'Compléter l’étape {$a} pour débloquer cette étape';
 $string['coursesection_available_soon'] = 'Disponible prochainement';
+$string['darkmode_enable'] = 'Activer le mode sombre';
+$string['darkmode_disable'] = 'Activer le mode clair';
+
+// CampusFR V13 — global dark-mode availability.
+$string['campus_dark_mode_available'] = 'Autoriser le mode sombre CampusFR';
+$string['campus_dark_mode_available_desc'] = 'Active le commutateur jour/nuit des utilisateurs. Si désactivé, CampusFR reste en mode clair et le commutateur disparaît de la topbar, y compris sur le showroom Articles / Alf. Les préférences existantes sont conservées pour une réactivation ultérieure.';
+$string['darkmode_hint_badge'] = 'Nouveau';
+$string['darkmode_hint_title'] = 'Découvrez le mode sombre';
+$string['darkmode_hint_text'] = 'Envie d’une ambiance plus douce le soir ? Essayez le mode sombre de CampusFR en cliquant sur le bouton Nuit.';
+$string['darkmode_hint_try'] = 'Essayer maintenant';
+$string['darkmode_hint_dismiss'] = 'Ne plus afficher';
+$string['darkmode_hint_close'] = 'Fermer cette info-bulle';

@@ -55,10 +55,10 @@ $targetjson = json_encode(
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Payment</title>
     <style>
-        html,body{margin:0;min-height:100%;background:#fff;font-family:Arial,sans-serif}
+        html,body{margin:0;min-height:100%;background:#fff !important;color:#302451 !important;color-scheme:light;font-family:Arial,sans-serif}
         .s{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:2rem;text-align:center}
         .sp{width:2.25rem;height:2.25rem;margin:0 auto 1rem;border:.22rem solid #e9ecef;border-top-color:#e83e8c;border-radius:50%;animation:r .75s linear infinite}
-        .s h1{margin:0 0 .45rem;font-size:1.25rem}.s p{margin:0;color:#6c757d}
+        .s h1{margin:0 0 .45rem;font-size:1.25rem;color:#302451 !important}.s p{margin:0;color:#6c757d !important}
         @keyframes r{to{transform:rotate(360deg)}}
     </style>
 </head>
@@ -141,6 +141,23 @@ $targetjson = json_encode(
                 box.appendChild(message);
                 overlay.appendChild(box);
                 d.body.appendChild(overlay);
+            }
+
+            // This bridge is separate from Moodle's Edly page. Its overlay
+            // is inserted into the *parent* checkout DOM, whose dark CSS may
+            // override ordinary inherited and inline non-important colors.
+            // Pin only this transition to the same LIGHT palette as above.
+            overlay.style.setProperty('background', '#ffffff', 'important');
+            overlay.style.setProperty('color', '#302451', 'important');
+            const visibleTitle = overlay.querySelector('h2');
+            const visibleMessage = overlay.querySelector('p');
+            if (visibleTitle) {
+                visibleTitle.style.setProperty('color', '#302451', 'important');
+                visibleTitle.style.setProperty('-webkit-text-fill-color', '#302451', 'important');
+            }
+            if (visibleMessage) {
+                visibleMessage.style.setProperty('color', '#6c757d', 'important');
+                visibleMessage.style.setProperty('-webkit-text-fill-color', '#6c757d', 'important');
             }
         }
     } catch (e) {}

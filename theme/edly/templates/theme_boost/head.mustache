@@ -18,8 +18,36 @@
     Page header.
 }}
 {{{ output.doctype }}}
-<html {{{ output.htmlattributes }}}>
+<html {{{ output.htmlattributes }}}
+      data-campus-dark-auth="{{#campusdarkauthenticated}}1{{/campusdarkauthenticated}}{{^campusdarkauthenticated}}0{{/campusdarkauthenticated}}"
+      data-campus-dark-allowed="{{#campusdarkallowed}}1{{/campusdarkallowed}}{{^campusdarkallowed}}0{{/campusdarkallowed}}"
+      data-campus-dark-pref="{{#campusdarkenabled}}1{{/campusdarkenabled}}{{^campusdarkenabled}}0{{/campusdarkenabled}}"
+      data-campus-dark-pref-unset="{{#campusdarkpreferenceunset}}1{{/campusdarkpreferenceunset}}{{^campusdarkpreferenceunset}}0{{/campusdarkpreferenceunset}}">
 <head>
+    {{! Apply before external styles to avoid a light flash on navigation. }}
+    <script>
+    (function () {
+        var root = document.documentElement;
+        var dark = root.getAttribute('data-campus-dark-pref') === '1';
+        // V24.2: an authenticated account with no Moodle preference inherits
+        // its visitor appearance before CSS loads, avoiding a light flash.
+        // Once a preference has been saved, it always wins over the browser.
+        if (root.getAttribute('data-campus-dark-auth') !== '1' ||
+                root.getAttribute('data-campus-dark-pref-unset') === '1') {
+            var guestPreference = null;
+            try { guestPreference = localStorage.getItem('campusfr.edly.darkmode'); } catch (ignored) {}
+            if (guestPreference !== 'dark' && guestPreference !== 'light') {
+                try {
+                    var cookie = document.cookie.match(/(?:^|;\s*)campusfr\.edly\.darkmode=(dark|light)(?:;|$)/);
+                    guestPreference = cookie ? cookie[1] : 'light';
+                } catch (ignored) { guestPreference = 'light'; }
+            }
+            dark = guestPreference === 'dark';
+        }
+        if (root.getAttribute('data-campus-dark-allowed') !== '1') { dark = false; }
+        root.classList.toggle('campus-dark', dark);
+    }());
+    </script>
     <title>{{{ output.page_title }}}</title>
     <link rel="shortcut icon" href="{{{ favicon }}}" />
     {{{ output.standard_head_html }}}

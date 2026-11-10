@@ -2,9 +2,10 @@
 <body {{{bodyattributes}}}>
 {{> core/local/toast/wrapper}}
 <div class="storefront-shell storefront-shell--fullwidth showroom-shell">
-    <header class="showroom-shell__topbar">
+    <header class="showroom-shell__topbar{{#campusdarkfeatureenabled}} campus-showroom-topbar--night{{/campusdarkfeatureenabled}}"{{#campusdarkfeatureenabled}} style="border-top:0!important;border-bottom:0!important;border-left:0!important;border-right:0!important;outline:0!important;box-shadow:none!important"{{/campusdarkfeatureenabled}}>
         <a class="showroom-shell__brand" href="{{{config.wwwroot}}}" aria-label="{{sitename}}">
             {{#main_logo}}<img src="{{{main_logo}}}" alt="{{sitename}}">{{/main_logo}}
+            <img class="showroom-shell__night-logo" src="{{{config.wwwroot}}}/theme/edly/pix/campusfr-night-logo-v8.png" alt="{{sitename}}" loading="eager" decoding="async">
             {{^main_logo}}<span>{{sitename}}</span>{{/main_logo}}
         </a>
         <div class="showroom-shell__navigation">
@@ -30,7 +31,7 @@
 
     {{{ output.standard_top_of_body_html }}}
 
-    <main id="page-content" class="storefront-shell__main showroom-shell__main" aria-label="{{#str}}content{{/str}}">
+    <main id="page-content" class="storefront-shell__main showroom-shell__main" aria-label="{{#str}}content{{/str}}" style="border-top:0!important;outline:0!important;box-shadow:none!important">
         {{{ output.main_content }}}
     </main>
 </div>

@@ -31,3 +31,22 @@
     font-size: clamp(1.7rem, 4vw, 3.5rem);
     color: inherit;
 }
+
+/* CampusFR V18 — Articles / Alf (showroom ID 8), maincontent seam fix.
+ * Moodle inserts the empty accessibility anchor immediately before the bridge.
+ * Its inherited line box causes a thin separator under the fixed topbar.
+ * Match the exact bridge design, NOT every showroom (and NOT core Moodle).
+ * Keep the anchor in the DOM so skip-to-main-content remains available. */
+body.commerce-showroom-bridge-page #page-content.showroom-shell__main:has(> #campusfr-bridge[data-bridge-css*="/articles_alf_reimport/"]) > span#maincontent {
+    display: block !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    outline: 0 !important;
+    overflow: hidden !important;
+}

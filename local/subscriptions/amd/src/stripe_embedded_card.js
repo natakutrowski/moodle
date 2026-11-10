@@ -121,6 +121,35 @@ const confirmPayment = async (
     window.location.assign(config.returnUrl);
 };
 
+const getCampusPaymentAppearance = () => {
+    if (!document.documentElement.classList.contains('campus-dark')) {
+        return {theme: 'stripe', variables: {borderRadius: '10px'}};
+    }
+    return {
+        theme: 'night',
+        variables: {
+            borderRadius: '10px',
+            colorPrimary: '#ff2a91',
+            colorBackground: '#1c2c4c',
+            colorText: '#f5f7ff',
+            colorTextSecondary: '#dbe5fb',
+            colorTextPlaceholder: '#b7c5e2',
+            colorDanger: '#ff8ba8',
+        },
+        // Stripe Payment Element runs in an iframe: parent Edly CSS cannot
+        // recolor field labels. Use the documented Appearance API class.
+        rules: {
+            '.Label': {
+                color: '#ffffff',
+                fontWeight: '500',
+            },
+            '.Label--focused': {
+                color: '#ffffff',
+            },
+        },
+    };
+};
+
 export const init = async config => {
     const form = document.querySelector('[data-stripe-embedded-form]');
     const mount = document.querySelector('[data-stripe-payment-element]');
@@ -138,13 +167,20 @@ export const init = async config => {
         const stripe = Stripe(config.publishableKey);
         const elements = stripe.elements({
             clientSecret: config.clientSecret,
-            appearance: {
-                theme: 'stripe',
-                variables: {
-                    borderRadius: '10px',
-                },
-            },
+            appearance: getCampusPaymentAppearance(),
         });
+
+        // Keep Stripe Elements in sync if the topbar changes day/night
+        // while checkout is open. The Elements Appearance API updates the
+        // already mounted payment widget without manipulating card data.
+        let appliedNight = document.documentElement.classList.contains('campus-dark');
+        new MutationObserver(() => {
+            const nextNight = document.documentElement.classList.contains('campus-dark');
+            if (nextNight !== appliedNight) {
+                appliedNight = nextNight;
+                elements.update({appearance: getCampusPaymentAppearance()});
+            }
+        }).observe(document.documentElement, {attributes: true, attributeFilter: ['class']});
 
         if (
             expressMount
