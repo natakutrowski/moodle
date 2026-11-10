@@ -873,6 +873,19 @@ if ($pagedrows === []) {
                 ['class' => 'crm-sales-row-menu-link']
             );
 
+        // Articles/Alf links are edited independently of the design and checkout.
+        $bridgeconfiguration = json_decode((string)$showroom->settingsjson, true);
+        if (is_array($bridgeconfiguration)
+            && ($bridgeconfiguration['designbridge']['id'] ?? '') === 'articles_alf_reimport') {
+            $adminactions .= html_writer::link(
+                new moodle_url('/local/subscriptions/admin/commerce/showrooms/bridge_contacts.php',
+                    ['id' => (int)$showroom->id]),
+                html_writer::tag('i', '', ['class' => 'fa fa-comments me-2', 'aria-hidden' => 'true'])
+                    . 'Liens Telegram / WhatsApp',
+                ['class' => 'crm-sales-row-menu-link']
+            );
+        }
+
         $groups[] = html_writer::div(
             html_writer::div(
                 get_string(

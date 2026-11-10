@@ -152,6 +152,9 @@ final class CommerceShowroomBridgePresenter {
                 'shop' => (string)($data['shopurl'] ?? ''),
                 'cart' => (string)($data['carturl'] ?? ''),
                 'support' => (string)($data['supporturl'] ?? 'mailto:support@campusfr.fr'),
+                // URLs are validated against the official platform domains in BridgeSettings.
+                'telegram' => $settings['telegramUrl'],
+                'whatsapp' => $settings['whatsappUrl'],
                 'privacy' => $designlinks['privacy'] ?? (string)($policyurls['policy'] ?? ''),
                 'terms' => $designlinks['terms'] ?? (string)($policyurls['terms'] ?? ''),
                 'offer' => $designlinks['offer'] ?? (string)($policyurls['offer'] ?? ''),
@@ -165,7 +168,9 @@ final class CommerceShowroomBridgePresenter {
         return [
             'bridgeid' => $id,
             'bridgeversion' => $manifest['version'],
-            'bridgescripturl' => CommerceShowroomBridgePackageRegistry::asset_url($id, $manifest['entry'], $manifest['version']),
+            'bridgescripturl' => CommerceShowroomBridgePackageRegistry::asset_url(
+                $id, $manifest['entry'], $manifest['version'] . '-' . substr(hash_file('sha256',
+                    $base . '/' . $manifest['entry']), 0, 12)),
             'bridgecssurl' => CommerceShowroomBridgePackageRegistry::asset_url($id, $manifest['css'], $manifest['version']),
             'bridgepayloadjson' => $safejson,
             'bridgefallbacktitle' => (string)($copy['hero']['title1'] ?? 'CampusFR'),
