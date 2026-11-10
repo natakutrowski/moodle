@@ -52,6 +52,39 @@ const loadStripe = () =>
         document.head.appendChild(script);
     });
 
+// V29.2 — This is the Payment Element used by commerce_checkout.php.
+// The embedded-card module is a separate Stripe integration.
+// CSS from Edly cannot style field labels inside Stripe's cross-origin iframe.
+const isCampusDark = () =>
+    document.documentElement.classList.contains('campus-dark');
+
+const campusInlineCardAppearance = () => {
+    // Preserve Stripe's existing appearance pixel-for-pixel in light mode.
+    if (!isCampusDark()) {
+        return {
+            theme: 'stripe',
+            variables: {borderRadius: '10px'},
+        };
+    }
+
+    return {
+        theme: 'night',
+        variables: {
+            borderRadius: '10px',
+            colorPrimary: '#ff2a91',
+            colorBackground: '#1c2c4c',
+            colorText: '#ffffff',
+            colorTextSecondary: '#f1f5ff',
+            colorTextPlaceholder: '#c1cde4',
+            colorDanger: '#ff8ba8',
+        },
+        rules: {
+            '.Label': {color: '#ffffff'},
+            '.Label--focused': {color: '#ffffff'},
+        },
+    };
+};
+
 const isInlineMethod = (config, method) =>
     Array.isArray(config.inlineMethods)
     && config.inlineMethods.includes(method);
@@ -220,6 +253,23 @@ export const init = config => {
     let preparedMethod = '';
     let preparing = false;
     let confirming = false;
+    // Keep the mounted Stripe iframe in sync if the CampusFR topbar changes
+    // day/night while the checkout is open. Do not recreate the Element.
+    let appliedNight = isCampusDark();
+    const appearanceObserver = new MutationObserver(() => {
+        const nextNight = isCampusDark();
+        if (nextNight === appliedNight) {
+            return;
+        }
+        appliedNight = nextNight;
+        if (elements) {
+            elements.update({appearance: campusInlineCardAppearance()});
+        }
+    });
+    appearanceObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class'],
+    });
 
     // H12.3.1: localised copy is rendered in the DOM instead of being passed
     // through js_call_amd(). This keeps the AMD bootstrap compact in all
@@ -440,13 +490,8 @@ export const init = config => {
                         stripe.elements({
                             clientSecret:
                                 payload.clientSecret,
-                            appearance: {
-                                theme: 'stripe',
-                                variables: {
-                                    borderRadius:
-                                        '10px',
-                                },
-                            },
+                            appearance:
+                                campusInlineCardAppearance(),
                         });
 
                     const email =

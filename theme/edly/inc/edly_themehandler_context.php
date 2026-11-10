@@ -15,6 +15,7 @@ use theme_edly\local\customer_navigation;
 require_once($CFG->dirroot.'/local/subscriptions/lib.php');
 require_once($CFG->dirroot.'/local/campus/lib.php');
 
+global $SESSION;
 
 $templatecontext = [
     'sitename'                  => format_string($SITE->shortname, true, ['context' => context_course::instance(SITEID), "escape" => false]),
@@ -165,3 +166,59 @@ if (!empty($templatecontext['guestnavigation']['enabled'])) {
 }
 
 $PAGE->requires->jquery();
+
+// CampusFR dark mode: preserve the learner's preference across pages/devices.
+// Keep CRM and immersive/landing showroom shells light. Ordinary Commerce
+// product pages may now opt into night mode without changing price/payment flow.
+// Unset means enabled: deployments must preserve the current V12 behavior.
+// Only an explicitly saved zero disables dark mode everywhere.
+$campusdarkfeatureenabled = (string)get_config('theme_edly', 'campus_dark_mode_available') !== '0';
+$templatecontext['campusdarkfeatureenabled'] = $campusdarkfeatureenabled;
+$templatecontext['campusdarkauthenticated'] = isloggedin() && !isguestuser();
+// V24.2: distinguish an account with NO recorded preference from a member
+// who deliberately selected light (value 0). On the first authenticated page,
+// the browser can import its pre-activation guest preference exactly once.
+// Existing Moodle preferences are never overwritten.
+$campusdarkstoredpreference = $templatecontext['campusdarkauthenticated']
+    ? get_user_preferences('theme_edly_dark_mode', null)
+    : null;
+$templatecontext['campusdarkpreferenceunset'] = $templatecontext['campusdarkauthenticated']
+    && $campusdarkstoredpreference === null;
+$templatecontext['campusdarkenabled'] = $templatecontext['campusdarkauthenticated']
+    && $campusdarkstoredpreference !== null
+    && (bool)$campusdarkstoredpreference;
+$campusdarkpath = $PAGE->url->get_path();
+$campusdarkiscrm = (bool)preg_match('~^/crm(?:/|$)|^/local/subscriptions/(?:admin/crm/|crm\.php$)~', $campusdarkpath);
+$campusdarkisownedshell = in_array($PAGE->pagelayout, [
+    'showroom', 'storefront', 'storefront_fullwidth', 'storefront_landing', 'storefront_immersive',
+], true);
+// Apply this only to standard product pages with the normal Storefront header.
+// Do not enable dark mode on immersive/landing shells or showroom bridges.
+$campusdarkisproduct = $campusdarkpath === '/local/subscriptions/storefront_product.php'
+    && in_array($PAGE->pagelayout, ['storefront', 'storefront_fullwidth'], true);
+$templatecontext['campusdarkallowed'] = $campusdarkfeatureenabled && !$campusdarkiscrm
+    && (!$campusdarkisownedshell || $campusdarkisproduct);
+$templatecontext['campusdarkshowtoggle'] = $campusdarkfeatureenabled && $templatecontext['campusdarkallowed'];
+$templatecontext['campusdarkenabled'] = $templatecontext['campusdarkallowed'] && $templatecontext['campusdarkenabled'];
+$templatecontext['campusdarksesskey'] = $templatecontext['campusdarkauthenticated'] ? sesskey() : '';
+
+// V25: onboarding nudge for the night mode toggle, only on Mon Campus
+// after login. Never show it to visitors,
+// never in dark mode, and keep showing it on future logins until the member
+// explicitly dismisses it.
+$campusdarkhintdismissed = $templatecontext['campusdarkauthenticated']
+    ? (bool)get_user_preferences('theme_edly_dark_mode_hint_dismissed', 0)
+    : true;
+$campusdarkhintisownpage = $campusdarkpath === '/local/subscriptions/mon_campus.php'
+    || (bool)preg_match('~^/(?:mon-campus|my-campus|moy-kampus)/?$~', $campusdarkpath);
+$campusdarkhinteligiblepage = $templatecontext['campusdarkauthenticated']
+    && !$isguest
+    && $templatecontext['campusdarkshowtoggle']
+    && !$campusdarkisownedshell
+    && $campusdarkhintisownpage;
+$templatecontext['campusdarkhintshow'] = false;
+$templatecontext['campusdarkhintdismissurl'] = $CFG->wwwroot . '/theme/edly/dark_mode_hint.php';
+if ($campusdarkhinteligiblepage && empty($SESSION->theme_edly_dark_mode_hint_seen)) {
+    $SESSION->theme_edly_dark_mode_hint_seen = 1;
+    $templatecontext['campusdarkhintshow'] = !$templatecontext['campusdarkenabled'] && !$campusdarkhintdismissed;
+}

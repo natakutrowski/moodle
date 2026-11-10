@@ -5407,3 +5407,103 @@ border:1px solid var(--commerce-premium-border);border-radius:clamp(1.35rem,2vw,
 .commerce-product-card .commerce-storefront-donation {
     margin-top: .5rem;
 }
+
+
+/* ======================================================================
+ * CampusFR Dark V8 — standard Storefront product composer (CSS only).
+ * This stylesheet is linked AFTER the Moodle theme on storefront_product.php.
+ * No price, payment, catalog or seller resolution behavior changes.
+ * ====================================================================== */
+@media (min-width: 992px) {
+  html body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .navbar-area .main-navbar,
+  html body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .navbar-area .main-navbar > .container-fluid,
+  html body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .navbar-area .main-navbar nav.navbar {
+    height:68px !important; min-height:68px !important;
+    max-width:none !important; margin:0 !important;
+    box-sizing:border-box !important; padding-top:0 !important; padding-bottom:0 !important;
+  }
+  html body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .navbar-area .main-navbar > .container-fluid {
+    width:100% !important; padding-inline:18px !important;
+  }
+  html body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .navbar-area .main-navbar nav.navbar {
+    display:flex !important; align-items:center !important; justify-content:space-between !important;
+  }
+  html body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .navbar-area .main-navbar .navbar-collapse {
+    display:flex !important; flex:1 1 auto !important; align-items:center !important;
+    justify-content:flex-end !important; margin-left:auto !important;
+  }
+}
+
+/* Match the button rhythm of the ordinary Campus topbar, not the compact
+   Storefront-only variant. */
+@media (min-width: 992px) {
+  html.campus-dark body#page-local-subscriptions-storefront_product .navbar-area .campus-customer-nav {
+    gap:.7rem !important; column-gap:.7rem !important;
+    margin-left:auto !important; justify-content:flex-end !important;
+  }
+  html.campus-dark body#page-local-subscriptions-storefront_product .navbar-area .campus-topbar-user__toggle {
+    height:46px !important; min-height:46px !important;
+    padding:5px 12px !important;
+  }
+}
+
+/* The provided DIGITAL.VERBES product uses .commerce-editorial-hero INSIDE
+   .commerce-product-section--hero. It does not have the earlier assumed
+   '.commerce-product-digital-hero' class. Preserve composer layout/media. */
+html.campus-dark body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .commerce-product-page--standard .commerce-product-section {
+  background:#182a48 !important;
+  background-image:radial-gradient(ellipse at 90% 0%,rgba(255,127,183,.10),transparent 55%),linear-gradient(145deg,#172644 0%,#1e3152 100%) !important;
+  color:#eaf1ff !important;
+  border:1px solid rgba(182,202,238,.25) !important;
+  border-radius:26px !important;
+  box-shadow:0 16px 36px rgba(0,0,0,.15) !important;
+}
+html.campus-dark body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .commerce-product-page--standard .commerce-product-section--background-accent {
+  background-image:radial-gradient(ellipse at 9% 90%,rgba(245,75,155,.12),transparent 52%),linear-gradient(145deg,#1e294c,#20294c) !important;
+}
+html.campus-dark body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .commerce-product-page--standard .commerce-product-section--background-soft {
+  background-image:linear-gradient(145deg,#1d304e,#213552) !important;
+}
+html.campus-dark body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .commerce-product-section :is(
+  .commerce-editorial-hero,.commerce-editorial-hero__content,.commerce-product-section__richtext,
+  .commerce-image-text,.commerce-image-text__content,.commerce-product-cta
+) {
+  background-color:transparent !important; background-image:none !important;
+  color:#eaf1ff !important;
+}
+html.campus-dark body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .commerce-product-section :is(
+  .commerce-product-section__title,.commerce-product-section__title--hero,h1,h2,h3,
+  .commerce-product-feature h3
+) {
+  color:#fff3df !important; -webkit-text-fill-color:#fff3df !important;
+  opacity:1 !important; text-shadow:none !important;
+}
+html.campus-dark body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .commerce-product-section :is(
+  .commerce-product-section__subtitle,.commerce-product-section__richtext,
+  .commerce-product-section__richtext p,.commerce-product-section__richtext strong,
+  .commerce-editorial-hero__content p,.commerce-image-text__content p,
+  .commerce-image-text__content li,.commerce-image-text__content strong,
+  .commerce-product-cta p,.commerce-product-faq summary,
+  .commerce-product-faq details > div,.commerce-product-feature > div
+) {
+  color:#e4edff !important; -webkit-text-fill-color:#e4edff !important;
+  opacity:1 !important; text-shadow:none !important;
+}
+html.campus-dark body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .commerce-product-section .commerce-product-feature,
+html.campus-dark body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .commerce-product-section .commerce-product-faq details {
+  background:#203553 !important; background-image:none !important;
+  color:#eaf1ff !important; border:1px solid rgba(188,207,243,.25) !important;
+  border-radius:16px !important;
+}
+html.campus-dark body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .commerce-product-section .commerce-editorial-hero__image,
+html.campus-dark body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .commerce-product-section .commerce-image-text__media img {
+  border-radius:20px !important; background:transparent !important;
+}
+html.campus-dark body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .commerce-product-section .commerce-product-faq details[open] {
+  border-color:rgba(252,166,211,.45) !important;
+}
+@media (max-width: 767.98px) {
+  html.campus-dark body#page-local-subscriptions-storefront_product.edly-storefront-shell--storefront .commerce-product-page--standard .commerce-product-section {
+    padding:1.25rem !important; border-radius:20px !important;
+  }
+}
