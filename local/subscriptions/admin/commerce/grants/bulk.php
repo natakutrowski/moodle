@@ -7,6 +7,7 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\catalog\presentation\CommerceProductDisplayNameResolver;
 use local_subscriptions\commerce\grant\CommerceBulkGrantDryRunService;
 use local_subscriptions\commerce\grant\CommerceBulkGrantCampaignService;
+use local_subscriptions\commerce\grant\CommerceBulkLegacyPlanGrantService;
 use local_subscriptions\commerce\mail\service\CommerceGrantMailStudioSelection;
 use local_subscriptions\commerce\personaloffer\admin\CommercePersonalOfferCrmInput;
 use local_subscriptions\crm\commerce\presentation\CommerceDesignSystemRenderer;
@@ -74,6 +75,10 @@ $sourcetype = optional_param(
 $sourceplanid = optional_param('source_plan_id', 0, PARAM_INT);
 $sourceproductid = optional_param('source_product_id', 0, PARAM_INT);
 $targetproductid = optional_param('target_product_id', 0, PARAM_INT);
+$targetplanid = optional_param('target_plan_id', 0, PARAM_INT);
+$targettype = optional_param('target_type', CommerceBulkLegacyPlanGrantService::TARGET_NATIVE_PRODUCT, PARAM_ALPHAEXT);
+$targetid = $targettype === CommerceBulkLegacyPlanGrantService::TARGET_LEGACY_PLAN
+    ? $targetplanid : $targetproductid;
 $simulation = null;
 $error = null;
 $mailselection = CommerceGrantMailStudioSelection::create($DB);
@@ -107,18 +112,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 required_param('campaign_name', PARAM_TEXT),
                 $sourcetype,
                 $sourceid,
-                $targetproductid,
+                $targetid,
                 optional_param_array('selected_userids', [], PARAM_INT),
                 (int)$USER->id,
                 optional_param('campaign_reason', '', PARAM_TEXT),
-                optional_param('send_access_email', 0, PARAM_BOOL) === 1,
-                optional_param('mailtemplateid', 0, PARAM_INT),
-                optional_param('mailtemplateid', 0, PARAM_INT) > 0
+                $targettype === CommerceBulkLegacyPlanGrantService::TARGET_NATIVE_PRODUCT
+                    && optional_param('send_access_email', 0, PARAM_BOOL) === 1,
+                $targettype === CommerceBulkLegacyPlanGrantService::TARGET_NATIVE_PRODUCT
+                    ? optional_param('mailtemplateid', 0, PARAM_INT) : 0,
+                $targettype === CommerceBulkLegacyPlanGrantService::TARGET_NATIVE_PRODUCT
+                    && optional_param('mailtemplateid', 0, PARAM_INT) > 0
                     ? $mailselection->snapshot(
                         optional_param('mailtemplateid', 0, PARAM_INT)
                     )
                     : [],
-                $scheduledat
+                $scheduledat,
+                $targettype
             );
 
             redirect(new moodle_url(
@@ -130,19 +139,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $simulation = (new CommerceBulkGrantDryRunService($DB))->simulate(
             $sourcetype,
             $sourceid,
-            $targetproductid,
-            (int)$USER->id
+            $targetid,
+            (int)$USER->id,
+            null,
+            $targettype
         );
     } catch (Throwable $exception) {
         $error = $exception->getMessage();
 
         if ($action === 'snapshot') {
-            $simulation = (new CommerceBulkGrantDryRunService($DB))->simulate(
-                $sourcetype,
-                $sourceid,
-                $targetproductid,
-                (int)$USER->id
-            );
+            try {
+                $simulation = (new CommerceBulkGrantDryRunService($DB))->simulate(
+                    $sourcetype, $sourceid, $targetid, (int)$USER->id, null, $targettype
+                );
+            } catch (Throwable $ignored) {
+                $simulation = null;
+            }
         }
     }
 }
@@ -273,6 +285,39 @@ echo CommerceDesignSystemRenderer::filter_panel(
     ) .
     html_writer::div(
         html_writer::label(
+            get_string('commerce_bulk_grant_target_type', 'local_subscriptions'),
+            'bulk-target-type',
+            false,
+            ['class' => 'form-label fw-semibold']
+        ) .
+        html_writer::select([
+            CommerceBulkLegacyPlanGrantService::TARGET_NATIVE_PRODUCT =>
+                get_string('commerce_bulk_grant_target_native', 'local_subscriptions'),
+            CommerceBulkLegacyPlanGrantService::TARGET_LEGACY_PLAN =>
+                get_string('commerce_bulk_grant_target_legacy', 'local_subscriptions'),
+        ], 'target_type', $targettype, false, [
+            'id' => 'bulk-target-type',
+            'class' => 'form-select',
+        ]),
+        'col-lg-4'
+    ) .
+    html_writer::div(
+        html_writer::label(
+            get_string('commerce_bulk_grant_target_plan', 'local_subscriptions'),
+            'bulk-target-plan',
+            false,
+            ['class' => 'form-label fw-semibold']
+        ) .
+        html_writer::select($plans, 'target_plan_id', $targetplanid, ['' => '—'], [
+            'id' => 'bulk-target-plan',
+            'class' => 'form-select',
+        ]) .
+        html_writer::div(get_string('commerce_bulk_grant_target_plan_help', 'local_subscriptions'), 'form-text'),
+        'col-lg-4',
+        ['id' => 'bulk-target-plan-wrap']
+    ) .
+    html_writer::div(
+        html_writer::label(
             get_string('commerce_bulk_grant_target_product', 'local_subscriptions'),
             'bulk-target-product',
             false,
@@ -293,7 +338,8 @@ echo CommerceDesignSystemRenderer::filter_panel(
             get_string('commerce_bulk_grant_target_help', 'local_subscriptions'),
             'form-text'
         ),
-        'col-lg-4'
+        'col-lg-4',
+        ['id' => 'bulk-target-product-wrap']
     ) .
     html_writer::end_div() .
     html_writer::div(
@@ -312,8 +358,10 @@ echo CommerceOffersAccessConfigurationRenderer::end_main();
 $selectedsource = $sourcetype === CommerceBulkGrantDryRunService::SOURCE_NATIVE_PRODUCT
     ? ($products[$sourceproductid]['name'] ?? get_string('commerce_offers_access_config_not_set', 'local_subscriptions'))
     : ($plans[$sourceplanid] ?? get_string('commerce_offers_access_config_not_set', 'local_subscriptions'));
-$selectedtarget = $products[$targetproductid]['name']
-    ?? get_string('commerce_offers_access_config_not_set', 'local_subscriptions');
+$selectedtarget = $targettype === CommerceBulkLegacyPlanGrantService::TARGET_LEGACY_PLAN
+    ? ($plans[$targetplanid] ?? get_string('commerce_offers_access_config_not_set', 'local_subscriptions'))
+    : ($products[$targetproductid]['name']
+        ?? get_string('commerce_offers_access_config_not_set', 'local_subscriptions'));
 $beneficiarycount = $simulation !== null
     ? (string)($simulation['summary']['total'] ?? 0)
     : get_string('commerce_offers_access_config_simulation_required', 'local_subscriptions');
@@ -326,7 +374,8 @@ echo CommerceOffersAccessConfigurationRenderer::summary(
             'value' => $selectedsource,
         ],
         [
-            'label' => get_string('commerce_offers_access_config_product', 'local_subscriptions'),
+            'label' => get_string($targettype === CommerceBulkLegacyPlanGrantService::TARGET_LEGACY_PLAN
+                ? 'commerce_bulk_grant_target_plan' : 'commerce_offers_access_config_product', 'local_subscriptions'),
             'value' => $selectedtarget,
         ],
         [
@@ -353,7 +402,19 @@ $PAGE->requires->js_init_code(<<<JS
     var product = document.getElementById('bulk-source-product-wrap');
     var planSelect = document.getElementById('bulk-source-plan');
     var productSelect = document.getElementById('bulk-source-product');
+    var targetType = document.getElementById('bulk-target-type');
+    var targetPlan = document.getElementById('bulk-target-plan-wrap');
+    var targetProduct = document.getElementById('bulk-target-product-wrap');
+    var targetPlanSelect = document.getElementById('bulk-target-plan');
+    var targetProductSelect = document.getElementById('bulk-target-product');
 
+    function refreshTarget() {
+        var legacy = targetType && targetType.value === 'legacy_plan';
+        if (targetPlan) targetPlan.style.display = legacy ? '' : 'none';
+        if (targetProduct) targetProduct.style.display = legacy ? 'none' : '';
+        if (targetPlanSelect) targetPlanSelect.required = !!legacy;
+        if (targetProductSelect) targetProductSelect.required = !legacy;
+    }
     function refreshSource() {
         var nativeMode = type && type.value === 'native_product';
         if (plan) plan.style.display = nativeMode ? 'none' : '';
@@ -363,7 +424,9 @@ $PAGE->requires->js_init_code(<<<JS
     }
 
     if (type) type.addEventListener('change', refreshSource);
+    if (targetType) targetType.addEventListener('change', refreshTarget);
     refreshSource();
+    refreshTarget();
 })();
 JS);
 
@@ -460,13 +523,19 @@ if ($simulation !== null) {
         'name' => 'target_product_id',
         'value' => $targetproductid,
     ]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'target_plan_id', 'value' => $targetplanid,
+    ]);
+    echo html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'target_type', 'value' => $targettype,
+    ]);
 
     $table = new html_table();
     $table->attributes['class'] = 'generaltable table table-hover align-middle';
     $table->head = [
         get_string('select'),
         get_string('commerce_bulk_grant_customer', 'local_subscriptions'),
-        get_string('commerce_bulk_grant_target_product', 'local_subscriptions'),
+        get_string('commerce_bulk_grant_target_type', 'local_subscriptions'),
         get_string('commerce_bulk_grant_current_ownership', 'local_subscriptions'),
         get_string('commerce_bulk_grant_decision', 'local_subscriptions'),
     ];
@@ -566,7 +635,7 @@ if ($simulation !== null) {
             $decisionhtml .= html_writer::div(s($reason), 'small text-muted mt-1');
         }
 
-        $targetlabel = $products[$targetproductid]['name'] ?? (string)$simulation['target']['name'];
+        $targetlabel = (string)$simulation['target']['name'];
         $select = $decision === CommerceBulkGrantDryRunService::DECISION_ELIGIBLE && $userid
             ? html_writer::checkbox(
                 'selected_userids[]',
@@ -768,10 +837,14 @@ if ($simulation !== null) {
             'rel' => 'noopener',
         ]
     );
-    echo html_writer::div(
-        $communication,
-        'crm-offers-access-communication mt-3'
-    );
+    if ($targettype === CommerceBulkLegacyPlanGrantService::TARGET_NATIVE_PRODUCT) {
+        echo html_writer::div($communication, 'crm-offers-access-communication mt-3');
+    } else {
+        echo html_writer::div(
+            get_string('commerce_bulk_grant_legacy_silent_notice', 'local_subscriptions'),
+            'alert alert-info mt-3'
+        );
+    }
 
     echo html_writer::div(
         html_writer::div(

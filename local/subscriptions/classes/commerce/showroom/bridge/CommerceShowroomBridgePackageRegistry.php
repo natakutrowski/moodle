@@ -158,6 +158,14 @@ final class CommerceShowroomBridgePackageRegistry {
         }
         $url = new \moodle_url('/local/subscriptions/designs/' . $id . '/' . $relative);
         if ($version !== '') {
+            // Bust browser cache after visual-only Articles/Alf updates without
+            // changing the manifest version used by the DEV checkout gate.
+            if ($id === 'articles_alf_reimport') {
+                $mtime = filemtime(self::design_root() . '/' . $id . '/' . $relative);
+                if ($mtime !== false) {
+                    $version .= '-' . (string)$mtime;
+                }
+            }
             $url->param('v', $version);
         }
         return $url->out(false);

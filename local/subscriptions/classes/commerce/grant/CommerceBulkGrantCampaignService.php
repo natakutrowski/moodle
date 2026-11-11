@@ -48,7 +48,8 @@ final class CommerceBulkGrantCampaignService {
         bool $sendemail = true,
         int $mailtemplateid = 0,
         array $mailtemplatesnapshot = [],
-        ?int $scheduledat = null
+        ?int $scheduledat = null,
+        string $targettype = CommerceBulkLegacyPlanGrantService::TARGET_NATIVE_PRODUCT
     ): int {
         $name = trim($name);
         if ($name === '') {
@@ -67,7 +68,9 @@ final class CommerceBulkGrantCampaignService {
             $sourcetype,
             $sourceid,
             $targetproductid,
-            $actoruserid
+            $actoruserid,
+            null,
+            $targettype
         );
 
         $eligible = [];
@@ -100,12 +103,14 @@ final class CommerceBulkGrantCampaignService {
             'sourcetype' => $sourcetype,
             'sourceid' => $sourceid,
             'sourcejson' => json_encode($simulation['source'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            'targetproductid' => $targetproductid,
+            'targettype' => $targettype,
+            'targetproductid' => $targettype === CommerceBulkLegacyPlanGrantService::TARGET_NATIVE_PRODUCT ? $targetproductid : null,
+            'targetplanid' => $targettype === CommerceBulkLegacyPlanGrantService::TARGET_LEGACY_PLAN ? $targetproductid : null,
             'targetjson' => json_encode($simulation['target'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'reason' => trim($reason),
-            'sendemail' => $sendemail ? 1 : 0,
-            'mailtemplateid' => $mailtemplateid > 0 ? $mailtemplateid : null,
-            'mailtemplatesnapshot' => $mailtemplatesnapshot !== []
+            'sendemail' => $targettype === CommerceBulkLegacyPlanGrantService::TARGET_LEGACY_PLAN ? 0 : ($sendemail ? 1 : 0),
+            'mailtemplateid' => $targettype === CommerceBulkLegacyPlanGrantService::TARGET_NATIVE_PRODUCT && $mailtemplateid > 0 ? $mailtemplateid : null,
+            'mailtemplatesnapshot' => $targettype === CommerceBulkLegacyPlanGrantService::TARGET_NATIVE_PRODUCT && $mailtemplatesnapshot !== []
                 ? json_encode(
                     $mailtemplatesnapshot,
                     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
@@ -140,6 +145,7 @@ final class CommerceBulkGrantCampaignService {
                 'evidencejson' => json_encode($row['evidence'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                 'ownershipsource' => (string)$row['ownershipsource'],
                 'plannedgrantcount' => (int)$row['grantcount'],
+                'legacyresultjson' => null,
                 'status' => self::MEMBER_QUEUED,
                 'attempts' => 0,
                 'lasterror' => null,
@@ -410,6 +416,29 @@ final class CommerceBulkGrantCampaignService {
         $member->timemodified = $now;
 
         try {
+            if ((string)($campaign->targettype ?? '') === CommerceBulkLegacyPlanGrantService::TARGET_LEGACY_PLAN) {
+                $frozen = json_decode((string)$campaign->targetjson, true);
+                if (!is_array($frozen) || (int)($frozen['id'] ?? 0) !== (int)$campaign->targetplanid) {
+                    throw new \RuntimeException('Invalid frozen Legacy Plan target.');
+                }
+                $result = (new CommerceBulkLegacyPlanGrantService($this->db))->grant(
+                    (int)$member->userid,
+                    (int)$campaign->targetplanid,
+                    (int)$campaign->id,
+                    (int)$member->id,
+                    $frozen
+                );
+                // Store the exact subscription and expiration used for later conversion.
+                $member->legacyresultjson = json_encode($result, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+                $member->status = $result['state'] === 'skipped'
+                    ? self::MEMBER_SKIPPED : self::MEMBER_COMPLETED;
+                $member->lasterror = null;
+                $member->completedat = $now;
+                $stats[$result['state'] === 'skipped' ? 'skipped' : 'completed']++;
+                $this->db->update_record(self::TABLE_MEMBER, $member);
+                $stats['processed']++;
+                return;
+            }
             $target = $this->db->get_record(
                 'local_subs_commerce_product',
                 ['id' => (int)$campaign->targetproductid],

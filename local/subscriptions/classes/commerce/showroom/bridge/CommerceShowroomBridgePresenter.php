@@ -121,8 +121,18 @@ final class CommerceShowroomBridgePresenter {
                 'ischeckouttest' => $checkouttest,
                 'isdevpublishedpilot' => $publicpilot],
             'content' => $copy,
-            'media' => ['presentationVideoUrl' => (new CommerceShowroomBridgeVideoService(\context_system::instance()))
-                ->get_url((int)$record->id)?->out(false) ?? $settings['videoUrl']],
+            'media' => [
+                'presentationVideoUrl' => (new CommerceShowroomBridgeVideoService(\context_system::instance()))
+                    ->get_url((int)$record->id)?->out(false) ?? $settings['videoUrl'],
+                // A configurable HTTPS image overrides the design's bundled Alf cover.
+                // The fallback is a static, versioned, trusted resource (no CMS migration).
+                'presentationPosterUrl' => $settings['posterUrl'] !== ''
+                    ? $settings['posterUrl']
+                    : ($id === 'articles_alf_reimport'
+                        ? (new \moodle_url('/local/subscriptions/designs/articles_alf_reimport/dist/assets/video-cover-alf.webp',
+                            ['v' => $manifest['version']]))->out(false)
+                        : ''),
+            ],
             'commerce' => [
                 'offers' => $offers,
                 'currency' => $data['currency'] ?? '',
@@ -142,6 +152,9 @@ final class CommerceShowroomBridgePresenter {
                 'shop' => (string)($data['shopurl'] ?? ''),
                 'cart' => (string)($data['carturl'] ?? ''),
                 'support' => (string)($data['supporturl'] ?? 'mailto:support@campusfr.fr'),
+                // URLs are validated against the official platform domains in BridgeSettings.
+                'telegram' => $settings['telegramUrl'],
+                'whatsapp' => $settings['whatsappUrl'],
                 'privacy' => $designlinks['privacy'] ?? (string)($policyurls['policy'] ?? ''),
                 'terms' => $designlinks['terms'] ?? (string)($policyurls['terms'] ?? ''),
                 'offer' => $designlinks['offer'] ?? (string)($policyurls['offer'] ?? ''),
@@ -155,7 +168,9 @@ final class CommerceShowroomBridgePresenter {
         return [
             'bridgeid' => $id,
             'bridgeversion' => $manifest['version'],
-            'bridgescripturl' => CommerceShowroomBridgePackageRegistry::asset_url($id, $manifest['entry'], $manifest['version']),
+            'bridgescripturl' => CommerceShowroomBridgePackageRegistry::asset_url(
+                $id, $manifest['entry'], $manifest['version'] . '-' . substr(hash_file('sha256',
+                    $base . '/' . $manifest['entry']), 0, 12)),
             'bridgecssurl' => CommerceShowroomBridgePackageRegistry::asset_url($id, $manifest['css'], $manifest['version']),
             'bridgepayloadjson' => $safejson,
             'bridgefallbacktitle' => (string)($copy['hero']['title1'] ?? 'CampusFR'),

@@ -15,7 +15,7 @@ final class CommerceShowroomDevCheckoutTestGate {
     public const KEY = 'articlesalfbridgepilot';
     public const TEMPLATE = 'local_subscriptions/showroom/bridge';
     public const DESIGN = 'articles_alf_reimport';
-    public const DESIGN_VERSION = '0.4.11';
+    public const DESIGN_VERSION = '0.4.13';
     public const DEV_ROOT = 'https://moodle-v2.campusfr.fr';
 
     public static function eligible(

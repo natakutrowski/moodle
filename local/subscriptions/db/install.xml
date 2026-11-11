@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026110103" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026110801" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
         <TABLE NAME="user_subscription" COMMENT="Table storing user subscription data">
             <FIELDS>
@@ -2259,7 +2259,7 @@
             </INDEXES>
         </TABLE>
 
-        <TABLE NAME="local_subs_commerce_grant_campaign" COMMENT="Frozen CRM bulk Native grant campaigns">
+        <TABLE NAME="local_subs_commerce_grant_campaign" COMMENT="Frozen CRM bulk Native or Legacy Plan grant campaigns">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
                 <FIELD NAME="campaignkey" TYPE="char" LENGTH="64" NOTNULL="true" />
@@ -2267,7 +2267,9 @@
                 <FIELD NAME="sourcetype" TYPE="char" LENGTH="32" NOTNULL="true" />
                 <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" />
                 <FIELD NAME="sourcejson" TYPE="text" NOTNULL="true" />
-                <FIELD NAME="targetproductid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="targettype" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="native_product" />
+                <FIELD NAME="targetproductid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="targetplanid" TYPE="int" LENGTH="10" NOTNULL="false" />
                 <FIELD NAME="targetjson" TYPE="text" NOTNULL="true" />
                 <FIELD NAME="reason" TYPE="text" NOTNULL="false" />
                 <FIELD NAME="sendemail" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" />
@@ -2290,6 +2292,7 @@
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id" />
                 <KEY NAME="targetproduct_fk" TYPE="foreign" FIELDS="targetproductid" REFTABLE="local_subs_commerce_product" REFFIELDS="id" />
+                <KEY NAME="targetplan_fk" TYPE="foreign" FIELDS="targetplanid" REFTABLE="subscription_plan" REFFIELDS="id" />
             </KEYS>
             <INDEXES>
                 <INDEX NAME="campaignkey_uix" UNIQUE="true" FIELDS="campaignkey" />
@@ -2297,7 +2300,7 @@
                 <INDEX NAME="status_schedule_idx" UNIQUE="false" FIELDS="status,scheduledat" />
             </INDEXES>
         </TABLE>
-        <TABLE NAME="local_subs_commerce_grant_campaign_member" COMMENT="Frozen selected beneficiaries of a CRM bulk Native grant campaign">
+        <TABLE NAME="local_subs_commerce_grant_campaign_member" COMMENT="Frozen beneficiaries of a Native or Legacy Plan grant campaign">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
                 <FIELD NAME="campaignid" TYPE="int" LENGTH="10" NOTNULL="true" />
@@ -2309,6 +2312,7 @@
                 <FIELD NAME="evidencejson" TYPE="text" NOTNULL="true" />
                 <FIELD NAME="ownershipsource" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="none" />
                 <FIELD NAME="plannedgrantcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="legacyresultjson" TYPE="text" NOTNULL="false" />
                 <FIELD NAME="status" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="queued" />
                 <FIELD NAME="attempts" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
                 <FIELD NAME="lasterror" TYPE="text" NOTNULL="false" />

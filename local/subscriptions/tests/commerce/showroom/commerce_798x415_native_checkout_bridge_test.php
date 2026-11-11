@@ -8,7 +8,7 @@ require_once(__DIR__ . '/../../../classes/commerce/showroom/bridge/CommerceShowr
 /** Production-capable native submission; DEV pilot sandbox and OTP guest checkout remain intact. */
 final class commerce_798x415_native_checkout_bridge_test extends advanced_testcase {
     public function test_public_pilot_only_accepts_reviewed_bridge_version(): void {
-        self::assertSame('0.4.11', Gate::DESIGN_VERSION);
+        self::assertSame('0.4.13', Gate::DESIGN_VERSION);
         $args=[8,'published',Gate::KEY,Gate::TEMPLATE,Gate::DEV_ROOT,Gate::DESIGN,
             Gate::DESIGN_VERSION,Gate::PUBLIC_PILOT_SLUGS];
         self::assertTrue(Gate::eligible_published_pilot(...$args));
