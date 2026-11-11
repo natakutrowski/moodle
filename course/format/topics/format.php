@@ -57,4 +57,27 @@ if (!is_null($displaysection)) {
 }
 $outputclass = $format->get_output_classname('content');
 $widget = new $outputclass($format);
+
+// TOPICS_EDITOR_OVERVIEW_V6_BEGIN
+// Offer the native full editing view without changing the student experience.
+if ($format->show_editor() &&
+        $format->get_course_display() == COURSE_DISPLAY_MULTIPAGE &&
+        empty($format->get_sectionid()) &&
+        $PAGE->pagetype === 'course-view-topics' &&
+        $PAGE->url->get_path() === '/course/view.php') {
+    $editorfull = optional_param('editor_full', 0, PARAM_BOOL) ||
+        optional_param('campusfr_full', 0, PARAM_BOOL);
+    $editorurl = new \moodle_url('/course/view.php', ['id' => $course->id]);
+    if (!$editorfull) {
+        $editorurl->param('editor_full', 1);
+    }
+    $editorlabel = $editorfull ? 'Retour au sommaire' : 'Vue complète';
+    echo \html_writer::div(
+        \html_writer::link($editorurl, $editorlabel, ['class' => 'btn btn-outline-secondary btn-sm']),
+        'text-end mb-3',
+        ['data-editor-overview' => $editorfull ? 'full' : 'compact']
+    );
+}
+// TOPICS_EDITOR_OVERVIEW_V6_END
+
 echo $renderer->render($widget);
