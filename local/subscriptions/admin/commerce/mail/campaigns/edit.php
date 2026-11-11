@@ -102,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $mode = optional_param('mode', 'preview', PARAM_ALPHA);
     // The separate test/pause/resume/cancel form contains none of the editor fields.
     // Never parse or validate unrelated audience data for an operational action.
-    if (!in_array($mode, ['pause', 'resume', 'cancel', 'test'], true)) {
+    if (!in_array($mode, ['pause', 'resume', 'cancel', 'test', 'reschedule', 'startnow'], true)) {
         $source = optional_param('audiencesource', 'manual', PARAM_ALPHA);
         $namevalue = optional_param('name', '', PARAM_TEXT);
         $templatevalue = optional_param('templateid', 0, PARAM_INT);
@@ -141,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (count($selectedexcludedids) > 500) {
             throw new \invalid_parameter_exception('Too many manually excluded accounts.');
         }
-        if (in_array($mode, ['pause', 'resume', 'cancel', 'test'], true)) {
+        if (in_array($mode, ['pause', 'resume', 'cancel', 'test', 'reschedule', 'startnow'], true)) {
             if (!$campaign || $id <= 0) {
                 throw new \invalid_parameter_exception('A saved campaign is required.');
             }
@@ -154,6 +154,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $service->send_test($id, (int)$USER->id, $testlanguage);
                 $message = get_string('commerce_campaign_stage4_test_success', 'local_subscriptions', $USER->email);
+            } else if ($mode === 'reschedule') {
+                $raw = required_param('rescheduledat', PARAM_RAW_TRIMMED);
+                $date = \DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $raw,
+                    \core_date::get_user_timezone_object());
+                $errors = \DateTimeImmutable::getLastErrors();
+                if (!$date || ($errors !== false && ($errors['warning_count'] || $errors['error_count']))) {
+                    throw new \invalid_parameter_exception(get_string(
+                        'commerce_campaign_start_invalid_date', 'local_subscriptions'));
+                }
+                $service->change_start($id, $date->getTimestamp(), (int)$USER->id);
+                $message = get_string('commerce_campaign_start_updated', 'local_subscriptions');
+            } else if ($mode === 'startnow') {
+                if (!optional_param('confirm_startnow', 0, PARAM_BOOL)) {
+                    throw new \invalid_parameter_exception(get_string(
+                        'commerce_campaign_start_confirm_required', 'local_subscriptions'));
+                }
+                $service->change_start($id, null, (int)$USER->id);
+                $message = get_string('commerce_campaign_start_now_queued', 'local_subscriptions');
             } else if ($mode === 'pause') {
                 $service->pause($id);
                 $message = get_string('commerce_campaign_stage4_paused', 'local_subscriptions');
@@ -885,7 +903,9 @@ if ($campaign) {
     if (in_array($status, ['draft', 'scheduled', 'queued', 'paused'], true)) {
         $actions['cancel'] = get_string('commerce_campaign_stage4_cancel', 'local_subscriptions');
     }
-    if ($actions) {
+    $canreschedule = in_array($status, ['scheduled', 'paused'], true)
+        && $service->can_change_start((int)$campaign->id);
+    if ($actions || $canreschedule) {
         echo html_writer::start_tag('form', [
             'method' => 'post', 'action' => $pageurl->out(false),
             'class' => 'card card-body mt-3',
@@ -907,6 +927,40 @@ if ($campaign) {
                 echo html_writer::div(get_string('commerce_marketing_campaign_languages_missing',
                     'local_subscriptions', 'fr/ru/en'), 'alert alert-warning');
             }
+        }
+        if ($canreschedule) {
+            $newdate = userdate(max(time() + HOURSECS, (int)$campaign->scheduledat), '%Y-%m-%dT%H:%M');
+            echo html_writer::start_div('border rounded p-3 mb-3');
+            echo html_writer::div(get_string('commerce_campaign_start_heading', 'local_subscriptions'),
+                'fw-semibold mb-2');
+            echo html_writer::div(get_string('commerce_campaign_start_current', 'local_subscriptions')
+                . ' ' . userdate((int)$campaign->scheduledat,
+                    get_string('strftimedatetimeshort', 'langconfig')), 'form-text mb-2');
+            echo html_writer::tag('label', get_string('commerce_campaign_start_new_date', 'local_subscriptions'),
+                ['for' => 'commerce-campaign-rescheduledat', 'class' => 'form-label'])
+                . html_writer::empty_tag('input', [
+                    'id' => 'commerce-campaign-rescheduledat',
+                    'type' => 'datetime-local', 'name' => 'rescheduledat',
+                    'value' => $newdate, 'class' => 'form-control mb-2',
+                    'style' => 'max-width:330px',
+                ]);
+            echo html_writer::tag('button', get_string('commerce_campaign_start_update', 'local_subscriptions'), [
+                'type' => 'submit', 'name' => 'mode', 'value' => 'reschedule',
+                'class' => 'btn btn-sm btn-primary me-2 mb-2',
+            ]);
+            echo html_writer::div(
+                html_writer::checkbox('confirm_startnow', '1', false,
+                    get_string('commerce_campaign_start_confirm', 'local_subscriptions'),
+                    ['id' => 'commerce-campaign-confirm-startnow', 'class' => 'me-2']),
+                'mt-2 mb-2'
+            );
+            echo html_writer::tag('button', get_string('commerce_campaign_start_now', 'local_subscriptions'), [
+                'type' => 'submit', 'name' => 'mode', 'value' => 'startnow',
+                'class' => 'btn btn-sm btn-outline-warning',
+            ]);
+            echo html_writer::div(get_string('commerce_campaign_start_cron_help', 'local_subscriptions'),
+                'form-text mt-2');
+            echo html_writer::end_div();
         }
         foreach ($actions as $action => $label) {
             $danger = $action === 'cancel';

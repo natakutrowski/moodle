@@ -38,7 +38,22 @@ final class process_marketing_mail_campaigns_task extends scheduled_task {
         $queue = CommerceMailRuntime::queue_service();
         $optouts = CommerceMarketingOptoutService::create($DB);
 
+        $lockfactory = \core\lock\lock_config::get_lock_factory('local_subscriptions_marketing_campaigns');
         foreach ($repository->due($now, 10) as $campaign) {
+            $lock = $lockfactory->get_lock('campaign_' . (int)$campaign->id, 0);
+            if (!$lock) {
+                // Another worker or operator is changing this campaign. Try next cron.
+                continue;
+            }
+            try {
+                // The due list can be stale if the operator postponed the start.
+                $current = $repository->get((int)$campaign->id);
+                if ((string)$current->status !== 'scheduled'
+                        || empty($current->scheduledat)
+                        || (int)$current->scheduledat > time()) {
+                    continue;
+                }
+                $campaign = $current;
             if (in_array((string)($campaign->audiencesource ?? 'manual'), ['course', 'profiles'], true)) {
                 if (!CommerceMarketingCourseCampaignGate::enabled()) {
                     mtrace('[Marketing Mail] course campaign release switch OFF: ' . (int)$campaign->id);
@@ -61,7 +76,8 @@ final class process_marketing_mail_campaigns_task extends scheduled_task {
             foreach ($repository->recipients((int)$campaign->id) as $recipient) {
                 // Operators can pause or cancel a campaign while this cron is running.
                 // Re-check state before queuing every recipient.
-                if ((string)$repository->get((int)$campaign->id)->status !== 'scheduled') {
+                $live = $repository->get((int)$campaign->id);
+                if ((string)$live->status !== 'scheduled' || (int)$live->scheduledat > time()) {
                     break;
                 }
                 if (!empty($recipient->mailid) || (string)$recipient->status === 'cancelled') {
@@ -118,6 +134,9 @@ final class process_marketing_mail_campaigns_task extends scheduled_task {
                 (int)$campaign->id,
                 $queued
             ));
+            } finally {
+                $lock->release();
+            }
         }
     }
 }

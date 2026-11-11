@@ -13191,6 +13191,22 @@ $string['commerce_campaign_stage3_reason_excluded_existing_course'] = 'Already h
 $string['commerce_campaign_stage3_reason_excluded_purchased_product'] = 'Already purchased an excluded product';
 $string['commerce_mail_studio_preview_empty'] = 'No complete content available in this language.';
 
+// Marketing campaigns: change start time before the first queue operation.
+$string['commerce_campaign_start_heading'] = 'Campaign start (no delivery has begun)';
+$string['commerce_campaign_start_current'] = 'Currently scheduled for:';
+$string['commerce_campaign_start_new_date'] = 'New date and time';
+$string['commerce_campaign_start_update'] = 'Save and reschedule';
+$string['commerce_campaign_start_confirm'] = 'I confirm that this campaign should start now.';
+$string['commerce_campaign_start_now'] = 'Start now';
+$string['commerce_campaign_start_cron_help'] = 'Start now makes the campaign eligible at the next cron run (normally every minute). Audience and content remain unchanged. Campaigns already queued cannot be rescheduled.';
+$string['commerce_campaign_start_busy'] = 'This campaign is being processed. Check its current state and try again.';
+$string['commerce_campaign_start_already_started'] = 'This campaign has already started, was cancelled, or is not scheduled. Its start time cannot be changed.';
+$string['commerce_campaign_start_future_required'] = 'Choose a future time, or use Start now.';
+$string['commerce_campaign_start_invalid_date'] = 'Invalid start date or time.';
+$string['commerce_campaign_start_confirm_required'] = 'Explicitly confirm Start now.';
+$string['commerce_campaign_start_updated'] = 'Start time updated. The campaign has been rescheduled.';
+$string['commerce_campaign_start_now_queued'] = 'Start now requested: the campaign will be prepared at the next cron run.';
+
 // CampusFR XP reconciliation audit — phase 1 (no automatic awards).
 $string['commerce_xp_audit_title'] = 'XP reconciliation';
 $string['commerce_xp_audit_task'] = 'CampusFR: pedagogical XP audit (no awards)';

@@ -283,6 +283,68 @@ final class CommerceMarketingCampaignService {
             || (bool)$config['excludealreadycontacted'];
     }
 
+    /**
+     * A campaign can be reprogrammed only before the first recipient is processed.
+     * Read-only: safe to call when displaying the campaign controls.
+     */
+    public function can_change_start(int $campaignid): bool {
+        $campaign = $this->repository->get($campaignid);
+        if (!in_array((string)$campaign->status, ['scheduled', 'paused'], true)
+                || !empty($campaign->queuedat)) {
+            return false;
+        }
+        return !$this->db->record_exists_select('local_subs_mail_campaign_recipient',
+            'campaignid = :campaignid AND (mailid IS NOT NULL OR status <> :draft)',
+            ['campaignid' => $campaignid, 'draft' => 'draft']);
+    }
+
+    /**
+     * Change only the start time; keep content, audience, and legal confirmation frozen.
+     * The same per-campaign lock is taken by the cron before creating outbox entries.
+     */
+    public function change_start(int $campaignid, ?int $newtime, int $userid): void {
+        $factory = \core\lock\lock_config::get_lock_factory('local_subscriptions_marketing_campaigns');
+        $lock = $factory->get_lock('campaign_' . $campaignid, 5);
+        if (!$lock) {
+            throw new \invalid_parameter_exception(get_string(
+                'commerce_campaign_start_busy', 'local_subscriptions'));
+        }
+        try {
+            if (!$this->can_change_start($campaignid)) {
+                throw new \invalid_parameter_exception(get_string(
+                    'commerce_campaign_start_already_started', 'local_subscriptions'));
+            }
+            $campaign = $this->repository->get($campaignid);
+            // Re-confirm the server-side release switch. A paused course audience
+            // must not get around the existing permission and eligibility checks.
+            if (in_array((string)($campaign->audiencesource ?? 'manual'), ['course', 'profiles'], true)) {
+                if (!CommerceMarketingCourseCampaignGate::enabled()) {
+                    throw new \invalid_parameter_exception(get_string(
+                        'commerce_campaign_e8_disabled', 'local_subscriptions'));
+                }
+                if (!CommerceMarketingCourseCampaignGate::snapshot_is_current(
+                        $this->db, $this->repository, $campaign)) {
+                    throw new \invalid_parameter_exception(get_string(
+                        'commerce_campaign_e8_stale_audience', 'local_subscriptions'));
+                }
+            }
+            $now = time();
+            if ($newtime !== null && $newtime <= $now) {
+                throw new \invalid_parameter_exception(get_string(
+                    'commerce_campaign_start_future_required', 'local_subscriptions'));
+            }
+            $this->repository->update_campaign((object)[
+                'id' => $campaignid,
+                'status' => 'scheduled',
+                'scheduledat' => $newtime ?? $now,
+                'timemodified' => $now,
+                'usermodified' => $userid,
+            ]);
+        } finally {
+            $lock->release();
+        }
+    }
+
     public function pause(int $campaignid): void {
         $campaign = $this->repository->get($campaignid);
         if (!in_array((string)$campaign->status, ['scheduled', 'queued'], true)) {

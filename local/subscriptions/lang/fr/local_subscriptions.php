@@ -13026,6 +13026,22 @@ $string['commerce_campaign_stage3_reason_excluded_existing_course'] = 'Possède 
 $string['commerce_campaign_stage3_reason_excluded_purchased_product'] = 'A déjà acheté un des produits exclus';
 $string['commerce_mail_studio_preview_empty'] = 'Aucun contenu complet disponible pour cette langue.';
 
+// Marketing campaigns: change start time before the first queue operation.
+$string['commerce_campaign_start_heading'] = 'Début de la campagne (aucun envoi commencé)';
+$string['commerce_campaign_start_current'] = 'Début actuellement prévu :';
+$string['commerce_campaign_start_new_date'] = 'Nouvelle date et heure';
+$string['commerce_campaign_start_update'] = 'Enregistrer et reprogrammer';
+$string['commerce_campaign_start_confirm'] = 'Je confirme le lancement immédiat de cette campagne.';
+$string['commerce_campaign_start_now'] = 'Démarrer maintenant';
+$string['commerce_campaign_start_cron_help'] = 'Le démarrage immédiat rend la campagne éligible au prochain passage du cron (en principe chaque minute). Les destinataires et le contenu restent inchangés. Une campagne déjà mise en file d’attente ne peut pas être reprogrammée.';
+$string['commerce_campaign_start_busy'] = 'Cette campagne est actuellement en cours de préparation. Réessaie après vérification de son état.';
+$string['commerce_campaign_start_already_started'] = 'La campagne a déjà commencé, est annulée ou n’est pas programmée : le démarrage n’est plus modifiable.';
+$string['commerce_campaign_start_future_required'] = 'Choisis une heure future ; pour lancer tout de suite, utilise « Démarrer maintenant ».';
+$string['commerce_campaign_start_invalid_date'] = 'Date ou heure de démarrage invalide.';
+$string['commerce_campaign_start_confirm_required'] = 'Confirme explicitement le lancement immédiat.';
+$string['commerce_campaign_start_updated'] = 'Nouvel horaire enregistré. La campagne est reprogrammée.';
+$string['commerce_campaign_start_now_queued'] = 'Démarrage immédiat demandé : préparation au prochain passage du cron.';
+
 // CampusFR XP reconciliation audit — phase 1 (no automatic awards).
 $string['commerce_xp_audit_title'] = 'Réconciliation XP';
 $string['commerce_xp_audit_task'] = 'CampusFR : audit des récompenses pédagogiques (sans attribution)';

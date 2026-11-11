@@ -13266,6 +13266,22 @@ $string['commerce_campaign_stage3_reason_excluded_existing_course'] = 'Уже е
 $string['commerce_campaign_stage3_reason_excluded_purchased_product'] = 'Уже куплен один из исключённых продуктов';
 $string['commerce_mail_studio_preview_empty'] = 'Для этого языка пока нет готового содержимого.';
 
+// Marketing campaigns: change start time before the first queue operation.
+$string['commerce_campaign_start_heading'] = 'Начало рассылки (отправка ещё не началась)';
+$string['commerce_campaign_start_current'] = 'Текущее время начала:';
+$string['commerce_campaign_start_new_date'] = 'Новая дата и время';
+$string['commerce_campaign_start_update'] = 'Сохранить и перенести';
+$string['commerce_campaign_start_confirm'] = 'Подтверждаю немедленный запуск этой рассылки.';
+$string['commerce_campaign_start_now'] = 'Запустить сейчас';
+$string['commerce_campaign_start_cron_help'] = 'Немедленный запуск делает рассылку доступной при следующем запуске cron (обычно каждую минуту). Аудитория и содержание не меняются. Уже поставленные в очередь рассылки перенести нельзя.';
+$string['commerce_campaign_start_busy'] = 'Сейчас идёт подготовка этой рассылки. Проверь статус и попробуй снова.';
+$string['commerce_campaign_start_already_started'] = 'Рассылка уже запущена, отменена или не запланирована. Изменение времени недоступно.';
+$string['commerce_campaign_start_future_required'] = 'Выбери время в будущем или нажми «Запустить сейчас».';
+$string['commerce_campaign_start_invalid_date'] = 'Некорректная дата или время запуска.';
+$string['commerce_campaign_start_confirm_required'] = 'Подтверди немедленный запуск рассылки.';
+$string['commerce_campaign_start_updated'] = 'Новое время сохранено. Рассылка перепланирована.';
+$string['commerce_campaign_start_now_queued'] = 'Запрошен немедленный запуск. Рассылка начнётся при следующем запуске cron.';
+
 // CampusFR XP reconciliation audit — phase 1 (no automatic awards).
 $string['commerce_xp_audit_title'] = 'Сверка XP';
 $string['commerce_xp_audit_task'] = 'CampusFR: аудит наград без начислений';
