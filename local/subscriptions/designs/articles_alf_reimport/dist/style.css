@@ -406,6 +406,95 @@ section.night-scope.bg-stars.relative.flex.flex-col.overflow-hidden > div:first-
 }
 
 
+/* CampusFR offers currency selector: compact first-card heading (2026-11-10) */
+/* Presentation only. Keep the existing React currency refresh and native checkout. */
+#offers.night-scope .campusfr-v3-offer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  gap: .4rem;
+  min-height: 1.875rem;
+}
+#offers.night-scope .campusfr-v3-offer-head > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+#offers.night-scope .campusfr-v3-offer-head > div:nth-child(2) {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 55%;
+  position: relative;
+}
+#offers.night-scope .campusfr-v3-offer-head .flex.w-fit.items-center:has(> .campusfr-v3-currency-select) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  max-width: 100%;
+  padding: 0;
+  background: color-mix(in oklab, var(--night-foreground) 3%, transparent);
+  border: 1px solid color-mix(in oklab, var(--primary) 32%, transparent);
+  border-radius: 999px;
+  box-shadow: none;
+  transition: background-color .18s ease, border-color .18s ease;
+}
+#offers.night-scope .campusfr-v3-offer-head .flex.w-fit.items-center:has(> .campusfr-v3-currency-select):hover {
+  background: color-mix(in oklab, var(--primary) 9%, transparent);
+  border-color: color-mix(in oklab, var(--primary) 52%, transparent);
+}
+/* Icon and visible label are redundant beside APPRENDRE; preserve label for assistive tech. */
+#offers.night-scope .campusfr-v3-offer-head svg,
+#offers.night-scope .campusfr-v3-offer-head label[for="campusfr-v3-offer-currency"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+#offers.night-scope .campusfr-v3-offer-head .campusfr-v3-currency-select {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  height: 1.8rem;
+  margin: 0;
+  padding: .25rem .6rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--night-foreground);
+  font-size: .73rem;
+  line-height: 1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  box-shadow: none;
+  cursor: pointer;
+}
+#offers.night-scope .campusfr-v3-offer-head .campusfr-v3-currency-select:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--primary) 88%, transparent);
+  outline-offset: 2px;
+}
+#offers.night-scope .campusfr-v3-offer-head [role="alert"] {
+  position: absolute;
+  z-index: 3;
+  top: 100%;
+  right: 0;
+  width: 11.5rem;
+  padding: .35rem .5rem;
+  border-radius: .4rem;
+  background: var(--night-deep);
+  text-align: right;
+  font-size: .7rem;
+}
+/* Selector no longer consumes a separate row above the three offers. */
+#offers.night-scope .mt-7.grid.max-w-6xl.items-start {
+  margin-top: clamp(2rem, 3.5vw, 3.5rem);
+}
+
+
 /* CampusFR: three synced currency selectors under offers */
 #offers.night-scope .campusfr-v3-currency-footer {
   margin-top: .9rem;

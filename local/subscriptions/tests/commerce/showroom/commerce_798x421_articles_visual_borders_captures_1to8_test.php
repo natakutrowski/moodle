@@ -18,8 +18,9 @@ final class commerce_798x421_articles_visual_borders_captures_1to8_test extends 
         $manifest = json_decode((string)file_get_contents($base . 'manifest.json'), true);
 
         self::assertSame('0.4.13', $manifest['version']);
-        // Compilation/checkout remains exactly as supplied in the DEV source archive.
-        self::assertStringContainsString('currencySelector:s.jsxDEV(S5', (string)file_get_contents(dirname(__DIR__, 3) . '/designs/articles_alf_reimport/dist/main.js'));
+        // Currency selector was relocated; checkout contract is unchanged.
+        self::assertStringContainsString('data-campusfr-native-checkout-v46', $js);
+        self::assertStringContainsString('currencySelector:s.jsxDEV(S5', $js);
         self::assertStringContainsString('CampusFR visual parity pass 03', $css);
         self::assertStringContainsString('CampusFR visual parity pass 04', $css);
         foreach ([

@@ -147,7 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $settingsjson = CommerceShowroomBridgeSettings::merge_into_settings_json(
             $settingsjson, optional_param('bridgedesign', '', PARAM_ALPHANUMEXT), $bridgejson,
-            $hasbridgeupload || $removebridgevideo ? '' : null
+            $hasbridgeupload || $removebridgevideo ? '' : null,
+            optional_param('bridgeposter_url', $savedbridgesettings['posterUrl'], PARAM_RAW_TRIMMED)
         );
     }
     $productsjson = (string)($record->productsjson ?? '{}');
@@ -727,6 +728,20 @@ if ($currentbridgevideourl !== null) {
 echo html_writer::tag('div',
     'Dépose ici une vidéo MP4 ou WebM (500 Mo maximum). Le fichier est hébergé dans Moodle et remplace le visuel d’attente. '
     . 'Les limites PHP upload_max_filesize et post_max_size du serveur doivent également permettre cette taille.',
+    ['class' => 'form-text mb-3']
+);
+// Video poster: editable HTTPS image URL; empty means the packaged Alf image.
+echo html_writer::tag('label', 'Image de couverture vidéo (URL HTTPS, facultatif)',
+    ['for' => 'bridgeposter_url', 'class' => 'form-label']);
+echo html_writer::empty_tag('input', [
+    'type' => 'url', 'id' => 'bridgeposter_url', 'name' => 'bridgeposter_url',
+    'value' => $currentbridge['posterUrl'], 'maxlength' => 2048,
+    'placeholder' => 'Laisser vide pour utiliser l’image Alf du design',
+    'class' => 'form-control mb-1',
+]);
+echo html_writer::tag('p',
+    'L’image Alf fournie est utilisée par défaut. Pour la remplacer, renseigne une URL HTTPS publique de ton image. ' .
+    'Le MP4 et sa configuration ne changent pas.',
     ['class' => 'form-text mb-3']
 );
 // X2: any trusted design with language catalogues receives the same editor.

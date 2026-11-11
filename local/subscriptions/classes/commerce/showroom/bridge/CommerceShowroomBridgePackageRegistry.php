@@ -158,7 +158,8 @@ final class CommerceShowroomBridgePackageRegistry {
         }
         $url = new \moodle_url('/local/subscriptions/designs/' . $id . '/' . $relative);
         if ($version !== '') {
-            // Version asset URLs using file modification time, not commerce manifest version.
+            // Bust browser cache after visual-only Articles/Alf updates without
+            // changing the manifest version used by the DEV checkout gate.
             if ($id === 'articles_alf_reimport') {
                 $mtime = filemtime(self::design_root() . '/' . $id . '/' . $relative);
                 if ($mtime !== false) {
