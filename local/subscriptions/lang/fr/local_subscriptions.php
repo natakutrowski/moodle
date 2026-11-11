@@ -13006,3 +13006,22 @@ $string['commerce_my_clan_photo_saved'] = 'Photo du clan mise à jour.';
 $string['commerce_my_clan_photo_missing'] = 'Choisis une image ou coche « Supprimer la photo actuelle ».';
 $string['commerce_my_clan_photo_size'] = 'Image invalide : maximum 4 Mo.';
 $string['commerce_my_clan_photo_invalid'] = 'Choisis une image JPG, PNG ou WebP valide (6000 px maximum par côté).';
+
+// Global Mail Studio preview and profile-targeted campaign filters.
+$string['commerce_mail_studio_preview_language'] = 'Langue à prévisualiser';
+$string['commerce_mail_studio_preview_help'] = 'Aperçu depuis les champs actuels, même sans enregistrer. Les noms sont fictifs ; les liens de prévisualisation ne sont pas des liens de vente. Les données dynamiques de commande ne sont pas simulées.';
+$string['commerce_mail_studio_preview_title'] = 'Aperçu de ton email';
+$string['commerce_mail_studio_preview_button'] = 'Prévisualiser sans enregistrer';
+$string['commerce_campaign_profiles_source'] = 'Profils Moodle (ciblage global)';
+$string['commerce_campaign_profiles_segment'] = 'Quel public cibler ?';
+$string['commerce_campaign_profiles_customers'] = 'Clients réels : Student sur au moins un cours OU achat Native confirmé';
+$string['commerce_campaign_profiles_trial'] = 'Essai uniquement : Trialstudent sur un cours, aucun Student ni achat Native';
+$string['commerce_campaign_profiles_courses'] = 'Exclure les personnes ayant déjà un de ces cours';
+$string['commerce_campaign_profiles_products'] = 'Exclure les acheteurs de ces produits Native';
+$string['commerce_campaign_profiles_multi_help'] = 'Choix multiple : Ctrl / Cmd + clic. Aucune sélection = aucune exclusion.';
+$string['commerce_campaign_previous_exclude'] = 'Exclure les destinataires déjà contactés avec ce même modèle Mail Studio';
+$string['commerce_campaign_previous_help'] = 'Activé par défaut. Vérification par adresse email dans les campagnes précédentes envoyées ou déjà en file. Un envoi de test ne compte pas. Désactiver uniquement si une relance est voulue.';
+$string['commerce_campaign_stage3_reason_previously_contacted'] = 'Modèle déjà envoyé ou en file pour cette adresse';
+$string['commerce_campaign_stage3_reason_excluded_existing_course'] = 'Possède déjà un des cours exclus';
+$string['commerce_campaign_stage3_reason_excluded_purchased_product'] = 'A déjà acheté un des produits exclus';
+$string['commerce_mail_studio_preview_empty'] = 'Aucun contenu complet disponible pour cette langue.';

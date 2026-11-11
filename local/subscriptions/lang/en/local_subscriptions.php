@@ -13171,3 +13171,22 @@ $string['commerce_my_clan_photo_saved'] = 'Clan picture updated.';
 $string['commerce_my_clan_photo_missing'] = 'Select a picture or tick “Remove current picture”.';
 $string['commerce_my_clan_photo_size'] = 'Invalid picture: maximum 4 MB.';
 $string['commerce_my_clan_photo_invalid'] = 'Choose a valid JPG, PNG or WebP picture (maximum 6000 px per side).';
+
+// Global Mail Studio preview and profile-targeted campaign filters.
+$string['commerce_mail_studio_preview_language'] = 'Preview language';
+$string['commerce_mail_studio_preview_help'] = 'Preview current fields without saving. Example names and links are placeholders; dynamic order data is not simulated.';
+$string['commerce_mail_studio_preview_title'] = 'Email preview';
+$string['commerce_mail_studio_preview_button'] = 'Preview without saving';
+$string['commerce_campaign_profiles_source'] = 'Moodle profiles (global targeting)';
+$string['commerce_campaign_profiles_segment'] = 'Target audience';
+$string['commerce_campaign_profiles_customers'] = 'Real customers: Student in any course OR confirmed Native purchase';
+$string['commerce_campaign_profiles_trial'] = 'Trial only: Trialstudent on a course, no Student role, no Native purchase';
+$string['commerce_campaign_profiles_courses'] = 'Exclude people who already have any of these courses';
+$string['commerce_campaign_profiles_products'] = 'Exclude buyers of these Native products';
+$string['commerce_campaign_profiles_multi_help'] = 'Multiple selection: Ctrl / Cmd + click. No selection means no exclusion.';
+$string['commerce_campaign_previous_exclude'] = 'Exclude recipients previously sent this same Mail Studio template';
+$string['commerce_campaign_previous_help'] = 'Enabled by default. Matches past sent or queued campaigns by email. Test messages do not count.';
+$string['commerce_campaign_stage3_reason_previously_contacted'] = 'Template already sent or queued for this address';
+$string['commerce_campaign_stage3_reason_excluded_existing_course'] = 'Already has an excluded course';
+$string['commerce_campaign_stage3_reason_excluded_purchased_product'] = 'Already purchased an excluded product';
+$string['commerce_mail_studio_preview_empty'] = 'No complete content available in this language.';

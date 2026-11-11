@@ -7,6 +7,7 @@ namespace local_subscriptions\commerce\mail\audience;
 defined('MOODLE_INTERNAL') || die();
 
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingOptoutService;
+use local_subscriptions\commerce\mail\campaign\CommerceMarketingRepeatSuppression;
 
 /**
  * Previews a course-based marketing audience and freezes only eligible recipients.
@@ -15,14 +16,15 @@ use local_subscriptions\commerce\mail\campaign\CommerceMarketingOptoutService;
 final class CommerceMarketingCampaignAudienceResolver {
     public function __construct(
         private readonly CommerceMarketingCourseAudienceService $courses,
-        private readonly CommerceMarketingOptoutService $optouts
+        private readonly CommerceMarketingOptoutService $optouts,
+        private readonly \moodle_database $db
     ) {
     }
 
     public static function create(?\moodle_database $db = null): self {
         global $DB;
         $db ??= $DB;
-        return new self(new CommerceMarketingCourseAudienceService($db), new CommerceMarketingOptoutService($db));
+        return new self(new CommerceMarketingCourseAudienceService($db), new CommerceMarketingOptoutService($db), $db);
     }
 
     /** @return string[] */
@@ -75,7 +77,10 @@ final class CommerceMarketingCampaignAudienceResolver {
      * @return array{courseid:int,course:string,summary:array<string,int>,rows:array<int,array<string,mixed>>,recipients:array<int,array<string,mixed>>}
      */
     public function preview_course(int $courseid, array $supportskus, array $excludedids = [],
-            array $filters = []): array {
+            array $filters = [], int $templateid = 0, bool $excludeprevious = true,
+            int $exceptcampaignid = 0): array {
+        $previous = $excludeprevious ? (new CommerceMarketingRepeatSuppression($this->db))
+            ->delivered_or_queued_emails($templateid, $exceptcampaignid) : [];
         $report = $this->courses->preview($courseid, $supportskus, null, $filters);
         $excluded = array_fill_keys($excludedids, true);
         $summary = ['candidates' => 0, 'eligible' => 0, 'excluded' => 0];
@@ -86,6 +91,9 @@ final class CommerceMarketingCampaignAudienceResolver {
             $reasons = $row['reasons'];
             if (isset($excluded[(int)$row['userid']])) {
                 $reasons[] = 'internal_exclusion';
+            }
+            if (isset($previous[strtolower(trim((string)$row['email']))])) {
+                $reasons[] = 'previously_contacted';
             }
             // Invalid emails have already been excluded by the course segment.
             if ($reasons === [] && $this->optouts->is_suppressed((string)$row['email'])) {

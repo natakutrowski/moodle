@@ -9,6 +9,8 @@ use local_subscriptions\admin\Capabilities;
 use local_subscriptions\commerce\mail\admin\CommerceMailSectionNavigationRenderer;
 use local_subscriptions\commerce\mail\builder\CommerceMailBuilder;
 use local_subscriptions\commerce\mail\builder\CommerceMailBuilderEditorRenderer;
+use local_subscriptions\commerce\mail\admin\CommerceMailPreviewRenderer;
+use local_subscriptions\commerce\mail\library\CommerceMailStudioPreviewService;
 use local_subscriptions\commerce\mail\CommerceMailType;
 use local_subscriptions\commerce\mail\library\CommerceMailLibrary;
 use local_subscriptions\commerce\mail\library\CommerceMailLibraryAlfDonationFooterImageService;
@@ -49,9 +51,21 @@ $title = $record
 CrmPageConfigurator::configure($PAGE, $context, $pageurl, $title, 'local-subscriptions-commerce-mail-library-edit-page');
 $PAGE->requires->css('/local/subscriptions/styles/commerce_mail_admin.css');
 
+$previewreport = null;
+$previewlanguage = optional_param('previewlanguage', $activelanguage, PARAM_ALPHA);
+if (!in_array($previewlanguage, CommerceMailLibrary::LANGUAGES, true)) { $previewlanguage = 'fr'; }
+$previewview = CommerceMailPreviewRenderer::normalise_view(
+    optional_param('previewview', CommerceMailPreviewRenderer::DESKTOP, PARAM_ALPHA)
+);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_sesskey();
-    $name = required_param('name', PARAM_TEXT);
+    $mode = optional_param('mode', 'save', PARAM_ALPHA);
+    if (!in_array($mode, ['save', 'preview'], true)) {
+        throw new \invalid_parameter_exception('Invalid Mail Studio action.');
+    }
+    $name = $mode === 'save'
+        ? required_param('name', PARAM_TEXT)
+        : optional_param('name', '', PARAM_TEXT);
     $category = required_param('category', PARAM_ALPHANUMEXT);
     $status = required_param('status', PARAM_ALPHANUMEXT);
     if ($record && !empty($record->runtimekey)) {
@@ -90,6 +104,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         : [];
     $metadata['foundation'] = 'N5.5';
     $metadata['editor'] = 'mail_builder';
+    if ($mode === 'preview') {
+        try {
+            $previewreport = CommerceMailStudioPreviewService::render(
+                $translations[$previewlanguage], $previewlanguage, $category
+            );
+        } catch (\Throwable $exception) {
+            \core\notification::error($exception->getMessage());
+        }
+    } else {
     $saved = $repository->save([
         'name' => $name,
         'category' => $category,
@@ -113,6 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         new moodle_url('/local/subscriptions/admin/commerce/mail/templates/library_edit.php', ['id' => (int)$saved->id]),
         get_string('changessaved'), null, \core\output\notification::NOTIFY_SUCCESS
     );
+    }
 }
 
 $categoryoptions = [];
@@ -143,7 +167,9 @@ $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey
 $form .= html_writer::div(
     html_writer::div(
         html_writer::tag('label', get_string('commerce_mail_library_name', 'local_subscriptions'), ['for' => 'mail-library-name', 'class' => 'form-label'])
-        . html_writer::empty_tag('input', ['id' => 'mail-library-name', 'type' => 'text', 'name' => 'name', 'value' => $record ? (string)$record->name : '', 'required' => 'required', 'class' => 'form-control']),
+        . html_writer::empty_tag('input', ['id' => 'mail-library-name', 'type' => 'text', 'name' => 'name', 'value' => $_SERVER['REQUEST_METHOD'] === 'POST'
+            ? optional_param('name', '', PARAM_TEXT) : ($record ? (string)$record->name : ''),
+            'required' => 'required', 'class' => 'form-control']),
         'commerce-mail-library-edit-field is-name'
     )
     . html_writer::div(
@@ -170,7 +196,9 @@ $form .= html_writer::div(
     )
     . html_writer::div(
         html_writer::tag('label', get_string('status'), ['for' => 'mail-library-status', 'class' => 'form-label'])
-        . html_writer::select($statusoptions, 'status', $record ? (string)$record->status : CommerceMailLibrary::STATUS_DRAFT, false, ['id' => 'mail-library-status', 'class' => 'form-select']),
+        . html_writer::select($statusoptions, 'status', $_SERVER['REQUEST_METHOD'] === 'POST'
+            ? optional_param('status', CommerceMailLibrary::STATUS_DRAFT, PARAM_ALPHANUMEXT)
+            : ($record ? (string)$record->status : CommerceMailLibrary::STATUS_DRAFT), false, ['id' => 'mail-library-status', 'class' => 'form-select']),
         'commerce-mail-library-edit-field'
     ),
     'commerce-mail-library-edit-meta'
@@ -457,11 +485,55 @@ if ($isalfdonationreceipttemplate) {
 }
 
 CommerceMailBuilderEditorRenderer::require_copy_behaviour($PAGE);
+if ($previewreport !== null) {
+    $PAGE->requires->js_init_code(<<<'JS'
+window.addEventListener('load', function () {
+    const preview = document.getElementById('mail-studio-preview-result');
+    if (preview) { preview.scrollIntoView({behavior: 'smooth', block: 'start'}); }
+});
+JS);
+}
 
+$previewoptions = [];
+foreach (CommerceMailLibrary::LANGUAGES as $language) {
+    $previewoptions[$language] = $languagelabels[$language];
+}
+$form .= html_writer::div(
+    html_writer::tag('label', get_string('commerce_mail_studio_preview_language', 'local_subscriptions'),
+        ['for' => 'mail-studio-preview-language', 'class' => 'form-label'])
+    . html_writer::select($previewoptions, 'previewlanguage', $previewlanguage, false,
+        ['id' => 'mail-studio-preview-language', 'class' => 'form-select'])
+    . html_writer::tag('label', get_string('commerce_mail_preview_modes', 'local_subscriptions'),
+        ['for' => 'mail-studio-preview-view', 'class' => 'form-label mt-2'])
+    . html_writer::select([
+        'desktop' => get_string('commerce_mail_preview_desktop', 'local_subscriptions'),
+        'mobile' => get_string('commerce_mail_preview_mobile', 'local_subscriptions'),
+        'text' => get_string('commerce_mail_preview_text', 'local_subscriptions'),
+        'source' => get_string('commerce_mail_preview_source', 'local_subscriptions'),
+    ], 'previewview', $previewview, false,
+        ['id' => 'mail-studio-preview-view', 'class' => 'form-select'])
+    . html_writer::div(get_string('commerce_mail_studio_preview_help', 'local_subscriptions'),
+        'form-text mt-2'),
+    'card card-body mt-4 mb-3'
+);
+if ($previewreport !== null) {
+    $form .= html_writer::start_div('card card-body mb-3', ['id' => 'mail-studio-preview-result']);
+    $form .= html_writer::tag('h3', get_string('commerce_mail_studio_preview_title', 'local_subscriptions'),
+        ['class' => 'h5']);
+    $form .= html_writer::tag('p', s($previewreport['subject']), ['class' => 'fw-semibold']);
+    $form .= CommerceMailPreviewRenderer::render(
+        $previewreport['html'], $previewreport['text'], $previewview
+    );
+    $form .= html_writer::end_div();
+}
 $form .= html_writer::div(
     html_writer::link($listurl, get_string('cancel'), ['class' => 'btn btn-outline-secondary'])
-    . html_writer::tag('button', get_string('savechanges'), ['type' => 'submit', 'class' => 'btn btn-primary']),
-    'commerce-mail-library-edit-actions'
+    . html_writer::tag('button', get_string('commerce_mail_studio_preview_button', 'local_subscriptions'),
+        ['type' => 'submit', 'name' => 'mode', 'value' => 'preview',
+         'formnovalidate' => 'formnovalidate', 'class' => 'btn btn-outline-primary'])
+    . html_writer::tag('button', get_string('savechanges'),
+        ['type' => 'submit', 'name' => 'mode', 'value' => 'save', 'class' => 'btn btn-primary']),
+    'commerce-mail-library-edit-actions d-flex flex-wrap gap-2'
 );
 $form .= html_writer::end_tag('form');
 

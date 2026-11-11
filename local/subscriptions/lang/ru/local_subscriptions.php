@@ -13246,3 +13246,22 @@ $string['commerce_my_clan_photo_saved'] = 'Фото клана обновлен�
 $string['commerce_my_clan_photo_missing'] = 'Выбери фото или отметь «Удалить текущее фото».';
 $string['commerce_my_clan_photo_size'] = 'Неверный размер изображения: максимум 4 МБ.';
 $string['commerce_my_clan_photo_invalid'] = 'Выбери корректный JPG, PNG или WebP (не более 6000 пикселей по каждой стороне).';
+
+// Global Mail Studio preview and profile-targeted campaign filters.
+$string['commerce_mail_studio_preview_language'] = 'Язык предпросмотра';
+$string['commerce_mail_studio_preview_help'] = 'Предпросмотр текущих полей без сохранения. Имя и ссылки условные; данные заказа не подставляются.';
+$string['commerce_mail_studio_preview_title'] = 'Предпросмотр письма';
+$string['commerce_mail_studio_preview_button'] = 'Предпросмотр без сохранения';
+$string['commerce_campaign_profiles_source'] = 'Профили Moodle (общая аудитория)';
+$string['commerce_campaign_profiles_segment'] = 'Целевая аудитория';
+$string['commerce_campaign_profiles_customers'] = 'Клиенты: Student хотя бы на одном курсе ИЛИ подтверждённая покупка Native';
+$string['commerce_campaign_profiles_trial'] = 'Только Trial: Trialstudent хотя бы на одном курсе, без Student и покупок Native';
+$string['commerce_campaign_profiles_courses'] = 'Исключить тех, у кого уже есть выбранные курсы';
+$string['commerce_campaign_profiles_products'] = 'Исключить покупателей выбранных продуктов Native';
+$string['commerce_campaign_profiles_multi_help'] = 'Множественный выбор: Ctrl / Cmd + клик. Ничего не выбрано — нет исключений.';
+$string['commerce_campaign_previous_exclude'] = 'Исключить адресатов, которым уже отправляли этот шаблон Mail Studio';
+$string['commerce_campaign_previous_help'] = 'Включено по умолчанию. Проверяются отправленные письма и письма в очереди; тестовые не учитываются.';
+$string['commerce_campaign_stage3_reason_previously_contacted'] = 'Такой шаблон уже отправлен или стоит в очереди';
+$string['commerce_campaign_stage3_reason_excluded_existing_course'] = 'Уже есть один из исключённых курсов';
+$string['commerce_campaign_stage3_reason_excluded_purchased_product'] = 'Уже куплен один из исключённых продуктов';
+$string['commerce_mail_studio_preview_empty'] = 'Для этого языка пока нет готового содержимого.';

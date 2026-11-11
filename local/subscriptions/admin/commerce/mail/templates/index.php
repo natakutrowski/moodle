@@ -118,6 +118,7 @@ foreach ($native as $record) {
     $contents = $library->contents((int)$record->id);
     $languages = array_keys($contents);
     $editurl = new moodle_url('/local/subscriptions/admin/commerce/mail/templates/library_edit.php', ['id' => (int)$record->id]);
+    $previewurl = new moodle_url('/local/subscriptions/admin/commerce/mail/templates/library_preview.php', ['id' => (int)$record->id]);
     $exporturl = new moodle_url('/local/subscriptions/admin/commerce/mail/templates/export.php', ['source' => 'native', 'id' => (int)$record->id]);
     $duplicateurl = new moodle_url('/local/subscriptions/admin/commerce/mail/templates/library_action.php', [
         'action' => 'duplicate', 'id' => (int)$record->id, 'sesskey' => sesskey(),
@@ -153,6 +154,8 @@ foreach ($native as $record) {
         )
         . html_writer::div(
             html_writer::link($editurl, get_string('edit'), ['class' => 'btn btn-sm btn-outline-primary'])
+            . html_writer::link($previewurl, get_string('commerce_mail_studio_preview_button', 'local_subscriptions'),
+                ['class' => 'btn btn-sm btn-outline-primary'])
             . html_writer::link($exporturl, get_string('commerce_mail_library_export', 'local_subscriptions'), ['class' => 'btn btn-sm btn-outline-secondary'])
             . html_writer::link($duplicateurl, get_string('duplicate'), ['class' => 'btn btn-sm btn-outline-secondary'])
             . ((string)$record->status !== CommerceMailLibrary::STATUS_ARCHIVED

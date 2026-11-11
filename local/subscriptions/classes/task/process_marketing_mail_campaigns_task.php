@@ -10,6 +10,8 @@ use core\task\scheduled_task;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignRepository;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingCourseCampaignGate;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingOptoutService;
+use local_subscriptions\commerce\mail\campaign\CommerceMarketingRepeatSuppression;
+use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignService;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingCampaignContentPolicy;
 use local_subscriptions\commerce\mail\CommerceMailContext;
 use local_subscriptions\commerce\mail\CommerceMailIdempotencyKey;
@@ -37,7 +39,7 @@ final class process_marketing_mail_campaigns_task extends scheduled_task {
         $optouts = CommerceMarketingOptoutService::create($DB);
 
         foreach ($repository->due($now, 10) as $campaign) {
-            if ((string)($campaign->audiencesource ?? 'manual') === 'course') {
+            if (in_array((string)($campaign->audiencesource ?? 'manual'), ['course', 'profiles'], true)) {
                 if (!CommerceMarketingCourseCampaignGate::enabled()) {
                     mtrace('[Marketing Mail] course campaign release switch OFF: ' . (int)$campaign->id);
                     continue;
@@ -50,6 +52,10 @@ final class process_marketing_mail_campaigns_task extends scheduled_task {
                     continue;
                 }
             }
+            $previous = CommerceMarketingCampaignService::exclude_already_contacted($campaign)
+                ? (new CommerceMarketingRepeatSuppression($DB))
+                    ->delivered_or_queued_emails((int)$campaign->templateid, (int)$campaign->id)
+                : [];
             $queued = 0;
             $contents = $repository->contents((int)$campaign->id);
             foreach ($repository->recipients((int)$campaign->id) as $recipient) {
@@ -61,7 +67,8 @@ final class process_marketing_mail_campaigns_task extends scheduled_task {
                 if (!empty($recipient->mailid) || (string)$recipient->status === 'cancelled') {
                     continue;
                 }
-                if ($optouts->is_suppressed((string)$recipient->email)) {
+                if (isset($previous[strtolower(trim((string)$recipient->email))])
+                        || $optouts->is_suppressed((string)$recipient->email)) {
                     $repository->mark_recipient_suppressed((int)$recipient->id, $now);
                     continue;
                 }

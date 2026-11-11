@@ -9,6 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 use local_subscriptions\commerce\mail\builder\CommerceMailBuilder;
 use local_subscriptions\commerce\mail\audience\CommerceMarketingCampaignAudienceResolver;
 use local_subscriptions\commerce\mail\audience\CommerceMarketingCourseAudienceService;
+use local_subscriptions\commerce\mail\audience\CommerceMarketingProfileAudienceService;
 use local_subscriptions\commerce\mail\campaign\CommerceMarketingOptoutService;
 use local_subscriptions\commerce\mail\library\CommerceMailLibrary;
 use local_subscriptions\commerce\mail\library\CommerceMailLibraryRepository;
@@ -65,7 +66,7 @@ final class CommerceMarketingCampaignService {
         }
 
         $source = (string)($data['audiencesource'] ?? 'manual');
-        if (!in_array($source, ['manual', 'course'], true)) {
+        if (!in_array($source, ['manual', 'course', 'profiles'], true)) {
             throw new \invalid_parameter_exception('Invalid marketing audience source.');
         }
         // An existing course-sourced draft must not be converted into a manual list
@@ -90,12 +91,16 @@ final class CommerceMarketingCampaignService {
             $filters = CommerceMarketingCourseAudienceService::normalise_filters(
                 (array)($data['audiencefilters'] ?? [])
             );
+            $excludeprevious = !array_key_exists('excludealreadycontacted', $data)
+                || (bool)$data['excludealreadycontacted'];
             $preview = CommerceMarketingCampaignAudienceResolver::create($this->db)
-                ->preview_course($courseid, $supportskus, $excludedids, $filters);
+                ->preview_course($courseid, $supportskus, $excludedids, $filters,
+                    $templateid, $excludeprevious, $campaignid ?? 0);
             $recipients = $preview['recipients'];
             $audienceconfig = json_encode([
                 'courseid' => $courseid,
                 'audiencepolicy' => 'course_access_v2',
+                'excludealreadycontacted' => $excludeprevious,
                 'deliverylanguage' => $deliverylanguage,
                 'supportskus' => $supportskus,
                 'excludedids' => $excludedids,
@@ -103,8 +108,34 @@ final class CommerceMarketingCampaignService {
                 'checkedat' => time(),
                 'eligible' => count($recipients),
             ], JSON_THROW_ON_ERROR);
+        } else if ($source === 'profiles') {
+            $segment = (string)($data['profilesegment'] ?? '');
+            $excludedcourses = CommerceMarketingProfileAudienceService::normalise_ids(
+                (array)($data['excludedcourses'] ?? [])
+            );
+            $excludedproducts = CommerceMarketingProfileAudienceService::normalise_ids(
+                (array)($data['excludedproducts'] ?? [])
+            );
+            $excludeprevious = !array_key_exists('excludealreadycontacted', $data)
+                || (bool)$data['excludealreadycontacted'];
+            $preview = CommerceMarketingProfileAudienceService::create($this->db)->preview(
+                $segment, $excludedcourses, $excludedproducts,
+                $templateid, $excludeprevious, $campaignid ?? 0
+            );
+            $recipients = $preview['recipients'];
+            $audienceconfig = json_encode([
+                'audiencepolicy' => 'global_profiles_v1',
+                'profilesegment' => $segment, 'excludedcourses' => $excludedcourses,
+                'excludedproducts' => $excludedproducts,
+                'excludealreadycontacted' => $excludeprevious,
+                'deliverylanguage' => $deliverylanguage, 'checkedat' => time(),
+                'eligible' => count($recipients),
+            ], JSON_THROW_ON_ERROR);
         } else {
-            $recipients = $this->preview_manual((string)($data['audience'] ?? ''))['recipients'];
+            $excludeprevious = !array_key_exists('excludealreadycontacted', $data)
+                || (bool)$data['excludealreadycontacted'];
+            $recipients = $this->preview_manual((string)($data['audience'] ?? ''),
+                $templateid, $excludeprevious, $campaignid ?? 0)['recipients'];
         }
         if ($recipients === []) {
             throw new \invalid_parameter_exception('At least one valid recipient is required.');
@@ -139,8 +170,11 @@ final class CommerceMarketingCampaignService {
             }
             unset($recipient);
         }
-        if ($source !== 'course') {
-            $audienceconfig = json_encode(['deliverylanguage' => $deliverylanguage], JSON_THROW_ON_ERROR);
+        if ($source === 'manual') {
+            $audienceconfig = json_encode([
+                'deliverylanguage' => $deliverylanguage,
+                'excludealreadycontacted' => $excludeprevious,
+            ], JSON_THROW_ON_ERROR);
         }
 
         $record = (object)[
@@ -179,7 +213,8 @@ final class CommerceMarketingCampaignService {
         if ((string)$campaign->status !== 'draft') {
             throw new \coding_exception('Only draft marketing campaigns can be scheduled.');
         }
-        $coursecampaign = (string)($campaign->audiencesource ?? 'manual') === 'course';
+        $coursecampaign = in_array((string)($campaign->audiencesource ?? 'manual'),
+            ['course', 'profiles'], true);
         if ($coursecampaign) {
             if (!CommerceMarketingCourseCampaignGate::enabled()) {
                 throw new \invalid_parameter_exception(get_string(
@@ -193,6 +228,17 @@ final class CommerceMarketingCampaignService {
                     $this->db, $this->repository, $campaign)) {
                 throw new \invalid_parameter_exception(get_string(
                     'commerce_campaign_e8_stale_audience', 'local_subscriptions'));
+            }
+        }
+        if (!$coursecampaign && $this->exclude_already_contacted($campaign)) {
+            $previous = (new CommerceMarketingRepeatSuppression($this->db))
+                ->delivered_or_queued_emails((int)$campaign->templateid, (int)$campaign->id);
+            foreach ($this->repository->recipients($campaignid) as $recipient) {
+                if (isset($previous[strtolower(trim((string)$recipient->email))])) {
+                    throw new \invalid_parameter_exception(
+                        'Recipient already contacted with this model; review and save the audience again.'
+                    );
+                }
             }
         }
         if ($this->repository->recipient_count($campaignid) <= 0) {
@@ -229,6 +275,12 @@ final class CommerceMarketingCampaignService {
             $record->audienceconfig = json_encode($config, JSON_THROW_ON_ERROR);
         }
         $this->repository->update_campaign($record);
+    }
+
+    public static function exclude_already_contacted(\stdClass $campaign): bool {
+        $config = json_decode((string)($campaign->audienceconfig ?? ''), true);
+        return !is_array($config) || !array_key_exists('excludealreadycontacted', $config)
+            || (bool)$config['excludealreadycontacted'];
     }
 
     public function pause(int $campaignid): void {
@@ -277,22 +329,29 @@ final class CommerceMarketingCampaignService {
      * Preview manually entered recipients with the same marketing opt-outs used at save time.
      * @return array{summary:array<string,int>,rows:array<int,array<string,mixed>>,recipients:array<int,array<string,mixed>>}
      */
-    public function preview_manual(string $raw): array {
+    public function preview_manual(string $raw, int $templateid = 0,
+            bool $excludeprevious = true, int $exceptcampaignid = 0): array {
         $parsed = $this->parse_recipients($raw);
         $optouts = CommerceMarketingOptoutService::create($this->db);
+        $previous = $excludeprevious
+            ? (new CommerceMarketingRepeatSuppression($this->db))
+                ->delivered_or_queued_emails($templateid, $exceptcampaignid) : [];
         $rows = [];
         $recipients = [];
         $summary = ['candidates' => count($parsed), 'eligible' => 0, 'excluded' => 0];
         foreach ($parsed as $recipient) {
             $suppressed = $optouts->is_suppressed((string)$recipient['email']);
+            $contacted = isset($previous[strtolower(trim((string)$recipient['email']))]);
             $row = $recipient;
-            $row['eligible'] = !$suppressed;
-            $row['reasons'] = $suppressed ? ['marketing_optout'] : [];
+            $row['eligible'] = !$suppressed && !$contacted;
+            $row['reasons'] = array_merge($suppressed ? ['marketing_optout'] : [],
+                $contacted ? ['previously_contacted'] : []);
             $rows[] = $row;
-            $summary[$suppressed ? 'excluded' : 'eligible']++;
-            if ($suppressed) {
-                $summary['reason_marketing_optout'] = ($summary['reason_marketing_optout'] ?? 0) + 1;
-            } else {
+            $summary[($suppressed || $contacted) ? 'excluded' : 'eligible']++;
+            foreach ($row['reasons'] as $reason) {
+                $summary['reason_' . $reason] = ($summary['reason_' . $reason] ?? 0) + 1;
+            }
+            if (!$suppressed && !$contacted) {
                 $recipients[] = $recipient;
             }
         }
