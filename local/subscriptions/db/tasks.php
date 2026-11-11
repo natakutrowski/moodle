@@ -298,3 +298,18 @@ $tasks[] = [
     'dayofweek' => '*',
     'month' => '*',
 ];
+
+// Independent passive observer. Does NOT perform XP repairs.
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\audit_pedagogical_xp_task',
+    'blocking' => 0,
+    'minute' => '*/5', 'hour' => '*', 'day' => '*', 'dayofweek' => '*', 'month' => '*',
+];
+
+// Operator-controlled worker: off unless explicitly enabled in CRM.
+// Its schedule stays registered; execute() becomes a no-op while disabled.
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\automatic_pedagogical_xp_repair_task',
+    'blocking' => 0,
+    'minute' => '*/5', 'hour' => '*', 'day' => '*', 'month' => '*', 'dayofweek' => '*',
+];

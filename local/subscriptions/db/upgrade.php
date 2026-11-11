@@ -10819,5 +10819,74 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110801, 'local', 'subscriptions');
     }
 
+
+    if ($oldversion < 2026111101) {
+        // CampusFR pedagogical XP observability: audit-only tables and future
+        // correction provenance. No change to existing XP or promotion ledgers.
+        $table = new xmldb_table('local_subs_xp_audit');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('fingerprint', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('kind', XMLDB_TYPE_CHAR, '12', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('cmid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('ruleid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('promotionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('points', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('reason', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('status', XMLDB_TYPE_CHAR, '24', null, XMLDB_NOTNULL, null, 'review');
+            $table->add_field('evidenceat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('firstseen', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('lastseen', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('resolvedat', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_index('fingerprint_unique', XMLDB_INDEX_UNIQUE, ['fingerprint']);
+            $table->add_index('status_seen_idx', XMLDB_INDEX_NOTUNIQUE, ['status', 'lastseen']);
+            $table->add_index('user_activity_idx', XMLDB_INDEX_NOTUNIQUE, ['userid', 'cmid']);
+            $dbman->create_table($table);
+        }
+        $table = new xmldb_table('local_subs_xp_audit_run');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('startedat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('finishedat', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('fromtime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('totime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('state', XMLDB_TYPE_CHAR, '16', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('examined', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('candidates', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('newitems', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('resolved', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('details', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_index('startedat_idx', XMLDB_INDEX_NOTUNIQUE, ['startedat']);
+            $dbman->create_table($table);
+        }
+        $table = new xmldb_table('local_subs_xp_audit_fix');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('requestkey', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('auditid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('cmid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('promotionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('kind', XMLDB_TYPE_CHAR, '12', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('points', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('mode', XMLDB_TYPE_CHAR, '16', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('sourceid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('actorid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('reason', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_index('requestkey_unique', XMLDB_INDEX_UNIQUE, ['requestkey']);
+            $table->add_index('audit_idx', XMLDB_INDEX_NOTUNIQUE, ['auditid']);
+            $table->add_index('userid_time_idx', XMLDB_INDEX_NOTUNIQUE, ['userid', 'timecreated']);
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026111101, 'local', 'subscriptions');
+    }
+
     return true;
 }

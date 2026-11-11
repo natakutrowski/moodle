@@ -10,6 +10,7 @@ defined('MOODLE_INTERNAL') || die();
 final class CommerceEducationNavigationRenderer {
     public const PROMOTIONS = 'promotions';
     public const COURSES = 'courses';
+    public const AUDIT = 'audit';
 
     public static function render(string $active): string {
         $items = [
@@ -17,6 +18,11 @@ final class CommerceEducationNavigationRenderer {
                 get_string('commerce_education_promotions_title', 'local_subscriptions'),
                 new \moodle_url('/local/subscriptions/admin/commerce/education/promotions.php'),
                 'fa-flag-checkered',
+            ],
+            self::AUDIT => [
+                get_string('commerce_xp_audit_title', 'local_subscriptions'),
+                new \moodle_url('/local/subscriptions/admin/commerce/education/xp_reconciliation.php'),
+                'fa-search',
             ],
             self::COURSES => [
                 get_string('commerce_education_courses_title', 'local_subscriptions'),
