@@ -40,6 +40,30 @@ class section extends section_base {
     /** @var course_format the course format */
     protected $format;
 
+
+    // TOPICS_EDITOR_OVERVIEW_V6_BEGIN
+    /** Keep a multipage course overview lightweight, including when editing. */
+    protected function add_cm_data(\stdClass &$data, \renderer_base $output): bool {
+        global $PAGE;
+        $compact = $this->format->show_editor() &&
+            $this->format->get_course_display() == COURSE_DISPLAY_MULTIPAGE &&
+            empty($this->format->get_sectionid()) &&
+            $PAGE->pagetype === 'course-view-topics' &&
+            $PAGE->url->get_path() === '/course/view.php' &&
+            !optional_param('editor_full', 0, PARAM_BOOL) &&
+            !optional_param('campusfr_full', 0, PARAM_BOOL);
+        if (!$compact || (int)$this->section->section === 0 ||
+                $this->section->is_delegated() || $this->isstealth) {
+            return parent::add_cm_data($data, $output);
+        }
+        // Reuse the native summary; do not build an editing card for every activity.
+        $cmsummary = new $this->cmsummaryclass($this->format, $this->section);
+        $data->cmsummary = $cmsummary->export_for_template($output);
+        $data->onlysummary = true;
+        return true;
+    }
+    // TOPICS_EDITOR_OVERVIEW_V6_END
+
     public function export_for_template(\renderer_base $output): stdClass {
         $format = $this->format;
 
