@@ -15,6 +15,9 @@ use local_subscriptions\commerce\mail\campaign\CommerceMarketingRepeatSuppressio
 final class CommerceMarketingProfileAudienceService {
     public const CUSTOMERS = 'customers';
     public const TRIAL_ONLY = 'trial_only';
+    // Accounts without either student role, not proof of historical Trial status.
+    public const NO_STUDENT_TRIAL = 'no_student_trial';
+    public const NO_STUDENT_TRIAL_NO_PURCHASE = 'no_student_trial_no_purchase';
     public const MAX_EXCLUSIONS = 100;
 
     public function __construct(private readonly \moodle_database $db) {}
@@ -45,7 +48,8 @@ final class CommerceMarketingProfileAudienceService {
     /** @param int[] $courseids @param int[] $productids */
     public function preview(string $segment, array $courseids = [], array $productids = [],
             int $templateid = 0, bool $excludeprevious = true, int $exceptcampaignid = 0): array {
-        if (!in_array($segment, [self::CUSTOMERS, self::TRIAL_ONLY], true)) {
+        if (!in_array($segment, [self::CUSTOMERS, self::TRIAL_ONLY,
+                self::NO_STUDENT_TRIAL, self::NO_STUDENT_TRIAL_NO_PURCHASE], true)) {
             throw new \invalid_parameter_exception('Unknown Moodle audience segment.');
         }
         $courseids = self::normalise_ids($courseids);
@@ -80,6 +84,33 @@ final class CommerceMarketingProfileAudienceService {
             [$insql, $params] = $this->db->get_in_or_equal($guestemails, SQL_PARAMS_NAMED, 'guestemail');
             $ids = array_merge($ids, array_map('intval', $this->db->get_fieldset_sql(
                 "SELECT id FROM {user} WHERE LOWER(TRIM(email)) $insql", $params)));
+        }
+        // Unlike customer/Trial segments, this audience starts with EVERY Moodle
+        // account, not only identities already known through a role or purchase.
+        // The guest user is never a marketing recipient. Keep suspended/unconfirmed
+        // profiles in the preview, with an explicit exclusion reason below.
+        $noroles = in_array($segment,
+            [self::NO_STUDENT_TRIAL, self::NO_STUDENT_TRIAL_NO_PURCHASE], true);
+        $anycontextstudents = [];
+        $staffusers = [];
+        if ($noroles) {
+            $ids = array_map('intval', $this->db->get_fieldset_sql(
+                "SELECT id FROM {user} WHERE deleted = 0 AND username <> :guestname",
+                ['guestname' => 'guest']));
+            // A student role assigned outside a course still disqualifies an account
+            // from a genuinely role-free audience.
+            $anycontextstudents = array_fill_keys(array_map('intval',
+                $this->db->get_fieldset_sql(
+                    "SELECT DISTINCT ra.userid FROM {role_assignments} ra
+                       JOIN {role} r ON r.id = ra.roleid
+                      WHERE r.shortname IN ('student', 'trialstudent')", [])), true);
+            // Do not accidentally target staff who have no student roles.
+            $staffusers = array_fill_keys(array_map('intval',
+                $this->db->get_fieldset_sql(
+                    "SELECT DISTINCT ra.userid FROM {role_assignments} ra
+                       JOIN {role} r ON r.id = ra.roleid
+                      WHERE r.shortname IN ('manager','teacher','editingteacher','coursecreator')
+                         OR r.archetype IN ('manager','teacher','editingteacher','coursecreator')", [])), true);
         }
         $ids = array_values(array_unique($ids));
         sort($ids, SORT_NUMERIC);
@@ -122,6 +153,15 @@ final class CommerceMarketingProfileAudienceService {
                         (!$trial || $student || isset($allpurchases[$userid]) || isset($guestpurchases[$email]))) {
                     continue;
                 }
+                if ($noroles && (isset($anycontextstudents[$userid]) || $student || $trial)) {
+                    continue;
+                }
+                // Strict prospect variant: no confirmed Native OR Legacy purchase,
+                // including unlinked purchases matched by canonical email.
+                if ($segment === self::NO_STUDENT_TRIAL_NO_PURCHASE &&
+                        (isset($allpurchases[$userid]) || isset($guestpurchases[$email]))) {
+                    continue;
+                }
                 $reasons = [];
                 if ((int)$user->deleted || (int)$user->suspended || !(int)$user->confirmed) {
                     $reasons[] = 'inactive_account';
@@ -131,6 +171,9 @@ final class CommerceMarketingProfileAudienceService {
                 }
                 if (\is_siteadmin($userid)) {
                     $reasons[] = 'site_administrator';
+                }
+                if ($noroles && isset($staffusers[$userid])) {
+                    $reasons[] = 'staff_role';
                 }
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $reasons[] = 'invalid_email';
@@ -157,6 +200,7 @@ final class CommerceMarketingProfileAudienceService {
                 if ($student) { $sources[] = 'student'; }
                 if ($trial) { $sources[] = 'trialstudent'; }
                 if ($buyer) { $sources[] = 'native_purchase'; }
+                if ($noroles) { $sources[] = 'no_student_trial'; }
                 $eligible = $reasons === [];
                 $summary['candidates']++;
                 $summary[$eligible ? 'eligible' : 'excluded']++;

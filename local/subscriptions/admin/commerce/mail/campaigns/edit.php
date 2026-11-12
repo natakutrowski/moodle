@@ -709,10 +709,17 @@ echo html_writer::div(
             'commerce_campaign_profiles_customers', 'local_subscriptions'),
         CommerceMarketingProfileAudienceService::TRIAL_ONLY => get_string(
             'commerce_campaign_profiles_trial', 'local_subscriptions'),
+        CommerceMarketingProfileAudienceService::NO_STUDENT_TRIAL => get_string(
+            'commerce_campaign_profiles_no_student_trial', 'local_subscriptions'),
+        CommerceMarketingProfileAudienceService::NO_STUDENT_TRIAL_NO_PURCHASE => get_string(
+            'commerce_campaign_profiles_no_student_trial_no_purchase', 'local_subscriptions'),
     ], 'profilesegment', $profilesegment, false, [
         'id' => 'marketing-profiles-segment', 'class' => 'form-select',
         'disabled' => !$editable ? 'disabled' : null,
-    ]), 'mb-3'
+    ]) . html_writer::div(
+        get_string('commerce_campaign_profiles_no_roles_help', 'local_subscriptions'),
+        'form-text mt-2'
+    ), 'mb-3'
 );
 foreach ([
     ['excludedcourses', $courseoptions, $selectedexcludedcourses, 'commerce_campaign_profiles_courses'],
@@ -830,7 +837,12 @@ if ($previewreport !== null) {
             html_writer::tag('td', $id ? (string)$id : '—')
             . html_writer::tag('td', s((string)$row['email']))
             . html_writer::tag('td', s($fullname))
-            . html_writer::tag('td', s(implode(', ', (array)($row['sources'] ?? []))))
+            . html_writer::tag('td', s(implode(', ', array_map(
+                static fn(string $source): string => $source === 'no_student_trial'
+                    ? get_string('commerce_campaign_profiles_no_student_trial_source', 'local_subscriptions')
+                    : $source,
+                (array)($row['sources'] ?? [])
+            ))))
             . html_writer::tag('td', s($status))
         );
     }

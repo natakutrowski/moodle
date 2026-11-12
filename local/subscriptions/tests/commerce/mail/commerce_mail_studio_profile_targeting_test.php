@@ -142,6 +142,58 @@ final class commerce_mail_studio_profile_targeting_test extends \advanced_testca
             (new CommerceMarketingRepeatSuppression($DB))->delivered_or_queued_emails((int)$template->id));
     }
 
+    public function test_accounts_without_student_or_trial_roles_are_targetable_and_safely_filtered(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+        $plain = $this->getDataGenerator()->create_user(['email' => 'ms-noroles@example.test']);
+        $nativebuyer = $this->getDataGenerator()->create_user(['email' => 'ms-noroles-native@example.test']);
+        $legacybuyer = $this->getDataGenerator()->create_user(['email' => 'ms-noroles-legacy@example.test']);
+        $guestbuyer = $this->getDataGenerator()->create_user(['email' => 'ms-noroles-guest@example.test']);
+        $student = $this->getDataGenerator()->create_user(['email' => 'ms-noroles-student@example.test']);
+        $trial = $this->getDataGenerator()->create_user(['email' => 'ms-noroles-trial@example.test']);
+        $suspended = $this->getDataGenerator()->create_user([
+            'email' => 'ms-noroles-suspended@example.test', 'suspended' => 1,
+        ]);
+        $teacher = $this->getDataGenerator()->create_user(['email' => 'ms-noroles-teacher@example.test']);
+        $outsidecourse = $this->getDataGenerator()->create_user([
+            'email' => 'ms-noroles-system-student@example.test',
+        ]);
+        $emailstop = $this->getDataGenerator()->create_user([
+            'email' => 'ms-noroles-emailstop@example.test', 'emailstop' => 1,
+        ]);
+        $this->assign_course_role($student, $course, 'student');
+        $this->assign_course_role($trial, $course, 'trialstudent');
+        $this->assign_course_role($teacher, $course, 'editingteacher');
+        $studentrole = $DB->get_record('role', ['shortname' => 'student'], '*', MUST_EXIST);
+        role_assign((int)$studentrole->id, (int)$outsidecourse->id, \context_system::instance()->id);
+        $productid = $this->product('MS-NOROLES-A');
+        $this->purchase($nativebuyer, 'MS-NOROLES-A');
+        $this->purchase($legacybuyer, 'SUB.MS.NOROLES', false);
+        $this->purchase($guestbuyer, 'MS-NOROLES-A', true, false, 'paid');
+        $service = new CommerceMarketingProfileAudienceService($DB);
+        $all = $service->preview(CommerceMarketingProfileAudienceService::NO_STUDENT_TRIAL);
+        $ids = array_column($all['recipients'], 'userid');
+        foreach ([$plain, $nativebuyer, $legacybuyer, $guestbuyer] as $allowed) {
+            self::assertContains((int)$allowed->id, $ids);
+        }
+        foreach ([$student, $trial, $outsidecourse, $teacher, $suspended, $emailstop] as $blocked) {
+            self::assertNotContains((int)$blocked->id, $ids);
+        }
+        self::assertGreaterThanOrEqual(1, $all['summary']['reason_inactive_account'] ?? 0);
+        self::assertGreaterThanOrEqual(1, $all['summary']['reason_staff_role'] ?? 0);
+        $prospects = $service->preview(CommerceMarketingProfileAudienceService::NO_STUDENT_TRIAL_NO_PURCHASE);
+        $prospectids = array_column($prospects['recipients'], 'userid');
+        self::assertContains((int)$plain->id, $prospectids);
+        foreach ([$nativebuyer, $legacybuyer, $guestbuyer, $student, $trial, $outsidecourse] as $blocked) {
+            self::assertNotContains((int)$blocked->id, $prospectids);
+        }
+        $excluded = $service->preview(CommerceMarketingProfileAudienceService::NO_STUDENT_TRIAL,
+            [], [$productid]);
+        self::assertNotContains((int)$nativebuyer->id, array_column($excluded['recipients'], 'userid'));
+        self::assertNotContains((int)$guestbuyer->id, array_column($excluded['recipients'], 'userid'));
+    }
+
     public function test_unsaved_preview_uses_actual_body_and_brand_layout(): void {
         $this->resetAfterTest(true);
         $result = CommerceMailStudioPreviewService::render([
