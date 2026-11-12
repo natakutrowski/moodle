@@ -13350,3 +13350,10 @@ $string['commerce_campaign_profiles_no_student_trial_no_purchase'] = 'Без р�
 $string['commerce_campaign_profiles_no_roles_help'] = 'Сегмент включает все аккаунты Moodle без этих ролей, а не только бывшие пробные. Покупатели Native без роли в курсе входят в первый сегмент. Заблокированные аккаунты, сотрудники, отписавшиеся и неверные адреса не получают письмо.';
 $string['commerce_campaign_profiles_no_student_trial_source'] = 'Аккаунт без роли ученика';
 $string['commerce_campaign_stage3_reason_staff_role'] = 'Сотрудник или преподаватель (исключён)';
+
+// CampusFR XP V4.1 — site-admin eligibility and module evidence labels.
+$string['commerce_xp_audit_filter_excluded'] = 'Исключены (нет права на XP)';
+$string['commerce_xp_v41_excluded_summary'] = 'Наблюдений, исключённых из-за отсутствия права на XP: {$a}. Они сохранены в журнале.';
+$string['commerce_xp_v41_admin_excluded'] = 'Не применяется: учётная запись администратора сайта не получает учебные XP CampusFR. Наблюдение сохранено без начисления баллов.';
+$string['commerce_xp_v41_completion_proof'] = 'Завершение Moodle подтверждено';
+$string['commerce_xp_v41_completion_only'] = 'только факт завершения, право на XP не доказано';

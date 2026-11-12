@@ -54,6 +54,13 @@ final class CommerceXpAutomaticRepairService {
         if (!$ob || ($ob->status ?? '') !== 'review') {
             return ['allowed' => false, 'reason' => 'Observation non ouverte'];
         }
+        // V4 completion-only findings are observational, NOT a grant proof.
+        // This guard also protects future non-H5P modules if the active
+        // operator ever switches the V3 worker to live.
+        if (!in_array((string)($ob->reason ?? ''),
+                ['no_personal_completion_log', 'no_promotion_source_ledger'], true)) {
+            return ['allowed' => false, 'reason' => 'Observation V4 : correction automatique interdite'];
+        }
         if (($report['badge'] ?? '') !== 'available' || (int)($report['existing'] ?? 1) !== 0) {
             return ['allowed' => false, 'reason' => 'Badge ou provenance déjà crédités'];
         }

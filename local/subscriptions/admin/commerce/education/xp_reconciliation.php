@@ -17,7 +17,7 @@ use local_subscriptions\crm\layout\CrmWorkspaceRenderer;
 use local_subscriptions\crm\navigation\CrmBreadcrumbRenderer;
 use local_subscriptions\crm\navigation\CrmNavigationKeys;
 
-global $DB, $PAGE, $OUTPUT;
+global $DB, $PAGE, $OUTPUT, $CFG;
 
 // No POST is allowed unless two management capabilities, sesskey, and opt-in toggle are present.
 $context = AdminSecurity::require(Capabilities::VIEW_PROMOTIONS);
@@ -31,7 +31,7 @@ if (!in_array($tab, ['anomalies', 'history'], true)) {
     $tab = 'anomalies';
 }
 $status = optional_param('status', 'review', PARAM_ALPHA);
-if (!in_array($status, ['review', 'resolved', 'all'], true)) {
+if (!in_array($status, ['review', 'resolved', 'excluded', 'all'], true)) {
     $status = 'review';
 }
 $page = max(0, optional_param('page', 0, PARAM_INT));
@@ -86,6 +86,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
 
 $review = $DB->count_records('local_subs_xp_audit', ['status' => 'review']);
 $resolved = $DB->count_records('local_subs_xp_audit', ['status' => 'resolved']);
+$excluded = $DB->count_records('local_subs_xp_audit', ['status' => 'excluded']);
 $fixcount = $DB->count_records('local_subs_xp_audit_fix');
 $lastruns = $DB->get_records('local_subs_xp_audit_run', null, 'id DESC', '*', 0, 1);
 $lastrun = $lastruns ? reset($lastruns) : null;
@@ -195,6 +196,8 @@ foreach ([
     echo html_writer::end_div();
 }
 echo html_writer::end_div();
+echo html_writer::div(get_string('commerce_xp_v41_excluded_summary', 'local_subscriptions', $excluded),
+    'small text-muted mb-3');
 if ($lastrun) {
     $state = (string)$lastrun->state;
     $line = get_string('commerce_xp_audit_last_run', 'local_subscriptions') . ': ' .
@@ -225,8 +228,25 @@ if ($auditid) {
     echo html_writer::start_div('card card-body mb-4');
     echo html_writer::tag('h3', get_string('commerce_xp_assisted_details', 'local_subscriptions') .
         ' #' . (int)$ob->id, ['class' => 'h5']);
+    if ($ob->status === 'excluded' && str_starts_with((string)$ob->reason, 'excluded_site_admin:')) {
+        echo html_writer::div(get_string('commerce_xp_v41_admin_excluded', 'local_subscriptions'),
+            'alert alert-info');
+    }
     $user = $report['user'];
     $person = $user ? fullname($user) . ' (#' . (int)$ob->userid . ')' : '#' . (int)$ob->userid;
+    $isnonh5p = ($report['modname'] ?? '') !== 'h5pactivity';
+    $prooflabel = $isnonh5p
+        ? get_string('commerce_xp_v41_completion_proof', 'local_subscriptions')
+        : get_string('commerce_xp_assisted_first_proof', 'local_subscriptions');
+    $completion = $report['completion'] ?? null;
+    $proofvalue = $isnonh5p
+        ? ($completion && in_array((int)$completion->completionstate, [1, 2], true) &&
+                $completion->overrideby === null
+            ? userdate((int)$completion->timemodified) . ' (' .
+                get_string('commerce_xp_v41_completion_only', 'local_subscriptions') . ')'
+            : '—')
+        : ($report['proofat'] ? userdate((int)$report['proofat']) .
+            ' / H5P #' . (int)$report['proofid'] : '—');
     $fields = [
         get_string('user') => $person,
         get_string('course') => (string)($report['course']->fullname ?? '#' . $ob->courseid),
@@ -236,9 +256,7 @@ if ($auditid) {
             $ob->kind === 'personal' ? '🥐' : '🥮',
         get_string('commerce_xp_audit_points', 'local_subscriptions') => (int)$ob->points,
         get_string('commerce_xp_audit_evidence', 'local_subscriptions') => userdate((int)$ob->evidenceat),
-        get_string('commerce_xp_assisted_first_proof', 'local_subscriptions') =>
-            $report['proofat'] ? userdate((int)$report['proofat']) .
-                ' / H5P #' . (int)$report['proofid'] : '—',
+        $prooflabel => $proofvalue,
         get_string('commerce_xp_assisted_rule', 'local_subscriptions') => '#' . (int)$ob->ruleid,
         get_string('commerce_xp_assisted_badge', 'local_subscriptions') => (string)$report['badge'],
         get_string('commerce_xp_assisted_existing', 'local_subscriptions') => (int)$report['existing'],
@@ -291,7 +309,7 @@ if ($auditid) {
 
 if ($tab === 'anomalies') {
     $filters = '';
-    foreach (['review', 'resolved', 'all'] as $s) {
+    foreach (['review', 'resolved', 'excluded', 'all'] as $s) {
         $filters .= html_writer::link(new moodle_url($baseurl,
             ['tab' => 'anomalies', 'status' => $s]),
             get_string('commerce_xp_audit_filter_' . $s, 'local_subscriptions'),
@@ -304,11 +322,12 @@ if ($tab === 'anomalies') {
     $params = $status === 'all' ? [] : ['status' => $status];
     $rows = $DB->get_records_sql(
         "SELECT a.*, u.firstname, u.lastname, c.fullname AS coursename,
-                cm.id AS existscm
+                cm.id AS existscm, cm.instance AS moduleinstance, m.name AS modname
            FROM {local_subs_xp_audit} a
            JOIN {user} u ON u.id = a.userid
            LEFT JOIN {course} c ON c.id = a.courseid
            LEFT JOIN {course_modules} cm ON cm.id = a.cmid
+           LEFT JOIN {modules} m ON m.id = cm.module
            {$where}
        ORDER BY a.lastseen DESC, a.id DESC",
         $params, $page * $perpage, $perpage
@@ -324,9 +343,18 @@ if ($tab === 'anomalies') {
     foreach ($rows as $item) {
         $userlink = html_writer::link(new moodle_url('/user/profile.php',
             ['id' => (int)$item->userid]), s(fullname($item)));
-        $activity = $item->existscm ? html_writer::link(
-            new moodle_url('/mod/h5pactivity/view.php', ['id' => (int)$item->cmid]),
-            '#' . (int)$item->cmid) : '#' . (int)$item->cmid;
+        $modname = (string)($item->modname ?? '');
+        $activityname = CommerceXpAssistedRepairService::activity_name(
+            $DB, $modname, (int)($item->moduleinstance ?? 0), (int)$item->cmid);
+        // A module must use a safe folder name and provide a view page.
+        $viewpath = '/mod/' . $modname . '/view.php';
+        $canlink = !empty($item->existscm) &&
+            preg_match('/^[a-z][a-z0-9_]*$/D', $modname) &&
+            is_file($CFG->dirroot . $viewpath);
+        $activitytext = s($activityname) . ' (#' . (int)$item->cmid . ')';
+        $activity = $canlink ? html_writer::link(
+            new moodle_url($viewpath, ['id' => (int)$item->cmid]), $activitytext) :
+            $activitytext;
         $table->data[] = [
             $userlink, s((string)($item->coursename ?? $item->courseid)), $activity,
             $item->kind === 'personal' ? '🥐' : '🥮', (int)$item->points,

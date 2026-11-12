@@ -13110,3 +13110,10 @@ $string['commerce_campaign_profiles_no_student_trial_no_purchase'] = 'Comptes sa
 $string['commerce_campaign_profiles_no_roles_help'] = 'Ce ciblage comprend les comptes Moodle sans ces rôles, pas uniquement les anciens essais. Un achat Native sans inscription peut donc figurer dans le premier groupe. Les comptes suspendus, le personnel, les désinscrits et les adresses invalides restent exclus de l’envoi.';
 $string['commerce_campaign_profiles_no_student_trial_source'] = 'Compte sans rôle élève';
 $string['commerce_campaign_stage3_reason_staff_role'] = 'Compte personnel ou enseignant (exclu)';
+
+// CampusFR XP V4.1 — site-admin eligibility and module evidence labels.
+$string['commerce_xp_audit_filter_excluded'] = 'Exclus (non éligibles)';
+$string['commerce_xp_v41_excluded_summary'] = 'Observations exclues car compte non éligible : {$a}. Conservées pour traçabilité.';
+$string['commerce_xp_v41_admin_excluded'] = 'Non applicable : ce compte est administrateur du site et ne peut pas recevoir les récompenses XP pédagogiques CampusFR. L’observation est conservée, sans attribution.';
+$string['commerce_xp_v41_completion_proof'] = 'Achèvement Moodle constaté';
+$string['commerce_xp_v41_completion_only'] = 'preuve d’achèvement uniquement, droit XP non établi';

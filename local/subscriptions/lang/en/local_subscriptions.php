@@ -13275,3 +13275,10 @@ $string['commerce_campaign_profiles_no_student_trial_no_purchase'] = 'Accounts w
 $string['commerce_campaign_profiles_no_roles_help'] = 'This segment includes all Moodle accounts without these roles, not only former trials. Native buyers without a course role are included in the first group. Suspended, staff and unsubscribed accounts and invalid addresses are excluded from delivery.';
 $string['commerce_campaign_profiles_no_student_trial_source'] = 'Account without student role';
 $string['commerce_campaign_stage3_reason_staff_role'] = 'Staff or teacher account (excluded)';
+
+// CampusFR XP V4.1 — site-admin eligibility and module evidence labels.
+$string['commerce_xp_audit_filter_excluded'] = 'Excluded (ineligible)';
+$string['commerce_xp_v41_excluded_summary'] = 'Observations excluded for account ineligibility: {$a}. Retained for audit history.';
+$string['commerce_xp_v41_admin_excluded'] = 'Not applicable: this account is a site administrator and is not eligible for CampusFR learning XP. The observation is retained; no award was made.';
+$string['commerce_xp_v41_completion_proof'] = 'Moodle completion recorded';
+$string['commerce_xp_v41_completion_only'] = 'completion evidence only; XP entitlement not established';

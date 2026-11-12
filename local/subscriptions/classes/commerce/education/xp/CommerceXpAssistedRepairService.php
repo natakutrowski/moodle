@@ -21,6 +21,24 @@ final class CommerceXpAssistedRepairService {
         return new self($db ?? $DB);
     }
 
+    /**
+     * Resolve the real activity title for any Moodle module with a name field.
+     * This method does not confer permission to repair non-H5P activities.
+     */
+    public static function activity_name(\moodle_database $db, string $modname,
+            int $instanceid, int $cmid): string {
+        $fallback = '#' . $cmid;
+        if ($instanceid <= 0 || !preg_match('/^[a-z][a-z0-9_]*$/D', $modname)) {
+            return $fallback;
+        }
+        try {
+            $name = $db->get_field($modname, 'name', ['id' => $instanceid], IGNORE_MISSING);
+            return is_string($name) && trim($name) !== '' ? $name : $fallback;
+        } catch (\Throwable) {
+            return $fallback;
+        }
+    }
+
     public static function request_key(object $ob): string {
         return hash('sha256', implode(':', ['campusfr', 'xp-assisted-v2',
             (string)$ob->kind, (int)$ob->userid, (int)$ob->cmid,
@@ -81,11 +99,21 @@ final class CommerceXpAssistedRepairService {
         $report['course'] = $this->db->get_record('course', ['id' => $cm->course],
             'id,fullname', IGNORE_MISSING);
         $module = $this->db->get_record('modules', ['id' => $cm->module], 'id,name', IGNORE_MISSING);
+        $report['modname'] = $module ? (string)$module->name : '';
+        $report['activityname'] = self::activity_name($this->db, $report['modname'],
+            (int)$cm->instance, (int)$cm->id);
+        // Expose the Moodle completion as observational evidence for non-H5P
+        // modules. It is not proof that an XP reward is historically owed.
+        $report['completion'] = $this->db->get_record('course_modules_completion',
+            ['coursemoduleid' => $ob->cmid, 'userid' => $ob->userid],
+            'id,completionstate,timemodified,overrideby', IGNORE_MISSING);
+        if ($user && is_siteadmin((int)$user->id)) {
+            $add('Compte administrateur : récompenses pédagogiques CampusFR non applicables.');
+        }
         if (!$module || $module->name !== 'h5pactivity') {
             $add('V2 : correction assistée limitée aux activités H5P.');
             return $report;
         }
-        $report['modname'] = 'h5pactivity';
         $h5p = $this->db->get_record('h5pactivity', ['id' => $cm->instance], 'id,name,course', IGNORE_MISSING);
         if (!$h5p || (int)$h5p->course !== (int)$cm->course) {
             $add('Instance H5P incohérente.');
@@ -104,10 +132,7 @@ final class CommerceXpAssistedRepairService {
                 $add('La règle applicable est différente ou ambiguë.');
             }
         }
-        $comp = $this->db->get_record('course_modules_completion',
-            ['coursemoduleid' => $ob->cmid, 'userid' => $ob->userid],
-            'id,completionstate,timemodified,overrideby', IGNORE_MISSING);
-        $report['completion'] = $comp;
+        $comp = $report['completion'];
         if ((int)$cm->completion !== 2 || !$comp || (int)$comp->completionstate !== 2 ||
                 $comp->overrideby !== null) {
             $add('Achèvement Moodle non réussi, forcé ou incomplet.');

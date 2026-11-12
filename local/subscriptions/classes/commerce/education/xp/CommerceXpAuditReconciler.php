@@ -115,6 +115,11 @@ final class CommerceXpAuditReconciler {
                 $courseid = (int)$pair->courseid;
                 $cmid = (int)$pair->cmid;
                 $userid = (int)$pair->userid;
+                if (is_siteadmin($userid)) {
+                    // Administrators' test completions are not XP-eligible.
+                    $stats['skipped']++;
+                    continue;
+                }
                 $when = (int)$pair->evidenceat;
                 if (!isset($rulecache[$courseid])) {
                     $rulecache[$courseid] = $this->effective_rules($courseid);
@@ -237,6 +242,10 @@ final class CommerceXpAuditReconciler {
         $open = $this->db->get_records('local_subs_xp_audit', ['status' => 'review'],
             'lastseen ASC, id ASC', '*', 0, 150);
         foreach ($open as $candidate) {
+            if (is_siteadmin((int)$candidate->userid)) {
+                // V4.1 classifies open site-admin findings as excluded.
+                continue;
+            }
             // Rotate the bounded refresh queue, so older unresolved candidates
             // cannot starve later ones indefinitely.
             $this->db->update_record('local_subs_xp_audit', (object)[

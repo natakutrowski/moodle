@@ -313,3 +313,11 @@ $tasks[] = [
     'blocking' => 0,
     'minute' => '*/5', 'hour' => '*', 'day' => '*', 'month' => '*', 'dayofweek' => '*',
 ];
+
+
+// V4: all-module, evidence-only completion audit. Never grants XP.
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\audit_all_module_xp_task',
+    'blocking' => 0,
+    'minute' => '*/5', 'hour' => '*', 'day' => '*', 'dayofweek' => '*', 'month' => '*',
+];

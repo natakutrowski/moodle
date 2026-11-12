@@ -12,7 +12,9 @@ use local_subscriptions\commerce\education\xp\CommerceXpAssistedRepairService as
 /** @covers \local_subscriptions\commerce\education\xp\CommerceXpAutomaticRepairService */
 final class commerce_798_xp_automatic_repair_test extends \advanced_testcase {
     private function report(string $kind, int $proofat): array {
-        $ob = (object)['kind' => $kind, 'status' => 'review', 'points' => 3];
+        $ob = (object)['kind' => $kind, 'status' => 'review', 'points' => 3,
+            'reason' => $kind === 'personal'
+                ? 'no_personal_completion_log' : 'no_promotion_source_ledger'];
         return ['eligible' => true, 'issues' => [], 'audit' => $ob, 'proofat' => $proofat,
             'proofid' => 123, 'badge' => 'available', 'existing' => 0,
             'sourcekey' => 'activity-v1:dummy', 'personal' => [(object)['id' => 101]]];
