@@ -31,6 +31,7 @@ class CommerceNativeRuntimeExecutor {
         $registry = new CommerceNativeFulfillmentHandlerRegistry([
             new CommerceCourseAccessFulfillmentHandler(),
             new CommerceDigitalDownloadFulfillmentHandler(),
+            new \local_subscriptions\commerce\fulfillment\native\reader\CommerceReaderAccessFulfillmentHandler(),
         ]);
         $orchestrator = new CommerceNativePurchaseFulfillmentOrchestrator(
             new CommerceEntitlementGrantRepository(

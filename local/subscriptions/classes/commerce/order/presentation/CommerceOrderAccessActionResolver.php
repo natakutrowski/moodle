@@ -66,6 +66,30 @@ final class CommerceOrderAccessActionResolver {
             } else {
                 $available = $fulfilled;
             }
+        } elseif ($grant->type === 'reader_access') {
+            // D2.22 Lot A: Reader grants are fulfilled by the active entitlement ledger.
+            // Do not require a separate download/course fulfillment, and do not trust
+            // the payment return without an active, valid, bound Reader grant.
+            if (!preg_match('/\Areader:publication:([a-z0-9][a-z0-9-]{0,63})\z/D',
+                    $grant->resourcekey, $matches)) {
+                $reason = 'resource_missing';
+            } else {
+                $publication = $this->database->get_record('local_cr_publication',
+                    ['slug' => $matches[1]], 'id,slug,status,productsku,revisionid', IGNORE_MISSING);
+                if (!$publication || (string)$publication->status !== 'published'
+                        || (int)$publication->revisionid <= 0
+                        || strtoupper(trim((string)$publication->productsku)) !== strtoupper(trim($grant->productsku))) {
+                    $reason = 'resource_missing';
+                } elseif ($grantstatus !== 'active' || $grant->beneficiaryuserid === null
+                        || $grant->beneficiaryuserid <= 1) {
+                    $reason = 'pending';
+                } else {
+                    $available = true;
+                    $reason = null;
+                    $status = 'active';
+                    $metadata['readerpublication'] = (string)$publication->slug;
+                }
+            }
         } elseif ($grant->type === 'digital_download') {
             $digital = $this->find_digital_access($grant->reference);
             if ($digital === null) {
@@ -115,6 +139,21 @@ final class CommerceOrderAccessActionResolver {
                 $url = $courseid > 0
                     ? UrlFactory::course($courseid)->out(false)
                     : null;
+                // CAMPUSFR_C31_READER_INTEGRATION: published Reader collections keep Moodle grants,
+                // but open the dedicated Reader experience instead of an empty support course.
+                if ($grant->type === 'course_access' && $courseid > 0
+                    && class_exists(\local_campusreader\local\entrypoint::class)) {
+                    $readerentry = \local_campusreader\local\entrypoint::for_course($courseid);
+                    if ($readerentry !== null) {
+                        $url = $readerentry['url'];
+                        $metadata['readercollection'] = true;
+                    }
+                }
+            } elseif ($grant->type === 'reader_access') {
+                // Reader itself rechecks the logged-in owner's active grant on every request.
+                $url = (new moodle_url('/local/campusreader/publication.php', [
+                    'slug' => (string)$metadata['readerpublication'],
+                ]))->out(false);
             } else {
                 $url = (new moodle_url('/local/subscriptions/order_access.php', [
                     'reference' => $orderreference,

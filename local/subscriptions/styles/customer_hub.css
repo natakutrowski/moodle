@@ -1,4 +1,18 @@
 .commerce-customer-hub { max-width: 1320px; margin: 0 auto; padding: 1rem 0 3rem; }
+/* CAMPUSFR_C31_READER_INTEGRATION — independent from Moodle course cards. */
+.commerce-customer-hub__shortcut--reader > i{background:#fce5ef;color:#E0397C}
+.commerce-customer-hub__reader-section{margin:0 0 1.5rem;border:1px solid var(--bs-border-color,#e7ddea);border-radius:1.25rem;padding:1.3rem;background:var(--bs-body-bg,#fff)}
+.commerce-customer-hub__reader-section>header{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem}
+.commerce-customer-hub__reader-section h2{font-size:1.2rem;margin:0}
+.commerce-customer-hub__reader-section h2 i{color:#E0397C;margin-right:.5rem}
+.commerce-customer-hub__reader-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:.75rem}
+.commerce-customer-hub__reader-card{display:flex;align-items:center;gap:.8rem;padding:1.1rem;border-radius:.85rem;background:var(--bs-tertiary-bg,#faf7fa);text-decoration:none;color:inherit;border:1px solid var(--bs-border-color,#e7ddea)}
+.commerce-customer-hub__reader-card:hover{border-color:#E0397C;color:inherit}
+.commerce-customer-hub__reader-card>span{font-size:1.9rem}
+.commerce-customer-hub__reader-card>strong{flex:1;min-width:0}
+.commerce-customer-hub__reader-card>small{color:#E0397C;white-space:nowrap}
+@media(max-width:620px){.commerce-customer-hub__reader-card{flex-wrap:wrap}}
+
 .commerce-customer-hub__hero { display:flex; align-items:center; justify-content:space-between; gap:2rem; padding:2.25rem; border-radius:1.5rem; background:linear-gradient(135deg,#fff0f5 0%,#f5f0ff 55%,#eef7ff 100%); margin-bottom:1.5rem; }
 .commerce-customer-hub__hero h1 { margin:.4rem 0 .65rem; font-size:clamp(2rem,4vw,3.25rem); }
 .commerce-customer-hub__hero p { margin:0; max-width:48rem; color:#5f6470; font-size:1.05rem; }

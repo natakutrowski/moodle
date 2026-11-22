@@ -17,6 +17,11 @@ final class CommerceShowroomDevCheckoutTestGate {
     public const DESIGN = 'articles_alf_reimport';
     public const DESIGN_VERSION = '0.4.13';
     public const DEV_ROOT = 'https://moodle-v2.campusfr.fr';
+    // CAMPUSFR_AVENT_CHECKOUT_DEV_V1: opt-in draft preview only; Articles pilot unchanged.
+    public const ADVENT_SHOWROOM_ID = 9;
+    public const ADVENT_KEY = 'avent_2026_dev';
+    public const ADVENT_DESIGN = 'advent_calendar_2026';
+    public const ADVENT_DESIGN_VERSION = '0.3.1';
 
     public static function eligible(
         int $id,
@@ -27,6 +32,15 @@ final class CommerceShowroomDevCheckoutTestGate {
         string $design,
         string $version
     ): bool {
+        // The second authorised preview is strictly confined to the Advent DEV draft.
+        if ($id === self::ADVENT_SHOWROOM_ID) {
+            return $status === 'draft'
+                && $key === self::ADVENT_KEY
+                && $template === self::TEMPLATE
+                && rtrim($wwwroot, '/') === self::DEV_ROOT
+                && $design === self::ADVENT_DESIGN
+                && $version === self::ADVENT_DESIGN_VERSION;
+        }
         return $id === self::SHOWROOM_ID
             && $status === 'draft'
             && $key === self::KEY

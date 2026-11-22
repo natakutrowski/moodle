@@ -111,6 +111,7 @@ final class CurrentPresentationRenderer {
         $nativeordersbylegacy = [];
         $bundleorders = [];
         $donationorders = [];
+        $readerorders = [];
         $usednativeorders = [];
         $entitlementexpectations = new CommercePurchaseEntitlementExpectationPolicy();
         $experienceresolver = new CommerceOrderExperienceResolver();
@@ -179,6 +180,16 @@ final class CurrentPresentationRenderer {
                 $donationorders[] = $presentation;
             } else if ($experienceresolver->resolve($presentation)['isbundle']) {
                 $bundleorders[] = $presentation;
+            } else if ($presentation->is_paid()) {
+                // Native services with reader_access are neither a legacy download
+                // nor a subscription, yet must appear in the customer's purchase history.
+                foreach ($nativeorderdetails->grants as $readergrant) {
+                    if ((string)$readergrant->type === 'reader_access'
+                            && str_starts_with((string)$readergrant->resourcekey, 'reader:publication:')) {
+                        $readerorders[] = $presentation;
+                        break;
+                    }
+                }
             }
         }
 
@@ -250,7 +261,8 @@ final class CurrentPresentationRenderer {
         usort($digitalpurchases, static fn($a, $b): int => (int)($b->payment_date ?? $b->creation_date ?? 0) <=> (int)($a->payment_date ?? $a->creation_date ?? 0));
         usort($bundleorders, static fn($a, $b): int => $b->timecreated <=> $a->timecreated);
         usort($donationorders, static fn($a, $b): int => $b->timecreated <=> $a->timecreated);
-        $totalpurchases = count($subs) + count($digitalpurchases) + count($bundleorders) + count($donationorders);
+        $totalpurchases = count($subs) + count($digitalpurchases) + count($readerorders)
+            + count($bundleorders) + count($donationorders);
 
         $pagetitle = $isadminview
             ? get_string('user_purchases_title', 'local_subscriptions', fullname($targetuser))
@@ -443,7 +455,13 @@ final class CurrentPresentationRenderer {
                                 $btns[] = html_writer::link(
                                     $access->url,
                                     html_writer::tag('i', '', ['class' => 'fa-solid fa-graduation-cap', 'aria-hidden' => 'true'])
-                                        . ' ' . get_string('commerce_i49_open_course', 'local_subscriptions'),
+                                        . ' ' . (!empty($access->metadata['readercollection'])
+                                            ? match (substr(current_language(), 0, 2)) {
+                                                'ru' => 'Открыть мою библиотеку',
+                                                'en' => 'Open my library',
+                                                default => 'Ouvrir ma bibliothèque',
+                                            }
+                                            : get_string('commerce_i49_open_course', 'local_subscriptions')),
                                     ['class' => 'btn btn-primary btn-sm']
                                 );
                             }
@@ -725,7 +743,8 @@ final class CurrentPresentationRenderer {
         echo html_writer::tag('h3', get_string('digital_purchases_profile_title', 'local_subscriptions'), [
             'class' => 'my-purchases-section__title',
         ]);
-        echo html_writer::tag('span', (string)count($digitalpurchases), ['class' => 'my-purchases-section__count']);
+        echo html_writer::tag('span', (string)(count($digitalpurchases) + count($readerorders)),
+            ['class' => 'my-purchases-section__count']);
         echo html_writer::end_div();
 
         $lang = strtolower(substr(current_language(), 0, 2));
@@ -764,7 +783,7 @@ final class CurrentPresentationRenderer {
             }
         }
 
-        if (!$digitalpurchases) {
+        if (!$digitalpurchases && !$readerorders) {
             echo $OUTPUT->notification(get_string('digital_purchases_empty', 'local_subscriptions'), \core\output\notification::NOTIFY_INFO);
         } else {
             $digitalmodals = [];
@@ -981,6 +1000,88 @@ final class CurrentPresentationRenderer {
                     get_string('digital_purchase_details', 'local_subscriptions'),
                     $rows
                 ))->render($OUTPUT);
+            }
+
+            // D2.22 Lot A: paid Native Reader services share the digital purchase
+            // section but do not pretend to be downloadable files.
+            foreach ($readerorders as $readerorder) {
+                $readeritem = null;
+                $readeraccess = null;
+                foreach ($readerorder->items as $item) {
+                    foreach ($item->accesses as $candidate) {
+                        if ($candidate->type === 'reader_access') {
+                            $readeritem = $item;
+                            $readeraccess = $candidate;
+                            break 2;
+                        }
+                    }
+                }
+                if ($readeritem === null) {
+                    continue;
+                }
+
+                $title = trim((string)$readeritem->label);
+                if ($title === '') {
+                    $title = get_string('cfr_reader_purchase_fallback', 'local_subscriptions');
+                }
+                $statuskey = $readeraccess !== null && $readeraccess->available
+                    ? 'commerce_i410_access_available'
+                    : (in_array(strtolower((string)($readeraccess?->status ?? '')),
+                        ['revoked', 'refunded', 'cancelled', 'canceled', 'expired'], true)
+                        ? 'commerce_access_temporarily_unavailable'
+                        : 'commerce_order_access_preparing');
+                $head = html_writer::start_div('my-purchase-card__title-row');
+                $head .= html_writer::tag('span', format_string($title), [
+                    'class' => 'h5 m-0 my-purchase-card__title',
+                ]);
+                $head .= html_writer::div(
+                    html_writer::span(get_string($statuskey, 'local_subscriptions'),
+                        'crm-commerce-status-badge crm-commerce-status-'
+                        . ($readeraccess !== null && $readeraccess->available ? 'active' : 'warning')
+                        . ' my-purchase-card__status')
+                    . $renderrefundbadge($refundsbyreference[$readerorder->reference] ?? []),
+                    'my-purchase-card__status-stack'
+                );
+                $head .= html_writer::end_div();
+
+                $list = html_writer::start_tag('ul', ['class' => 'list-unstyled mb-2 small']);
+                $list .= html_writer::tag('li',
+                    html_writer::tag('span', get_string('purchase_date', 'local_subscriptions') . ': ',
+                        ['class' => 'text-muted']) . userdate($readerorder->timecreated));
+                $list .= html_writer::tag('li',
+                    html_writer::tag('span', get_string('pricepaid', 'local_subscriptions') . ': ',
+                        ['class' => 'text-muted'])
+                    . $fmtmoney($readerorder->totalminor / 100, $readerorder->currency));
+                $list .= html_writer::end_tag('ul');
+
+                $btns = [];
+                $sku = trim((string)($readeritem->metadata['productsku']
+                    ?? $readeritem->metadata['sku'] ?? ''));
+                if ($sku !== '') {
+                    $btns[] = html_writer::link(
+                        CommerceCustomerPublicUrlResolver::storefront($sku),
+                        get_string('digital_product_view_page', 'local_subscriptions'),
+                        ['class' => 'btn btn-outline-primary btn-sm product-page-action']
+                    );
+                }
+                // The Reader endpoint itself verifies authenticated ownership;
+                // never show a direct customer link in admin-on-behalf views.
+                if (!$isadminview && $readeraccess !== null && $readeraccess->available
+                        && $readeraccess->url !== null) {
+                    $btns[] = html_writer::link($readeraccess->url,
+                        get_string('cfr_reader_open_calendar_purchase', 'local_subscriptions'),
+                        ['class' => 'btn btn-primary btn-sm']);
+                }
+                $btns[] = html_writer::link(
+                    UrlFactory::order_details(['reference' => $readerorder->reference]),
+                    get_string('details', 'local_subscriptions'),
+                    ['class' => 'btn btn-outline-secondary btn-sm']
+                );
+                echo $purchaseslist->render_item(new PurchaseCard(
+                    $head, $list, new PurchaseActions($btns, 'my-purchase-card__actions'),
+                    'card shadow-sm mb-3 my-purchase-card', 'my-purchase-card__header',
+                    'digital', 'fa-solid fa-book-open'
+                ));
             }
 
             echo html_writer::end_div();

@@ -699,6 +699,13 @@ echo html_writer::select(
     'bridgedesign', $currentbridge['id'], false,
     ['id' => 'bridgedesign', 'class' => 'form-select mb-2']
 );
+if ($id > 0 && $currentbridge['id'] === 'advent_calendar_2026') {
+    echo html_writer::tag('p', html_writer::link(
+        new moodle_url('/local/subscriptions/admin/commerce/showrooms/advent_media.php', ['id' => $id]),
+        'Configurer les 24 couvertures, l’audio d’exemple et Telegram / WhatsApp',
+        ['class' => 'btn btn-outline-primary']
+    ), ['class' => 'my-3']);
+}
 echo html_writer::tag('label', 'Vidéo de présentation du cours (Moodle)',
     ['for' => 'bridgevideo_upload', 'class' => 'form-label']);
 echo html_writer::empty_tag('input', [

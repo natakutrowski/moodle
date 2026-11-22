@@ -1,0 +1,105 @@
+/* CampusFR C3.1 — reader collection landing, scoped (light + dark). */
+.cfr-reader-home{max-width:1100px;margin:0 auto;padding:1.25rem 1rem 4rem;color:var(--bs-body-color,inherit)}
+.cfr-reader-home__hero{padding:2.5rem;border-radius:24px;background:linear-gradient(115deg,#fbedf4,#f4efff);color:#322345}
+.cfr-reader-home__hero>span{font-size:.78rem;letter-spacing:.14em;font-weight:750;color:#b32b67;text-transform:uppercase}
+.cfr-reader-home__hero h1{font-family:Georgia,serif;font-size:clamp(2rem,5vw,3.4rem);margin:.6rem 0}
+.cfr-reader-home__hero p{margin:0;color:#66566e}
+.cfr-reader-home__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:1.1rem;margin-top:1.5rem}
+.cfr-reader-home__card{display:flex;align-items:center;gap:1rem;padding:1.2rem;border:1px solid var(--bs-border-color,#e7dbe4);border-radius:18px;color:inherit;text-decoration:none;background:var(--bs-body-bg,#fff);box-shadow:0 7px 26px #21132f0c}
+.cfr-reader-home__card:hover{border-color:#E0397C;color:inherit;transform:translateY(-1px)}
+.cfr-reader-home__illustration{display:grid;place-items:center;flex:0 0 4rem;height:4rem;border-radius:14px;background:#f9e0eb;font-size:2rem}
+.cfr-reader-home__card-text{display:flex;flex-direction:column;gap:.2rem;flex:1;min-width:0}
+.cfr-reader-home__card-text strong{font-size:1.08rem}
+.cfr-reader-home__card-text small{color:var(--bs-secondary-color,#777)}
+.cfr-reader-home__empty{padding:2rem 1rem;margin-top:1rem;text-align:center;border:1px dashed var(--bs-border-color,#ccc);border-radius:16px}
+.cfr-reader-home__empty h2{font-size:1.3rem}
+/* CAMPUSFR_C33_READER_NAV: follow the CampusFR toggle, not the operating-system preference.
+   In particular, html.campus-dark is the active platform selector. */
+html.campus-dark .cfr-reader-home__hero,
+html[data-bs-theme="dark"] .cfr-reader-home__hero,
+html.dark-mode .cfr-reader-home__hero {
+    background:linear-gradient(115deg,#32263e,#29263f);
+    color:#fff4e7;
+}
+html.campus-dark .cfr-reader-home__hero h1,
+html[data-bs-theme="dark"] .cfr-reader-home__hero h1,
+html.dark-mode .cfr-reader-home__hero h1 {
+    color:#fff4e7 !important;
+}
+html.campus-dark .cfr-reader-home__hero>span,
+html[data-bs-theme="dark"] .cfr-reader-home__hero>span,
+html.dark-mode .cfr-reader-home__hero>span {
+    color:#ff83b0;
+}
+html.campus-dark .cfr-reader-home__hero p,
+html[data-bs-theme="dark"] .cfr-reader-home__hero p,
+html.dark-mode .cfr-reader-home__hero p {
+    color:#ddd0e4;
+}
+/* Reader card contrast is kept independent of theme-wide link overrides. */
+html.campus-dark .cfr-reader-home__card,
+html[data-bs-theme="dark"] .cfr-reader-home__card,
+html.dark-mode .cfr-reader-home__card {
+    color:#fff4e7;
+}
+html.campus-dark .cfr-reader-home__card:hover,
+html[data-bs-theme="dark"] .cfr-reader-home__card:hover,
+html.dark-mode .cfr-reader-home__card:hover {
+    color:#fff4e7;
+}
+
+
+/* CampusFR D2.8.6 — prominent personal-vocabulary destination on My Library. */
+.cfr-reader-home__vocab-feature{margin:22px 0 20px}
+.cfr-reader-home__vocab-link{
+  display:flex;align-items:center;gap:20px;padding:23px 26px;
+  border:1px solid #efadc9;border-radius:19px;
+  background:linear-gradient(112deg,#fff4f9 0%,#f9eaf6 65%,#f2edff 100%);
+  box-shadow:0 8px 28px rgba(97,33,72,.07);
+  text-decoration:none!important;color:#342245!important;
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;
+}
+.cfr-reader-home__vocab-link:hover{transform:translateY(-2px);border-color:#E0397C;box-shadow:0 12px 30px rgba(97,33,72,.12);color:#342245!important}
+.cfr-reader-home__vocab-link:focus-visible{outline:3px solid #3779d5;outline-offset:4px}
+.cfr-reader-home__vocab-icon{
+  flex:0 0 76px;display:grid;place-items:center;width:76px;height:76px;
+  border-radius:19px;background:#f8cfdf;color:#802048;font-size:36px;
+}
+.cfr-reader-home__vocab-copy{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.cfr-reader-home__vocab-eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.11em;color:#aa2d69;font-weight:800}
+.cfr-reader-home__vocab-copy strong{font-size:clamp(20px,2.3vw,27px);line-height:1.2;font-weight:800;color:inherit}
+.cfr-reader-home__vocab-copy small{font-size:14px;line-height:1.5;color:#705569}
+.cfr-reader-home__vocab-cta{
+  display:inline-flex;gap:12px;align-items:center;justify-content:center;
+  padding:12px 16px;border-radius:999px;background:#E0397C;color:#fff;
+  font-size:13px;font-weight:750;white-space:nowrap;
+}
+.cfr-reader-home__vocab-cta span{font-size:17px;line-height:1}
+html.campus-dark .cfr-reader-home__vocab-link,
+html[data-bs-theme="dark"] .cfr-reader-home__vocab-link,
+html.dark-mode .cfr-reader-home__vocab-link{
+  background:linear-gradient(115deg,#38263c,#32263e 70%,#2c2b47);
+  border-color:#78556d;color:#fff0f6!important;
+}
+html.campus-dark .cfr-reader-home__vocab-link:hover,
+html[data-bs-theme="dark"] .cfr-reader-home__vocab-link:hover,
+html.dark-mode .cfr-reader-home__vocab-link:hover{border-color:#ff8ab8;color:#fff0f6!important}
+html.campus-dark .cfr-reader-home__vocab-icon,
+html[data-bs-theme="dark"] .cfr-reader-home__vocab-icon,
+html.dark-mode .cfr-reader-home__vocab-icon{background:#603b5a;color:#ffdbeb}
+html.campus-dark .cfr-reader-home__vocab-eyebrow,
+html[data-bs-theme="dark"] .cfr-reader-home__vocab-eyebrow,
+html.dark-mode .cfr-reader-home__vocab-eyebrow{color:#ff99c4}
+html.campus-dark .cfr-reader-home__vocab-copy small,
+html[data-bs-theme="dark"] .cfr-reader-home__vocab-copy small,
+html.dark-mode .cfr-reader-home__vocab-copy small{color:#e2d0e1}
+html.campus-dark .cfr-reader-home__vocab-cta,
+html[data-bs-theme="dark"] .cfr-reader-home__vocab-cta,
+html.dark-mode .cfr-reader-home__vocab-cta{background:#E0397C;color:#fff}
+@media(max-width:760px){
+  .cfr-reader-home__vocab-link{flex-wrap:wrap;gap:12px;padding:18px}
+  .cfr-reader-home__vocab-icon{flex-basis:56px;width:56px;height:56px;font-size:27px;border-radius:14px}
+  .cfr-reader-home__vocab-copy{flex-basis:calc(100% - 75px)}
+  .cfr-reader-home__vocab-cta{margin-left:0;flex:1;min-width:100%;min-height:42px}
+}
+@media(prefers-reduced-motion:reduce){.cfr-reader-home__vocab-link{transition:none}.cfr-reader-home__vocab-link:hover{transform:none}}

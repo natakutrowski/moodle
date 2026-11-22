@@ -1,0 +1,74 @@
+/* CAMPUSFR_ADVENT_BRIDGE_VISUAL_V4 -- intentionally UNLAYERED and appended
+ * after Tailwind compiled CSS, inside the Advent ShadowRoot only.
+ * This fixes lost borders / low-contrast lines seen against Lovable in Moodle.
+ * Never add these selectors to Moodle's global stylesheet or the Articles design. */
+[data-advent-root] {
+  --advent-outline-gold: rgba(236, 171, 76, .53);
+  --advent-outline-gold-strong: rgba(242, 176, 74, .72);
+  --advent-outline-pink: rgba(233, 31, 137, .64);
+  --advent-faq-divider: rgba(185, 138, 87, .26);
+}
+/* Hero feature chips, cards, the 24 calendar doors and their reverse face. */
+[data-advent-root] .advent-hero-badge,
+[data-advent-root] .advent-audio-frame,
+[data-advent-root] .advent-door-front,
+[data-advent-root] .advent-door-back,
+[data-advent-root] .advent-format-card,
+[data-advent-root] .advent-original-frame,
+[data-advent-root] .advent-cat-image-frame,
+[data-advent-root] .advent-timer-box,
+[data-advent-root] .advent-contact-button {
+  border: 1px solid var(--advent-outline-gold);
+}
+[data-advent-root] .advent-hero-badge,
+[data-advent-root] .advent-door-back,
+[data-advent-root] .advent-original-frame,
+[data-advent-root] .advent-timer-box {
+  box-shadow: 0 0 22px -10px rgba(239,170,70,.52);
+}
+[data-advent-root] .advent-door-front:last-child { border-color: var(--advent-outline-gold); }
+[data-advent-root] .advent-door-front.bg-primary\/25 {
+  border-color: var(--advent-outline-gold-strong);
+}
+/* Rubric labels and purchase card: original Lovable pink edges. */
+[data-advent-root] .advent-section-pill {
+  border: 1px solid var(--advent-outline-pink);
+}
+[data-advent-root] .advent-offer-frame {
+  border: 2px solid #e91f89;
+  box-shadow: 0 10px 35px -10px rgba(234, 24, 129, .45);
+}
+/* Warm card inset over the cat picture and outer article edge. */
+[data-advent-root] .advent-cat-image-frame {
+  border-color: var(--advent-outline-gold-strong);
+  pointer-events: none;
+}
+[data-advent-root] .advent-gift-paper {
+  border: 2px solid var(--advent-outline-gold-strong);
+}
+/* FAQ outer frame, solid separators, a soft gold answer edge and true click affordance. */
+[data-advent-root] .advent-faq-frame {
+  border: 1px solid var(--advent-outline-gold);
+}
+[data-advent-root] .advent-faq-item {
+  border-bottom: 1px solid var(--advent-faq-divider);
+  border-bottom-style: solid;
+}
+[data-advent-root] .advent-faq-item:last-child { border-bottom: 0; }
+[data-advent-root] .advent-faq-answer {
+  border: 1px solid rgba(240, 178, 81, .37);
+}
+[data-advent-root] .advent-faq-trigger {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+[data-advent-root] .advent-faq-trigger:hover { background: rgba(228, 35, 129, .11); }
+[data-advent-root] .advent-faq-trigger:focus-visible {
+  outline: 2px solid var(--advent-outline-pink);
+  outline-offset: 2px;
+}
+/* Preserve existing Lovable hover animation and colors without impacting Commerce. */
+[data-advent-root] .advent-contact-button:hover,
+[data-advent-root] .advent-hero-badge:hover {
+  border-color: var(--advent-outline-gold-strong);
+}

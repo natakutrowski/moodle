@@ -1,0 +1,197 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/campusreader/db" VERSION="2026111501" COMMENT="CampusFR reader collection, slots, books, pages and reading progress" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+    <TABLES>
+        <TABLE NAME="local_cr_collection" COMMENT="CampusFR local_cr_collection">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="slug" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="title" TYPE="char" LENGTH="191" NOTNULL="true"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timezone" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="Europe/Paris"/>
+                <FIELD NAME="presentationmode" TYPE="char" LENGTH="12" NOTNULL="true" DEFAULT="auto"/><FIELD NAME="libraryafter" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/><FIELD NAME="published" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="slug_u" UNIQUE="true" FIELDS="slug"/>
+                <INDEX NAME="course_i" UNIQUE="false" FIELDS="courseid"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_cr_book" COMMENT="CampusFR local_cr_book">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="collectionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="slug" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="title" TYPE="char" LENGTH="191" NOTNULL="true"/>
+                <FIELD NAME="subtitle" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="published" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="coll_slug_u" UNIQUE="true" FIELDS="collectionid, slug"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_cr_slot" COMMENT="CampusFR local_cr_slot">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="collectionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="position" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="unlockat" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="bookid" TYPE="int" LENGTH="10"/>
+                <FIELD NAME="teaser" TYPE="char" LENGTH="191" NOTNULL="true"/>
+                <FIELD NAME="layoutsize" TYPE="char" LENGTH="12" NOTNULL="true" DEFAULT="normal"/><FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="coll_pos_u" UNIQUE="true" FIELDS="collectionid, position"/>
+                <INDEX NAME="book_i" UNIQUE="false" FIELDS="bookid"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_cr_page" COMMENT="CampusFR local_cr_page">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="bookid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="pageindex" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="kind" TYPE="char" LENGTH="16" NOTNULL="true"/>
+                <FIELD NAME="title" TYPE="char" LENGTH="191" NOTNULL="true"/>
+                <FIELD NAME="paragraphsjson" TYPE="text" NOTNULL="true"/>
+                <FIELD NAME="imagefile" TYPE="char" LENGTH="255"/>
+                <FIELD NAME="imagealt" TYPE="char" LENGTH="255"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="book_page_u" UNIQUE="true" FIELDS="bookid, pageindex"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_cr_progress" COMMENT="CampusFR local_cr_progress">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="bookid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="pageindex" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="user_book_u" UNIQUE="true" FIELDS="userid, bookid"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_cr_anthology" COMMENT="CampusFR anthology editorial draft, no course dependency">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="slug" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="title" TYPE="char" LENGTH="191" NOTNULL="true"/>
+                <FIELD NAME="subtitle" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="12" NOTNULL="true" DEFAULT="draft"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/></KEYS>
+            <INDEXES><INDEX NAME="slug_u" UNIQUE="true" FIELDS="slug"/></INDEXES>
+        </TABLE>
+        <TABLE NAME="local_cr_anthology_story" COMMENT="Ordered references to existing canonical Reader stories">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="anthologyid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="bookid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="position" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/></KEYS>
+            <INDEXES>
+                <INDEX NAME="anth_pos_u" UNIQUE="true" FIELDS="anthologyid, position"/>
+                <INDEX NAME="anth_book_u" UNIQUE="true" FIELDS="anthologyid, bookid"/>
+                <INDEX NAME="book_i" UNIQUE="false" FIELDS="bookid"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_cr_anthrev" COMMENT="Private immutable editorial anthology snapshots and internal approval; no public access">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="anthologyid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="revno" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="digest" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="snapshotjson" TYPE="text" LENGTH="big" NOTNULL="true"/>
+                <FIELD NAME="state" TYPE="char" LENGTH="12" NOTNULL="true" DEFAULT="review"/>
+                <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="approvedby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="approvedat" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/></KEYS>
+            <INDEXES>
+                <INDEX NAME="anth_rev_u" UNIQUE="true" FIELDS="anthologyid, revno"/>
+                <INDEX NAME="anth_state_i" UNIQUE="false" FIELDS="anthologyid, state"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_cr_publication" COMMENT="Reader public edition with frozen anthology revision and optional frozen Advent layout; defaults closed">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="slug" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="kind" TYPE="char" LENGTH="12" NOTNULL="true"/>
+                <FIELD NAME="anthologyid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="revisionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="collectionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="calendarjson" TYPE="text" LENGTH="big" NOTNULL="true"/>
+                <FIELD NAME="productsku" TYPE="char" LENGTH="100" NOTNULL="false"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="12" NOTNULL="true" DEFAULT="draft"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="publishedat" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/></KEYS>
+            <INDEXES>
+                <INDEX NAME="slug_u" UNIQUE="true" FIELDS="slug"/>
+                <INDEX NAME="anth_i" UNIQUE="false" FIELDS="anthologyid"/>
+                <INDEX NAME="prod_i" UNIQUE="false" FIELDS="productsku"/>
+                <INDEX NAME="status_i" UNIQUE="false" FIELDS="status"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_cr_vocab" COMMENT="Private per-user vocabulary, unrelated to course grants">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="lang" TYPE="char" LENGTH="12" NOTNULL="true" DEFAULT="fr"/>
+                <FIELD NAME="wordhash" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="word" TYPE="char" LENGTH="191" NOTNULL="true"/>
+                <FIELD NAME="translation" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/></KEYS>
+            <INDEXES>
+                <INDEX NAME="user_word_u" UNIQUE="true" FIELDS="userid, lang, wordhash"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_cr_vocab_source" COMMENT="Context citations for saved words">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="vocabid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="pubslug" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="chapter" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="pageindex" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/></KEYS>
+            <INDEXES>
+                <INDEX NAME="source_u" UNIQUE="true" FIELDS="vocabid, pubslug, chapter, pageindex"/>
+                <INDEX NAME="pub_i" UNIQUE="false" FIELDS="pubslug"/>
+            </INDEXES>
+        </TABLE>
+    </TABLES>
+</XMLDB>

@@ -170,6 +170,13 @@ final class CrmNavigationRegistry {
                         Capabilities::VIEW_PROMOTIONS,
                         'fa-graduation-cap'
                     ),
+                    // CFR_D21_LIB: atelier Bibliothèque éditorial dans Pédagogie.
+                    $child(
+                        get_string('cfr_d21_nav', 'local_subscriptions'),
+                        '/local/subscriptions/admin/commerce/education/library/index.php',
+                        Capabilities::MANAGE_PROMOTIONS,
+                        'fa-book'
+                    ),
                     $child(
                         get_string('crm_commerce_nav_offers_access', 'local_subscriptions'),
                         '/local/subscriptions/admin/commerce/offers-access/index.php',

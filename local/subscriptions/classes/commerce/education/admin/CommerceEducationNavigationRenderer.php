@@ -10,6 +10,7 @@ defined('MOODLE_INTERNAL') || die();
 final class CommerceEducationNavigationRenderer {
     public const PROMOTIONS = 'promotions';
     public const COURSES = 'courses';
+    public const LIBRARY = 'library'; // CFR_D21_LIB
     public const AUDIT = 'audit';
 
     public static function render(string $active): string {
@@ -29,6 +30,11 @@ final class CommerceEducationNavigationRenderer {
                 new \moodle_url('/local/subscriptions/admin/commerce/education/courses.php'),
                 'fa-unlock-alt',
             ],
+            self::LIBRARY => [
+                get_string('cfr_d21_nav', 'local_subscriptions'),
+                new \moodle_url('/local/subscriptions/admin/commerce/education/library/index.php'),
+                'fa-book',
+            ],
         ];
 
         if (!isset($items[$active])) {
@@ -38,6 +44,10 @@ final class CommerceEducationNavigationRenderer {
         if (!has_capability(\local_subscriptions\admin\Capabilities::MANAGE_CONFIGURATION,
                 \context_system::instance())) {
             unset($items[self::COURSES]);
+        }
+        // CFR_D21_LIB: pas de lien vers un écran interdit.
+        if (!has_capability(\local_subscriptions\admin\Capabilities::MANAGE_PROMOTIONS,\context_system::instance())) {
+            unset($items[self::LIBRARY]);
         }
         $links = '';
         foreach ($items as $key => [$label, $url, $icon]) {

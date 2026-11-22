@@ -44,6 +44,28 @@ final class CommerceCustomerHubService {
         $userid = (int)$user->id;
         $email = trim((string)$user->email);
         $courses = $this->course_cards($userid);
+        // CAMPUSFR_C31_READER_INTEGRATION: only currently accessible published collections.
+        $readercollections = class_exists(\local_campusreader\local\entrypoint::class)
+            ? \local_campusreader\local\entrypoint::for_current_user() : [];
+        // D2.8.1: Commerce Native editions are NOT attached to a Moodle course.
+        // The legacy entrypoint only returns course-linked collections.
+        // Merge the already rights-filtered edition list for the current user.
+        if (class_exists(\local_campusreader\local\publication_access::class)) {
+            foreach (\local_campusreader\local\publication_access::owned() as $edition) {
+                $readercollections[] = [
+                    'title' => (string)$edition['title'],
+                    'url' => (string)$edition['url'],
+                ];
+            }
+        }
+        $readercount = count($readercollections);
+        // Russian numerals require a third plural form (1 / 2-4 / 5+).
+        $tail = $readercount % 100;
+        $unit = $readercount % 10;
+        $countform = ($tail >= 11 && $tail <= 14) ? 'many' :
+            ($unit === 1 ? 'one' : (($unit >= 2 && $unit <= 4) ? 'few' : 'many'));
+        $readercountlabel = get_string('cfr_hub_reader_count_' . $countform,
+            'local_subscriptions', $readercount);
         $purchasecount = count(
             $this->purchases->find_details_for_customer($userid, $email)
         );
@@ -65,6 +87,12 @@ final class CommerceCustomerHubService {
             'avatarurl' => $picture->get_url($page)->out(false),
             'courses' => $courses,
             'hascourses' => $courses !== [],
+            'readercollections' => $readercollections,
+            'hasreadercollections' => $readercollections !== [],
+            'readercollectioncount' => $readercount,
+            'readercollectioncountdisplay' => $readercountlabel,
+            'myreaderurl' => (new \moodle_url('/local/campusreader/my.php'))->out(false),
+            'myvocabularyurl' => (new \moodle_url('/local/campusreader/vocabulary.php'))->out(false),
             'coursecount' => count($courses),
             'purchasecount' => $purchasecount,
             'resourcecount' => $resourcecount,
@@ -104,6 +132,11 @@ final class CommerceCustomerHubService {
         $now = time();
         foreach ($this->courses->get_courses($userid) as $course) {
             $courseid = (int)$course->id;
+            // Reader purchases are books, not pedagogical courses.
+            if (class_exists(\local_campusreader\local\entrypoint::class)
+                && \local_campusreader\local\entrypoint::for_course($courseid) !== null) {
+                continue;
+            }
             try {
                 $status = $this->learningstatus->resolve($userid, $courseid, $now);
             } catch (\Throwable) {

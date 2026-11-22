@@ -37,7 +37,8 @@
  * Its inherited line box causes a thin separator under the fixed topbar.
  * Match the exact bridge design, NOT every showroom (and NOT core Moodle).
  * Keep the anchor in the DOM so skip-to-main-content remains available. */
-body.commerce-showroom-bridge-page #page-content.showroom-shell__main:has(> #campusfr-bridge[data-bridge-css*="/articles_alf_reimport/"]) > span#maincontent {
+body.commerce-showroom-bridge-page #page-content.showroom-shell__main:has(> #campusfr-bridge[data-bridge-css*="/articles_alf_reimport/"]) > span#maincontent,
+body.commerce-showroom-bridge-page #page-content.showroom-shell__main:has(> #campusfr-bridge[data-bridge-css*="/advent_calendar_2026/"]) > span#maincontent {
     display: block !important;
     height: 0 !important;
     min-height: 0 !important;
@@ -50,3 +51,5 @@ body.commerce-showroom-bridge-page #page-content.showroom-shell__main:has(> #cam
     outline: 0 !important;
     overflow: hidden !important;
 }
+
+/* Advent X3 inherits the existing Articles/Alf accessibility-anchor seam correction above. */

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 510" role="img" aria-label="Village de Noël enneigé et maison illuminée sous les étoiles">
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#1a1b40"/><stop offset=".68" stop-color="#3d325b"/><stop offset="1" stop-color="#8b5770"/></linearGradient>
+    <radialGradient id="moon"><stop stop-color="#fff8d7"/><stop offset=".7" stop-color="#ffecb4"/><stop offset="1" stop-color="#f8c7ae"/></radialGradient>
+    <radialGradient id="halo"><stop stop-color="#fff4b5" stop-opacity=".49"/><stop offset="1" stop-color="#fff4b5" stop-opacity="0"/></radialGradient>
+    <linearGradient id="snow" x2="0" y2="1"><stop stop-color="#fff9e9"/><stop offset="1" stop-color="#e6c8da"/></linearGradient>
+    <linearGradient id="house" x2="1" y2="1"><stop stop-color="#c48192"/><stop offset="1" stop-color="#765672"/></linearGradient>
+    <linearGradient id="roof" x2="1" y2="1"><stop stop-color="#604560"/><stop offset="1" stop-color="#3a3454"/></linearGradient>
+    <filter id="windowGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="21"/></filter>
+  </defs>
+  <rect width="940" height="510" fill="url(#sky)"/>
+  <circle cx="738" cy="101" r="104" fill="url(#halo)"/>
+  <circle cx="738" cy="101" r="48" fill="url(#moon)"/>
+  <g fill="#ffe5b6">
+    <circle cx="91" cy="69" r="3"/><circle cx="175" cy="139" r="2"/><circle cx="262" cy="73" r="2"/>
+    <circle cx="394" cy="97" r="2.6"/><circle cx="504" cy="49" r="2"/><circle cx="594" cy="156" r="2.5"/>
+    <circle cx="833" cy="183" r="2.4"/><circle cx="866" cy="69" r="2"/><circle cx="119" cy="240" r="2"/>
+    <circle cx="318" cy="200" r="1.8"/><circle cx="531" cy="224" r="1.7"/>
+  </g>
+  <g stroke="#ffe9c3" stroke-width="2.7" stroke-linecap="round">
+    <path d="M203 48v18m-9-9h18M418 153v19m-9-9h18M636 54v22m-11-11h22M825 237v14m-7-7h14"/>
+  </g>
+  <path d="M0 305Q98 238 183 298T398 280T665 303T940 285V510H0Z" fill="#b8a2bb" opacity=".5"/>
+  <path d="M0 381Q135 327 290 371T594 344T940 372V510H0Z" fill="#d6bfd2"/>
+  <path d="M0 435Q174 384 359 428T701 401T940 427V510H0Z" fill="url(#snow)"/>
+  <g transform="translate(64 255)" opacity=".8">
+    <path d="M0 146 53 10l53 136Z" fill="#31516a"/><path d="m15 105 38-95 38 95Z" fill="#527084"/>
+    <path d="m22 84 31-74 31 74Z" fill="#486278"/><path d="m26 80 27-70 27 70" fill="none" stroke="#dfd6df" stroke-width="7"/>
+    <rect x="47" y="141" width="13" height="26" rx="3" fill="#5a4751"/>
+  </g>
+  <g transform="translate(767 254)" opacity=".9">
+    <path d="M0 148 67 0l67 148Z" fill="#355068"/><path d="m19 99 48-99 48 99Z" fill="#466b7b"/>
+    <path d="m24 89 43-89 43 89" fill="none" stroke="#d3cfd5" stroke-width="8"/>
+    <rect x="61" y="146" width="13" height="27" fill="#514652"/>
+  </g>
+  <g transform="translate(318 188)">
+    <ellipse cx="160" cy="247" rx="201" ry="24" fill="#5b465f" opacity=".37"/>
+    <path d="M30 92h260v184H30Z" fill="url(#house)" stroke="#efc9b1" stroke-width="5"/>
+    <path d="M0 104 158-19 322 104Z" fill="url(#roof)" stroke="#e1bed1" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M17 83 156-28l150 111" fill="none" stroke="#fff5e8" stroke-width="13" stroke-linecap="round"/>
+    <path d="M52 122h73v87H52zM189 122h73v87h-73z" fill="#fbe0a3" filter="url(#windowGlow)" opacity=".66"/>
+    <rect x="61" y="137" width="66" height="69" rx="4" fill="#ffdc89" stroke="#5e4c67" stroke-width="9"/>
+    <rect x="194" y="137" width="66" height="69" rx="4" fill="#ffe29b" stroke="#5e4c67" stroke-width="9"/>
+    <path d="M94 141v63m-30-31h61M227 141v63m-29-31h59" stroke="#987078" stroke-width="6"/>
+    <path d="M142 274v-95q0-16 17-16h20q18 0 18 16v95" fill="#75415d" stroke="#e6a985" stroke-width="7"/>
+    <circle cx="188" cy="232" r="4" fill="#ffdeac"/>
+    <path d="M44 114q39 9 71 0m74 0q39 9 71 0" fill="none" stroke="#fff0dc" stroke-width="7" stroke-linecap="round"/>
+    <path d="m46 290 78-23 86 23 65-13" fill="none" stroke="#fff9f1" stroke-width="9" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(133 399)">
+    <rect x="0" y="11" width="76" height="66" rx="3" fill="#e63f7d" stroke="#f5d7a7" stroke-width="4"/>
+    <rect x="27" y="11" width="20" height="66" fill="#ffdba5"/>
+    <rect x="0" y="33" width="76" height="17" fill="#ffdba5"/>
+    <path d="M37 10Q-8-15 13-27q22-9 25 37Q36-30 62-26q26 14-25 36" fill="none" stroke="#f3dbaa" stroke-width="7"/>
+  </g>
+  <g fill="#fff7e9" opacity=".7"><circle cx="275" cy="398" r="4"/><circle cx="714" cy="417" r="4"/><circle cx="822" cy="375" r="3"/><circle cx="571" cy="468" r="4"/></g>
+</svg>

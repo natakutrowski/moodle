@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "id": "noel-des-etoiles",
+  "title": "Le Noël des étoiles",
+  "subtitle": "Un conte de Noël · CampusFR",
+  "pages": [
+    {"kind":"cover","title":"Le Noël des étoiles","paragraphs":["Un conte de Noël · CampusFR"]},
+    {"kind":"text","title":"Un soir de décembre","paragraphs":["La petite fille regardait les étoiles à travers la fenêtre.","Dehors, la ville brillait sous une fine couche de neige. Elle espérait un petit miracle."]},
+    {"kind":"image","title":"La nuit étoilée","image":"nuit-etoilee.svg","image_alt":"Petite maison enneigée sous les étoiles et la lune","paragraphs":["Tout était silencieux, sauf le vent qui dansait dans les arbres."]},
+    {"kind":"mixed","title":"Une lumière","image":"lumiere-doree.svg","image_alt":"Une lumière dorée dans une forêt nocturne","paragraphs":["Soudain, elle aperçut une lumière dorée. Elle retint son souffle.","La lumière semblait l’inviter à sortir."]},
+    {"kind":"text","title":"Dans la rue","paragraphs":["Elle mit son manteau, ouvrit doucement la porte et suivit l’étrange lumière.","Les maisons endormies avaient des toits blancs."]},
+    {"kind":"image","title":"Le chemin","image":"lumiere-doree.svg","image_alt":"Un sentier éclairé dans la forêt","paragraphs":["Au bout de la rue, un petit sentier conduisait vers une forêt."]},
+    {"kind":"mixed","title":"Une rencontre","paragraphs":["Sous un grand sapin, un renard attendait.","Il leva la tête comme s’il connaissait déjà la petite fille."]},
+    {"kind":"text","title":"Le cadeau","paragraphs":["Le renard lui montra une étoile cachée dans la neige.","Elle comprit alors que les plus beaux cadeaux ne se trouvent pas dans les magasins."]},
+    {"kind":"text","title":"La magie de Noël","paragraphs":["De retour chez elle, la petite fille sourit.","Cette nuit-là, elle avait découvert quelque chose de merveilleux."]},
+    {"kind":"back","title":"Fin","paragraphs":["À bientôt pour une nouvelle histoire."]}
+  ]
+}

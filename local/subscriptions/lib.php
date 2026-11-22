@@ -449,6 +449,8 @@ function local_subscriptions_pluginfile(
         \local_subscriptions\commerce\showroom\cms\CommerceShowroomBlockMediaManager::FILEAREA,
         \local_subscriptions\commerce\showroom\cms\CommerceShowroomSocialImageService::FILEAREA,
         'showroom_bridge_video',
+        'showroom_advent_preview_audio',
+        'showroom_advent_cover',
     ];
 
     if (!in_array($filearea, $allowedareas, true)) {
@@ -510,6 +512,48 @@ function local_subscriptions_pluginfile(
             return false;
         }
         send_stored_file($file, 86400, 0, false, $options + ['cacheability' => 'public']);
+        return true;
+    }
+
+    // Marketing audio and story covers: protect draft files, stream published files.
+    if (in_array($filearea, ['showroom_advent_preview_audio', 'showroom_advent_cover'], true)) {
+        global $DB;
+        if (count($args) !== 2) {
+            return false;
+        }
+        $itemid = (int)array_shift($args);
+        $filename = clean_param((string)array_shift($args), PARAM_FILE);
+        if ($itemid <= 0 || $filename === '') {
+            return false;
+        }
+        $record = $DB->get_record('local_subs_showroom', ['id' => $itemid], 'id,status,settingsjson');
+        if (!$record) {
+            return false;
+        }
+        $settings = json_decode((string)$record->settingsjson, true);
+        if (!is_array($settings) || ($settings['designbridge']['id'] ?? '') !== 'advent_calendar_2026') {
+            return false;
+        }
+        // A draft is never exposed to unauthenticated users via a guessed pluginfile URL.
+        if ($record->status !== 'published') {
+            require_login();
+            require_capability('local/subscriptions:manage_showrooms', $context);
+        }
+        if ($filearea === 'showroom_advent_preview_audio') {
+            if (!preg_match('/\Aaudio-[a-f0-9]{16}\.mp3\z/D', $filename)) {
+                return false;
+            }
+        } else if (!preg_match('/\Acover-(?:0[1-9]|1[0-9]|2[0-4])-[a-f0-9]{16}\.(?:webp|jpg|png)\z/D', $filename)) {
+            return false;
+        }
+        $file = get_file_storage()->get_file($context->id, 'local_subscriptions',
+            $filearea, $itemid, '/', $filename);
+        if (!$file || $file->is_directory()) {
+            return false;
+        }
+        send_stored_file($file, 86400, 0, false, $options + [
+            'cacheability' => $record->status === 'published' ? 'public' : 'private',
+        ]);
         return true;
     }
 

@@ -263,7 +263,7 @@ $data['currencyerrormessage'] = get_string('commerce_showroom_currency_update_er
 // DEV-only CMS key, showroom database ID or preview/publication state.
 // Commerce still owns invoice display fields, legal links and merchant policy.
 $isnativelegalbridge = $isbridgerender
-    && (string)($data['bridgeid'] ?? '') === 'articles_alf_reimport';
+    && in_array((string)($data['bridgeid'] ?? ''), ['articles_alf_reimport', 'advent_calendar_2026'], true);
 
 
 // J16P3 — legal footer: same regional legal URL resolution as Commerce policies.

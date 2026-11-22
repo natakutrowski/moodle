@@ -167,6 +167,7 @@ final class CommerceManualProductGrantService {
         $registry = new CommerceNativeFulfillmentHandlerRegistry([
             new CommerceCourseAccessFulfillmentHandler(),
             new CommerceDigitalDownloadFulfillmentHandler(),
+            new \local_subscriptions\commerce\fulfillment\native\reader\CommerceReaderAccessFulfillmentHandler(),
         ]);
         $executor = new CommercePersistentNativeFulfillmentExecutor(
             $registry,

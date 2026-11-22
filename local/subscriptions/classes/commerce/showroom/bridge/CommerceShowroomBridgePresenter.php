@@ -37,10 +37,12 @@ final class CommerceShowroomBridgePresenter {
         $id = $settings['id'];
         $manifest = CommerceShowroomBridgePackageRegistry::require_manifest($id);
         $base = CommerceShowroomBridgePackageRegistry::base_directory($id);
-        // The *only* exception to read-only preview: an expressly requested,
-        // authenticated admin preview on exact DEV #8 with sandbox gateways.
+        // CAMPUSFR_AVENT_CHECKOUT_DEV_V1: only expressly requested admin
+        // previews of the two exact DEV drafts may reach sandbox checkout.
         if ($checkouttest) {
-            if ($previewid !== 8 || !has_capability('moodle/site:config', \context_system::instance())
+            if (!in_array($previewid, [CommerceShowroomDevCheckoutTestGate::SHOWROOM_ID,
+                    CommerceShowroomDevCheckoutTestGate::ADVENT_SHOWROOM_ID], true)
+                || !has_capability('moodle/site:config', \context_system::instance())
                 || !CommerceShowroomDevCheckoutTestGate::eligible(
                     (int)$record->id,
                     (string)$record->status,
@@ -113,6 +115,12 @@ final class CommerceShowroomBridgePresenter {
             ];
             $designlinks = $resolvedlegal['urls'];
         }
+        $adventmedia = null;
+        if ($id === 'advent_calendar_2026') {
+            // Moodle File API is the source of truth; no asset URLs from untrusted CMS HTML.
+            require_once(__DIR__ . '/CommerceShowroomAdventMediaService.php');
+            $adventmedia = new CommerceShowroomAdventMediaService(\context_system::instance());
+        }
         $payload = [
             'api' => 'campusfr-showroom-bridge/v1',
             'design' => ['id' => $id, 'version' => $manifest['version']],
@@ -122,6 +130,8 @@ final class CommerceShowroomBridgePresenter {
                 'isdevpublishedpilot' => $publicpilot],
             'content' => $copy,
             'media' => [
+                'previewAudioUrl' => $adventmedia ? $adventmedia->audio_url((int)$record->id) : '',
+                'storyCovers' => $adventmedia ? $adventmedia->cover_urls((int)$record->id) : [],
                 'presentationVideoUrl' => (new CommerceShowroomBridgeVideoService(\context_system::instance()))
                     ->get_url((int)$record->id)?->out(false) ?? $settings['videoUrl'],
                 // A configurable HTTPS image overrides the design's bundled Alf cover.

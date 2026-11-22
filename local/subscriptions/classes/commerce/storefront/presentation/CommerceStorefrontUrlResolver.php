@@ -56,9 +56,24 @@ final class CommerceStorefrontUrlResolver {
                 UrlFactory::my_digital_products(),
             'bundle' =>
                 UrlFactory::my_campus(),
+            'service' => self::owned_reader_publication($product),
             default =>
                 UrlFactory::my_purchases(),
         };
+    }
+
+    private static function owned_reader_publication(CommerceStorefrontProduct $product): \moodle_url {
+        global $DB;
+        if (!$DB->get_manager()->table_exists(new \xmldb_table('local_cr_publication'))) {
+            return UrlFactory::my_purchases();
+        }
+        $pub = $DB->get_record('local_cr_publication',
+            ['productsku' => strtoupper(trim($product->get_sku())), 'status' => 'published'],
+            'id,slug,kind,revisionid,productsku,status', IGNORE_MISSING);
+        if ($pub && \local_campusreader\local\publication_access::can_view($pub)) {
+            return new \moodle_url('/local/campusreader/publication.php', ['slug' => $pub->slug]);
+        }
+        return UrlFactory::my_purchases();
     }
 
     private static function owned_course_access(

@@ -1,0 +1,166 @@
+/* CampusFR Avent C2.1 — two reusable collection presentations. Scoped CSS only. */
+.cfr-library {
+  --cfr-pink:#E0397C;--cfr-text:#382934;--cfr-muted:#765d69;--cfr-border:#e8d7d8;
+  color:var(--cfr-text);background:linear-gradient(155deg,#fffaf3,#fff0ef 70%,#f9e5f0);
+  border:1px solid var(--cfr-border);border-radius:24px;max-width:1200px;
+  margin:10px auto 36px;padding:clamp(14px,3vw,38px);isolation:isolate;
+}
+.cfr-library *, .cfr-library *::before,.cfr-library *::after{box-sizing:border-box}
+.cfr-library__hero{text-align:center;margin:0 auto 25px;max-width:880px}
+.cfr-library__eyebrow{font:800 11px/1.5 system-ui,sans-serif;letter-spacing:.2em;color:var(--cfr-pink)}
+.cfr-library__hero h2{font:normal clamp(30px,4vw,51px)/1.1 Georgia,serif;color:var(--cfr-text);margin:13px 0}
+.cfr-library__hero p{font:400 15px/1.5 system-ui,sans-serif;color:var(--cfr-muted);margin:8px auto}
+.cfr-library__count{display:inline-block;margin-top:10px;padding:8px 17px;border:1px solid #e5c7cc;
+  border-radius:100px;background:#fff9f5;color:#8d3157;font:700 12px system-ui,sans-serif}
+.cfr-library__hero .cfr-library__admin{font:700 12px/1.5 system-ui,sans-serif;color:#9b416b;margin:14px 0 6px}
+.cfr-library__view-switch{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px auto 5px}
+.cfr-library__view-link{display:inline-flex;min-height:40px;align-items:center;justify-content:center;
+  padding:8px 17px;border-radius:50px;border:1px solid #dbb9c8;color:#7c3856!important;
+  font:700 12px/1.2 system-ui,sans-serif;text-decoration:none!important;background:#fff9f5}
+.cfr-library__view-link:hover,.cfr-library__view-link.is-active{border-color:var(--cfr-pink);
+  background:var(--cfr-pink);color:white!important}
+.cfr-library__view-link:focus-visible,.cfr-library a:focus-visible{outline:3px solid #2976ce;outline-offset:3px}
+.cfr-library__hero .cfr-library__switch-note{font-size:12px;color:var(--cfr-muted);margin:7px auto}
+.cfr-library__footer{text-align:center;font:400 12px/1.6 system-ui,sans-serif;color:var(--cfr-muted);padding:20px 6px 5px}
+.cfr-library__footer p{margin:5px auto}
+
+/* A real bookcase: each group is its own row with a continuous wooden plank aligned
+   under all covers. No repeating background gradient with unrelated grid line heights. */
+.cfr-shelves{display:flex;flex-direction:column;gap:16px;padding:15px 0 24px;
+  border-radius:18px;background:radial-gradient(ellipse at 50% 10%,#f4e0dc 0,#e4c7c7 75%);
+  box-shadow:inset 0 8px 24px #925c5c21}
+.cfr-shelves__scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-color:#a6736b transparent}
+.cfr-shelves__row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(7px,1.3vw,17px);
+  align-items:end;position:relative;min-height:310px;padding:16px clamp(9px,2.3vw,24px) 82px;
+  background:linear-gradient(180deg,#fff8f416,#65484915)}
+.cfr-shelves__row::before{content:'';position:absolute;left:0;right:0;bottom:69px;height:18px;
+  background:linear-gradient(180deg,#e2bc9d 0,#a56e57 28%,#784638 90%,#643a30);
+  border-top:3px solid #f5dcc0;box-shadow:0 11px 13px #48302944;z-index:1;pointer-events:none}
+.cfr-shelves__row::after{content:'';position:absolute;left:0;right:0;bottom:49px;height:22px;
+  background:linear-gradient(180deg,#a06e59,#764638);border-radius:0 0 9px 9px;z-index:0;pointer-events:none}
+.cfr-library__item{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  z-index:2;min-width:0;min-height:220px}
+.cfr-library__cover{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  width:100%;max-width:160px;height:192px;padding:14px 8px 12px;
+  border:2px solid #be9b8c;border-radius:4px 9px 5px 3px;
+  background:linear-gradient(110deg,#4d3154 0,#7a4968 43%,#543454 100%);
+  color:#fff4e5!important;text-decoration:none!important;text-align:center;
+  box-shadow:inset 6px 0 7px #1c102c83,inset -3px 0 3px #ecc3a633,3px 1px 0 #dfcbb5,
+    6px 3px 0 #765064,8px 9px 10px #2a142b50;
+  transform-origin:bottom center;transition:transform .22s ease,box-shadow .22s ease}
+.cfr-library__item:nth-child(3n+2) .cfr-library__cover{height:205px;background:linear-gradient(108deg,#254859,#476b78 55%,#29495c)}
+.cfr-library__item:nth-child(3n) .cfr-library__cover{height:180px;background:linear-gradient(109deg,#6b3f4e,#a06a6c 60%,#794657)}
+.cfr-library__item:nth-child(5n) .cfr-library__cover{height:211px}
+.cfr-library__cover[href]:hover{color:#fff4e5!important;transform:translateY(-7px) rotate(-1.2deg);
+  box-shadow:inset 6px 0 7px #1c102c83,3px 1px 0 #dfcbb5,8px 14px 20px #2a142b73}
+.cfr-library__cover--locked{filter:saturate(.72)}
+.cfr-library__number{font:normal clamp(28px,3vw,43px)/1 Georgia,serif;color:#fff0cd}
+.cfr-library__ornament{font-size:19px;color:#ffe1ce}
+.cfr-library__card-title{font:600 clamp(10px,1.1vw,12px)/1.35 Georgia,serif;
+  overflow-wrap:anywhere;min-height:26px}
+.cfr-library__card-date{font:700 9px/1.3 system-ui,sans-serif;letter-spacing:.05em;color:#f5d4ce}
+.cfr-library__card-status{position:absolute;bottom:-70px;left:-5px;right:-5px;text-align:center;
+  font:600 10px/1.28 system-ui,sans-serif;color:var(--cfr-text);z-index:3;
+  min-height:27px;display:flex;justify-content:center;align-items:flex-start}
+
+/* Advent is a different product presentation from the bookcase. */
+.cfr-library--advent{background:radial-gradient(circle at 50% -20%,#693e6b 0,#31243c 55%,#181a32 100%);
+  --cfr-text:#fff5e7;--cfr-muted:#e7cfdd;--cfr-border:#8a6786}
+.cfr-library--advent .cfr-library__hero h2{color:#fff8e7}
+.cfr-library--advent .cfr-library__eyebrow{color:#ff93bf}
+.cfr-library--advent .cfr-library__count{background:#342539;color:#ffe9c7;border-color:#906b7a}
+.cfr-library--advent .cfr-library__view-link{background:#34263b;color:#ffe7f0!important;border-color:#966278}
+.cfr-library--advent .cfr-library__view-link.is-active,
+.cfr-library--advent .cfr-library__view-link:hover{background:#E0397C;color:#fff!important}
+.cfr-library--advent .cfr-library__hero .cfr-library__admin{color:#ffd0e4}
+.cfr-advent{position:relative;isolation:isolate;padding:22px clamp(9px,2.2vw,27px) 32px;
+  border:1px solid #bc9d9a73;border-radius:19px;
+  background:radial-gradient(circle at 17% 13%,#8f51754d,transparent 35%),
+             radial-gradient(circle at 87% 67%,#b75d8b36,transparent 34%),
+             linear-gradient(140deg,#38243d,#232c45 55%,#352338);
+  box-shadow:inset 0 0 40px #0e0f2652,0 15px 28px #0c071431}
+.cfr-advent::before{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background-image:radial-gradient(#ffe7ab 1px,transparent 1.8px),radial-gradient(#f5bcd2 1px,transparent 1.8px);
+  background-size:80px 87px,127px 110px;background-position:19px 32px,61px 18px;opacity:.4}
+.cfr-advent__sky{position:relative;text-align:center;color:#f7d9a9;font-size:20px;
+  letter-spacing:1.2em;margin-bottom:19px;pointer-events:none}
+.cfr-advent__grid{position:relative;list-style:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));
+  grid-auto-rows:143px;grid-auto-flow:row dense;gap:clamp(8px,1.25vw,15px);
+  margin:0;padding:0;align-items:stretch}
+.cfr-advent__slot{position:relative;min-width:0;min-height:0;display:flex;flex-direction:column;gap:5px}
+.cfr-advent__slot--wide{grid-column:span 2}
+.cfr-advent__slot--tall{grid-row:span 2}
+.cfr-advent__slot--feature{grid-column:span 2;grid-row:span 2}
+.cfr-advent__case{position:relative;flex:1;min-height:0;border-radius:9px;perspective:900px;
+  box-shadow:0 8px 19px #110f2280,inset 0 0 5px #e6bcb564;overflow:hidden;
+  border:1px solid #cfabb08c;background:linear-gradient(130deg,#785370,#2b314c)}
+.cfr-advent__case::before{content:'';position:absolute;inset:7px;border:1px solid #e8c6a84d;
+  pointer-events:none;border-radius:6px;z-index:1}
+.cfr-advent__door{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:7px;padding:12px 7px;text-align:center;text-decoration:none!important;
+  background:linear-gradient(133deg,#744965,#ae5874 49%,#583b63);
+  color:#fff1d6!important;cursor:pointer;border:0;transform-origin:left center;
+  backface-visibility:hidden;transition:transform .83s cubic-bezier(.26,.68,.16,1),filter .2s;
+  z-index:3;box-shadow:inset 3px 3px 3px #f8d2c73b,inset -4px -4px 12px #160c2544}
+.cfr-advent__slot:nth-child(4n+2) .cfr-advent__door{background:linear-gradient(140deg,#28546a,#547789 52%,#263c5b)}
+.cfr-advent__slot:nth-child(5n+3) .cfr-advent__door{background:linear-gradient(125deg,#614a77,#85628f,#533953)}
+.cfr-advent__slot:nth-child(7n+4) .cfr-advent__door{background:linear-gradient(138deg,#675a4f,#a47d68 60%,#705153)}
+.cfr-advent__slot.is-available .cfr-advent__door:not(.cfr-advent__door--locked):hover{filter:brightness(1.14)}
+.cfr-advent__slot.is-opened .cfr-advent__door{transform:rotateY(-105deg);pointer-events:none}
+.cfr-advent__slot.is-opened .cfr-advent__case{overflow:visible}
+.cfr-advent__slot.is-unavailable .cfr-advent__door{filter:saturate(.68)}
+.cfr-advent__door--locked{cursor:default}
+.cfr-advent__date{font:700 10px/1.2 system-ui,sans-serif;letter-spacing:.05em;color:#ffdcc3}
+.cfr-advent__number{font:normal clamp(33px,4vw,65px)/1 Georgia,serif;text-shadow:0 2px 8px #1b102a6b}
+.cfr-advent__slot--feature .cfr-advent__number{font-size:clamp(65px,8vw,110px)}
+.cfr-advent__decoration{font-size:17px;color:#ffe2b5}
+.cfr-advent__invitation{font:700 10px/1.25 system-ui,sans-serif;color:#ffe6e0}
+.cfr-advent__reveal{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:10px;text-align:center;padding:9px;
+  background:radial-gradient(circle at 50% 30%,#fff2dc,#e9cdcd);color:#48344b}
+.cfr-advent__reveal[hidden]{display:none!important}
+.cfr-advent__reveal-symbol{font-size:25px;color:#a84978}
+.cfr-advent__reveal strong{font:700 clamp(11px,1.4vw,17px)/1.3 Georgia,serif;max-width:100%}
+.cfr-advent__read-link{border-radius:30px;padding:8px 11px;background:var(--cfr-pink);color:white!important;
+  font:700 11px/1.3 system-ui,sans-serif;text-decoration:none!important;display:inline-block}
+.cfr-advent__read-link:hover{background:#a82b5d}
+.cfr-advent__status{text-align:center;color:#f5d3df;font:600 10px/1.3 system-ui,sans-serif;
+  min-height:13px;overflow-wrap:anywhere}
+.cfr-advent__slot.is-opened .cfr-advent__status{color:#ffe5aa}
+/* When reduced motion is requested, the door reveals instantly. */
+@media(prefers-reduced-motion:reduce){.cfr-advent__door,.cfr-library__cover{transition:none!important}
+  .cfr-advent__slot.is-opened .cfr-advent__door{transform:none;visibility:hidden}
+  .cfr-library__cover[href]:hover{transform:none}}
+
+/* Both modes work with the actual CampusFR switch (html.campus-dark). */
+html.campus-dark .cfr-library--library{--cfr-text:#f3e4ea;--cfr-muted:#d6bbcb;--cfr-border:#594354;
+  background:linear-gradient(145deg,#291f31,#39293a 60%,#251e2c)}
+html.campus-dark .cfr-library__hero h2{color:var(--cfr-text)}
+html.campus-dark .cfr-library--library .cfr-shelves{background:radial-gradient(ellipse at 50% 10%,#553d42,#241a27 75%)}
+html.campus-dark .cfr-library--library .cfr-library__count{background:#463147;color:#ffd5e4;border-color:#8b5972}
+html.campus-dark .cfr-library--library .cfr-library__view-link{background:#352839;color:#ffd2e1!important;border-color:#855c6f}
+html.campus-dark .cfr-library--library .cfr-library__view-link.is-active{background:#e0397c;color:#fff!important}
+html.campus-dark .cfr-library__hero .cfr-library__admin{color:#ffbed7}
+
+@media(max-width:920px){.cfr-shelves__row{grid-template-columns:repeat(6,minmax(118px,1fr));min-width:795px}
+  .cfr-advent__grid{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:135px}}
+@media(max-width:620px){
+  .cfr-library{padding:13px 8px;border-radius:17px}
+  .cfr-library__hero h2{font-size:clamp(27px,7vw,37px)}
+  .cfr-shelves__row{grid-template-columns:repeat(6,minmax(118px,1fr));min-width:795px;gap:9px;padding:12px 11px 81px;min-height:274px}
+  .cfr-library__cover{height:163px;max-width:142px}
+  .cfr-library__item:nth-child(3n+2) .cfr-library__cover{height:177px}
+  .cfr-library__item:nth-child(3n) .cfr-library__cover{height:155px}
+  .cfr-library__item:nth-child(5n) .cfr-library__cover{height:183px}
+  .cfr-library__number{font-size:32px}.cfr-library__card-title{font-size:10px}
+  .cfr-advent{padding:13px 8px 24px}
+  .cfr-advent__grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:135px;gap:9px}
+  .cfr-advent__number{font-size:47px}
+  .cfr-advent__slot--feature .cfr-advent__number{font-size:70px}
+  .cfr-advent__slot--wide{grid-column:span 2}
+  .cfr-advent__slot--tall{grid-row:span 2}
+  .cfr-advent__slot--feature{grid-column:span 2;grid-row:span 2}
+}
+
+
+.cfr-pub-door--locked {cursor: not-allowed; opacity: .65;}

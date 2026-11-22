@@ -30,7 +30,7 @@ if ($record === null) {
     throw new moodle_exception('invalidrecord');
 }
 
-// P2I: opt-in, administrative DEV checkout test for draft #8 only.
+// CAMPUSFR_AVENT_CHECKOUT_DEV_V1: opt-in admin sandbox test for exact DEV drafts #8 and #9.
 // Normal previews and all public showrooms are unchanged.
 $commercetest = optional_param('commerce_test', 0, PARAM_INT);
 if ($commercetest !== 0 && $commercetest !== 1) {
@@ -40,8 +40,19 @@ if ($commercetest === 1) {
     require_capability('moodle/site:config', $context);
     $settings = json_decode((string)$record->settingsjson, true, 512, JSON_THROW_ON_ERROR);
     $designid = (string)($settings['designbridge']['id'] ?? '');
+    // Only these two CMS/design pairs can be considered before loading a manifest.
+    $testdesign = match ($id) {
+        \local_subscriptions\commerce\showroom\bridge\CommerceShowroomDevCheckoutTestGate::SHOWROOM_ID
+            => \local_subscriptions\commerce\showroom\bridge\CommerceShowroomDevCheckoutTestGate::DESIGN,
+        \local_subscriptions\commerce\showroom\bridge\CommerceShowroomDevCheckoutTestGate::ADVENT_SHOWROOM_ID
+            => \local_subscriptions\commerce\showroom\bridge\CommerceShowroomDevCheckoutTestGate::ADVENT_DESIGN,
+        default => throw new moodle_exception('invalidparameter'),
+    };
+    if ($designid !== $testdesign) {
+        throw new moodle_exception('invalidparameter');
+    }
     $manifest = \local_subscriptions\commerce\showroom\bridge\CommerceShowroomBridgePackageRegistry
-        ::require_manifest('articles_alf_reimport');
+        ::require_manifest($testdesign);
     if (!\local_subscriptions\commerce\showroom\bridge\CommerceShowroomDevCheckoutTestGate::eligible(
         $id,
         (string)$record->status,

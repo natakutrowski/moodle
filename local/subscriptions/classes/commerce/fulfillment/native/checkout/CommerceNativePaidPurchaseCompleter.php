@@ -162,6 +162,7 @@ final class CommerceNativePaidPurchaseCompleter {
         $registry = new CommerceNativeFulfillmentHandlerRegistry([
             new CommerceCourseAccessFulfillmentHandler(),
             new CommerceDigitalDownloadFulfillmentHandler(),
+            new \local_subscriptions\commerce\fulfillment\native\reader\CommerceReaderAccessFulfillmentHandler(),
             new CommercePedagogicalPromotionJoinFulfillmentHandler(),
         ]);
         $orchestrator = new CommerceNativePurchaseFulfillmentOrchestrator(

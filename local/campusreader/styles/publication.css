@@ -1,0 +1,32 @@
+/* D2.4.3 — Native Commerce edition reader; no admin-only or course route changes. */
+.cfr-pub-shell{max-width:1180px;margin:0 auto;padding:1.25rem 1rem 4rem}
+.cfr-pub-head{text-align:center;margin:1rem 0 1.5rem}
+.cfr-pub-head span{color:#E0397C;letter-spacing:.09em;text-transform:uppercase;font-size:.78rem;font-weight:700}
+.cfr-pub-head h1{margin:.35rem 0;color:var(--bs-body-color,#26213d)}
+.cfr-pub-head p{opacity:.75}
+.cfr-pub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;max-width:1000px;margin:auto}
+.cfr-pub-mode{grid-column:1/-1;text-align:center}
+.cfr-pub-door{border:1px solid var(--bs-border-color,#dcd4e7);border-radius:14px;min-height:130px;padding:1.25rem;text-decoration:none!important;color:var(--bs-body-color,#26213d);background:var(--bs-body-bg,#fff);display:flex;gap:.65rem;flex-direction:column;justify-content:center;box-shadow:0 3px 16px rgba(25,15,45,.03)}
+.cfr-pub-door strong{font-size:1.7rem;color:#E0397C}
+.cfr-pub-door span{line-height:1.3}
+.cfr-pub-door.is-locked{opacity:.64;background:var(--bs-tertiary-bg,#f6f3f9);cursor:not-allowed}
+.cfr-pub-door.is-locked strong{color:var(--bs-secondary-color,#666)}
+.cfr-pub-chapternav{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:1rem;margin:1rem 0}
+.cfr-pub-chapternav a{color:#C62265;text-decoration:none}
+.cfr-pub-reader{max-width:900px;margin:1rem auto!important;transform:none!important;inset:unset!important}
+.cfr-pub-reader .cfr-reader__stage{display:flex;justify-content:center}
+.cfr-pub-reader .cfr-book{margin:0 auto!important}
+.cfr-pub-media{margin:1rem auto;max-width:700px;padding:1rem;border:1px solid var(--bs-border-color,#ddd);border-radius:12px}
+.cfr-pub-media audio,.cfr-pub-media video{max-width:100%;width:100%}
+[data-bs-theme="dark"] .cfr-pub-door,[data-bs-theme="dark"] .cfr-pub-media{background:var(--bs-body-bg);color:var(--bs-body-color)}
+@media(max-width:640px){.cfr-pub-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cfr-pub-shell{padding:.5rem .4rem 2rem}}
+
+/* D2.9b — frozen narration phrase highlighting, without blocking word tooltips. */
+.cfr-pub-reader .cfr-sync-phrase { border-radius:3px; transition:background-color .12s ease; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+.cfr-pub-reader .cfr-sync-phrase.is-speaking { background:rgba(224,57,124,.24); box-shadow:0 0 0 2px rgba(224,57,124,.07); }
+.cfr-pub-sync-head { display:flex; align-items:flex-start; flex-wrap:wrap; gap:.5rem; margin:.5rem 0 .75rem; color:var(--bs-body-color,#26213d); font-size:.89rem; }
+.cfr-pub-sync-head [data-cfr-sync-current] { color:var(--bs-secondary-color,#655d75); flex:1 1 200px; }
+[data-bs-theme="dark"] .cfr-pub-reader .cfr-sync-phrase.is-speaking,
+html.campus-dark .cfr-pub-reader .cfr-sync-phrase.is-speaking,
+body.campus-dark .cfr-pub-reader .cfr-sync-phrase.is-speaking { background:rgba(255,126,176,.33); }
+@media(prefers-reduced-motion:reduce){.cfr-pub-reader .cfr-sync-phrase{transition:none}}

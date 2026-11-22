@@ -6,9 +6,24 @@ use local_subscriptions\payment\stripe\StripeConfiguration;
 use local_subscriptions\payment\stripe\StripeGateway;
 final class StripeWebhookVerifier {
     public function verify(string $payload,array $headers,?string $requestedprofile=null): StripeVerifiedWebhook {
-        $profiles=$requestedprofile!==null && trim($requestedprofile)!==''
-            ? [StripeConfiguration::normalise($requestedprofile)]
-            : array_values(array_unique(array_merge([StripeConfiguration::active_profile()],StripeConfiguration::PROFILES)));
+        // D2.19.1: when Stripe TEST is selected, *only* TEST signatures may be
+        // accepted, even if legacy LIVE webhook secrets remain configured.
+        // Reject an explicit LIVE/unknown profile before profile normalisation,
+        // which otherwise silently maps unknown values back to TEST.
+        if (StripeConfiguration::active_profile() === StripeConfiguration::TEST) {
+            if ($requestedprofile !== null && trim($requestedprofile) !== '' &&
+                    strtolower(trim($requestedprofile)) !== StripeConfiguration::TEST) {
+                throw new \UnexpectedValueException('Only Stripe TEST webhooks are accepted in TEST mode.');
+            }
+            $profiles = [StripeConfiguration::TEST];
+        } else {
+            // Keep the historical production multi-profile routing unchanged.
+            $profiles = $requestedprofile !== null && trim($requestedprofile) !== ''
+                ? [StripeConfiguration::normalise($requestedprofile)]
+                : array_values(array_unique(array_merge(
+                    [StripeConfiguration::active_profile()], StripeConfiguration::PROFILES
+                )));
+        }
         $last=null;
         foreach($profiles as $profile){
             $cfg=StripeConfiguration::get($profile);

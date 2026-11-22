@@ -1,0 +1,8 @@
+{
+  "id": "advent_calendar_2026",
+  "label": "Calendrier de l’Avent 2026",
+  "version": "0.3.1",
+  "entry": "dist/main.js",
+  "css": "dist/style.css",
+  "content": "content/ru.json"
+}

@@ -244,6 +244,22 @@ echo CommerceOffersAccessDetailRenderer::hero(
 );
 
 $actions = [];
+// C2.2c.4: link to the explicit single-grant revocation screen (site admin only).
+if (is_siteadmin((int)$USER->id)
+        && (string)$grant->type === 'course_access'
+        && preg_match('/^ent-manual-[a-f0-9]{32}$/', (string)$grant->grantreference)
+        && in_array((string)$grant->status, ['active', 'granted', 'completed', 'revoked'], true)) {
+    $actions[] = [
+        'label' => get_string('commerce_manual_revoke_action', 'local_subscriptions'),
+        'url' => new moodle_url(
+            '/local/subscriptions/admin/commerce/grants/revoke_manual.php',
+            ['id' => $id]
+        ),
+        'icon' => 'fa-ban',
+        'class' => 'btn btn-outline-danger crm-offers-access-action',
+    ];
+}
+// End C2.2c.4.
 if ($user) {
     $actions[] = [
         'label' => get_string(

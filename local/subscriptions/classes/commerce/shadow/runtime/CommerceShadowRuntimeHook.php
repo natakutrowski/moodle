@@ -89,6 +89,7 @@ final class CommerceShadowRuntimeHook {
         $registry = new CommerceNativeFulfillmentHandlerRegistry([
             new CommerceCourseAccessFulfillmentHandler(),
             new CommerceDigitalDownloadFulfillmentHandler(),
+            new \local_subscriptions\commerce\fulfillment\native\reader\CommerceReaderAccessFulfillmentHandler(),
         ]);
         $native = new CommerceShadowExecutionService(
             $grants,

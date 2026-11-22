@@ -19,6 +19,15 @@
             <span><strong>{{#str}}commerce_my_clan_shortcut, local_subscriptions{{/str}}</strong><small>{{#str}}commerce_my_clan_shortcut_help, local_subscriptions{{/str}}</small></span>
         </a>
         {{/hasclan}}
+        <!-- CAMPUSFR_D281: always available; independent of course enrolment. -->
+        <a href="{{myreaderurl}}" class="commerce-customer-hub__shortcut commerce-customer-hub__shortcut--reader">
+            <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+            <span><strong>{{#str}}cfr_hub_library, local_subscriptions{{/str}}</strong><small>{{readercollectioncountdisplay}}</small></span>
+        </a>
+        <a href="{{myvocabularyurl}}" class="commerce-customer-hub__shortcut commerce-customer-hub__shortcut--reader">
+            <i class="fa-solid fa-language" aria-hidden="true"></i>
+            <span><strong>{{#str}}cfr_hub_vocabulary, local_subscriptions{{/str}}</strong><small>{{#str}}cfr_hub_saved_words, local_subscriptions{{/str}}</small></span>
+        </a>
         <a href="{{myresourcesurl}}" class="commerce-customer-hub__shortcut">
             <i class="fa-solid fa-folder-open" aria-hidden="true"></i>
             <span><strong>{{#str}}commerce_customer_hub_resources, local_subscriptions{{/str}}</strong><small>{{resourcecount}} {{#str}}commerce_customer_hub_available, local_subscriptions{{/str}}</small></span>
@@ -36,6 +45,21 @@
             <span><strong>{{#str}}commerce_customer_hub_support, local_subscriptions{{/str}}</strong><small>{{#str}}commerce_customer_hub_support_help_short, local_subscriptions{{/str}}</small></span>
         </a>
     </nav>
+
+    {{#hasreadercollections}}
+    <section class="commerce-customer-hub__reader-section" aria-label="{{#str}}cfr_hub_library, local_subscriptions{{/str}}">
+        <header><h2><i class="fa-solid fa-book-open" aria-hidden="true"></i> {{#str}}cfr_hub_library, local_subscriptions{{/str}}</h2>
+            <a href="{{myreaderurl}}">{{#str}}cfr_hub_see_all, local_subscriptions{{/str}}</a></header>
+        <div class="commerce-customer-hub__reader-cards">
+            {{#readercollections}}
+            <a class="commerce-customer-hub__reader-card" href="{{url}}">
+                <span aria-hidden="true">📖</span><strong>{{title}}</strong>
+                <small>{{#str}}cfr_hub_open, local_subscriptions{{/str}} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></small>
+            </a>
+            {{/readercollections}}
+        </div>
+    </section>
+    {{/hasreadercollections}}
 
     <div class="commerce-customer-hub__grid">
         <section class="commerce-customer-hub__panel commerce-customer-hub__panel--courses">

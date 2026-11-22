@@ -1,0 +1,91 @@
+/* CampusFR D2.12.3 — publication PDF actions; scoped to a published chapter. */
+.cfr-pub-reader .cfr-pub-downloads {
+  --cfr-pdf-accent:#E0397C;
+  --cfr-pdf-ink:#392337;
+  --cfr-pdf-secondary:#64515e;
+  margin:24px auto 26px;
+  padding:clamp(16px,2.5vw,26px);
+  max-width:880px;
+  border:1px solid #ead5dc;
+  border-radius:20px;
+  color:var(--cfr-pdf-ink);
+  background:linear-gradient(135deg,#fffdfc 0%,#fff6f9 100%);
+  box-shadow:0 9px 28px rgba(74,31,53,.07);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.cfr-pub-reader .cfr-pub-downloads__heading {text-align:center;margin-bottom:19px}
+.cfr-pub-reader .cfr-pub-downloads__eyebrow {
+  display:block;color:#94244f;font-size:11px;letter-spacing:.14em;font-weight:800;
+}
+.cfr-pub-reader .cfr-pub-downloads__heading h3 {
+  margin:6px 0 5px;font:700 clamp(21px,2.4vw,26px)/1.25 Georgia,serif;
+  color:var(--cfr-pdf-ink);
+}
+.cfr-pub-reader .cfr-pub-downloads__heading p {
+  margin:0;color:var(--cfr-pdf-secondary);font-size:13px;line-height:1.5;
+}
+.cfr-pub-reader .cfr-pub-downloads__grid {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;
+}
+.cfr-pub-reader .cfr-pub-downloads__action {
+  box-sizing:border-box;display:flex;align-items:center;gap:12px;
+  min-width:0;padding:16px 14px;border:1px solid #e7bfce;border-radius:15px;
+  background:#fff;color:#382234;text-decoration:none;
+  box-shadow:0 2px 8px rgba(41,23,30,.04);
+  transition:border-color .15s,box-shadow .15s,transform .15s;
+}
+.cfr-pub-reader .cfr-pub-downloads__action:hover {
+  border-color:var(--cfr-pdf-accent);color:#382234;
+  box-shadow:0 5px 16px rgba(86,34,56,.12);transform:translateY(-1px);
+  text-decoration:none;
+}
+.cfr-pub-reader .cfr-pub-downloads__action:focus-visible {
+  outline:3px solid #245eaf;outline-offset:4px;
+}
+.cfr-pub-reader .cfr-pub-downloads__glyph {
+  display:flex;align-items:center;justify-content:center;
+  flex:0 0 41px;width:41px;height:41px;border-radius:12px;
+  background:#ffebf2;color:#752445;font-size:21px;
+}
+.cfr-pub-reader .cfr-pub-downloads__body {display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.cfr-pub-reader .cfr-pub-downloads__body strong {
+  color:inherit;font-size:14px;font-weight:750;line-height:1.25;
+}
+.cfr-pub-reader .cfr-pub-downloads__body small {
+  color:var(--cfr-pdf-secondary);font-size:12px;line-height:1.4;
+}
+.cfr-pub-reader .cfr-pub-downloads__arrow {
+  flex:none;color:#94244f;font-size:22px;font-weight:700;
+}
+.cfr-pub-reader .cfr-pub-downloads__tip {
+  margin:15px 2px 0;color:var(--cfr-pdf-secondary);
+  font-size:12px;line-height:1.6;text-align:center;
+}
+.cfr-pub-reader .cfr-pub-downloads__tip strong {color:var(--cfr-pdf-ink)}
+@media(max-width:700px) {
+  .cfr-pub-reader .cfr-pub-downloads {margin:22px 7px;padding:18px 13px;border-radius:16px}
+  .cfr-pub-reader .cfr-pub-downloads__grid {grid-template-columns:minmax(0,1fr);gap:10px}
+  .cfr-pub-reader .cfr-pub-downloads__action {padding:14px 12px}
+}
+/* CampusFR manual Dark Mode, not prefers-color-scheme. */
+html.campus-dark .cfr-pub-reader .cfr-pub-downloads {
+  --cfr-pdf-ink:#fff0f6;
+  --cfr-pdf-secondary:#e0cbd8;
+  background:linear-gradient(145deg,#342533,#2a212f);
+  border-color:#765469;box-shadow:0 9px 26px rgba(0,0,0,.25);
+}
+html.campus-dark .cfr-pub-reader .cfr-pub-downloads__eyebrow,
+html.campus-dark .cfr-pub-reader .cfr-pub-downloads__arrow {color:#ffb2ce}
+html.campus-dark .cfr-pub-reader .cfr-pub-downloads__action {
+  background:#3b2c3b;border-color:#75576b;color:#fff0f6;
+}
+html.campus-dark .cfr-pub-reader .cfr-pub-downloads__action:hover {
+  background:#4a3346;border-color:#E0397C;color:#fff0f6;
+}
+html.campus-dark .cfr-pub-reader .cfr-pub-downloads__glyph {
+  background:#643148;color:#ffdeeb;
+}
+@media(prefers-reduced-motion:reduce){
+  .cfr-pub-reader .cfr-pub-downloads__action {transition:none}
+  .cfr-pub-reader .cfr-pub-downloads__action:hover {transform:none}
+}

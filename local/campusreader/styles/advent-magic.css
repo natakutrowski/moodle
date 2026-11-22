@@ -1,0 +1,326 @@
+/* CampusFR C2.2a — carton-pâte advent surprise. Intentionally scoped to calendar.
+   Existing permanent library and Moodle themes are not altered. */
+.cfr-library--advent .cfr-advent__case {perspective:1150px; perspective-origin:50% 46%}
+.cfr-library--advent .cfr-advent__slot.is-opening,
+.cfr-library--advent .cfr-advent__slot.is-opened,
+.cfr-library--advent .cfr-advent__slot.is-closing {z-index:9}
+.cfr-library--advent .cfr-advent__door {
+  padding:0; overflow:visible;transform-origin:2% 50%;
+  transform-style:preserve-3d;backface-visibility:visible;
+  transition:transform 1120ms cubic-bezier(.23,.77,.16,1),filter 200ms;
+  box-shadow:inset 2px 0 3px #ffe4ab33,4px 3px 9px #0c0d2866;
+}
+/* Cut edges and micro-fibres visible as the cardboard leaf swings. */
+.cfr-library--advent .cfr-advent__door::before {
+  content:'';position:absolute;inset:-2px -2px -2px auto;width:6px;border:0;
+  border-radius:1px 4px 4px 1px;
+  background:repeating-linear-gradient(180deg,#f5dcb8 0 2px,#c39d78 2px 4px,#ead1a9 4px 6px);
+  box-shadow:1px 0 3px #27132999;transform:translateZ(-2px);pointer-events:none;
+}
+.cfr-library--advent .cfr-advent__door::after {
+  content:'';position:absolute;left:2px;top:5%;height:90%;width:3px;border-radius:5px;
+  background:repeating-linear-gradient(to bottom,#fff4d2 0 4px,#9a5860 4px 8px);
+  box-shadow:2px 0 3px #20102066;pointer-events:none;
+}
+.cfr-library--advent .cfr-advent__door-front,
+.cfr-library--advent .cfr-advent__door-back {
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:3px;border-radius:inherit;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;transform-style:preserve-3d;
+}
+.cfr-library--advent .cfr-advent__door-front {
+  transform:translateZ(3px);padding:8px 6px;
+  background:radial-gradient(ellipse at 51% 33%,#fff6d916,transparent 55%);
+  box-shadow:inset 0 0 0 1px #fbd8a64d,inset 0 0 22px #31162c44;
+}
+.cfr-library--advent .cfr-advent__door-front::after {
+  content:'';position:absolute;inset:8px;border:1px solid #f5d7ac72;
+  border-radius:inherit;pointer-events:none;
+}
+.cfr-library--advent .cfr-advent__door-back {
+  transform:rotateY(180deg) translateZ(2px);
+  padding:15px 8px;text-align:center;color:#7a5260;
+  background:repeating-linear-gradient(112deg,#f3dfbb 0 3px,#ead2aa 3px 5px,#edd8b5 5px 8px);
+  box-shadow:inset 0 0 0 2px #d0a67f,inset 0 0 18px #a574506c;
+}
+.cfr-library--advent .cfr-advent__door-back span {font:36px Georgia,serif;color:#bf815f}
+.cfr-library--advent .cfr-advent__door-back small {
+  font:italic clamp(9px,1vw,13px)/1.35 Georgia,serif;max-width:95%;color:#77515c;
+}
+.cfr-library--advent .cfr-advent__pull-tab {
+  position:absolute;right:-7px;top:48%;transform:translateY(-50%) rotate(-90deg);
+  display:grid;place-items:center;width:22px;height:37px;
+  color:#84505e;font:bold 24px/1 Georgia,serif;background:linear-gradient(105deg,#fff4d8,#d6aa75);
+  border:1px solid #e6c494;border-radius:1px 9px 9px 1px;
+  box-shadow:3px 2px 4px #1a102661;z-index:1;transition:transform 160ms;
+}
+.cfr-library--advent .cfr-advent__slot.is-available .cfr-advent__door:hover .cfr-advent__pull-tab {
+  transform:translateY(-50%) rotate(-90deg) translateY(3px);
+}
+.cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__door,
+.cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__door {transform:rotateY(-153deg);filter:brightness(1.07);pointer-events:none}
+.cfr-library--advent .cfr-advent__slot.is-closing .cfr-advent__door {transform:rotateY(0deg);pointer-events:none}
+.cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__case,
+.cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__case,
+.cfr-library--advent .cfr-advent__slot.is-closing .cfr-advent__case {overflow:visible}
+.cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__case::before,
+.cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__case::before {visibility:hidden}
+/* Small backlit cavity. Magical light remains behind the leaf, not over its front. */
+.cfr-library--advent .cfr-advent__reveal {
+  isolation:isolate;z-index:2;gap:clamp(3px,.5vw,8px);padding:8px 6px;
+  border:3px solid #c89b79;border-radius:5px;
+  background:radial-gradient(ellipse at 50% 26%,#fffdf0 0%,#ffe9b8 36%,#dda9a1 85%,#b77f93 100%);
+  box-shadow:inset 0 0 0 3px #fbeac5,inset 0 0 18px #7c45675e;
+}
+.cfr-library--advent .cfr-advent__reveal::before {
+  content:'';position:absolute;inset:-12px;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse at center,#ffe8abbd 0%,#facf7481 22%,transparent 70%);
+  opacity:0;transform:scale(.75);
+}
+.cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__reveal::before {
+  animation:cfrCardboardGlow 1500ms ease-out 180ms both;
+}
+.cfr-library--advent .cfr-advent__reveal-rays {
+  position:absolute;inset:-9px;z-index:-1;pointer-events:none;opacity:.24;
+  background:repeating-conic-gradient(from 0deg at 50% 48%,#fff7d1 0deg 11deg,transparent 12deg 29deg);
+  -webkit-mask-image:radial-gradient(circle,#000 0 35%,transparent 80%);
+  mask-image:radial-gradient(circle,#000 0 35%,transparent 80%);
+}
+.cfr-library--advent .cfr-advent__reveal-symbol {
+  font-size:clamp(20px,2.4vw,38px);color:#bd6d80;text-shadow:0 0 16px #fff4c8,0 2px 0 #fff9ea;
+  transform:scale(.7);opacity:.5;
+}
+.cfr-library--advent .cfr-advent__reveal-kicker {
+  font:800 clamp(7px,.65vw,10px)/1.2 system-ui,sans-serif;letter-spacing:.1em;color:#9b566d;
+}
+.cfr-library--advent .cfr-advent__reveal strong {
+  color:#674156;font:700 clamp(10px,1.1vw,18px)/1.16 Georgia,serif;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.cfr-library--advent .cfr-advent__read-link {
+  position:relative;z-index:1;min-height:27px;padding:7px 10px;border-radius:14px;
+  background:#E0397C;font:700 clamp(9px,.8vw,12px)/1.1 system-ui,sans-serif;
+  box-shadow:0 3px 8px #ad436459;
+}
+.cfr-library--advent .cfr-advent__reveal-symbol,
+.cfr-library--advent .cfr-advent__reveal-kicker,
+.cfr-library--advent .cfr-advent__reveal strong,
+.cfr-library--advent .cfr-advent__read-link {opacity:0;transition:opacity 260ms,transform 360ms}
+.cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__reveal-symbol,
+.cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__reveal-symbol,
+.cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__reveal-kicker,
+.cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__reveal-kicker,
+.cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__reveal strong,
+.cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__reveal strong,
+.cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__read-link,
+.cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__read-link {opacity:1}
+.cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__reveal-symbol,
+.cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__reveal-symbol {transform:scale(1)}
+.cfr-library--advent .cfr-advent__close {
+  position:absolute;z-index:7;top:3px;right:3px;width:30px;height:30px;min-width:30px;
+  display:grid;place-items:center;padding:0;border-radius:50%;border:1px solid #c995a0;
+  background:#fffcf0;color:#85425b;font:24px/1 system-ui,sans-serif;
+  cursor:pointer;box-shadow:0 3px 6px #7c4d6244;
+}
+.cfr-library--advent .cfr-advent__close:hover {background:#E0397C;color:white}
+.cfr-library--advent .cfr-advent__close:focus-visible {outline:3px solid #397ace;outline-offset:3px}
+.cfr-library--advent .cfr-advent__slot.is-closing .cfr-advent__reveal {pointer-events:none}
+.cfr-library--advent .cfr-advent__slot.is-unavailable .cfr-advent__door-front {opacity:.9}
+@keyframes cfrCardboardGlow {0%{opacity:0;transform:scale(.7)}40%{opacity:1;transform:scale(1.16)}100%{opacity:.24;transform:scale(1.02)}}
+
+/* The large surprise isn't limited by the small geometry of each door. Native dialog
+   puts it in the browser top layer, supports Escape and focus containment. */
+.cfr-advent-magic {
+  box-sizing:border-box;position:fixed;inset:0;margin:auto;padding:0;
+  width:min(93vw,490px);max-height:min(90dvh,820px);
+  border:1px solid #f4dcb7;border-radius:22px;overflow-y:auto;overflow-x:hidden;
+  background:#fff7e9;color:#4c354c;
+  box-shadow:0 0 0 7px #bb8a654d,0 0 0 9px #f8dcac65,0 24px 95px #090e24c2;
+}
+.cfr-advent-magic:not([open]) {display:none}
+.cfr-advent-magic::backdrop {background:radial-gradient(circle at center,#2b16397d,#0a1021d5);backdrop-filter:blur(4px)}
+.cfr-advent-magic[open] {animation:cfrMagicAppear 620ms cubic-bezier(.19,.8,.2,1) both}
+.cfr-advent-magic__inner {position:relative;padding:8px;border:1px solid #ad794e61;border-radius:21px}
+.cfr-advent-magic__inner::before {
+  content:'';position:absolute;inset:12px;border:1px solid #be946e80;border-radius:16px;pointer-events:none;z-index:1;
+}
+.cfr-advent-magic__close {
+  position:absolute;top:18px;right:18px;z-index:10;width:42px;height:42px;border-radius:50%;
+  display:grid;place-items:center;background:#fcf2de;border:1px solid #d3ad80;color:#744158;
+  cursor:pointer;font:29px/1 system-ui,sans-serif;box-shadow:0 3px 10px #19132c55;
+}
+.cfr-advent-magic__close:hover {background:#E0397C;color:white}
+.cfr-advent-magic button:focus-visible,.cfr-advent-magic a:focus-visible {outline:3px solid #1a69bb;outline-offset:3px}
+.cfr-advent-magic__art {
+  width:100%;height:clamp(180px,32vh,255px);position:relative;border-radius:15px 15px 4px 4px;
+  background:#13182e url('../assets/surprise-cottage.svg') center/cover no-repeat;
+  box-shadow:inset 0 0 0 2px #ffddaa78,inset 0 -22px 35px #1f1f3d8a;overflow:hidden;
+}
+.cfr-advent-magic__moon {
+  position:absolute;top:14px;left:14px;color:#ffe2a6;text-shadow:0 0 15px #fff3dc;font:26px Georgia,serif;
+  animation:cfrMoonGlimmer 1800ms ease-in-out 1 alternate;
+}
+.cfr-advent-magic__content {padding:23px 22px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.cfr-advent-magic__eyebrow {font:800 11px/1.4 system-ui,sans-serif;letter-spacing:.21em;color:#c13f7c}
+.cfr-advent-magic__date {font:italic 16px/1.4 Georgia,serif;color:#956d75}
+.cfr-advent-magic h3 {font:normal clamp(28px,5vw,40px)/1.07 Georgia,serif;color:#4a3048;margin:9px 0 2px}
+.cfr-advent-magic p {color:#866672;font:normal 14px/1.6 system-ui,sans-serif;margin:4px 0 11px;max-width:320px}
+.cfr-advent-magic__read {
+  display:inline-flex;align-items:center;justify-content:center;gap:16px;min-height:50px;
+  padding:12px 22px;border-radius:99px;background:#E0397C;color:white!important;
+  font:800 14px/1.3 system-ui,sans-serif;text-decoration:none!important;
+  box-shadow:0 9px 21px #af3b7663;transition:transform 160ms,box-shadow 160ms;
+}
+.cfr-advent-magic__read:hover {transform:translateY(-2px);box-shadow:0 13px 24px #af3b7677}
+.cfr-advent-magic__fold {margin-top:4px;padding:7px 9px;color:#7f596c;border:0;
+  background:transparent;cursor:pointer;font:600 12px system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px}
+@keyframes cfrMagicAppear {0%{opacity:0;transform:translateY(22px) scale(.88)}65%{opacity:1;transform:translateY(-5px) scale(1.015)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes cfrMoonGlimmer {0%{opacity:.15;transform:scale(.9)}100%{opacity:1;transform:scale(1.05)}}
+@media (max-width:620px) {
+ .cfr-library--advent .cfr-advent__pull-tab {width:18px;height:32px;right:-6px}
+ .cfr-library--advent .cfr-advent__slot:not(.cfr-advent__slot--feature) .cfr-advent__reveal-kicker {display:none}
+ .cfr-library--advent .cfr-advent__reveal {gap:4px}
+ .cfr-library--advent .cfr-advent__reveal strong {font-size:11px}
+ .cfr-library--advent .cfr-advent__door-back small {font-size:9px}
+ .cfr-advent-magic {width:min(94vw,490px);max-height:87dvh;border-radius:17px}
+ .cfr-advent-magic__inner {padding:6px}
+ .cfr-advent-magic__art {height:clamp(140px,27vh,215px)}
+ .cfr-advent-magic__content {padding:20px 13px 18px}
+ .cfr-advent-magic h3 {font-size:32px}
+}
+@media (prefers-reduced-motion:reduce) {
+ .cfr-library--advent .cfr-advent__door,
+ .cfr-library--advent .cfr-advent__reveal-symbol,
+ .cfr-library--advent .cfr-advent__reveal-kicker,
+ .cfr-library--advent .cfr-advent__reveal strong,
+ .cfr-library--advent .cfr-advent__read-link,
+ .cfr-advent-magic__read {transition:none!important;animation:none!important}
+ .cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__door,
+ .cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__door {transform:none!important;visibility:hidden!important}
+ .cfr-library--advent .cfr-advent__slot.is-closing .cfr-advent__door {visibility:visible!important}
+ .cfr-advent-magic[open],.cfr-advent-magic__moon {animation:none!important}
+}
+
+
+/* CampusFR C2.2a.1 — opened flaps remain INSIDE their own cardboard windows.
+   Deliberate overrides over the C2.2a animation and the older illustration CSS. */
+.cfr-library--advent .cfr-advent__slot.is-opening,
+.cfr-library--advent .cfr-advent__slot.is-opened,
+.cfr-library--advent .cfr-advent__slot.is-closing {z-index:1}
+.cfr-library--advent .cfr-advent__case,
+.cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__case,
+.cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__case,
+.cfr-library--advent .cfr-advent__slot.is-closing .cfr-advent__case {
+  overflow:hidden; /* no cardboard flap, glow or caption can cover a neighbor */
+  contain:paint;
+}
+.cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__door,
+.cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__door {
+  transform:rotateY(-81deg);
+  filter:brightness(1.06);
+  pointer-events:none;
+}
+.cfr-library--advent .cfr-advent__slot.is-closing .cfr-advent__door {
+  transform:rotateY(0deg);
+  pointer-events:none;
+}
+.cfr-library--advent .cfr-advent__slot.is-restored .cfr-advent__door {transition:none!important}
+.cfr-library--advent .cfr-advent__slot.is-restored .cfr-advent__reveal * {transition:none!important;animation:none!important}
+.cfr-library--advent .cfr-advent__reveal {
+  inset:0;overflow:hidden;gap:clamp(2px,.4vw,5px);
+  padding:clamp(4px,.6vw,9px);
+  border:2px solid #d8af78;
+  background:radial-gradient(ellipse at 65% 22%,#fffef4 0%,#ffe9b5 41%,#dbad9f 86%,#c08a9c 100%);
+  box-shadow:inset 0 0 0 3px #ffefca,inset 0 0 20px #994f6388;
+}
+.cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__reveal::before,
+.cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__reveal::before {
+  inset:0;animation:none;opacity:.3;transform:none;
+}
+.cfr-library--advent .cfr-advent__reveal-symbol {font-size:clamp(14px,2vw,27px);line-height:1;color:#a44468}
+.cfr-library--advent .cfr-advent__reveal-kicker {font-size:clamp(7px,.7vw,10px);letter-spacing:.08em;color:#843f61}
+.cfr-library--advent .cfr-advent__reveal strong {
+  color:#482e41!important;
+  font:700 clamp(10px,1.1vw,18px)/1.14 Georgia,serif;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;overflow-wrap:anywhere;margin:0 2px;
+}
+.cfr-library--advent .cfr-advent__discover {
+  position:relative;z-index:4;display:inline-flex;align-items:center;justify-content:center;
+  width:auto;max-width:calc(100% - 4px);min-height:29px;min-width:0;
+  padding:6px clamp(6px,.8vw,13px);border:1px solid #a62d63;border-radius:24px;
+  background:#E0397C;color:#fff!important;cursor:pointer;
+  text-align:center;white-space:normal;font:800 clamp(9px,.8vw,12px)/1.12 system-ui,sans-serif;
+  box-shadow:0 3px 10px #83435b66;transition:transform .18s,background .18s;
+}
+.cfr-library--advent .cfr-advent__discover:hover {transform:translateY(-2px);background:#b92f68}
+.cfr-library--advent .cfr-advent__discover:focus-visible,
+.cfr-library--advent .cfr-advent__read-link:focus-visible {outline:3px solid #2069c4;outline-offset:2px}
+.cfr-library--advent .cfr-advent__read-link {
+  display:none; /* direct link remains available in DOM to JS & no-JS fallback */
+}
+.cfr-library--advent .cfr-advent__close {
+  top:3px;right:3px;min-width:28px;width:28px;height:28px;
+  font:23px/1 system-ui,sans-serif;border:1px solid #ad7581;
+}
+.cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__reveal,
+.cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__reveal {pointer-events:auto}
+.cfr-library--advent .cfr-advent__slot.is-closing .cfr-advent__reveal {pointer-events:none}
+/* Real ink on warm paper, even when CampusFR/Moodle applies global dark CSS. */
+html.campus-dark .cfr-library--advent .cfr-advent__reveal strong,
+html.campus-dark .cfr-library--advent .cfr-advent__reveal-kicker {color:#482e41!important}
+html.campus-dark .cfr-library--advent .cfr-advent__discover {color:#fff!important}
+html.campus-dark dialog.cfr-advent-magic,
+html.campus-dark .cfr-advent-magic__inner,
+body.theme-dark dialog.cfr-advent-magic {background:#fff7e9!important;color:#40283d!important}
+html.campus-dark .cfr-advent-magic h3,
+html.campus-dark .cfr-advent-magic__content h3 {color:#452c43!important}
+html.campus-dark .cfr-advent-magic p,
+html.campus-dark .cfr-advent-magic__content p {color:#654552!important}
+html.campus-dark .cfr-advent-magic__date {color:#76505b!important}
+html.campus-dark .cfr-advent-magic__eyebrow {color:#aa285e!important}
+html.campus-dark .cfr-advent-magic__fold {color:#673c54!important}
+html.campus-dark .cfr-advent-magic__close {background:#fff4df!important;color:#6e3c55!important}
+html.campus-dark .cfr-advent-magic__close:hover {background:#E0397C!important;color:#fff!important}
+/* Small cases have a compact inner gift, not a full paragraph. */
+@media(max-width:620px){
+ .cfr-library--advent .cfr-advent__reveal {padding:3px 2px;gap:3px}
+ .cfr-library--advent .cfr-advent__reveal-kicker {font-size:7px}
+ .cfr-library--advent .cfr-advent__reveal-symbol {font-size:15px}
+ .cfr-library--advent .cfr-advent__reveal strong {font-size:clamp(9px,2.8vw,14px);line-height:1.1}
+ .cfr-library--advent .cfr-advent__discover {font-size:10px;min-height:30px;padding:5px 7px}
+ .cfr-library--advent .cfr-advent__close {width:28px;height:28px;min-width:28px}
+ .cfr-library--advent .cfr-advent__slot:not(.cfr-advent__slot--feature) .cfr-advent__reveal-symbol {display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .cfr-library--advent .cfr-advent__slot.is-opened .cfr-advent__door,
+ .cfr-library--advent .cfr-advent__slot.is-opening .cfr-advent__door {transform:none!important;visibility:hidden!important}
+ .cfr-library--advent .cfr-advent__slot.is-closing .cfr-advent__door {visibility:visible!important}
+ .cfr-library--advent .cfr-advent__discover {transition:none!important}
+}
+
+
+/* C2.2a.2 — Replay available to administrators only; controls match CampusFR Dark Mode. */
+.cfr-library--advent .cfr-advent-debug {
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 11px;
+  max-width:660px;margin:12px auto 4px;padding:9px 12px;border-radius:14px;
+  border:1px solid #cda1b76b;background:#281a355e;color:#fce5ef;
+  font:600 12px/1.35 system-ui,sans-serif;
+}
+.cfr-library--advent .cfr-advent-debug label {color:inherit}
+.cfr-library--advent .cfr-advent-debug select {
+  box-sizing:border-box;max-width:100%;min-height:35px;padding:6px 10px;
+  color:#483042!important;background:#fff9ee!important;border:1px solid #d6ad8c;border-radius:8px;
+  font:600 12px system-ui,sans-serif;
+}
+.cfr-library--advent .cfr-advent-debug button {
+  min-height:35px;padding:7px 13px;border-radius:22px;border:1px solid #f3b4ce;
+  background:#E0397C;color:#fff;cursor:pointer;font:700 12px system-ui,sans-serif;
+}
+.cfr-library--advent .cfr-advent-debug button:hover:not(:disabled) {background:#bc2f68}
+.cfr-library--advent .cfr-advent-debug button:disabled {opacity:.6;cursor:wait}
+.cfr-library--advent .cfr-advent-debug :is(button,select):focus-visible {outline:3px solid #ffe39e;outline-offset:2px}
+.cfr-library--advent .cfr-advent-debug__hint {width:100%;text-align:center;min-height:1em;color:#f1d5e1}
+html:not(.campus-dark) .cfr-library--advent .cfr-advent-debug {background:#fff5f8;color:#543047;border-color:#b894a8}
+html:not(.campus-dark) .cfr-library--advent .cfr-advent-debug__hint {color:#754f65}
+@media(max-width:620px){.cfr-library--advent .cfr-advent-debug {padding:10px 7px}}

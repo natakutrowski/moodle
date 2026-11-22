@@ -546,10 +546,17 @@ $renderaccessactions = static function(array $accesses) use ($reference, $order,
                     'order_result',
                     $access->url
                 );
+                // CAMPUSFR_C31_READER_INTEGRATION: change only Reader CTA, never normal courses.
+                $isreaderaccess = !empty($access->metadata['readercollection']);
+                $readerlabel = match (substr(current_language(), 0, 2)) {
+                    'ru' => 'Открыть мою библиотеку',
+                    'en' => 'Open my library',
+                    default => 'Ouvrir ma bibliothèque',
+                };
                 $coursebuttoncontent = html_writer::tag('i', '', [
-                    'class' => 'fa-solid fa-graduation-cap me-2',
+                    'class' => $isreaderaccess ? 'fa-solid fa-book-open me-2' : 'fa-solid fa-graduation-cap me-2',
                     'aria-hidden' => 'true',
-                ]) . get_string('commerce_i2_open_course', 'local_subscriptions');
+                ]) . ($isreaderaccess ? $readerlabel : get_string('commerce_i2_open_course', 'local_subscriptions'));
                 if ($requiresaccountfinalisation) {
                     $accessactions .= html_writer::tag('button', $coursebuttoncontent, [
                         'type' => 'button',
@@ -562,6 +569,34 @@ $renderaccessactions = static function(array $accesses) use ($reference, $order,
                         $trackedurl,
                         $coursebuttoncontent,
                         ['class' => 'btn btn-primary']
+                    );
+                }
+                continue;
+            }
+
+            if ($access->type === 'reader_access') {
+                $calendarlabel = get_string('cfr_reader_open_calendar_purchase', 'local_subscriptions');
+                $buttoncontent = html_writer::tag('i', '', [
+                    'class' => 'fa-solid fa-calendar-days me-2', 'aria-hidden' => 'true',
+                ]) . $calendarlabel;
+                if ($requiresaccountfinalisation) {
+                    $accessactions .= html_writer::tag('button', $buttoncontent, [
+                        'type' => 'button',
+                        'class' => 'btn btn-primary commerce-order-account-gated-action',
+                        'data-requires-account-finalisation' => '1',
+                        'aria-haspopup' => 'dialog',
+                    ]);
+                } else if (!isloggedin() || isguestuser()) {
+                    $accessactions .= html_writer::link(
+                        new moodle_url('/login/index.php', ['wantsurl' => $access->url]),
+                        $buttoncontent, ['class' => 'btn btn-primary']
+                    );
+                } else {
+                    $accessactions .= html_writer::link(
+                        CommerceTrackedActionUrl::build(
+                            $reference, 'order_open_access', 'order_result', $access->url
+                        ),
+                        $buttoncontent, ['class' => 'btn btn-primary']
                     );
                 }
                 continue;

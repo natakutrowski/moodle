@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "id": "le-renard-de-minuit",
+  "title": "Le renard de minuit",
+  "subtitle": "Deuxième histoire de démonstration · CampusFR",
+  "pages": [
+    {"kind":"cover","title":"Le renard de minuit","paragraphs":["Une autre histoire d’hiver · CampusFR"]},
+    {"kind":"image","title":"Une forêt silencieuse","image":"lumiere-doree.svg","image_alt":"La forêt éclairée par une lueur dorée","paragraphs":["La neige recouvrait les arbres. La nuit était calme."]},
+    {"kind":"text","title":"Une étrange visite","paragraphs":["Un petit renard s’approcha de la maison.","Il regardait la fenêtre comme s’il attendait une réponse."]},
+    {"kind":"mixed","title":"Le chemin du retour","image":"nuit-etoilee.svg","image_alt":"Une maison et des étoiles sous le ciel de nuit","paragraphs":["La petite fille sourit et ouvrit la porte.","Ensemble, ils marchèrent doucement jusqu’au jardin."]},
+    {"kind":"text","title":"Le souhait","paragraphs":["Le renard leva les yeux vers les étoiles.","Ce soir-là, le silence semblait rempli de promesses."]},
+    {"kind":"back","title":"Fin","paragraphs":["La prochaine histoire les attendait déjà."]}
+  ]
+}
