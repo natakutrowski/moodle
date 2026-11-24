@@ -33,6 +33,27 @@ $PAGE->requires->css(new moodle_url('/local/subscriptions/styles/gift_prepare.cs
 $giftcurrencycontext = \local_subscriptions\commerce\gift\CommerceGiftShowroomCurrencyContext::resolve(
     $SESSION, (int)$USER->id, time()
 );
+// G6D3D: When a visitor chose RUB/EUR on the public Advent showroom before
+// signing in, carry over only the freshly observed server-side selection.
+// Require_login() has already completed above; bind the currency to THIS buyer.
+// Native Commerce still independently resolves the authoritative price/provider.
+if (!$giftcurrencycontext['fromshowroom']) {
+    $guestselection = $SESSION->cfr_g6d3d_guestgiftcurrency ?? null;
+    unset($SESSION->cfr_g6d3d_guestgiftcurrency);
+    $now = time();
+    if (is_object($guestselection)
+        && (string)($guestselection->showroom ?? '') === 'avent_2026'
+        && in_array((string)($guestselection->currency ?? ''), ['EUR', 'RUB'], true)
+        && (int)($guestselection->at ?? 0) <= $now
+        && (int)($guestselection->at ?? 0) >= $now - 1200) {
+        \local_subscriptions\commerce\gift\CommerceGiftShowroomCurrencyContext::capture(
+            $SESSION, (int)$USER->id, (string)$guestselection->currency, $now
+        );
+        $giftcurrencycontext = \local_subscriptions\commerce\gift\CommerceGiftShowroomCurrencyContext::resolve(
+            $SESSION, (int)$USER->id, $now
+        );
+    }
+}
 $giftcurrency = $giftcurrencycontext['currency'];
 $values = [
     'recipientname' => '', 'recipientemail' => '', 'deliverymode' => 'email',

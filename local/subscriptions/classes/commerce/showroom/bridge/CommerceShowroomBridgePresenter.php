@@ -121,31 +121,75 @@ final class CommerceShowroomBridgePresenter {
             require_once(__DIR__ . '/CommerceShowroomAdventMediaService.php');
             $adventmedia = new CommerceShowroomAdventMediaService(\context_system::instance());
         }
-        // G5B4B5: still DEV-only. The published Advent showroom may offer
-        // gift preparation to a confirmed customer ONLY while the explicit
-        // commercial rehearsal (or historical fixed-pair test) is armed.
-        // All billing authority remains in Native checkout; this is UX only.
+        // G6D3D: public customer entrypoint. Only the ordinary confirmed
+        // customer is permitted to pay; guest visitors complete Moodle login
+        // via gift_prepare.php before any personal gift details are requested.
+        // Browser payload is purely UX; all payment/identity checks remain server-side.
         $giftpilot = ['enabled' => false, 'currency' => (string)($data['currency'] ?? ''), 'url' => ''];
-        if ($id === 'advent_calendar_2026'
+        $giftshowroomkey = $definition->get_key();
+        $giftshowroomok = $giftshowroomkey === 'avent_2026'
+            || ($giftshowroomkey === 'avent_2026_dev'
+                && rtrim((string)$CFG->wwwroot, '/') === 'https://moodle-v2.campusfr.fr');
+        $giftavailable = $id === 'advent_calendar_2026'
             && (string)$manifest['version'] === '0.3.1'
-                        && (string)$record->status === 'published'
-            && in_array($definition->get_key(), ['avent_2026', 'avent_2026_dev'], true)
-            && $previewid === null
-            && !$checkouttest
+            && (string)$record->status === 'published'
+            && $giftshowroomok
+            && $previewid === null && !$checkouttest
             && in_array((string)($data['currency'] ?? ''), ['EUR', 'RUB'], true)
             && \local_subscriptions\commerce\gift\CommerceGiftCommercialRuntimeGate::can_operate()
-            && (new \local_subscriptions\commerce\gift\CommerceGiftFeatureToggle())->can_issue()) {
-            global $USER;
-            if (isloggedin() && !isguestuser() && (int)$USER->id > 2
-                && !is_siteadmin((int)$USER->id)) {
+            && (new \local_subscriptions\commerce\gift\CommerceGiftFeatureToggle())->can_issue();
+        if ($giftavailable) {
+            // The response depends on the visitor's Moodle authentication state.
+            if (!headers_sent()) {
+                header('Cache-Control: private, no-store, max-age=0');
+                header('Pragma: no-cache');
+                header('Vary: Cookie', false);
+            }
+            // Replace the obsolete prelaunch copy only while the gift runtime is ON.
+            // This also explains the admin restriction instead of saying "coming soon".
+            $giftcopy = match ($language) {
+                'en' => [
+                    'gift_step1' => 'Choose the recipient and add a personal message before payment.',
+                    'gift_step2' => 'Review your gift and continue to secure payment. An invitation is prepared after payment confirmation.',
+                    'gift_faq_temp' => 'Yes. You can give the Advent calendar to someone else. Choose a recipient, add your message, and schedule the invitation.',
+                    'gift_unavailable' => 'A confirmed customer account is required',
+                    'gift_currency_switch_hint' => 'Prefer another currency? Choose EUR or RUB above.',
+                ],
+                'ru' => [
+                    'gift_step1' => 'Укажи получателя и добавь личное сообщение перед оплатой.',
+                    'gift_step2' => 'Проверь подарок и перейди к безопасной оплате. Приглашение будет подготовлено после подтверждения платежа.',
+                    'gift_faq_temp' => 'Да. Выбери получателя, добавь сообщение и дату отправки приглашения.',
+                    'gift_unavailable' => 'Нужен подтверждённый аккаунт покупателя',
+                    'gift_currency_switch_hint' => 'Хочешь другую валюту? Выбери EUR или RUB выше.',
+                ],
+                default => [
+                    'gift_step1' => 'Choisis le destinataire et ajoute un message personnel avant le paiement.',
+                    'gift_step2' => 'Vérifie ton cadeau puis passe au paiement sécurisé. L’invitation sera préparée après confirmation du paiement.',
+                    'gift_faq_temp' => 'Oui. Choisis le destinataire, ajoute ton message et programme l’envoi de son invitation.',
+                    'gift_unavailable' => 'Un compte client confirmé est nécessaire',
+                    'gift_currency_switch_hint' => 'Tu préfères une autre devise ? Choisis EUR ou RUB ci-dessus.',
+                ],
+            };
+            $copy['page'] = array_replace((array)($copy['page'] ?? []), $giftcopy);
+            global $USER, $SESSION;
+            if (!isloggedin() || isguestuser()) {
+                // Short-lived, server-observed currency survives the login hop.
+                // Currency is presentation context, never price/provider authority.
+                $SESSION->cfr_g6d3d_guestgiftcurrency = (object)[
+                    'showroom' => 'avent_2026',
+                    'currency' => (string)($data['currency'] ?? ''),
+                    'at' => time(),
+                ];
+                $giftpilot['enabled'] = true;
+                $giftpilot['url'] = '/local/subscriptions/gift_prepare.php';
+            } elseif ((int)$USER->id > 2 && !is_siteadmin((int)$USER->id)) {
                 try {
                     \local_subscriptions\commerce\gift\CommerceGiftCommercialRuntimeGate::assert_buyer(
                         $db, (int)$USER->id, (string)$USER->email);
                     $giftpilot['enabled'] = true;
                     $giftpilot['url'] = '/local/subscriptions/gift_prepare.php';
-
                 } catch (\DomainException $ignored) {
-                    // Customer is not authorised: leave the showroom ungifted.
+                    // Invalid customer: keep the CTA disabled with truthful copy.
                 }
             }
         }
