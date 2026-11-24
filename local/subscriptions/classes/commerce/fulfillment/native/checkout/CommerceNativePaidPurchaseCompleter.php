@@ -112,6 +112,38 @@ final class CommerceNativePaidPurchaseCompleter {
             );
         }
 
+        // G3B: a persisted sealed gift must NEVER fall through to the normal
+        // grant planner. It is either issued to the registry or fails closed.
+        // This branch cannot emit gifts while the G1 hard runtime gate is off.
+        $giftitemid = \local_subscriptions\commerce\gift\CommerceGiftPaidCompletionRouter::gift_item_id($items);
+        if ($giftitemid !== null) {
+            if (!(new \local_subscriptions\commerce\gift\CommerceGiftFeatureToggle())->can_issue()) {
+                throw new \DomainException('Gift issuance is disabled; never grant a gift to the buyer.');
+            }
+            if ((string)$purchase->status === CommercePurchaseStatus::FULFILLED) {
+                $issuedgift = $this->db->get_record(
+                    \local_subscriptions\commerce\gift\CommerceGiftSchema::TABLE_GIFT,
+                    ['purchaseid' => (int)$purchase->id, 'purchaseitemid' => $giftitemid],
+                    'id', IGNORE_MISSING
+                );
+                if (!$issuedgift) {
+                    throw new \DomainException('Fulfilled gift purchase lacks its issuance record.');
+                }
+                // Safe on duplicate confirmed webhooks; never dispatch or grant here.
+                (new \local_subscriptions\commerce\gift\CommerceGiftPostPaidAutoQueue($this->db))
+                    ->queue_if_eligible((int)$issuedgift->id);
+                return;
+            }
+            $issuedgift = (new \local_subscriptions\commerce\gift\CommerceGiftIssuanceService($this->db))
+                ->issue_paid_unit((int)$purchase->id, $giftitemid);
+            $this->update_purchase_status((int)$purchase->id, CommercePurchaseStatus::FULFILLED);
+            // The legacy G5B.4B3 pre-finalisation check may see payment_pending.
+            // Recheck after the Native purchase is durably FULFILLED, under lock.
+            (new \local_subscriptions\commerce\gift\CommerceGiftPostPaidAutoQueue($this->db))
+                ->queue_if_eligible((int)$issuedgift->id);
+            return;
+        }
+
         $grantexpectations = new CommerceNativeGrantExpectationPolicy($this->db);
 
         if ((string)$purchase->status === CommercePurchaseStatus::FULFILLED) {

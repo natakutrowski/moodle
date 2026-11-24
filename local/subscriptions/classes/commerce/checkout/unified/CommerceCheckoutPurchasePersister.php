@@ -136,6 +136,27 @@ final class CommerceCheckoutPurchasePersister {
             $persisted = $existingitem->to_record();
             $requestitem = $requestitems[$index];
 
+            // G3B: previously frozen gift recipient/delivery must never be
+            // swapped when an interrupted checkout resumes under the same reference.
+            $requestgift = $requestitem->get_metadata()[
+                \local_subscriptions\commerce\gift\CommerceGiftIntentSeal::METADATA_FIELD
+            ] ?? null;
+            $persistedmeta = json_decode((string)($persisted->metadatajson ?? '{}'), true);
+            $existinggift = is_array($persistedmeta)
+                ? ($persistedmeta[\local_subscriptions\commerce\gift\CommerceGiftIntentSeal::METADATA_FIELD] ?? null)
+                : null;
+            if ($requestgift !== null || $existinggift !== null) {
+                if ($requestgift === null || $existinggift === null
+                    || !hash_equals(
+                        hash('sha256', json_encode($requestgift, JSON_THROW_ON_ERROR)),
+                        hash('sha256', json_encode($existinggift, JSON_THROW_ON_ERROR))
+                    )) {
+                    throw new CommerceInterruptedCheckoutResumeMismatchException(
+                        'Interrupted gift checkout intent does not match its frozen purchase.'
+                    );
+                }
+            }
+
             if (
                 (string)$persisted->itemreference
                     !== $requestitem->get_item()->get_reference()

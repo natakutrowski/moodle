@@ -1,0 +1,109 @@
+/* G5B3A.1: full-width Moodle standard layout, desktop and mobile. Preview only. */
+.cfr-gift-onboard{--cfr-pink:#E0397C;--cfr-text:#241850;--cfr-muted:#5c6072;--cfr-panel:#fff;--cfr-border:#e0dce9;width:100%;max-width:1050px;box-sizing:border-box;margin-inline:auto;min-height:60vh;display:flex;align-items:flex-start;justify-content:center;padding:clamp(1rem,3vw,2.5rem);color:var(--cfr-text)}
+.cfr-gift-onboard__card{box-sizing:border-box;flex:0 1 840px;max-width:100%;min-width:0;background:var(--cfr-panel);border:1px solid var(--cfr-border);box-shadow:0 12px 40px rgba(16,18,45,.09);border-radius:24px;padding:clamp(1.5rem,4vw,3rem)}
+.cfr-gift-onboard__icon{font-size:2.5rem;text-align:center;margin-bottom:12px}
+.cfr-gift-onboard__title{text-align:center;font-weight:800;color:var(--cfr-text);font-size:clamp(1.65rem,3vw,2.35rem);line-height:1.2;max-width:27ch;margin-inline:auto;text-wrap:balance}
+.cfr-gift-onboard__intro{color:var(--cfr-muted);text-align:center;margin:14px auto 24px;line-height:1.6;max-width:62ch}
+.cfr-gift-onboard h2{font-size:1.4rem;font-weight:750;margin:26px 0 10px;color:var(--cfr-text)}
+.cfr-gift-onboard__warning{border-left:3px solid var(--cfr-pink);border-radius:6px;padding:12px 16px;background:rgba(224,57,124,.09);margin:18px 0;color:var(--cfr-text);font-size:.92rem}
+.cfr-gift-onboard__email-label{font-size:.9rem;color:var(--cfr-muted)}
+.cfr-gift-onboard__email{margin:8px 0 18px;padding:16px;border:1px solid var(--cfr-border);border-radius:12px;overflow-wrap:anywhere;font-weight:700}
+.cfr-gift-onboard__grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+.cfr-gift-onboard label{display:block;font-weight:700;margin-bottom:12px}
+.cfr-gift-onboard .form-control{width:100%;min-height:46px;margin-top:8px;background:var(--cfr-panel);border:1px solid var(--cfr-border);color:var(--cfr-text);border-radius:10px}
+.cfr-gift-onboard__button{background:var(--cfr-pink);border-color:var(--cfr-pink);font-weight:700;border-radius:12px;margin-top:18px;padding:12px 20px}
+.cfr-gift-onboard__footnote{color:var(--cfr-muted);margin:12px 0;font-size:.9rem}
+[data-bs-theme="dark"] .cfr-gift-onboard,[data-theme="dark"] .cfr-gift-onboard,body.dark .cfr-gift-onboard{--cfr-text:#f7f3fb;--cfr-muted:#c2c2d4;--cfr-panel:#111730;--cfr-border:#3a3f60}
+@media(prefers-color-scheme:dark){body:not([data-bs-theme="light"]) .cfr-gift-onboard{--cfr-text:#f7f3fb;--cfr-muted:#c2c2d4;--cfr-panel:#111730;--cfr-border:#3a3f60}}
+@media(max-width:650px){.cfr-gift-onboard{padding:12px 0 30px;min-height:auto}.cfr-gift-onboard__grid{grid-template-columns:1fr}.cfr-gift-onboard__card{padding:22px 18px;border-radius:18px}.cfr-gift-onboard__title{font-size:clamp(1.5rem,7vw,2rem)}}
+
+
+/* G6C5D — actual CampusFR night theme / recipient onboarding.
+ * The earlier CSS only recognized generic dark classes; the site also sets
+ * html.campus-dark. All child surfaces and text now inherit a coherent palette. */
+.cfr-gift-onboard {
+  --cfr-text: var(--bs-body-color, #241850);
+  --cfr-muted: var(--bs-secondary-color, #5c6072);
+  --cfr-panel: var(--bs-body-bg, #fff);
+  --cfr-border: var(--bs-border-color, #e0dce9);
+}
+:is(html.campus-dark, html.dark, html.dark-mode, html[data-bs-theme="dark"], html[data-theme="dark"],
+    body.dark, body.dark-mode, body.theme-dark, body[data-bs-theme="dark"], body[data-theme="dark"]) .cfr-gift-onboard {
+  --cfr-text: #f8f3fd;
+  --cfr-muted: #cad1e4;
+  --cfr-panel: #0d1630;
+  --cfr-border: #364461;
+}
+:is(html.campus-dark, html.dark, html.dark-mode, html[data-bs-theme="dark"], html[data-theme="dark"],
+    body.dark, body.dark-mode, body.theme-dark, body[data-bs-theme="dark"], body[data-theme="dark"]) .cfr-gift-onboard__card {
+  background: var(--cfr-panel) !important;
+  color: var(--cfr-text) !important;
+  border-color: var(--cfr-border) !important;
+  box-shadow: 0 18px 48px rgba(0,0,0,.22);
+}
+:is(html.campus-dark, html.dark, html.dark-mode, html[data-bs-theme="dark"], html[data-theme="dark"],
+    body.dark, body.dark-mode, body.theme-dark, body[data-bs-theme="dark"], body[data-theme="dark"]) .cfr-gift-onboard :is(.cfr-gift-onboard__title, h2, label) {
+  color: var(--cfr-text) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+:is(html.campus-dark, html.dark, html.dark-mode, html[data-bs-theme="dark"], html[data-theme="dark"],
+    body.dark, body.dark-mode, body.theme-dark, body[data-bs-theme="dark"], body[data-theme="dark"]) .cfr-gift-onboard :is(.cfr-gift-onboard__intro, .cfr-gift-onboard__email-label, .cfr-gift-onboard__footnote) {
+  color: var(--cfr-muted) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+:is(html.campus-dark, html.dark, html.dark-mode, html[data-bs-theme="dark"], html[data-theme="dark"],
+    body.dark, body.dark-mode, body.theme-dark, body[data-bs-theme="dark"], body[data-theme="dark"]) .cfr-gift-onboard .form-control {
+  background: #1e2d4f !important;
+  border-color: #62708f !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  color-scheme: dark;
+}
+:is(html.campus-dark, html.dark, html.dark-mode, html[data-bs-theme="dark"], html[data-theme="dark"],
+    body.dark, body.dark-mode, body.theme-dark, body[data-bs-theme="dark"], body[data-theme="dark"]) .cfr-gift-onboard .form-control::placeholder {
+  color: #c4cce0 !important;
+  opacity: 1;
+}
+:is(html.campus-dark, html.dark, html.dark-mode, html[data-bs-theme="dark"], html[data-theme="dark"],
+    body.dark, body.dark-mode, body.theme-dark, body[data-bs-theme="dark"], body[data-theme="dark"]) .cfr-gift-onboard .form-control:focus {
+  border-color: #ff89b5 !important;
+  outline: 2px solid #ff89b5;
+  outline-offset: 1px;
+}
+:is(html.campus-dark, html.dark, html.dark-mode, html[data-bs-theme="dark"], html[data-theme="dark"],
+    body.dark, body.dark-mode, body.theme-dark, body[data-bs-theme="dark"], body[data-theme="dark"]) .cfr-gift-onboard__warning {
+  background: #351b30 !important;
+  color: #fff0f6 !important;
+}
+
+/* Onboarding Moodle notifications: prevent pale Bootstrap banners in night mode. */
+html.campus-dark .cfr-gift-onboard :is(.alert-warning, .alert-danger) {
+  background: #352337 !important; border-color: #a96079 !important; color: #fff0f6 !important;
+}
+html.campus-dark .cfr-gift-onboard .alert-info {
+  background: #192e49 !important; border-color: #567bad !important; color: #eef6ff !important;
+}
+html.campus-dark .cfr-gift-onboard .alert-success {
+  background: #143b34 !important; border-color: #397a61 !important; color: #f1fff7 !important;
+}
+html.campus-dark .cfr-gift-onboard .alert :is(p, span, strong) {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* G6C5E: password policy widget shared with the Guest Checkout activation. */
+.cfr-gift-onboard__security{margin:14px 0 20px;padding:18px 20px;border:1px solid var(--cfr-border);background:color-mix(in srgb,var(--cfr-panel) 92%,var(--cfr-pink) 8%);border-radius:15px}
+.cfr-gift-onboard .cfr-gift-onboard__security-title{margin:0 0 12px;font-size:1.02rem;font-weight:750;color:var(--cfr-text)}
+.cfr-gift-onboard__requirements{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:8px 14px}
+.cfr-gift-onboard__requirement{display:flex;align-items:baseline;gap:9px;color:var(--cfr-muted);font-size:.91rem;line-height:1.5}
+.cfr-gift-onboard__requirement .commerce-guest-activation__requirement-icon{flex:0 0 1.25em;text-align:center;font-weight:800}
+.cfr-gift-onboard__requirement.is-valid{color:#16704c}
+.cfr-gift-onboard__requirement.is-invalid{color:#a33852}
+html.campus-dark .cfr-gift-onboard__requirement.is-valid,[data-bs-theme="dark"] .cfr-gift-onboard__requirement.is-valid{color:#91e5bd}
+html.campus-dark .cfr-gift-onboard__requirement.is-invalid,[data-bs-theme="dark"] .cfr-gift-onboard__requirement.is-invalid{color:#ffc0d4}
+.cfr-gift-onboard .commerce-guest-activation__password-control{display:flex;position:relative;width:100%;align-items:center}
+.cfr-gift-onboard .commerce-guest-activation__password-control .form-control{padding-right:54px}
+.cfr-gift-onboard .commerce-guest-activation__password-toggle{position:absolute;right:4px;top:8px;bottom:0;display:flex;align-items:center;justify-content:center;width:43px;height:43px;border:0;border-radius:9px;background:transparent;color:var(--cfr-text);cursor:pointer}
+.cfr-gift-onboard .commerce-guest-activation__password-toggle:hover{background:rgba(224,57,124,.13)}
+.cfr-gift-onboard button:disabled{opacity:.58;cursor:not-allowed}
+@media(max-width:650px){.cfr-gift-onboard__security{padding:15px}.cfr-gift-onboard__requirements{grid-template-columns:1fr}}

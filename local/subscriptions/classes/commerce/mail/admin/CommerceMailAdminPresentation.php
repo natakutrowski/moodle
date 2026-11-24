@@ -37,6 +37,7 @@ final class CommerceMailAdminPresentation {
             $options[$type] = self::type_label($type);
         }
 
+        $options[CommerceMailType::GIFT_VERIFICATION_OTP] = self::type_label(CommerceMailType::GIFT_VERIFICATION_OTP);
         return $options;
     }
 
@@ -96,6 +97,8 @@ final class CommerceMailAdminPresentation {
             CommerceMailType::MARKETING_CAMPAIGN => 'text-bg-primary',
             CommerceMailType::SALES_FOLLOWUP => 'text-bg-warning',
             CommerceMailType::GUEST_IDENTITY_OTP => 'text-bg-info',
+            CommerceMailType::GIFT_INVITATION => 'text-bg-success',
+            CommerceMailType::GIFT_VERIFICATION_OTP => 'text-bg-info',
             default => 'text-bg-light',
         };
     }

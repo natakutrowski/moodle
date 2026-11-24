@@ -395,7 +395,13 @@ final class CommerceCartService {
                 }
             }
 
-            if ($this->ownership->owns($customerid, $sku)) {
+            // An already-owned product remains unavailable for personal purchases.
+            // A second purchase is permitted ONLY for a server-issued, HMAC-proven
+            // Advent gift in an isolated direct cart. Do not trust cart metadata alone.
+            if ($this->ownership->owns($customerid, $sku)
+                && !(!$persist && \local_subscriptions\commerce\gift\CommerceGiftVerifiedDirectRepurchase::allows(
+                    $cart, $sku, $priceid, $quantity, $metadata, $GLOBALS['DB']
+                ))) {
                 return new CommerceCartOperationResult($cart, false, [
                     new CommerceCartMessage(
                         'already_owned',

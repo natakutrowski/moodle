@@ -51,6 +51,20 @@
                     </div>
                 </div>
 
+                {{#cfrgiftcheckout}}
+                    <div class="alert alert-primary border-0 mb-4" role="status" data-campusfr-gift-checkout="1">
+                        <div class="d-flex align-items-start gap-3">
+                            <i class="fa-solid fa-gift fs-4" aria-hidden="true"></i>
+                            <div>
+                                <strong class="d-block mb-1">{{cfrgiftcheckouttitle}}</strong>
+                                <div><span class="fw-semibold">{{cfrgiftcheckoutrecipientlabel}} :</span> {{cfrgiftcheckoutrecipient}}</div>
+                                <div class="small mt-1">{{cfrgiftcheckoutdelivery}}</div>
+                                <div class="small mt-2">{{cfrgiftcheckoutaccess}}</div>
+                            </div>
+                        </div>
+                    </div>
+                {{/cfrgiftcheckout}}
+
                 {{#personalofferhasmultiplecurrencies}}
                     <div class="commerce-personal-offer-currency-card commerce-showroom-currency-card mb-4">
                         <span class="commerce-showroom-currency-card__icon" aria-hidden="true">

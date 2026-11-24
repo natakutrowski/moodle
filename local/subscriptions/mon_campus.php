@@ -35,5 +35,8 @@ $data['welcome'] = get_string(
 );
 
 echo $OUTPUT->header();
+// G4A.1: native-looking shortcut inside the Mon Campus shortcut grid.
+$data['mygiftsurl'] = (new moodle_url('/local/subscriptions/my_gifts.php'))->out(false);
 echo $OUTPUT->render_from_template('local_subscriptions/customer/hub', $data);
+
 echo $OUTPUT->footer();

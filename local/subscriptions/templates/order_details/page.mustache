@@ -51,6 +51,18 @@
         {{/hasaccessstatus}}
     </section>
 
+    {{#isgiftpurchase}}
+    <section class="commerce-order-panel commerce-order-panel--gift" aria-label="{{#str}}cfr_gift_g6_order_title, local_subscriptions{{/str}}">
+        <div class="commerce-order-panel__heading"><i class="fa-solid fa-gift" aria-hidden="true"></i>
+            <h2>{{#str}}cfr_gift_g6_order_title, local_subscriptions{{/str}}</h2>
+        </div>
+        <div class="commerce-order-panel__body">
+            <p><strong>{{#str}}cfr_gift_g6_recipient, local_subscriptions{{/str}} :</strong> {{giftrecipient}}</p>
+            <p>{{#str}}cfr_gift_g6_order_notice, local_subscriptions{{/str}}</p>
+        </div>
+    </section>
+    {{/isgiftpurchase}}
+
     {{#isbundle}}
         <section class="commerce-order-bundle">
             <div class="commerce-order-bundle__icon"><i class="fa-solid fa-box-open" aria-hidden="true"></i></div>

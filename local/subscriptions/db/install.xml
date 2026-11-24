@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026111101" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="local/subscriptions/db" VERSION="2026112304" COMMENT="XMLDB file for local_subscriptions" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
         <TABLE NAME="user_subscription" COMMENT="Table storing user subscription data">
             <FIELDS>
@@ -2861,6 +2861,156 @@
                 <INDEX NAME="audit_idx" UNIQUE="false" FIELDS="auditid" />
                 <INDEX NAME="userid_time_idx" UNIQUE="false" FIELDS="userid,timecreated" />
             </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_gift" COMMENT="Paid gift issuance ledger; zero entitlement until safely claimed">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="giftuuid" TYPE="char" LENGTH="32" NOTNULL="true" />
+                <FIELD NAME="issuekey" TYPE="char" LENGTH="64" NOTNULL="true" />
+                <FIELD NAME="purchaseid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="purchaseitemid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="unitindex" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="buyeruserid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="buyeremail" TYPE="char" LENGTH="254" NOTNULL="false" />
+                <FIELD NAME="sourceproductsku" TYPE="char" LENGTH="128" NOTNULL="true" />
+                <FIELD NAME="sourcepriceid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="sourcetype" TYPE="char" LENGTH="40" NOTNULL="true" />
+                <FIELD NAME="rightssnapshotjson" TYPE="text" NOTNULL="false" />
+                <FIELD NAME="purchasesnapshotjson" TYPE="text" NOTNULL="false" />
+                <FIELD NAME="deliverymode" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="link" />
+                <FIELD NAME="intendedrecipientuserid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="intendedrecipientemail" TYPE="char" LENGTH="254" NOTNULL="false" />
+                <FIELD NAME="rightsholderuserid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="status" TYPE="char" LENGTH="24" NOTNULL="true" DEFAULT="issued" />
+                <FIELD NAME="scheduledat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="expiresat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="claimedat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="activatedat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="rowversion" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="purchase_fk" TYPE="foreign" FIELDS="purchaseid" REFTABLE="local_subscriptions_commerce_purchase" REFFIELDS="id" />
+                <KEY NAME="item_fk" TYPE="foreign" FIELDS="purchaseitemid" REFTABLE="local_subscriptions_commerce_purchase_item" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="giftuuid_uix" UNIQUE="true" FIELDS="giftuuid" />
+                <INDEX NAME="issuekey_uix" UNIQUE="true" FIELDS="issuekey" />
+                <INDEX NAME="purchase_item_idx" UNIQUE="false" FIELDS="purchaseid,purchaseitemid" />
+                <INDEX NAME="holder_status_idx" UNIQUE="false" FIELDS="rightsholderuserid,status" />
+                <INDEX NAME="status_schedule_idx" UNIQUE="false" FIELDS="status,scheduledat" />
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_subs_commerce_gift_token" COMMENT="Hashed bearer invitations; raw secrets never persisted">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="giftid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="tokenhash" TYPE="char" LENGTH="64" NOTNULL="true" />
+                <FIELD NAME="issuedat" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="expiresat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="revokedat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="usedat" TYPE="int" LENGTH="10" NOTNULL="false" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="gift_fk" TYPE="foreign" FIELDS="giftid" REFTABLE="local_subs_commerce_gift" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="tokenhash_uix" UNIQUE="true" FIELDS="tokenhash" />
+                <INDEX NAME="gift_issued_idx" UNIQUE="false" FIELDS="giftid,issuedat" />
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_subs_commerce_gift_event" COMMENT="Audited append-only gift lifecycle events; redacted payloads only">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="giftid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="eventtype" TYPE="char" LENGTH="48" NOTNULL="true" />
+                <FIELD NAME="actoruserid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="occurredat" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="idempotencykey" TYPE="char" LENGTH="64" NOTNULL="true" />
+                <FIELD NAME="detailjson" TYPE="text" NOTNULL="false" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="gift_fk" TYPE="foreign" FIELDS="giftid" REFTABLE="local_subs_commerce_gift" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="event_idem_uix" UNIQUE="true" FIELDS="idempotencykey" />
+                <INDEX NAME="gift_time_idx" UNIQUE="false" FIELDS="giftid,occurredat" />
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_gift_delivery" COMMENT="G4B buyer-authored draft; no email or invitation secret stored">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="giftid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="message" TYPE="text" NOTNULL="false" />
+                <FIELD NAME="locale" TYPE="char" LENGTH="5" NOTNULL="true" DEFAULT="fr" />
+                <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="draft" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="queuedat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="sentat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="lastattemptat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="attempts" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="failurecode" TYPE="char" LENGTH="40" NOTNULL="false" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="gift_fk" TYPE="foreign-unique" FIELDS="giftid" REFTABLE="local_subs_commerce_gift" REFFIELDS="id" />
+            </KEYS>
+        </TABLE>
+
+        <TABLE NAME="local_subs_commerce_gift_precheckout" COMMENT="G5B2 immutable DEV precheckout copy of gift message and recipient; no token or grant">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="draftuuid" TYPE="char" LENGTH="32" NOTNULL="true" />
+                <FIELD NAME="lineuuid" TYPE="char" LENGTH="32" NOTNULL="true" />
+                <FIELD NAME="buyeruserid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="buyeremail" TYPE="char" LENGTH="254" NOTNULL="true" />
+                <FIELD NAME="recipientname" TYPE="char" LENGTH="80" NOTNULL="false" />
+                <FIELD NAME="recipientemail" TYPE="char" LENGTH="254" NOTNULL="false" />
+                <FIELD NAME="deliverymode" TYPE="char" LENGTH="16" NOTNULL="true" />
+                <FIELD NAME="message" TYPE="text" NOTNULL="false" />
+                <FIELD NAME="locale" TYPE="char" LENGTH="5" NOTNULL="true" DEFAULT="fr" />
+                <FIELD NAME="currency" TYPE="char" LENGTH="3" NOTNULL="true" />
+                <FIELD NAME="priceid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="scheduledat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="expiresat" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="status" TYPE="char" LENGTH="24" NOTNULL="true" DEFAULT="checkout_started" />
+                <FIELD NAME="giftid" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
+            </FIELDS>
+            <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id" /></KEYS>
+            <INDEXES>
+                <INDEX NAME="draftuuid_uix" UNIQUE="true" FIELDS="draftuuid" />
+                <INDEX NAME="lineuuid_uix" UNIQUE="true" FIELDS="lineuuid" />
+                <INDEX NAME="buyer_status_idx" UNIQUE="false" FIELDS="buyeruserid,status" />
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_subs_commerce_gift_signup" COMMENT="G5B3B one active email challenge per gift; no plaintext OTP, no recipient password">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="giftid" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="sessionhash" TYPE="char" LENGTH="64" NOTNULL="true" />
+                <FIELD NAME="codehash" TYPE="char" LENGTH="255" NOTNULL="false" />
+                <FIELD NAME="status" TYPE="char" LENGTH="16" NOTNULL="true" DEFAULT="sending" />
+                <FIELD NAME="sentat" TYPE="int" LENGTH="10" NOTNULL="false" />
+                <FIELD NAME="expiresat" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="attempts" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="windowstart" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="sendcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="gift_fk" TYPE="foreign-unique" FIELDS="giftid" REFTABLE="local_subs_commerce_gift" REFFIELDS="id" />
+            </KEYS>
         </TABLE>
     </TABLES>
 </XMLDB>

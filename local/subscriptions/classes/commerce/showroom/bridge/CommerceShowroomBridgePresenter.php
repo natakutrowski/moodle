@@ -121,6 +121,48 @@ final class CommerceShowroomBridgePresenter {
             require_once(__DIR__ . '/CommerceShowroomAdventMediaService.php');
             $adventmedia = new CommerceShowroomAdventMediaService(\context_system::instance());
         }
+        // G5B4B5: still DEV-only. The published Advent showroom may offer
+        // gift preparation to a confirmed customer ONLY while the explicit
+        // commercial rehearsal (or historical fixed-pair test) is armed.
+        // All billing authority remains in Native checkout; this is UX only.
+        $giftpilot = ['enabled' => false, 'currency' => (string)($data['currency'] ?? ''), 'url' => ''];
+        if ($id === 'advent_calendar_2026'
+            && (string)$manifest['version'] === '0.3.1'
+                        && (string)$record->status === 'published'
+            && in_array($definition->get_key(), ['avent_2026', 'avent_2026_dev'], true)
+            && $previewid === null
+            && !$checkouttest
+            && in_array((string)($data['currency'] ?? ''), ['EUR', 'RUB'], true)
+            && \local_subscriptions\commerce\gift\CommerceGiftCommercialRuntimeGate::can_operate()
+            && (new \local_subscriptions\commerce\gift\CommerceGiftFeatureToggle())->can_issue()) {
+            global $USER;
+            if (isloggedin() && !isguestuser() && (int)$USER->id > 2
+                && !is_siteadmin((int)$USER->id)) {
+                try {
+                    \local_subscriptions\commerce\gift\CommerceGiftCommercialRuntimeGate::assert_buyer(
+                        $db, (int)$USER->id, (string)$USER->email);
+                    $giftpilot['enabled'] = true;
+                    $giftpilot['url'] = '/local/subscriptions/gift_prepare.php';
+
+                } catch (\DomainException $ignored) {
+                    // Customer is not authorised: leave the showroom ungifted.
+                }
+            }
+        }
+        // G5B4B1: remember the currency rendered by the trusted published Advent
+        // showroom, scoped to the authenticated buyer and current Moodle session.
+        // This is display context only, never a price or checkout authorization.
+        if ($id === 'advent_calendar_2026'
+                        && (string)$record->status === 'published'
+            && in_array($definition->get_key(), ['avent_2026', 'avent_2026_dev'], true)
+            && $previewid === null && !$checkouttest
+            && \local_subscriptions\commerce\gift\CommerceGiftCommercialRuntimeGate::can_operate()
+            && isloggedin() && !isguestuser()) {
+            global $SESSION, $USER;
+            \local_subscriptions\commerce\gift\CommerceGiftShowroomCurrencyContext::capture(
+                $SESSION, (int)$USER->id, (string)($data['currency'] ?? ''), time()
+            );
+        }
         $payload = [
             'api' => 'campusfr-showroom-bridge/v1',
             'design' => ['id' => $id, 'version' => $manifest['version']],
@@ -146,6 +188,7 @@ final class CommerceShowroomBridgePresenter {
             'commerce' => [
                 'offers' => $offers,
                 'currency' => $data['currency'] ?? '',
+                'giftpilot' => $giftpilot,
                 'currencies' => CommerceShowroomBridgeCurrencyOptions::from_showroom_page(
                     (array)($data['currencies'] ?? []),
                     (string)($data['currency'] ?? ''),

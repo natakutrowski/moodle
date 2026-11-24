@@ -42,6 +42,21 @@ final class CommercePurchaseReceiptTemplate extends AbstractCommerceMailTemplate
         }
 
         if ($variant === '') {
+            // G6B3: the payment receipt is sent BEFORE gift issuance. Determine
+            // gift identity from the original persisted, HMAC-verified checkout
+            // intent rather than an as-yet uncreated gift/Reader grant.
+            $purchaseid = $request->get_purchase_id();
+            if ($purchaseid !== null && $purchaseid > 0) {
+                global $DB;
+                $gift = (new \local_subscriptions\commerce\gift\CommerceGiftPurchaseSummary($DB))
+                    ->for_purchase($purchaseid);
+                if ($gift !== null) {
+                    $a = (object)['recipient' => s($gift['label'])];
+                    $editorial['subject'] = get_string('cfr_gift_g6_receipt_subject', 'local_subscriptions');
+                    $editorial['heading'] = get_string('cfr_gift_g6_receipt_heading', 'local_subscriptions');
+                    $editorial['introhtml'] = get_string('cfr_gift_g6_receipt_intro', 'local_subscriptions', $a);
+                }
+            }
             return $editorial;
         }
 

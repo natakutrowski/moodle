@@ -28,6 +28,7 @@ use local_subscriptions\commerce\payment\method\CommercePaymentMethodVisual;
 use local_subscriptions\payment\Provider;
 use local_subscriptions\url\UrlFactory;
 use local_subscriptions\currency\CurrencyFormatter;
+use local_subscriptions\commerce\gift\CommerceGiftPurchaseSummary;
 
 \local_subscriptions\subscription_config::guard_public_access();
 
@@ -422,7 +423,12 @@ $paymentcontext = [
     'ispartiallyrefunded' => $refundpresentation['ispartial'],
 ];
 
+// Order ownership has already been checked by CommerceOrderPresentationService.
+// Show only HMAC-verified buyer gift metadata; never infer beneficiary from URL.
+$giftordersummary = (new CommerceGiftPurchaseSummary($DB))->for_purchase((int)$order->purchaseid);
 $templatecontext = [
+    'isgiftpurchase' => $giftordersummary !== null,
+    'giftrecipient' => $giftordersummary['label'] ?? '',
     'reference' => s($publicreference),
     'createdat' => userdate($order->timecreated),
     'total' => $formatmoney($order->totalminor, $order->currency),

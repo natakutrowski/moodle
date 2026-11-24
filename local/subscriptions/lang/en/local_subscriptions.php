@@ -14101,3 +14101,233 @@ $string['cfr_fix_demo_aria'] = 'Demo book';
 $string['cfr_fix_demo_saved'] = 'Last page saved on this device (demo).';
 $string['cfr_fix_demo_warning'] = 'Fictional demo content only. Progress is stored in this browser; no purchases, private imports or server-side storage.';
 $string['cfr_fix_layout_page_aria'] = 'Page';
+
+$string['cfr_gift_g4_my_gifts'] = 'My gifts';
+$string['cfr_gift_g4_offered'] = 'Gifts I have given';
+$string['cfr_gift_g4_received'] = 'Gifts I have received';
+$string['cfr_gift_g4_list_intro'] = 'Find the gifts you have purchased or activated on CampusFR.';
+$string['cfr_gift_g4_offered_empty'] = 'You have not purchased any gifts yet.';
+$string['cfr_gift_g4_received_empty'] = 'You have not received any gifts yet.';
+$string['cfr_gift_g4_product'] = 'Advent Calendar 2026';
+$string['cfr_gift_g4_status_label'] = 'Gift status';
+$string['cfr_gift_g4_status_active'] = 'Activated by the recipient';
+$string['cfr_gift_g4_status_claimed'] = 'Claimed, activation in progress';
+$string['cfr_gift_g4_status_issued'] = 'Ready to give';
+$string['cfr_gift_g4_status_unavailable'] = 'Unavailable';
+$string['cfr_gift_g4_status_processing'] = 'Being prepared';
+$string['cfr_gift_g4_payment_check_title'] = 'Checking your payment';
+$string['cfr_gift_g4_payment_check_message'] = 'Your payment return has been received. We are waiting for confirmation from the payment provider before issuing the gift.';
+$string['cfr_gift_g4_processing_title'] = 'Payment confirmed, preparing your gift';
+$string['cfr_gift_g4_processing_message'] = 'Your payment is recorded. The gift has not been issued yet. Refresh this page or contact support if the status does not change.';
+$string['cfr_gift_g4_ready_title'] = 'Your gift is ready!';
+$string['cfr_gift_g4_ready_message'] = 'Your purchase is confirmed. The Advent Calendar is now registered as a gift awaiting delivery and activation by its recipient.';
+$string['cfr_gift_g4_active_title'] = 'Your gift has been activated!';
+$string['cfr_gift_g4_active_message'] = 'The recipient has activated the Advent Calendar in their own CampusFR account.';
+$string['cfr_gift_g4_buyer_not_recipient'] = 'This gift does not provide calendar access to the purchaser’s account.';
+$string['cfr_gift_g4_summary_title'] = 'Gift summary';
+$string['cfr_gift_g4_refresh'] = 'Refresh status';
+$string['cfr_gift_g4_view_order'] = 'View order';
+$string['cfr_gift_g4_open_library'] = 'Open my library';
+$string['cfr_gift_g4_prepare_invitation'] = 'Generate a new invitation code';
+$string['cfr_gift_g4_invitation_ready'] = 'Your invitation is ready';
+$string['cfr_gift_g4_invitation_once'] = 'Copy this code now: it will not be displayed again. Generating another code cancels previous ones.';
+$string['cfr_gift_g4_invitation_share'] = 'Share the code privately. The recipient must sign in and enter it on the activation page.';
+$string['cfr_gift_g4_invitation_unavailable'] = 'Invitation unavailable for this gift. No new usable code was shown.';
+$string['cfr_gift_g4_delivery_coming'] = 'Self-service gift delivery will open once the public journey is validated.';
+$string['cfr_gift_g4_claim_title'] = 'Activate my gift';
+$string['cfr_gift_g4_claim_intro'] = 'Sign in with your own CampusFR account and enter your invitation code. The code is never placed in a page URL.';
+$string['cfr_gift_g4_token_label'] = 'Invitation code';
+$string['cfr_gift_g4_claim_button'] = 'Activate gift';
+$string['cfr_gift_g4_claim_success'] = 'Gift activated! Find it in My Library.';
+$string['cfr_gift_g4_claim_unavailable'] = 'Invitation unavailable or activation incomplete. If the gift was claimed, you may retry below.';
+$string['cfr_gift_g4_claim_retry_later'] = 'Activation is temporarily unavailable. The gift remains assigned to your account.';
+$string['cfr_gift_g4_retry_activation'] = 'Retry activation';
+$string['cfr_gift_g4_claim_page_link'] = 'Gift activation page';
+
+// G6B5 — invitation sign-in handoff and direct library access.
+$string['cfr_gift_g6b5_unavailable_now'] = 'Gift activation is temporarily unavailable. Please try again later.';
+$string['cfr_gift_g6b5_signin_title'] = 'Have you received a gift?';
+$string['cfr_gift_g6b5_signin_intro'] = 'Sign in to your CampusFR account to use your invitation code. You will return to this page after signing in.';
+$string['cfr_gift_g6b5_signin_button'] = 'Sign in to activate my gift';
+$string['cfr_gift_g6b5_no_account'] = 'Do not have a CampusFR account yet?';
+$string['cfr_gift_g6b5_create_account'] = 'Create my account to receive the gift';
+$string['cfr_gift_g6b5_privacy'] = 'Keep your invitation code in your email: you will not be asked for it before signing in.';
+$string['cfr_gift_g6b5_signed_in_hint'] = 'Before entering your code, check that you are using the account associated with the email address that received the invitation.';
+$string['cfr_gift_g6b5_signed_in_as'] = 'Signed-in account:';
+$string['cfr_gift_g6b5_change_account'] = 'Not my account: sign out';
+$string['cfr_gift_g6b5_library_button'] = 'Open My Library';
+
+// G4A.1 - Gift space integration and purchaser receipt (recipient price hidden).
+$string['cfr_gift_g4_hub_help'] = 'Given and received';
+$string['cfr_gift_g4_kicker'] = 'My spaces · CampusFR';
+$string['cfr_gift_g4_amount_paid'] = 'Amount paid';
+$string['cfr_gift_g4_order_date'] = 'Purchase date';
+$string['cfr_gift_g4_purchase_unavailable'] = 'Payment details unavailable';
+
+// G4B1: buyer-authored delivery draft (no email transmission).
+$string['cfr_gift_g4b_title'] = 'Personalise the delivery';
+$string['cfr_gift_g4b_description'] = 'Add a personal message to accompany the calendar. The recipient and delivery date remain those set at checkout.';
+$string['cfr_gift_g4b_note'] = 'Your message (optional, 500 characters maximum)';
+$string['cfr_gift_g4b_locale'] = 'Language of the CampusFR message';
+$string['cfr_gift_g4b_save'] = 'Save my message';
+$string['cfr_gift_g4b_saved'] = 'Your message was saved. No email has been sent yet.';
+$string['cfr_gift_g4b_unavailable'] = 'This message could not be saved. Check the gift and try again.';
+$string['cfr_gift_g4b_preview'] = 'Message preview';
+$string['cfr_gift_g4b_empty'] = 'No personal message yet.';
+$string['cfr_gift_g4b_send_closed'] = 'Email delivery is not currently available for this gift.';
+$string['cfr_gift_g4b_scheduled'] = 'Scheduled delivery date';
+$string['cfr_gift_g4b_immediate'] = 'Delivery planned when the sending service is authorised';
+$string['cfr_gift_g4b_notice'] = 'The delivery method remains the one recorded at checkout.';
+
+$string['cfr_gift_g4b2_queue'] = 'Schedule email delivery';
+$string['cfr_gift_g4b2_link'] = 'Create my gift code';
+$string['cfr_gift_g4b2_queued'] = 'Invitation scheduled. Delivery is planned for the selected date, subject to service availability.';
+$string['cfr_gift_g4b2_sent'] = 'Invitation sent by email.';
+$string['cfr_gift_g4b2_manual'] = 'Delivery needs manual review. No automatic resend.';
+$string['cfr_gift_g4b2_failed'] = 'The invitation could not be prepared. Contact support.';
+$string['cfr_gift_g4b2_link_ready'] = 'Gift code created and shown once.';
+$string['cfr_gift_g4b2_disabled'] = 'Sending this invitation is temporarily unavailable. Your gift remains saved.';
+$string['cfr_gift_g4b2_queue_success'] = 'Delivery scheduled successfully.';
+$string['cfr_gift_g4b2_link_success'] = 'Your gift code is ready. Copy it now: it is not stored in plain text.';
+$string['cfr_gift_g4b2_unavailable'] = 'This operation is unavailable for this gift.';
+$string['cfr_gift_g4b2_email_subject'] = 'You have received a CampusFR gift!';
+$string['cfr_gift_g4b2_email_intro'] = 'A surprise awaits you on CampusFR: the 2026 Advent Calendar.';
+$string['cfr_gift_g4b2_email_instructions'] = 'Sign in to CampusFR, open the page below and enter your gift code to activate it. Do not share this code.';
+$string['cfr_gift_g4b2_task'] = 'Secure Advent Calendar gift delivery';
+
+$string['cfr_gift_g4b2_link_wait'] = 'Your gift code can be created from the scheduled delivery date.';
+
+// G5B.1: Advent gift pre-checkout UX preview (DEV only).
+$string['cfr_gift_prepare_title'] = 'Prepare your gift';
+$string['cfr_gift_prepare_intro'] = 'A gift that takes someone on a journey, before the first story even begins.';
+$string['cfr_gift_prepare_eyebrow'] = 'ADVENT CALENDAR 2026 · CAMPUSFR';
+$string['cfr_gift_prepare_crumb'] = 'Prepare a gift';
+$string['cfr_gift_prepare_step1'] = 'Recipient';
+$string['cfr_gift_prepare_step2'] = 'Message';
+$string['cfr_gift_prepare_step3'] = 'Delivery';
+$string['cfr_gift_prepare_receivername'] = 'Recipient’s first name (optional)';
+$string['cfr_gift_prepare_receiveremail'] = 'Recipient’s email address';
+$string['cfr_gift_prepare_receiveremailhelp'] = 'They can create a free CampusFR account to claim their gift.';
+$string['cfr_gift_prepare_deliverymode'] = 'How would you like to give the gift?';
+$string['cfr_gift_prepare_emailmode'] = 'By email';
+$string['cfr_gift_prepare_linkmode'] = 'With a link to share';
+$string['cfr_gift_prepare_message'] = 'Your personal message (optional, 500 characters maximum)';
+$string['cfr_gift_prepare_language'] = 'CampusFR invitation language';
+$string['cfr_gift_prepare_datechoice'] = 'When should the gift be delivered?';
+$string['cfr_gift_prepare_now'] = 'After payment';
+$string['cfr_gift_prepare_later'] = 'On a selected date';
+$string['cfr_gift_prepare_date'] = 'Date and time (Paris)';
+$string['cfr_gift_prepare_currency'] = 'Currency';
+$string['cfr_gift_prepare_preview'] = 'Preview my gift';
+$string['cfr_gift_prepare_check'] = 'Check the details before continuing.';
+$string['cfr_gift_prepare_back'] = 'Edit details';
+$string['cfr_gift_prepare_success'] = 'Your gift is ready to set up!';
+$string['cfr_gift_prepare_previewinfo'] = 'Check your gift details before continuing.';
+$string['cfr_gift_prepare_mode_email'] = 'Email invitation';
+$string['cfr_gift_prepare_mode_link'] = 'Shareable link';
+$string['cfr_gift_prepare_recipient'] = 'Recipient';
+$string['cfr_gift_prepare_personalmessage'] = 'Personal message';
+$string['cfr_gift_prepare_schedule'] = 'Delivery';
+$string['cfr_gift_prepare_locale'] = 'Language';
+$string['cfr_gift_prepare_no_message'] = 'No personal message';
+$string['cfr_gift_prepare_not_set'] = 'Not provided';
+$string['cfr_gift_prepare_immediate'] = 'After payment confirmation';
+$string['cfr_gift_prepare_error_email'] = 'Enter a valid email address.';
+$string['cfr_gift_prepare_error_mode'] = 'Select a valid delivery method.';
+$string['cfr_gift_prepare_error_name'] = 'First name must be at most 80 characters.';
+$string['cfr_gift_prepare_error_message'] = 'Message must be at most 500 characters.';
+$string['cfr_gift_prepare_error_locale'] = 'Choose an available language.';
+$string['cfr_gift_prepare_error_currency'] = 'Choose an available currency.';
+$string['cfr_gift_prepare_error_date'] = 'Choose a valid date within the next 60 days, at least 10 minutes from now.';
+$string['cfr_gift_prepare_devonly'] = 'This step prepares your gift. No payment is taken yet.';
+$string['cfr_gift_prepare_self'] = 'For me';
+$string['cfr_gift_prepare_gift'] = 'As a gift';
+
+$string['cfr_gift_prepare_checkout_button'] = 'Continue to payment';
+$string['cfr_gift_prepare_checkout_info'] = 'The recipient and your message will remain linked to your gift order. The invitation will be prepared after payment confirmation.';
+$string['cfr_gift_prepare_checkout_unavailable'] = 'Gift checkout is currently unavailable for this selection. Check the currency and choose email delivery.';
+
+// G5B3A — Prévisualisation DEV de l'accueil du bénéficiaire, sans création de compte.
+$string['cfr_gift_prepare_summary'] = 'Your gift summary';
+$string['cfr_gift_prepare_currency_from_showroom_dev'] = 'Your currency and price are determined by the selection made on the Advent Calendar page.';
+$string['cfr_gift_onboard_title'] = 'Your CampusFR gift is waiting!';
+$string['cfr_gift_onboard_intro'] = 'An Advent calendar has been gifted to you. Set up your access securely.';
+$string['cfr_gift_onboard_preview_notice'] = 'The gift is not activated until the recipient completes verification.';
+$string['cfr_gift_onboard_code_label'] = 'Gift code received by email';
+$string['cfr_gift_onboard_check_button'] = 'Check my invitation';
+$string['cfr_gift_onboard_invalid'] = 'This invitation cannot be used. Check your code or contact support.';
+$string['cfr_gift_onboard_email_fixed_label'] = 'Gift email address (cannot be changed)';
+$string['cfr_gift_onboard_existing_title'] = 'You already have a CampusFR account';
+$string['cfr_gift_onboard_existing_info'] = 'Sign in with this address, then enter your code on the gift activation page.';
+$string['cfr_gift_onboard_sign_in'] = 'Sign in';
+$string['cfr_gift_onboard_existing_code_again'] = 'After signing in, enter your invitation code again. For security, it is not included in the link.';
+$string['cfr_gift_onboard_new_title'] = 'Create an account to receive your gift';
+$string['cfr_gift_onboard_new_info'] = 'Enter your first and last name and choose a password. Your email address comes from the invitation and must be verified.';
+$string['cfr_gift_onboard_firstname'] = 'First name';
+$string['cfr_gift_onboard_lastname'] = 'Last name';
+$string['cfr_gift_onboard_password'] = 'Password';
+$string['cfr_gift_onboard_passwordconfirm'] = 'Confirm password';
+$string['cfr_gift_onboard_verification_pending'] = 'To activate your gift, complete your email verification.';
+$string['cfr_gift_onboard_create_button'] = 'Create my account and activate my gift';
+
+$string['cfr_gift_signup_title'] = 'Your CampusFR gift is waiting!';
+$string['cfr_gift_signup_intro'] = 'Verify your email before creating your account and claiming your gift.';
+$string['cfr_gift_signup_demo'] = 'Admin preview: no account or right will be created.';
+$string['cfr_gift_signup_unavailable'] = 'This gift journey is temporarily unavailable. Check your invitation and try again.';
+$string['cfr_gift_signup_sent'] = 'A verification code has been sent to your email.';
+$string['cfr_gift_signup_success'] = 'Your account and gift are now active!';
+$string['cfr_gift_signup_pending'] = 'Your account was created. Gift activation needs to be retried.';
+$string['cfr_gift_signup_library'] = 'Open my library';
+$string['cfr_gift_signup_code'] = 'Your gift code';
+$string['cfr_gift_signup_verify'] = 'Verify my invitation';
+$string['cfr_gift_signup_email'] = 'Gift recipient email';
+$string['cfr_gift_signup_existing'] = 'You already have a CampusFR account. Sign in using this email.';
+$string['cfr_gift_signup_login'] = 'Sign in';
+$string['cfr_gift_signup_login_hint'] = 'After signing in, return to this page and enter your code again if necessary.';
+$string['cfr_gift_signup_existing_claim'] = 'Claim my gift on this account';
+$string['cfr_gift_signup_new'] = 'New to CampusFR? Verify this email address first.';
+$string['cfr_gift_signup_send'] = 'Send verification code';
+$string['cfr_gift_signup_firstname'] = 'First name';
+$string['cfr_gift_signup_lastname'] = 'Last name';
+$string['cfr_gift_signup_password'] = 'Password';
+$string['cfr_gift_signup_passwordconfirm'] = 'Confirm password';
+$string['cfr_gift_signup_emailcode'] = 'Email verification code (6 digits)';
+$string['cfr_gift_signup_safety'] = 'Your code expires after ten minutes. It is never put in a URL.';
+$string['cfr_gift_signup_create'] = 'Create my account and claim my gift';
+
+$string['cfr_g5b4_checkout_title'] = '🎁 This purchase is a gift';
+$string['cfr_g5b4_checkout_recipient'] = 'Recipient';
+$string['cfr_g5b4_checkout_immediate'] = 'The invitation will be prepared after payment confirmation.';
+$string['cfr_g5b4_checkout_scheduled'] = 'Scheduled delivery: {$a} (Paris time).';
+$string['cfr_g5b4_checkout_access'] = 'The Advent Calendar will be granted to the recipient upon activation, never to the buyer.';
+
+$string['cfr_gift_g6_recipient'] = 'Recipient';
+$string['cfr_gift_g6_order_title'] = 'Gift order 🎁';
+$string['cfr_gift_g6_order_notice'] = 'This calendar is a gift for the named recipient. Reader access will be activated only when they accept and activate the gift.';
+
+$string['cfr_gift_g6_receipt_subject'] = 'Your CampusFR gift purchase confirmation — {order_reference}';
+$string['cfr_gift_g6_receipt_heading'] = 'Your gift purchase is confirmed 🎁';
+$string['cfr_gift_g6_receipt_intro'] = '<p>Hello {firstname},</p><p>Your gift purchase of the <strong>2026 Advent Calendar</strong> is confirmed.</p><p><strong>Recipient:</strong> {$a->recipient}</p><p>This gift is for the recipient, not for your account. They can activate their access after receiving the invitation. You can follow delivery in “My gifts”.</p>';
+
+// G6B6: gift invitation delivery journal (never stores activation secrets).
+$string['commerce_mail_type_gift_invitation'] = 'Gift invitation';
+$string['commerce_gift_mail_journal_redacted'] = 'Delivery record: recipient, order and status are saved. The activation code, personal link and private message are not stored here. To test a fictional address, use an SMTP catch-all on DEV.';
+
+// G6B7: visual-only sample preview for gift mail journal.
+$string['commerce_gift_mail_preview_sample_notice'] = 'Illustrative preview of the current Mail Studio template: name, personal note, code and link are non-working examples. The exact previously sent email was not stored in Commerce. To inspect a real code sent to a fictional address, capture SMTP on DEV (e.g. Mailpit).';
+
+$string['commerce_mail_type_gift_verification_otp'] = 'Gift email verification code';
+$string['commerce_gift_otp_preview_sample_notice'] = 'Sample verification message. The actual code is not stored in Commerce history.';
+$string['cfr_gift_password_otp_digits'] = 'Enter the 6-digit code from your email.';
+
+// G6C5F: Gift OTP reuses the checkout OTP email layout with gift-appropriate copy.
+$string['commerce_gift_shared_otp_mail_subject'] = 'Your code to receive your CampusFR gift';
+$string['commerce_gift_shared_otp_mail_preheader'] = 'Verify your email with this six-digit code to receive your gift.';
+$string['commerce_gift_shared_otp_mail_intro'] = 'Enter this code in CampusFR to verify your email address and activate your gift.';
+
+// G6C5G: explicitly audited site-administrator gift code reveal.
+$string['commerce_gift_admin_invitation_code'] = 'Actual gift code';
+$string['commerce_gift_admin_otp_code'] = 'Actual OTP (6 digits)';
+$string['commerce_gift_admin_reveal_code'] = 'Reveal actual code';
+$string['commerce_gift_admin_code_warning'] = 'Site administrators only. Explicit and audited reveal; never share this code. Only available while valid.';
+$string['commerce_gift_admin_code_missing'] = 'Code unavailable: historical email, expired, used or no encrypted capture.';

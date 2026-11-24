@@ -124,6 +124,8 @@
     "story_21": "Le santon qui voulait voyager",
     "story_22": "Le renard aux yeux d’or",
     "story_23": "Le château des souvenirs",
-    "story_24": "La dernière étoile de Noël"
+    "story_24": "La dernière étoile de Noël",
+    "currency_switch_hint": "Удобнее оплатить в другой валюте? Выбери EUR или RUB выше.",
+    "gift_currency_switch_hint": "Нужна другая валюта? Выбери EUR или RUB выше."
   }
 }

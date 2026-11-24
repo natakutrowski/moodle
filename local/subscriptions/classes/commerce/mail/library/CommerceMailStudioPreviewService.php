@@ -38,6 +38,14 @@ final class CommerceMailStudioPreviewService {
                 'en' => 'Hello Camille!',
                 default => 'Bonjour Camille !',
             },
+            // Gift preview uses public demonstration values, never real tokens.
+            '{{gift_recipient_name}}' => 'Camille',
+            '{{gift_personal_message}}' => match ($language) {
+                'ru' => 'Счастливого Рождества!', 'en' => 'Merry Christmas!',
+                default => 'Joyeux Noël !',
+            },
+            '{{gift_claim_url}}' => 'https://example.test/local/subscriptions/gift_claim.php',
+            '{{gift_code}}' => 'EXEMPLE-NE-PAS-UTILISER',
         ];
         // Other transactional variables stay visible: no invented live order or URL.
         $subject = strtr($subject, $tokens);

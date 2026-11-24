@@ -83,6 +83,12 @@ if ($order === null) {
 $expectations = new CommercePurchaseEntitlementExpectationPolicy();
 $isdonationonly = $expectations->order_is_donation_only($order);
 $state = (new CommercePostPaymentStateResolver($expectations))->resolve($order, $result);
+// G4A: customer-safe gift read model; never infer issuance from result=success.
+$giftview = (new \local_subscriptions\commerce\gift\CommerceGiftCustomerPresentation($DB))
+    ->for_owned_order($order);
+$isgiftorder = $giftview['isgift'];
+$giftrecord = $giftview['gift'];
+
 // A successful payment converts exactly the cart that was frozen into this purchase.
 // The UUID check deliberately leaves any newer cart untouched.
 if ($order->is_paid()) {
@@ -284,6 +290,7 @@ $PAGE->requires->css(
     new moodle_url('/local/subscriptions/styles/order_result.css')
 );
 $PAGE->requires->css(new moodle_url('/local/subscriptions/styles/provisional_account.css'));
+if ($isgiftorder) { $PAGE->requires->css(new moodle_url('/local/subscriptions/styles/gifts_g4.css')); }
 $PAGE->requires->js_call_amd('local_subscriptions/guest_checkout_security', 'init');
 
 if ($state->code === 'processing' && $order->is_paid()) {
@@ -402,6 +409,56 @@ if ($showpaymentconfirmationsplash) {
 
     echo html_writer::end_div();
     echo html_writer::end_div();
+}
+
+// Only a signed gift purchase receives the alternate post-payment journey.
+// Personal purchases continue byte-for-byte through the original rendering below.
+if ($isgiftorder) {
+    $g4 = static fn(string $key): string => get_string($key, 'local_subscriptions');
+    $paid = $order->is_paid();
+    $isissued = $paid && $giftrecord !== null;
+    $isactive = $isissued && (string)$giftrecord->status === 'active';
+    $gifttitle = !$paid ? $g4('cfr_gift_g4_payment_check_title')
+        : (!$isissued ? $g4('cfr_gift_g4_processing_title')
+            : ($isactive ? $g4('cfr_gift_g4_active_title') : $g4('cfr_gift_g4_ready_title')));
+    $giftmessage = !$paid ? $g4('cfr_gift_g4_payment_check_message')
+        : (!$isissued ? $g4('cfr_gift_g4_processing_message')
+            : ($isactive ? $g4('cfr_gift_g4_active_message') : $g4('cfr_gift_g4_ready_message')));
+    echo html_writer::start_div('container py-4 py-lg-5 cfr-gift-g4');
+    // The existing steps describe direct access delivery, not gifting.
+    echo html_writer::start_div('cfr-gift-g4__hero');
+    echo html_writer::tag('span', '🎁', ['class' => 'cfr-gift-g4__icon', 'aria-hidden' => 'true']);
+    echo html_writer::tag('h1', s($gifttitle), ['class' => 'h2']);
+    echo html_writer::tag('p', s($giftmessage), ['class' => 'lead']);
+    echo html_writer::tag('p', s($g4('cfr_gift_g4_buyer_not_recipient')),
+        ['class' => 'text-muted']);
+    echo html_writer::end_div();
+    echo html_writer::start_div('cfr-gift-g4__summary');
+    echo html_writer::tag('h2', s($g4('cfr_gift_g4_summary_title')), ['class' => 'h5']);
+    echo html_writer::tag('p', s($g4('cfr_gift_g4_product')), ['class' => 'fw-semibold']);
+    echo html_writer::tag('p', s($publicreference) . ' · ' .
+        s($formatmoney($order->totalminor, $order->currency)), ['class' => 'text-muted']);
+    if ($isissued) {
+        echo html_writer::tag('p', s($g4('cfr_gift_g4_status_label')) . ' : ' .
+            s($g4(\local_subscriptions\commerce\gift\CommerceGiftCustomerPresentation::status_key(
+                (string)$giftrecord->status))), ['class' => 'fw-semibold']);
+    }
+    echo html_writer::start_div('d-flex flex-wrap gap-2');
+    if ($isissued && isloggedin() && !isguestuser()) {
+        echo html_writer::link(new moodle_url('/local/subscriptions/my_gifts.php'),
+            s($g4('cfr_gift_g4_my_gifts')), ['class' => 'btn btn-primary']);
+    } elseif ($paid) {
+        echo html_writer::link(new moodle_url('/local/subscriptions/order_result.php',
+            ['reference' => $reference, 'result' => 'success']),
+            s($g4('cfr_gift_g4_refresh')), ['class' => 'btn btn-outline-primary']);
+    }
+    echo html_writer::link($vieworderurl,
+        s($g4('cfr_gift_g4_view_order')), ['class' => 'btn btn-outline-secondary']);
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+    echo $OUTPUT->footer();
+    return;
 }
 
 echo html_writer::start_div('commerce-order-result container py-4 py-lg-5');

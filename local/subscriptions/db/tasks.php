@@ -321,3 +321,14 @@ $tasks[] = [
     'blocking' => 0,
     'minute' => '*/5', 'hour' => '*', 'day' => '*', 'dayofweek' => '*', 'month' => '*',
 ];
+
+// G4B2: DEV-gated gift invitation dispatch (hard denied without two active safety switches).
+$tasks[] = [
+    'classname' => '\local_subscriptions\task\deliver_gift_invitations_task',
+    'blocking' => 0,
+    'minute' => '*/5',
+    'hour' => '*',
+    'day' => '*',
+    'dayofweek' => '*',
+    'month' => '*',
+];

@@ -714,6 +714,10 @@ foreach ($result['records'] as $record) {
     }
 
     if ((string)$record->status === 'sent'
+            && !in_array((string)$record->mailtype, [
+                \local_subscriptions\commerce\mail\CommerceMailType::GIFT_INVITATION,
+                \local_subscriptions\commerce\mail\CommerceMailType::GIFT_VERIFICATION_OTP,
+            ], true)
             && has_capability(
                 Capabilities::MANAGE_SUBSCRIPTIONS,
                 $context

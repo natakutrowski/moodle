@@ -17,6 +17,7 @@ final class CommerceTrackedActionUrl {
         'order_download_invoice',
         'order_contact_support',
         'order_open_course',
+        'order_open_access',
         'order_download_file',
         'order_print',
     ];

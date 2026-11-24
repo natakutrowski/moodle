@@ -1,0 +1,226 @@
+/* G4A gift UX - design tokens + dark mode, independent of payment CSS. */
+.cfr-gift-g4 {max-width:1000px;margin-inline:auto}
+.cfr-gift-g4__hero,.cfr-gift-g4__card,.cfr-gift-g4__summary,.cfr-gift-g4__token {
+  background:var(--bs-body-bg,#fff);color:var(--bs-body-color,inherit);border:1px solid var(--bs-border-color,#ddd);
+  border-radius:16px;padding:1.5rem;margin-bottom:1rem;overflow-wrap:anywhere
+}
+.cfr-gift-g4__hero {text-align:center;padding:2rem 1.5rem}
+.cfr-gift-g4__icon {display:block;font-size:3rem;margin-bottom:0.4rem}
+.cfr-gift-g4__cards {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:1rem}
+.cfr-gift-g4__token {border-color:#e0397c}
+.cfr-gift-g4__secret {display:block;font-size:1rem;line-height:2.2;user-select:text;word-break:break-all}
+.cfr-gift-g4 .btn-primary {background-color:#e0397c;border-color:#e0397c;color:#fff}
+.cfr-gift-g4 .btn-primary:hover {background-color:#bd2863;border-color:#bd2863}
+.cfr-gift-g4__hub-link {max-width:1150px}
+[data-bs-theme="dark"] .cfr-gift-g4__hero,[data-bs-theme="dark"] .cfr-gift-g4__card,
+[data-bs-theme="dark"] .cfr-gift-g4__summary,[data-bs-theme="dark"] .cfr-gift-g4__token {
+  background:var(--bs-body-bg,#202126);border-color:var(--bs-border-color,#454850)
+}
+@media (max-width:575px) {.cfr-gift-g4__hero {padding:1.25rem}.cfr-gift-g4__card {padding:1rem}}
+
+/* G4A.1 – Campus-integrated gift cards, respects Moodle color tokens. */
+.cfr-gift-g4__welcome{display:flex;align-items:center;gap:1.25rem;border-radius:1.5rem;padding:1.6rem 1.85rem;margin-bottom:1rem;background:linear-gradient(118deg,#fff0f5,#f7f0ff 63%,#f2f8ff);color:#302338}
+.cfr-gift-g4__welcome-icon{font-size:2.5rem;flex:0 0 auto;line-height:1.1}
+.cfr-gift-g4__welcome-copy{min-width:0}.cfr-gift-g4__heading{font-weight:750;font-size:clamp(1.55rem,3vw,2.15rem);margin:.2rem 0 .35rem}
+.cfr-gift-g4__welcome-copy p{margin:0;color:#625769}.cfr-gift-g4__eyebrow{text-transform:uppercase;letter-spacing:.07em;font-size:.71rem;font-weight:800;color:#bc2869}
+.cfr-gift-g4__overview{display:flex;gap:.65rem;flex-wrap:wrap;margin:0 0 1.5rem}
+.cfr-gift-g4__overview span{padding:.5rem .85rem;border:1px solid var(--bs-border-color,#e0d7e0);background:var(--bs-tertiary-bg,#f8f7f9);border-radius:999px;font-weight:650;font-size:.84rem}
+.cfr-gift-g4__section{margin:1.6rem 0}.cfr-gift-g4__section-title{font-size:1.2rem;font-weight:750;margin-bottom:.9rem}
+.cfr-gift-g4__empty{padding:1.25rem 1.5rem;border:1px dashed var(--bs-border-color,#e4dfe5);border-radius:1rem;color:var(--bs-secondary-color,#73747a)}
+.cfr-gift-g4__cards{grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr))}
+.cfr-gift-g4__card{box-shadow:0 8px 26px rgba(38,41,61,.045);padding:1.35rem;border-radius:1.1rem;display:flex;flex-direction:column;gap:.9rem;min-width:0;margin:0}
+.cfr-gift-g4__card-top{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.cfr-gift-g4__card-icon{display:inline-flex;align-items:center;justify-content:center;font-size:1.55rem;width:2.8rem;height:2.8rem;background:#fce5ef;border-radius:.8rem}
+.cfr-gift-g4__status{background:var(--bs-tertiary-bg,#f6f4f8);color:var(--bs-body-color,#333);border:1px solid var(--bs-border-color,#e5e1e7);border-radius:999px;padding:.3rem .65rem;font-size:.78rem;font-weight:650;text-align:right}
+.cfr-gift-g4__product{font-size:1.12rem;font-weight:750;margin:0}.cfr-gift-g4__price{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;border-top:1px solid var(--bs-border-color,#ece8ec);padding-top:.85rem}
+.cfr-gift-g4__price strong{font-size:1.25rem;white-space:nowrap}.cfr-gift-g4__muted,.cfr-gift-g4__meta{font-size:.87rem;color:var(--bs-secondary-color,#73747a)}
+.cfr-gift-g4__text-link{font-weight:650;color:#C42C6E;text-decoration:none}.cfr-gift-g4__text-link:hover{text-decoration:underline}
+.cfr-gift-g4__hint{margin:0}.cfr-gift-g4__card form{margin:0}.cfr-gift-g4__card .btn{align-self:start}
+[data-bs-theme="dark"] .cfr-gift-g4__welcome{background:linear-gradient(118deg,#382433,#30263e 65%,#252b37);color:#f9edf4}
+[data-bs-theme="dark"] .cfr-gift-g4__welcome-copy p{color:#d8cbd7}
+[data-bs-theme="dark"] .cfr-gift-g4__eyebrow{color:#ff9ac4}
+[data-bs-theme="dark"] .cfr-gift-g4__text-link{color:#ff93bf}
+[data-bs-theme="dark"] .cfr-gift-g4__card-icon{background:#4a2a3a}
+@media(max-width:575px){.cfr-gift-g4__welcome{padding:1.15rem;gap:.8rem}.cfr-gift-g4__welcome-icon{font-size:2rem}.cfr-gift-g4__card{padding:1.1rem}}
+
+
+/* G4A.2 – accessible gift banner across Moodle's light/dark theme variants.
+ * Never leave pale text on a pale banner when custom Dark Mode forces heading colors. */
+.cfr-gift-g4 .cfr-gift-g4__welcome {
+  background:linear-gradient(118deg,#fff0f5,#f7f0ff 63%,#f2f8ff);
+  color:#302338 !important;
+}
+.cfr-gift-g4 .cfr-gift-g4__welcome .cfr-gift-g4__heading {
+  color:#302338 !important;
+  -webkit-text-fill-color:#302338;
+}
+.cfr-gift-g4 .cfr-gift-g4__welcome .cfr-gift-g4__welcome-copy p {
+  color:#625769 !important;
+  -webkit-text-fill-color:#625769;
+}
+.cfr-gift-g4 .cfr-gift-g4__welcome .cfr-gift-g4__eyebrow {
+  color:#9d2157 !important;
+  -webkit-text-fill-color:#9d2157;
+}
+/* Dark variants used by Moodle/Boost and CampusFR custom theme. */
+:is(html[data-bs-theme="dark"],html[data-theme="dark"],html.dark,html.dark-mode,
+    body[data-bs-theme="dark"],body[data-theme="dark"],body.dark,body.dark-mode,
+    body.theme-dark,.theme-dark) .cfr-gift-g4 .cfr-gift-g4__welcome {
+  background:linear-gradient(118deg,#392535,#30253d 65%,#252b38);
+  border:1px solid #574259;
+  color:#fff1f7 !important;
+}
+:is(html[data-bs-theme="dark"],html[data-theme="dark"],html.dark,html.dark-mode,
+    body[data-bs-theme="dark"],body[data-theme="dark"],body.dark,body.dark-mode,
+    body.theme-dark,.theme-dark) .cfr-gift-g4 .cfr-gift-g4__welcome .cfr-gift-g4__heading {
+  color:#fff1f7 !important;
+  -webkit-text-fill-color:#fff1f7;
+}
+:is(html[data-bs-theme="dark"],html[data-theme="dark"],html.dark,html.dark-mode,
+    body[data-bs-theme="dark"],body[data-theme="dark"],body.dark,body.dark-mode,
+    body.theme-dark,.theme-dark) .cfr-gift-g4 .cfr-gift-g4__welcome .cfr-gift-g4__welcome-copy p {
+  color:#e0d1df !important;
+  -webkit-text-fill-color:#e0d1df;
+}
+:is(html[data-bs-theme="dark"],html[data-theme="dark"],html.dark,html.dark-mode,
+    body[data-bs-theme="dark"],body[data-theme="dark"],body.dark,body.dark-mode,
+    body.theme-dark,.theme-dark) .cfr-gift-g4 .cfr-gift-g4__welcome .cfr-gift-g4__eyebrow {
+  color:#ffa4c9 !important;
+  -webkit-text-fill-color:#ffa4c9;
+}
+
+/* G4A.2 – purchases category, visually compatible with CampusFR purchase cards. */
+.cfr-gift-purchases__pagewrap {max-width:1180px;margin:0 auto 3rem;padding:1rem max(20px,2.4vw) 2.3rem}
+.cfr-gift-purchases {color:var(--bs-body-color,inherit)}
+.cfr-gift-purchases__header{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem}
+.cfr-gift-purchases__title{font-size:1.05rem;font-weight:750;margin:0;flex:1}
+.cfr-gift-purchases__section-icon{display:inline-flex;align-items:center;justify-content:center;
+  width:2.3rem;height:2.3rem;border-radius:.85rem;background:#ffeaf3;color:#c62367}
+.cfr-gift-purchases__count{background:var(--bs-body-bg,#fff);color:var(--bs-body-color,#302338);
+  border:1px solid var(--bs-border-color,#e4dfe8);padding:.3rem .65rem;border-radius:99px;font-size:.85rem;font-weight:750}
+.cfr-gift-purchases__cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,345px),1fr));gap:1.1rem}
+.cfr-gift-purchases__card{position:relative;min-width:0;overflow:hidden;background:var(--bs-body-bg,#fff);
+  color:var(--bs-body-color,#302338);border:1px solid var(--bs-border-color,#e0e3eb);
+  border-radius:1rem;padding:1.15rem 1.25rem;box-shadow:0 8px 20px rgba(23,24,48,.05)}
+.cfr-gift-purchases__card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#e0397c}
+.cfr-gift-purchases__card-title{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;margin-bottom:.95rem}
+.cfr-gift-purchases__card-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+  height:2.5rem;width:2.5rem;border-radius:.75rem;background:#ffedf4;color:#c72e70}
+.cfr-gift-purchases__product{font-size:1rem;font-weight:750;flex:1;margin:0;min-width:145px}
+.cfr-gift-purchases__status{font-size:.72rem;font-weight:700;line-height:1.25;padding:.32rem .55rem;border-radius:20px;
+  background:var(--bs-tertiary-bg,#f5f3f8);border:1px solid var(--bs-border-color,#dedee6);text-align:center}
+.cfr-gift-purchases__receipt{border-top:1px solid var(--bs-border-color,#e4e7ed);padding-top:.85rem;
+  display:flex;align-items:baseline;gap:1rem;justify-content:space-between;font-size:.88rem}
+.cfr-gift-purchases__receipt strong{font-size:1.1rem;font-weight:750;white-space:nowrap}
+.cfr-gift-purchases__date{margin:.75rem 0;color:var(--bs-secondary-color,#626a79);font-size:.85rem}
+.cfr-gift-purchases__actions{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.9rem}
+.cfr-gift-purchases__actions .btn{border-radius:.55rem;font-size:.84rem}
+.cfr-gift-purchases__actions .btn-outline-primary{border-color:#e0397c;color:#bd2362}
+.cfr-gift-purchases__actions .btn-outline-primary:hover,.cfr-gift-purchases__actions .btn-outline-primary:focus{
+  background:#e0397c;border-color:#e0397c;color:#fff}
+:is(html[data-bs-theme="dark"],html[data-theme="dark"],html.dark,html.dark-mode,
+    body[data-bs-theme="dark"],body[data-theme="dark"],body.dark,body.dark-mode,
+    body.theme-dark,.theme-dark) .cfr-gift-purchases__card{background:#111a34;color:#f9f2f8;border-color:#374360}
+:is(html[data-bs-theme="dark"],html[data-theme="dark"],html.dark,html.dark-mode,
+    body[data-bs-theme="dark"],body[data-theme="dark"],body.dark,body.dark-mode,
+    body.theme-dark,.theme-dark) .cfr-gift-purchases__date{color:#c8d2e4}
+:is(html[data-bs-theme="dark"],html[data-theme="dark"],html.dark,html.dark-mode,
+    body[data-bs-theme="dark"],body[data-theme="dark"],body.dark,body.dark-mode,
+    body.theme-dark,.theme-dark) .cfr-gift-purchases__actions .btn-outline-primary{color:#ff89b5;border-color:#ff89b5}
+:is(html[data-bs-theme="dark"],html[data-theme="dark"],html.dark,html.dark-mode,
+    body[data-bs-theme="dark"],body[data-theme="dark"],body.dark,body.dark-mode,
+    body.theme-dark,.theme-dark) .cfr-gift-purchases__actions .btn-outline-primary:hover{color:#fff}
+@media(max-width:575px){
+  .cfr-gift-purchases__pagewrap{padding:1rem .85rem 2rem}
+  .cfr-gift-purchases__card{padding:1rem}
+  .cfr-gift-purchases__receipt{flex-wrap:wrap;gap:.25rem}
+}
+
+
+/* G4A.3 – Derive night-mode colors from effective Bootstrap theme tokens.
+ * Unlike body.dark / data-bs-theme selectors, these follow the actual palette
+ * already used by the surrounding Campus cards, including custom theme toggles. */
+.cfr-gift-g4 .cfr-gift-g4__welcome {
+    background: linear-gradient(118deg,
+        color-mix(in srgb, var(--bs-body-bg, #fff) 86%, #e0397c),
+        color-mix(in srgb, var(--bs-body-bg, #fff) 90%, #8166c8) 64%,
+        color-mix(in srgb, var(--bs-body-bg, #fff) 94%, #5997d8)) !important;
+    border: 1px solid color-mix(in srgb, var(--bs-border-color, #e5e7eb) 76%, #e0397c);
+    color: var(--bs-body-color, #302338) !important;
+}
+.cfr-gift-g4 .cfr-gift-g4__welcome .cfr-gift-g4__heading {
+    color: var(--bs-body-color, #302338) !important;
+    -webkit-text-fill-color: var(--bs-body-color, #302338);
+}
+.cfr-gift-g4 .cfr-gift-g4__welcome .cfr-gift-g4__welcome-copy p {
+    color: color-mix(in srgb, var(--bs-body-color, #302338) 79%, var(--bs-body-bg, #fff)) !important;
+    -webkit-text-fill-color: color-mix(in srgb, var(--bs-body-color, #302338) 79%, var(--bs-body-bg, #fff));
+}
+.cfr-gift-g4 .cfr-gift-g4__welcome .cfr-gift-g4__eyebrow {
+    color: color-mix(in srgb, var(--bs-body-color, #302338) 50%, #e0397c) !important;
+    -webkit-text-fill-color: color-mix(in srgb, var(--bs-body-color, #302338) 50%, #e0397c);
+}
+.cfr-gift-g4 .cfr-gift-g4__card-icon {
+    background: color-mix(in srgb, var(--bs-body-bg, #fff) 76%, #e0397c) !important;
+    border: 1px solid color-mix(in srgb, var(--bs-border-color, #e5e7eb) 70%, #e0397c);
+}
+
+/* Section is now a child of .my-purchases-premium__inner, just like courses,
+ * digital purchases, packs and donations. No detached white page after grey. */
+.my-purchases-premium__inner > .cfr-gift-purchases {margin:2rem 0 0;padding:0 0 .8rem}
+.my-purchases-premium__inner .cfr-gift-purchases__cards {grid-template-columns:repeat(2,minmax(0,1fr))}
+.my-purchases-premium__inner .cfr-gift-purchases__title {font-size:1.15rem}
+.cfr-gift-purchases__pagewrap {background:var(--mypurchases-bg,#f6f7fb)}
+@media(max-width:800px) {
+    .my-purchases-premium__inner .cfr-gift-purchases__cards {grid-template-columns:minmax(0,1fr)}
+}
+
+/* G4B1 — buyer delivery draft, inherits CampusFR light/dark theme tokens. */
+.cfr-gift-g4b__panel { margin-top: 1rem; padding: 1rem; border: 1px solid color-mix(in srgb,var(--bs-body-color,#333) 17%,transparent); border-radius: 0.9rem; background: color-mix(in srgb,var(--bs-body-bg,#fff) 93%,var(--bs-body-color,#333) 7%); color: var(--bs-body-color,#302646); }
+.cfr-gift-g4b__title { font-weight: 700; font-size: 1rem; margin-bottom: .6rem; color: inherit; }
+.cfr-gift-g4b__label { display:block; font-weight:600; font-size:.88rem; color:inherit; margin:.6rem 0 .3rem; }
+.cfr-gift-g4b__textarea,.cfr-gift-g4b__select { max-width: 100%; background:var(--bs-body-bg,#fff); color:var(--bs-body-color,#302646); border-color:color-mix(in srgb,var(--bs-body-color,#333) 24%,transparent); }
+.cfr-gift-g4b__select { max-width:16rem; margin-bottom:.75rem; }
+.cfr-gift-g4b__preview { white-space:pre-wrap; overflow-wrap:anywhere; border-left:3px solid #E0397C; padding:.6rem .8rem; color:inherit; }
+.cfr-gift-g4b__warning { font-size:.84rem; margin-top:1rem; color:var(--bs-secondary-color,var(--bs-body-color,#302646)); }
+@media(max-width:640px){ .cfr-gift-g4b__panel { padding:.75rem; } }
+
+
+/* G6B5 — invitation login handoff + library CTA; mobile and dark tokens. */
+.cfr-gift-g6b5__sign-in{max-width:640px;margin:1.3rem auto;padding:2rem;background:var(--bs-body-bg,#fff);color:var(--bs-body-color,#25252b);border:1px solid var(--bs-border-color,#dcdce3);border-radius:1.1rem;box-shadow:0 10px 28px rgba(30,29,40,.06);text-align:center}
+.cfr-gift-g6b5__icon{font-size:2.8rem;margin-bottom:.5rem}
+.cfr-gift-g6b5__cta{display:inline-flex;justify-content:center;align-items:center;gap:.45rem;font-weight:750;padding:.75rem 1.25rem;white-space:normal;text-align:center;min-height:2.8rem}
+.cfr-gift-g6b5__secondary{margin:1.2rem 0 .15rem;color:var(--bs-secondary-color,#626270)}
+.cfr-gift-g6b5__secondary-link{font-weight:650;text-underline-offset:.2rem;color:#b82265}
+.cfr-gift-g6b5__secondary-link:hover{color:#921a4e;text-decoration:underline}
+.cfr-gift-g6b5__privacy{font-size:.85rem;color:var(--bs-secondary-color,#626270);margin:1.4rem 0 0}
+.cfr-gift-g6b5__identity{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem .8rem;padding:.7rem .9rem;margin:.5rem 0 1.2rem;background:var(--bs-tertiary-bg,#f6f6f9);color:var(--bs-body-color,#25252b);border:1px solid var(--bs-border-color,#dcdce3);border-radius:.8rem}
+.cfr-gift-g6b5__identity-label{color:var(--bs-secondary-color,#626270)}
+.cfr-gift-g6b5__identity-value{overflow-wrap:anywhere}
+.cfr-gift-g6b5__success{padding:1.2rem 1.4rem;display:flex;flex-direction:column;align-items:flex-start;gap:.2rem}
+.cfr-gift-g6b5__success .cfr-gift-g6b5__cta{box-shadow:0 3px 10px rgba(0,0,0,.1)}
+[data-bs-theme="dark"] .cfr-gift-g6b5__secondary-link{color:#ff94c1}
+[data-bs-theme="dark"] .cfr-gift-g6b5__secondary-link:hover{color:#ffc0d9}
+@media(max-width:575px){.cfr-gift-g6b5__sign-in{padding:1.2rem}.cfr-gift-g6b5__sign-in .cfr-gift-g6b5__cta,.cfr-gift-g6b5__success .cfr-gift-g6b5__cta{width:100%}}
+
+
+/* G6C5A — success notice: accessible contrast in both CampusFR themes.
+ * Uses Moodle's effective body theme tokens rather than browser appearance,
+ * so manual dark-mode selection is respected.  Gift state and CTA unchanged. */
+.cfr-gift-g6b5 .cfr-gift-g6b5__success.alert-success {
+    background: color-mix(in srgb, var(--bs-body-bg, #fff) 72%, #219873 28%) !important;
+    border: 1px solid color-mix(in srgb, var(--bs-border-color, #cadbcf) 52%, #31936d 48%) !important;
+    color: var(--bs-body-color, #263d32) !important;
+}
+.cfr-gift-g6b5 .cfr-gift-g6b5__success.alert-success p {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+/* Explicit fallbacks for Campus themes which override Bootstrap's alert palette. */
+:is(html[data-bs-theme="dark"], html[data-theme="dark"], html.dark, html.dark-mode,
+    body[data-bs-theme="dark"], body[data-theme="dark"], body.dark, body.dark-mode,
+    body.theme-dark, .theme-dark) .cfr-gift-g6b5 .cfr-gift-g6b5__success.alert-success {
+    background: #143b34 !important;
+    border-color: #397a61 !important;
+    color: #f1fff7 !important;
+}

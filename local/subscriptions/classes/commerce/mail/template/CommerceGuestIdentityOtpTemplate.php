@@ -33,8 +33,11 @@ final class CommerceGuestIdentityOtpTemplate implements CommerceMailTemplate {
                 );
             }
 
+            // Share the same Commerce HTML/layout for purchase and gift verification.
+            // Only text changes; the purchase flow is unchanged by default.
+            $giftpurpose = $context->get('purpose', '') === 'gift';
             $subject = get_string(
-                'commerce_guest_identity_otp_mail_subject',
+                $giftpurpose ? 'commerce_gift_shared_otp_mail_subject' : 'commerce_guest_identity_otp_mail_subject',
                 'local_subscriptions'
             );
             $greeting = $name !== ''
@@ -51,7 +54,7 @@ final class CommerceGuestIdentityOtpTemplate implements CommerceMailTemplate {
             $bodyhtml =
                 '<p>' . s($greeting) . '</p>'
                 . '<p>' . s(get_string(
-                    'commerce_guest_identity_otp_mail_intro',
+                    $giftpurpose ? 'commerce_gift_shared_otp_mail_intro' : 'commerce_guest_identity_otp_mail_intro',
                     'local_subscriptions'
                 )) . '</p>'
                 . '<div style="margin:24px 0;text-align:center;">'
@@ -80,7 +83,7 @@ final class CommerceGuestIdentityOtpTemplate implements CommerceMailTemplate {
                 null,
                 [
                     'preheader' => get_string(
-                        'commerce_guest_identity_otp_mail_preheader',
+                        $giftpurpose ? 'commerce_gift_shared_otp_mail_preheader' : 'commerce_guest_identity_otp_mail_preheader',
                         'local_subscriptions'
                     ),
                 ]
@@ -93,7 +96,7 @@ final class CommerceGuestIdentityOtpTemplate implements CommerceMailTemplate {
                 $text,
                 [
                     'language' => $request->get_language(),
-                    'template' => 'guest_identity_otp',
+                    'template' => $giftpurpose ? 'gift_verification_otp' : 'guest_identity_otp',
                 ]
             );
         } finally {

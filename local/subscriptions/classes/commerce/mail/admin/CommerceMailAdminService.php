@@ -58,6 +58,32 @@ final class CommerceMailAdminService {
 
     public function preview(int $id): array {
         $record = $this->required($id);
+        if ((string)$record->mailtype === \local_subscriptions\commerce\mail\CommerceMailType::GIFT_VERIFICATION_OTP) {
+            // An OTP is never retained in Commerce history. Render a clearly fictional sample.
+            $sample = \local_subscriptions\commerce\gift\CommerceGiftRecipientSignupService::verification_copy(
+                (string)$record->language, '000000');
+            // This is a fictitious rendering. Even the sample code is masked;
+            // no real OTP is persisted or revealed via this admin endpoint.
+            return ['subject' => (string)$record->subject,
+                'html' => str_replace('000000', '••••••', $sample['html']),
+                'text' => str_replace('000000', '••••••', $sample['text'])];
+        }
+        if ((string)$record->mailtype === \local_subscriptions\commerce\mail\CommerceMailType::GIFT_INVITATION) {
+            // Visual preview of the CURRENT Mail Studio template with demo data only.
+            // The exact sent mail cannot be reconstructed from the secret-free journal.
+            // Never query gift tokens, invitation secrets or personal gift messages here.
+            $sample = (new \local_subscriptions\commerce\gift\CommerceGiftMailStudioInvitation($GLOBALS['DB']))
+                ->sample((string)$record->language);
+            $html = $sample->get_html();
+            // Template HTML can contain a DEMO claim link. Leave its visual styling,
+            // but remove all href targets so an admin cannot click a fake action.
+            $html = preg_replace('~\s+href\s*=\s*(?:"[^"]*"|\x27[^\x27]*\x27|[^\s>]+)~i', '', $html);
+            if ($html === null) {
+                throw new \RuntimeException('Invalid visual mail preview.');
+            }
+            return ['subject' => (string)$record->subject,
+                'html' => $html, 'text' => $sample->get_text()];
+        }
         $context = json_decode((string)$record->contextjson, true, 512, JSON_THROW_ON_ERROR);
         $request = new CommerceMailRequest(
             (string)$record->mailtype,
@@ -100,7 +126,9 @@ final class CommerceMailAdminService {
 
     public function resend(int $id, int $adminuserid): \stdClass {
         $record = $this->required($id);
-        if ((string)$record->status !== 'sent') {
+        if ((string)$record->status !== 'sent'
+                || (string)$record->mailtype === \local_subscriptions\commerce\mail\CommerceMailType::GIFT_INVITATION
+                || (string)$record->mailtype === \local_subscriptions\commerce\mail\CommerceMailType::GIFT_VERIFICATION_OTP) {
             throw new \moodle_exception('commerce_mail_resend_not_allowed', 'local_subscriptions');
         }
 

@@ -23,6 +23,8 @@ final class CommerceMailType {
     public const MARKETING_CAMPAIGN = 'marketing_campaign';
     public const SALES_FOLLOWUP = 'sales_followup';
     public const GUEST_IDENTITY_OTP = 'guest_identity_otp';
+    public const GIFT_INVITATION = 'gift_invitation';
+    public const GIFT_VERIFICATION_OTP = 'gift_verification_otp';
 
     /**
      * @return string[]
@@ -49,7 +51,7 @@ final class CommerceMailType {
      * @return string[]
      */
     public static function routable(): array {
-        return array_merge(self::all(), [self::MARKETING_CAMPAIGN, self::SALES_FOLLOWUP, self::GUEST_IDENTITY_OTP]);
+        return array_merge(self::all(), [self::MARKETING_CAMPAIGN, self::SALES_FOLLOWUP, self::GUEST_IDENTITY_OTP, self::GIFT_INVITATION]);
     }
 
     public static function normalise(string $type): string {

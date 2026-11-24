@@ -75,6 +75,15 @@ try {
     }
 
     $SESSION->local_subscriptions_showroom_currency = $currency;
+    // G5B4B1: trusted published Showroom currency refresh (no price authority).
+    if (in_array($showroomkey, ['avent_2026', 'avent_2026_dev'], true)
+        && $definition->get_key() === $showroomkey
+        && \local_subscriptions\commerce\gift\CommerceGiftCommercialRuntimeGate::can_operate()
+        && isloggedin() && !isguestuser()) {
+        \local_subscriptions\commerce\gift\CommerceGiftShowroomCurrencyContext::capture(
+            $SESSION, (int)$USER->id, $currency, time()
+        );
+    }
     $SESSION->local_subscriptions_storefront_currency = $currency;
     if (isloggedin() && !isguestuser()) {
         set_user_preference(

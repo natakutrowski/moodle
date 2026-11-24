@@ -550,6 +550,120 @@ if (class_exists(DOMDocument::class)) {
     libxml_use_internal_errors($previouslibxmlstate);
 }
 
+// G4A.2 – Native-looking gift purchase category for the purchaser only.
+// Never expose payer receipts for gifts received, or in another user's admin view.
+$giftpurchasecards = '';
+if (!$isadminview && (int)$targetuserid === (int)$USER->id
+        && !isguestuser() && !empty($USER->confirmed) && empty($USER->suspended)) {
+    $giftview = new \local_subscriptions\commerce\gift\CommerceGiftCustomerPresentation($DB);
+    $offeredgifts = $giftview->offered((int)$USER->id);
+    if ($offeredgifts) {
+        $label = static fn(string $key): string => get_string($key, 'local_subscriptions');
+        $giftpurchasecards .= html_writer::start_tag('section', [
+            'class' => 'cfr-gift-purchases', 'aria-labelledby' => 'cfr-gift-purchases-heading',
+        ]);
+        $giftpurchasecards .= html_writer::start_div('cfr-gift-purchases__header');
+        $giftpurchasecards .= html_writer::tag('span',
+            html_writer::tag('i', '', ['class' => 'fa-solid fa-gift', 'aria-hidden' => 'true']),
+            ['class' => 'cfr-gift-purchases__section-icon', 'aria-hidden' => 'true']);
+        $giftpurchasecards .= html_writer::tag('h2', s($label('cfr_gift_g4_offered')),
+            ['id' => 'cfr-gift-purchases-heading', 'class' => 'cfr-gift-purchases__title']);
+        $giftpurchasecards .= html_writer::tag('span', (string)count($offeredgifts),
+            ['class' => 'cfr-gift-purchases__count', 'aria-label' => s($label('cfr_gift_g4_offered'))]);
+        $giftpurchasecards .= html_writer::end_div();
+        $giftpurchasecards .= html_writer::start_div('cfr-gift-purchases__cards');
+        foreach ($offeredgifts as $offeredgift) {
+            $receipt = $giftview->receipt_for_offered($offeredgift, (int)$USER->id);
+            $giftpurchasecards .= html_writer::start_tag('article', ['class' => 'cfr-gift-purchases__card']);
+            $giftpurchasecards .= html_writer::start_div('cfr-gift-purchases__card-title');
+            $giftpurchasecards .= html_writer::tag('span',
+                html_writer::tag('i', '', ['class' => 'fa-solid fa-gift', 'aria-hidden' => 'true']),
+                ['class' => 'cfr-gift-purchases__card-icon', 'aria-hidden' => 'true']);
+            $giftpurchasecards .= html_writer::tag('h3', s($label('cfr_gift_g4_product')),
+                ['class' => 'cfr-gift-purchases__product']);
+            $giftpurchasecards .= html_writer::tag('span',
+                s($label(\local_subscriptions\commerce\gift\CommerceGiftCustomerPresentation::status_key(
+                    (string)$offeredgift->status))),
+                ['class' => 'cfr-gift-purchases__status']);
+            $giftpurchasecards .= html_writer::end_div();
+            if ($receipt !== null) {
+                $giftpurchasecards .= html_writer::start_div('cfr-gift-purchases__receipt');
+                $giftpurchasecards .= html_writer::tag('span', s($label('cfr_gift_g4_amount_paid')));
+                $giftpurchasecards .= html_writer::tag('strong',
+                    s(\local_subscriptions\currency\CurrencyFormatter::format_minor_code(
+                        $receipt['amountminor'], $receipt['currency'])));
+                $giftpurchasecards .= html_writer::end_div();
+                $giftpurchasecards .= html_writer::tag('p',
+                    s($label('cfr_gift_g4_order_date')) . ' : ' .
+                    s(userdate($receipt['created'], get_string('strftimedatefullshort', 'langconfig'))),
+                    ['class' => 'cfr-gift-purchases__date']);
+            } else {
+                $giftpurchasecards .= html_writer::tag('p', s($label('cfr_gift_g4_purchase_unavailable')),
+                    ['class' => 'cfr-gift-purchases__date']);
+            }
+            $giftpurchasecards .= html_writer::start_div('cfr-gift-purchases__actions');
+            if ($receipt !== null) {
+                $giftpurchasecards .= html_writer::link(
+                    new moodle_url('/local/subscriptions/order_details.php', ['reference' => $receipt['reference']]),
+                    s($label('cfr_gift_g4_view_order')),
+                    ['class' => 'btn btn-outline-primary btn-sm']);
+            }
+            $giftpurchasecards .= html_writer::link(new moodle_url('/local/subscriptions/my_gifts.php'),
+                s($label('cfr_gift_g4_my_gifts')), ['class' => 'btn btn-outline-secondary btn-sm']);
+            $giftpurchasecards .= html_writer::end_div();
+            $giftpurchasecards .= html_writer::end_tag('article');
+        }
+        $giftpurchasecards .= html_writer::end_div();
+        $giftpurchasecards .= html_writer::end_tag('section');
+    }
+}
+if ($giftpurchasecards !== '') {
+    $PAGE->requires->css(new moodle_url('/local/subscriptions/styles/gifts_g4.css', [
+        'v' => (string)filemtime(__DIR__ . '/styles/gifts_g4.css'),
+    ]));
+}
+
+// G4A.3: insert the gift category INSIDE the existing premium purchases root.
+// The purchases renderer closes its grey container before returning HTML: emitting
+// another section after $purchasecontent would inevitably put it outside that area.
+$giftintegrated = false;
+if ($giftpurchasecards !== '' && class_exists(DOMDocument::class)) {
+    $previouslibxmlstate = libxml_use_internal_errors(true);
+    $giftpage = new DOMDocument('1.0', 'UTF-8');
+    $loaded = $giftpage->loadHTML(
+        '<?xml encoding="UTF-8"><div id="my-purchases-gift-root">' .
+        $purchasecontent . $giftpurchasecards . '</div>',
+        LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+    );
+    if ($loaded) {
+        $giftxpath = new DOMXPath($giftpage);
+        $findclass = static function(string $classname) use ($giftxpath): ?DOMElement {
+            $nodes = $giftxpath->query('//*[@class and contains(concat(" ", normalize-space(@class), " "), " ' .
+                $classname . ' ")]');
+            $node = $nodes ? $nodes->item(0) : null;
+            return $node instanceof DOMElement ? $node : null;
+        };
+        $inner = $findclass('my-purchases-premium__inner');
+        $section = $findclass('cfr-gift-purchases');
+        $root = $giftpage->getElementById('my-purchases-gift-root');
+        if ($inner !== null && $section !== null && $root !== null) {
+            $inner->appendChild($section);
+            $purchasecontent = '';
+            foreach ($root->childNodes as $child) {
+                $purchasecontent .= $giftpage->saveHTML($child);
+            }
+            $giftintegrated = true;
+        }
+    }
+    libxml_clear_errors();
+    libxml_use_internal_errors($previouslibxmlstate);
+}
+
 echo $OUTPUT->header();
 echo $purchasecontent;
+if ($giftpurchasecards !== '' && !$giftintegrated) {
+    // Degraded DOM environments: keep the buyer's receipt visible and styled,
+    // without interfering with existing order sections or purchase ownership.
+    echo html_writer::div($giftpurchasecards, 'cfr-gift-purchases__pagewrap');
+}
 echo $OUTPUT->footer();

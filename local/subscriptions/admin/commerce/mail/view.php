@@ -49,6 +49,33 @@ if ($record === null) {
     throw new moodle_exception('invalidrecord');
 }
 
+// Codes are NEVER rendered on ordinary GET requests, including mail previews.
+// Explicit administrator POST + Moodle sesskey is required every time.
+$giftsecretkind = match ((string)$record->mailtype) {
+    CommerceMailType::GIFT_INVITATION => \local_subscriptions\commerce\gift\CommerceGiftAdminCodeEscrow::INVITATION,
+    CommerceMailType::GIFT_VERIFICATION_OTP => \local_subscriptions\commerce\gift\CommerceGiftAdminCodeEscrow::VERIFICATION,
+    default => null,
+};
+$giftsecret = null;
+$giftsecretrequested = false;
+$giftsecretavailable = $giftsecretkind !== null && (string)$record->status === 'sent';
+if ($giftsecretavailable && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST'
+        && optional_param('gift_reveal_code', '', PARAM_ALPHA) === 'show') {
+    require_sesskey();
+    if (!is_siteadmin((int)$USER->id)) {
+        throw new required_capability_exception(\context_system::instance(),
+            'moodle/site:config', 'nopermissions', '');
+    }
+    // Prevent secrets appearing in intermediary caches, URLs, and referrers.
+    header('Cache-Control: no-store, no-cache, must-revalidate, private');
+    header('Pragma: no-cache');
+    header('Referrer-Policy: no-referrer');
+    header('X-Robots-Tag: noindex, nofollow');
+    $giftsecretrequested = true;
+    $giftsecret = \local_subscriptions\commerce\gift\CommerceGiftAdminCodeEscrow::reveal(
+        $id, $giftsecretkind);
+}
+
 $previewerror = null;
 try {
     $preview = $service->preview($id);
@@ -79,7 +106,9 @@ $metadata = implode(' · ', [
 ]);
 
 $resendbutton = '';
-if ((string)$record->status === 'sent' && $previewerror === null) {
+if ((string)$record->status === 'sent' && $previewerror === null
+        && !in_array((string)$record->mailtype, [CommerceMailType::GIFT_INVITATION,
+            CommerceMailType::GIFT_VERIFICATION_OTP], true)) {
     $resendbutton = html_writer::link(
         new moodle_url('/local/subscriptions/admin/commerce/mail/action.php', [
             'id' => $id,
@@ -138,6 +167,41 @@ if ($previewerror !== null) {
 echo CommerceSectionNavigationRenderer::render(CommerceSectionNavigationRenderer::MAIL);
 echo CommerceMailSectionNavigationRenderer::render(CommerceMailSectionNavigationRenderer::JOURNAL);
 
+// Site administrators may explicitly reveal the CURRENT unexpired real code.
+// The journal itself and the regular HTML preview always remain redacted.
+if ($giftsecretavailable && is_siteadmin((int)$USER->id)) {
+    $giftlabel = get_string($giftsecretkind === \local_subscriptions\commerce\gift\CommerceGiftAdminCodeEscrow::INVITATION
+        ? 'commerce_gift_admin_invitation_code' : 'commerce_gift_admin_otp_code', 'local_subscriptions');
+    $giftform = html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey(),
+    ]) . html_writer::empty_tag('input', [
+        'type' => 'hidden', 'name' => 'gift_reveal_code', 'value' => 'show',
+    ]) . html_writer::tag('button', get_string('commerce_gift_admin_reveal_code', 'local_subscriptions'),
+        ['type' => 'submit', 'class' => 'btn btn-outline-primary']);
+    $giftbox = html_writer::tag('strong', s($giftlabel))
+        . html_writer::div(get_string('commerce_gift_admin_code_warning', 'local_subscriptions'),
+            'small mt-2 mb-2');
+    if ($giftsecretrequested) {
+        $giftbox .= $giftsecret === null
+            ? html_writer::div(get_string('commerce_gift_admin_code_missing', 'local_subscriptions'), 'mt-2')
+            : html_writer::tag('code', s($giftsecret),
+                ['class' => 'd-block mt-2 p-2 rounded border user-select-all',
+                 'style' => 'overflow-wrap:anywhere; font-size:1.1em;']);
+    }
+    $giftbox .= html_writer::tag('form', $giftform,
+        ['method' => 'post', 'action' => $url->out(false), 'class' => 'mt-2']);
+    echo html_writer::div($giftbox, 'border rounded p-3 mb-3');
+}
+
+if (in_array((string)$record->mailtype, [CommerceMailType::GIFT_INVITATION,
+        CommerceMailType::GIFT_VERIFICATION_OTP], true)) {
+    echo html_writer::div(
+        (string)$record->mailtype === CommerceMailType::GIFT_VERIFICATION_OTP
+            ? get_string('commerce_gift_otp_preview_sample_notice', 'local_subscriptions')
+            : get_string('commerce_gift_mail_preview_sample_notice', 'local_subscriptions'),
+        'alert alert-info mb-3'
+    );
+}
 echo html_writer::tag('h2', s($preview['subject']), ['class' => 'h4 mb-2']);
 echo html_writer::div(
     $metadata,

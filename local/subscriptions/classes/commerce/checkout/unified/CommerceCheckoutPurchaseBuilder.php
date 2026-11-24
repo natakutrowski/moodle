@@ -87,6 +87,49 @@ final class CommerceCheckoutPurchaseBuilder {
             $productpromotionminor += $pricing->get_promotion_total_minor();
             $trialdiscountminor += $pricing->get_trial_discount_total_minor();
 
+            $giftmetadata = array_merge(
+                $cartitem->get_metadata(),
+                $promotionjoinmetadata,
+                $pricing->to_metadata(),
+                [
+                    'priceid' => $cartitem->get_price_id(),
+                    'catalogue_type' => $calculated->get_product_type(),
+                    'locked_subtotal_minor' => $calculated->get_subtotal()->get_amount_minor(),
+                    'locked_total_minor' => $linetotal,
+                    'locked_list_unit_minor' => $pricing->get_initial_unit_minor(),
+                    'locked_promoted_unit_minor' => $pricing->get_promoted_unit_minor(),
+                    'locked_payable_unit_minor' => $unitamount,
+                    'locked_list_total_minor' => $pricing->get_initial_total_minor(),
+                    'locked_product_promotion_minor' => $pricing->get_promotion_total_minor(),
+                    'locked_trial_discount_minor' => $pricing->get_trial_discount_total_minor(),
+                    'locked_total_discount_minor' => $pricing->get_total_reduction_minor(),
+                    'commerceoperation' => strtolower(trim((string)(
+                        $cartitem->get_metadata()['operation'] ?? ''
+                    ))),
+                ]
+            );
+            // G3B: plain purchases retain the pre-existing metadata and do not
+            // trigger configuration reads, signing or any gift service.
+            if (array_key_exists('campusfr_gift_draft_v1', $giftmetadata)
+                || array_key_exists('campusfr_gift_v1', $giftmetadata)) {
+                $giftmetadata = \local_subscriptions\commerce\gift\CommerceGiftCheckoutIntentBinder::seal_checkout_line(
+                    $giftmetadata,
+                    $reference,
+                    $customer->get_email(),
+                    $summary->get_currency(),
+                    $index,
+                    $cartitem->get_product_sku(),
+                    $cartitem->get_price_id(),
+                    $quantity,
+                    $linetotal,
+                    $summary->get_context()->is_live(),
+                    $summary->get_context()->get_provider(),
+                    count($calculateditems) === 1,
+                    (new \local_subscriptions\commerce\gift\CommerceGiftFeatureToggle())->can_issue(),
+                    trim((string)get_config('local_subscriptions', 'commerce_gifts_intent_key_hex'))
+                );
+            }
+
             $items[] = new CommercePurchaseRequestItem(
                 new CommerceItem(
                     $this->map_type($calculated->get_product_type()),
@@ -101,28 +144,7 @@ final class CommerceCheckoutPurchaseBuilder {
                 $quantity,
                 $unitamount,
                 $summary->get_currency(),
-                array_merge(
-                    $cartitem->get_metadata(),
-                    $promotionjoinmetadata,
-                    $pricing->to_metadata(),
-                    [
-                        'priceid' => $cartitem->get_price_id(),
-                        'catalogue_type' => $calculated->get_product_type(),
-                        'locked_subtotal_minor' =>
-                            $calculated->get_subtotal()->get_amount_minor(),
-                        'locked_total_minor' => $linetotal,
-                        'locked_list_unit_minor' => $pricing->get_initial_unit_minor(),
-                        'locked_promoted_unit_minor' => $pricing->get_promoted_unit_minor(),
-                        'locked_payable_unit_minor' => $unitamount,
-                        'locked_list_total_minor' => $pricing->get_initial_total_minor(),
-                        'locked_product_promotion_minor' => $pricing->get_promotion_total_minor(),
-                        'locked_trial_discount_minor' => $pricing->get_trial_discount_total_minor(),
-                        'locked_total_discount_minor' => $pricing->get_total_reduction_minor(),
-                        'commerceoperation' => strtolower(trim((string)(
-                            $cartitem->get_metadata()['operation'] ?? ''
-                        ))),
-                    ]
-                )
+                $giftmetadata
             );
         }
 

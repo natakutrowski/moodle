@@ -587,6 +587,17 @@ try {
         $selectedprovider,
         current_language()
     );
+    // G5B4A: read-only gift confirmation from the trusted, persisted DEV
+    // pre-checkout draft. A forged or expired gift blocks this checkout.
+    // Ordinary cart and Buy Now checkout get only cfrgiftcheckout=false.
+    $data += \local_subscriptions\commerce\gift\CommerceGiftCheckoutPresentation::present(
+        $directpurchase,
+        (int)($USER->id ?? 0),
+        (string)($USER->email ?? ''),
+        $currency,
+        $DB,
+        $source
+    );
     $data = CommerceCartSeatReservationPresenter::create($DB)->decorate(
         $data,
         $snapshot->get_summary()->get_cart_snapshot()->get_cart()->get_uuid(),

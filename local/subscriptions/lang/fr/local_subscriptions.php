@@ -13936,3 +13936,233 @@ $string['cfr_fix_demo_aria'] = 'Livre de démonstration';
 $string['cfr_fix_demo_saved'] = 'Dernière page conservée sur cet appareil (démo).';
 $string['cfr_fix_demo_warning'] = 'Contenu fictif uniquement. Traductions russes partielles ; progression locale limitée à ce navigateur. Aucun droit commercial, import privé ou enregistrement serveur pour cette phase.';
 $string['cfr_fix_layout_page_aria'] = 'Page';
+
+$string['cfr_gift_g4_my_gifts'] = 'Mes cadeaux';
+$string['cfr_gift_g4_offered'] = 'Cadeaux offerts';
+$string['cfr_gift_g4_received'] = 'Cadeaux reçus';
+$string['cfr_gift_g4_list_intro'] = 'Retrouve les cadeaux que tu as offerts ou activés sur CampusFR.';
+$string['cfr_gift_g4_offered_empty'] = 'Aucun cadeau offert pour le moment.';
+$string['cfr_gift_g4_received_empty'] = 'Aucun cadeau reçu pour le moment.';
+$string['cfr_gift_g4_product'] = 'Calendrier de l’Avent 2026';
+$string['cfr_gift_g4_status_label'] = 'Statut du cadeau';
+$string['cfr_gift_g4_status_active'] = 'Activé par le destinataire';
+$string['cfr_gift_g4_status_claimed'] = 'Réclamé, activation en cours';
+$string['cfr_gift_g4_status_issued'] = 'Prêt à être remis';
+$string['cfr_gift_g4_status_unavailable'] = 'Indisponible';
+$string['cfr_gift_g4_status_processing'] = 'En cours de préparation';
+$string['cfr_gift_g4_payment_check_title'] = 'Vérification de votre paiement';
+$string['cfr_gift_g4_payment_check_message'] = 'Votre retour de paiement a été reçu. Nous attendons la confirmation du prestataire avant d’émettre le cadeau.';
+$string['cfr_gift_g4_processing_title'] = 'Paiement confirmé, cadeau en préparation';
+$string['cfr_gift_g4_processing_message'] = 'Votre règlement est bien enregistré. Le cadeau n’a pas encore été émis. Vous pouvez actualiser cette page ou contacter l’assistance si le statut ne change pas.';
+$string['cfr_gift_g4_ready_title'] = 'Votre cadeau est prêt !';
+$string['cfr_gift_g4_ready_message'] = 'Votre achat est confirmé. Le Calendrier de l’Avent est enregistré comme cadeau, en attente de remise et d’activation par son destinataire.';
+$string['cfr_gift_g4_active_title'] = 'Votre cadeau a été activé !';
+$string['cfr_gift_g4_active_message'] = 'Le bénéficiaire a activé le Calendrier de l’Avent sur son propre compte CampusFR.';
+$string['cfr_gift_g4_buyer_not_recipient'] = 'Le cadeau ne donne pas accès au calendrier sur le compte de l’acheteur.';
+$string['cfr_gift_g4_summary_title'] = 'Récapitulatif du cadeau';
+$string['cfr_gift_g4_refresh'] = 'Actualiser le statut';
+$string['cfr_gift_g4_view_order'] = 'Voir la commande';
+$string['cfr_gift_g4_open_library'] = 'Ouvrir ma bibliothèque';
+$string['cfr_gift_g4_prepare_invitation'] = 'Générer un nouveau code d’invitation';
+$string['cfr_gift_g4_invitation_ready'] = 'Votre invitation est prête';
+$string['cfr_gift_g4_invitation_once'] = 'Copiez ce code maintenant : il ne sera plus affiché. Un nouveau code annulera les précédents.';
+$string['cfr_gift_g4_invitation_share'] = 'Transmettez ce code en privé. Le destinataire devra se connecter puis le saisir sur la page d’activation.';
+$string['cfr_gift_g4_invitation_unavailable'] = 'Invitation indisponible pour ce cadeau. Aucun nouveau code utilisable n’a été affiché.';
+$string['cfr_gift_g4_delivery_coming'] = 'La remise autonome du cadeau sera ouverte après validation du parcours public.';
+$string['cfr_gift_g4_claim_title'] = 'Activer mon cadeau';
+$string['cfr_gift_g4_claim_intro'] = 'Connectez-vous avec votre propre compte CampusFR et saisissez votre code d’invitation. Le code n’est jamais transmis dans l’adresse de la page.';
+$string['cfr_gift_g4_token_label'] = 'Code d’invitation';
+$string['cfr_gift_g4_claim_button'] = 'Activer le cadeau';
+$string['cfr_gift_g4_claim_success'] = 'Cadeau activé ! Retrouvez-le dans Ma bibliothèque.';
+$string['cfr_gift_g4_claim_unavailable'] = 'Invitation indisponible ou activation incomplète. Si le cadeau a été réclamé, vous pouvez réessayer ci-dessous.';
+$string['cfr_gift_g4_claim_retry_later'] = 'Activation temporairement indisponible. Le cadeau reste réservé à votre compte.';
+$string['cfr_gift_g4_retry_activation'] = 'Réessayer l’activation';
+$string['cfr_gift_g4_claim_page_link'] = 'Page d’activation du cadeau';
+
+// G6B5 — invitation sign-in handoff and direct library access.
+$string['cfr_gift_g6b5_unavailable_now'] = 'L’activation des cadeaux est temporairement indisponible. Réessayez plus tard.';
+$string['cfr_gift_g6b5_signin_title'] = 'Vous avez reçu un cadeau ?';
+$string['cfr_gift_g6b5_signin_intro'] = 'Connectez-vous à votre compte CampusFR pour utiliser votre code d’invitation. Vous retrouverez cette page après connexion.';
+$string['cfr_gift_g6b5_signin_button'] = 'Se connecter pour activer mon cadeau';
+$string['cfr_gift_g6b5_no_account'] = 'Vous n’avez pas encore de compte CampusFR ?';
+$string['cfr_gift_g6b5_create_account'] = 'Créer mon compte pour recevoir le cadeau';
+$string['cfr_gift_g6b5_privacy'] = 'Conservez votre code d’invitation dans l’e-mail : il ne vous sera jamais demandé avant la connexion.';
+$string['cfr_gift_g6b5_signed_in_hint'] = 'Avant de saisir votre code, vérifiez que vous utilisez le compte associé à l’adresse qui a reçu l’invitation.';
+$string['cfr_gift_g6b5_signed_in_as'] = 'Compte connecté :';
+$string['cfr_gift_g6b5_change_account'] = 'Ce n’est pas mon compte : me déconnecter';
+$string['cfr_gift_g6b5_library_button'] = 'Ouvrir Ma bibliothèque';
+
+// G4A.1 - Gift space integration and purchaser receipt (recipient price hidden).
+$string['cfr_gift_g4_hub_help'] = 'Offerts et reçus';
+$string['cfr_gift_g4_kicker'] = 'Mes espaces · CampusFR';
+$string['cfr_gift_g4_amount_paid'] = 'Montant payé';
+$string['cfr_gift_g4_order_date'] = 'Date d’achat';
+$string['cfr_gift_g4_purchase_unavailable'] = 'Détails de paiement indisponibles';
+
+// G4B1: buyer-authored delivery draft (no email transmission).
+$string['cfr_gift_g4b_title'] = 'Personnaliser la remise';
+$string['cfr_gift_g4b_description'] = 'Écris un petit mot pour accompagner le calendrier. Le destinataire et la date de remise restent ceux définis lors de l’achat.';
+$string['cfr_gift_g4b_note'] = 'Ton message (facultatif, 500 caractères maximum)';
+$string['cfr_gift_g4b_locale'] = 'Langue du message CampusFR';
+$string['cfr_gift_g4b_save'] = 'Enregistrer mon message';
+$string['cfr_gift_g4b_saved'] = 'Ton message a été enregistré. Aucun e-mail n’a encore été envoyé.';
+$string['cfr_gift_g4b_unavailable'] = 'Impossible d’enregistrer ce message. Vérifie le cadeau et réessaie.';
+$string['cfr_gift_g4b_preview'] = 'Aperçu de ton message';
+$string['cfr_gift_g4b_empty'] = 'Aucun message personnalisé pour le moment.';
+$string['cfr_gift_g4b_send_closed'] = 'L’envoi par e-mail n’est pas disponible pour ce cadeau pour le moment.';
+$string['cfr_gift_g4b_scheduled'] = 'Date de remise prévue';
+$string['cfr_gift_g4b_immediate'] = 'Remise prévue dès autorisation du service d’envoi';
+$string['cfr_gift_g4b_notice'] = 'Le mode de remise reste celui enregistré lors du paiement.';
+
+$string['cfr_gift_g4b2_queue'] = 'Programmer la remise par e-mail';
+$string['cfr_gift_g4b2_link'] = 'Préparer mon code cadeau';
+$string['cfr_gift_g4b2_queued'] = 'Invitation programmée. Son envoi est prévu à la date choisie, sous réserve de la disponibilité du service.';
+$string['cfr_gift_g4b2_sent'] = 'Invitation envoyée par e-mail.';
+$string['cfr_gift_g4b2_manual'] = 'Envoi à vérifier manuellement : aucun renvoi automatique.';
+$string['cfr_gift_g4b2_failed'] = 'La remise n’a pas pu être préparée. Contacte l’assistance.';
+$string['cfr_gift_g4b2_link_ready'] = 'Code cadeau créé. Il a été affiché une seule fois.';
+$string['cfr_gift_g4b2_disabled'] = 'L’envoi de cette invitation est temporairement indisponible. Votre cadeau reste enregistré.';
+$string['cfr_gift_g4b2_queue_success'] = 'Remise programmée avec succès.';
+$string['cfr_gift_g4b2_link_success'] = 'Ton code cadeau est prêt. Copie-le maintenant : il ne sera pas conservé en clair.';
+$string['cfr_gift_g4b2_unavailable'] = 'Cette opération est indisponible pour ce cadeau.';
+$string['cfr_gift_g4b2_email_subject'] = 'Tu as reçu un cadeau CampusFR !';
+$string['cfr_gift_g4b2_email_intro'] = 'Une surprise t’attend sur CampusFR : le Calendrier de l’Avent 2026.';
+$string['cfr_gift_g4b2_email_instructions'] = 'Connecte-toi sur CampusFR, ouvre la page ci-dessous et saisis ton code cadeau pour l’activer. Ne communique ce code à personne.';
+$string['cfr_gift_g4b2_task'] = 'Expédition sécurisée des cadeaux Calendrier de l’Avent';
+
+$string['cfr_gift_g4b2_link_wait'] = 'Ton code cadeau pourra être créé à partir de la date de remise prévue.';
+
+// G5B.1: Advent gift pre-checkout UX preview (DEV only).
+$string['cfr_gift_prepare_title'] = 'Préparer mon cadeau';
+$string['cfr_gift_prepare_intro'] = 'Un cadeau qui fait voyager, avant même le premier conte.';
+$string['cfr_gift_prepare_eyebrow'] = 'CALENDRIER DE L’AVENT 2026 · CAMPUSFR';
+$string['cfr_gift_prepare_crumb'] = 'Préparer un cadeau';
+$string['cfr_gift_prepare_step1'] = 'Destinataire';
+$string['cfr_gift_prepare_step2'] = 'Message';
+$string['cfr_gift_prepare_step3'] = 'Remise';
+$string['cfr_gift_prepare_receivername'] = 'Prénom du destinataire (facultatif)';
+$string['cfr_gift_prepare_receiveremail'] = 'Adresse e-mail du destinataire';
+$string['cfr_gift_prepare_receiveremailhelp'] = 'Cette personne pourra créer son compte CampusFR gratuitement pour récupérer le cadeau.';
+$string['cfr_gift_prepare_deliverymode'] = 'Comment souhaites-tu remettre le cadeau ?';
+$string['cfr_gift_prepare_emailmode'] = 'Par e-mail';
+$string['cfr_gift_prepare_linkmode'] = 'Avec un lien à partager';
+$string['cfr_gift_prepare_message'] = 'Ton message personnel (facultatif, 500 caractères maximum)';
+$string['cfr_gift_prepare_language'] = 'Langue de l’invitation CampusFR';
+$string['cfr_gift_prepare_datechoice'] = 'Quand remettre le cadeau ?';
+$string['cfr_gift_prepare_now'] = 'Après le paiement';
+$string['cfr_gift_prepare_later'] = 'À une date choisie';
+$string['cfr_gift_prepare_date'] = 'Date et heure (Paris)';
+$string['cfr_gift_prepare_currency'] = 'Devise';
+$string['cfr_gift_prepare_preview'] = 'Prévisualiser mon cadeau';
+$string['cfr_gift_prepare_check'] = 'Vérifie les informations avant de continuer.';
+$string['cfr_gift_prepare_back'] = 'Modifier';
+$string['cfr_gift_prepare_success'] = 'Ton cadeau est prêt à être configuré !';
+$string['cfr_gift_prepare_previewinfo'] = 'Vérifiez les informations du cadeau avant de passer à l’étape suivante.';
+$string['cfr_gift_prepare_mode_email'] = 'Invitation par e-mail';
+$string['cfr_gift_prepare_mode_link'] = 'Lien à transmettre';
+$string['cfr_gift_prepare_recipient'] = 'Destinataire';
+$string['cfr_gift_prepare_personalmessage'] = 'Message personnel';
+$string['cfr_gift_prepare_schedule'] = 'Remise';
+$string['cfr_gift_prepare_locale'] = 'Langue';
+$string['cfr_gift_prepare_no_message'] = 'Sans message personnel';
+$string['cfr_gift_prepare_not_set'] = 'Non renseigné';
+$string['cfr_gift_prepare_immediate'] = 'Après confirmation du paiement';
+$string['cfr_gift_prepare_error_email'] = 'Saisis une adresse e-mail valide.';
+$string['cfr_gift_prepare_error_mode'] = 'Sélectionne un mode de remise valide.';
+$string['cfr_gift_prepare_error_name'] = 'Le prénom ne doit pas dépasser 80 caractères.';
+$string['cfr_gift_prepare_error_message'] = 'Le message ne doit pas dépasser 500 caractères.';
+$string['cfr_gift_prepare_error_locale'] = 'Choisis une langue disponible.';
+$string['cfr_gift_prepare_error_currency'] = 'Choisis une devise disponible.';
+$string['cfr_gift_prepare_error_date'] = 'Choisis une date valide dans les 60 jours à venir, au moins 10 minutes après maintenant.';
+$string['cfr_gift_prepare_devonly'] = 'Cette étape permet de préparer le cadeau. Aucun paiement n’est effectué maintenant.';
+$string['cfr_gift_prepare_self'] = 'Pour moi';
+$string['cfr_gift_prepare_gift'] = 'À offrir';
+
+$string['cfr_gift_prepare_checkout_button'] = 'Continuer vers le paiement';
+$string['cfr_gift_prepare_checkout_info'] = 'Le destinataire et ton message resteront liés à la commande cadeau. L’invitation sera préparée après confirmation du paiement.';
+$string['cfr_gift_prepare_checkout_unavailable'] = 'Le paiement cadeau est momentanément indisponible pour ce choix. Vérifie la devise et sélectionne la remise par e-mail.';
+
+// G5B3A — Prévisualisation DEV de l'accueil du bénéficiaire, sans création de compte.
+$string['cfr_gift_prepare_summary'] = 'Récapitulatif de ton cadeau';
+$string['cfr_gift_prepare_currency_from_showroom_dev'] = 'La devise et le tarif sont déterminés par le choix effectué sur la page du Calendrier de l’Avent.';
+$string['cfr_gift_onboard_title'] = 'Ton cadeau CampusFR t’attend !';
+$string['cfr_gift_onboard_intro'] = 'Un calendrier de l’Avent a été offert pour toi. Prépare ton accès en toute sécurité.';
+$string['cfr_gift_onboard_preview_notice'] = 'Aucune activation n’est réalisée tant que le bénéficiaire n’a pas terminé les étapes de vérification.';
+$string['cfr_gift_onboard_code_label'] = 'Code cadeau reçu par e-mail';
+$string['cfr_gift_onboard_check_button'] = 'Vérifier mon invitation';
+$string['cfr_gift_onboard_invalid'] = 'Cette invitation n’est pas utilisable. Vérifie ton code ou demande de l’aide.';
+$string['cfr_gift_onboard_email_fixed_label'] = 'Adresse e-mail du cadeau (non modifiable)';
+$string['cfr_gift_onboard_existing_title'] = 'Tu as déjà un compte CampusFR';
+$string['cfr_gift_onboard_existing_info'] = 'Connecte-toi avec cette adresse, puis utilise ton code dans la page d’activation du cadeau.';
+$string['cfr_gift_onboard_sign_in'] = 'Me connecter';
+$string['cfr_gift_onboard_existing_code_again'] = 'Après connexion, saisis à nouveau ton code d’invitation. Pour ta sécurité, il n’est pas placé dans le lien.';
+$string['cfr_gift_onboard_new_title'] = 'Créer ton compte pour recevoir ton cadeau';
+$string['cfr_gift_onboard_new_info'] = 'Tu pourras saisir ton prénom, ton nom et choisir un mot de passe. Ton adresse e-mail sera fixée par l’invitation et devra être vérifiée.';
+$string['cfr_gift_onboard_firstname'] = 'Prénom';
+$string['cfr_gift_onboard_lastname'] = 'Nom';
+$string['cfr_gift_onboard_password'] = 'Mot de passe';
+$string['cfr_gift_onboard_passwordconfirm'] = 'Confirmer le mot de passe';
+$string['cfr_gift_onboard_verification_pending'] = 'Pour activer ton cadeau, termine la vérification de ton adresse e-mail.';
+$string['cfr_gift_onboard_create_button'] = 'Créer mon compte et activer mon cadeau';
+
+$string['cfr_gift_signup_title'] = 'Un cadeau CampusFR t’attend !';
+$string['cfr_gift_signup_intro'] = 'Confirme ton adresse e-mail avant de créer ton compte et récupérer ton cadeau.';
+$string['cfr_gift_signup_demo'] = 'Aperçu administrateur : aucune création de compte ni aucun droit.';
+$string['cfr_gift_signup_unavailable'] = 'Ce parcours est momentanément indisponible. Vérifie l’invitation et réessaie.';
+$string['cfr_gift_signup_sent'] = 'Un code de confirmation vient d’être envoyé à ton adresse.';
+$string['cfr_gift_signup_success'] = 'Ton compte et ton cadeau sont activés !';
+$string['cfr_gift_signup_pending'] = 'Ton compte est créé. L’activation du cadeau doit être reprise.';
+$string['cfr_gift_signup_library'] = 'Ouvrir ma bibliothèque';
+$string['cfr_gift_signup_code'] = 'Ton code cadeau';
+$string['cfr_gift_signup_verify'] = 'Vérifier mon invitation';
+$string['cfr_gift_signup_email'] = 'Adresse e-mail liée au cadeau';
+$string['cfr_gift_signup_existing'] = 'Tu as déjà un compte CampusFR. Connecte-toi avec cette adresse.';
+$string['cfr_gift_signup_login'] = 'Me connecter';
+$string['cfr_gift_signup_login_hint'] = 'Après la connexion, reviens sur cette page et saisis à nouveau ton code si nécessaire.';
+$string['cfr_gift_signup_existing_claim'] = 'Activer mon cadeau sur ce compte';
+$string['cfr_gift_signup_new'] = 'Tu n’as pas encore de compte ? Confirme d’abord cette adresse e-mail.';
+$string['cfr_gift_signup_send'] = 'Envoyer mon code de vérification';
+$string['cfr_gift_signup_firstname'] = 'Prénom';
+$string['cfr_gift_signup_lastname'] = 'Nom';
+$string['cfr_gift_signup_password'] = 'Mot de passe';
+$string['cfr_gift_signup_passwordconfirm'] = 'Confirmer le mot de passe';
+$string['cfr_gift_signup_emailcode'] = 'Code reçu par e-mail (6 chiffres)';
+$string['cfr_gift_signup_safety'] = 'Le code expire au bout de dix minutes. Il n’est jamais placé dans l’URL.';
+$string['cfr_gift_signup_create'] = 'Créer mon compte et activer mon cadeau';
+
+$string['cfr_g5b4_checkout_title'] = '🎁 Cet achat est un cadeau';
+$string['cfr_g5b4_checkout_recipient'] = 'Destinataire';
+$string['cfr_g5b4_checkout_immediate'] = 'L’invitation sera préparée après confirmation du paiement.';
+$string['cfr_g5b4_checkout_scheduled'] = 'Remise prévue le {$a} (heure de Paris).';
+$string['cfr_g5b4_checkout_access'] = 'Le calendrier sera attribué au destinataire lors de son activation, jamais au compte acheteur.';
+
+$string['cfr_gift_g6_recipient'] = 'Bénéficiaire';
+$string['cfr_gift_g6_order_title'] = 'Commande cadeau 🎁';
+$string['cfr_gift_g6_order_notice'] = 'Ce calendrier est offert au bénéficiaire indiqué. L’accès Reader sera activé uniquement après la réception et la validation de son cadeau.';
+
+$string['cfr_gift_g6_receipt_subject'] = 'Confirmation de votre achat cadeau CampusFR — {order_reference}';
+$string['cfr_gift_g6_receipt_heading'] = 'Votre cadeau est acheté 🎁';
+$string['cfr_gift_g6_receipt_intro'] = '<p>Bonjour {firstname},</p><p>Votre achat cadeau du <strong>Calendrier de l’Avent 2026</strong> est confirmé.</p><p><strong>Bénéficiaire :</strong> {$a->recipient}</p><p>Ce cadeau est destiné à cette personne, et non à votre compte. Elle pourra activer son accès après réception de l’invitation. Vous pouvez suivre la remise dans « Mes cadeaux ».</p>';
+
+// G6B6: gift invitation delivery journal (never stores activation secrets).
+$string['commerce_mail_type_gift_invitation'] = 'Invitation cadeau';
+$string['commerce_gift_mail_journal_redacted'] = 'Historique de livraison : l’adresse, la commande et le statut sont conservés. Le code d’activation, le lien personnel et le message privé ne sont pas stockés ici. Pour tester une adresse fictive, utilisez une boîte SMTP de capture sur DEV.';
+
+// G6B7: visual-only sample preview for gift mail journal.
+$string['commerce_gift_mail_preview_sample_notice'] = 'Aperçu illustratif du modèle Mail Studio actuel : nom, message personnel, code et lien sont des exemples non utilisables. L’e-mail exact déjà expédié n’a pas été conservé dans Commerce. Pour lire un vrai code avec une adresse fictive, il faut capturer le SMTP sur DEV (ex. Mailpit).';
+
+$string['commerce_mail_type_gift_verification_otp'] = 'Code de vérification du cadeau';
+$string['commerce_gift_otp_preview_sample_notice'] = 'Aperçu du modèle de vérification. Le code réel n’est pas conservé dans l’historique Commerce.';
+$string['cfr_gift_password_otp_digits'] = 'Saisis exactement les 6 chiffres reçus par e-mail.';
+
+// G6C5F: Gift OTP reuses the checkout OTP email layout with gift-appropriate copy.
+$string['commerce_gift_shared_otp_mail_subject'] = 'Ton code pour recevoir ton cadeau CampusFR';
+$string['commerce_gift_shared_otp_mail_preheader'] = 'Confirme ton adresse e-mail avec ce code à 6 chiffres pour recevoir ton cadeau.';
+$string['commerce_gift_shared_otp_mail_intro'] = 'Saisis ce code dans CampusFR pour confirmer ton adresse e-mail et activer ton cadeau.';
+
+// G6C5G: explicitly audited site-administrator gift code reveal.
+$string['commerce_gift_admin_invitation_code'] = 'Code cadeau réel';
+$string['commerce_gift_admin_otp_code'] = 'Code OTP réel (6 chiffres)';
+$string['commerce_gift_admin_reveal_code'] = 'Afficher le code réel';
+$string['commerce_gift_admin_code_warning'] = 'Réservé aux administrateurs du site. Révélation volontaire et journalisée ; ne partagez pas ce code. Disponible uniquement tant qu’il est valide.';
+$string['commerce_gift_admin_code_missing'] = 'Code indisponible : ancien envoi, expiration, utilisation ou capture non effectuée.';

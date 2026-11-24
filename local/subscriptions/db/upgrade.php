@@ -10888,5 +10888,174 @@ function xmldb_local_subscriptions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026111101, 'local', 'subscriptions');
     }
 
+    if ($oldversion < 2026112201) {
+        // G2B: additive, empty gift registries. No payments, grants or UI are changed.
+        $table = new xmldb_table('local_subs_commerce_gift');
+        if (!$dbman->table_exists($table)) {
+            $table->addField(new xmldb_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null));
+            $table->addField(new xmldb_field('giftuuid', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('issuekey', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('purchaseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('purchaseitemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('unitindex', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0'));
+            $table->addField(new xmldb_field('buyeruserid', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('buyeremail', XMLDB_TYPE_CHAR, '254', null, null, null, null));
+            $table->addField(new xmldb_field('sourceproductsku', XMLDB_TYPE_CHAR, '128', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('sourcepriceid', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('sourcetype', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('rightssnapshotjson', XMLDB_TYPE_TEXT, null, null, null, null, null));
+            $table->addField(new xmldb_field('purchasesnapshotjson', XMLDB_TYPE_TEXT, null, null, null, null, null));
+            $table->addField(new xmldb_field('deliverymode', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'link'));
+            $table->addField(new xmldb_field('intendedrecipientuserid', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('intendedrecipientemail', XMLDB_TYPE_CHAR, '254', null, null, null, null));
+            $table->addField(new xmldb_field('rightsholderuserid', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('status', XMLDB_TYPE_CHAR, '24', null, XMLDB_NOTNULL, null, 'issued'));
+            $table->addField(new xmldb_field('scheduledat', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('expiresat', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('claimedat', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('activatedat', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('rowversion', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '1'));
+            $table->addKey(new xmldb_key('primary', XMLDB_KEY_PRIMARY, ['id']));
+            $table->addKey(new xmldb_key('purchase_fk', XMLDB_KEY_FOREIGN, ['purchaseid'], 'local_subscriptions_commerce_purchase', ['id']));
+            $table->addKey(new xmldb_key('item_fk', XMLDB_KEY_FOREIGN, ['purchaseitemid'], 'local_subscriptions_commerce_purchase_item', ['id']));
+            $table->addIndex(new xmldb_index('giftuuid_uix', XMLDB_INDEX_UNIQUE, ['giftuuid']));
+            $table->addIndex(new xmldb_index('issuekey_uix', XMLDB_INDEX_UNIQUE, ['issuekey']));
+            $table->addIndex(new xmldb_index('purchase_item_idx', XMLDB_INDEX_NOTUNIQUE, ['purchaseid', 'purchaseitemid']));
+            $table->addIndex(new xmldb_index('holder_status_idx', XMLDB_INDEX_NOTUNIQUE, ['rightsholderuserid', 'status']));
+            $table->addIndex(new xmldb_index('status_schedule_idx', XMLDB_INDEX_NOTUNIQUE, ['status', 'scheduledat']));
+            $dbman->create_table($table);
+        }
+        $table = new xmldb_table('local_subs_commerce_gift_token');
+        if (!$dbman->table_exists($table)) {
+            $table->addField(new xmldb_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null));
+            $table->addField(new xmldb_field('giftid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('tokenhash', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('issuedat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('expiresat', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('revokedat', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('usedat', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addKey(new xmldb_key('primary', XMLDB_KEY_PRIMARY, ['id']));
+            $table->addKey(new xmldb_key('gift_fk', XMLDB_KEY_FOREIGN, ['giftid'], 'local_subs_commerce_gift', ['id']));
+            $table->addIndex(new xmldb_index('tokenhash_uix', XMLDB_INDEX_UNIQUE, ['tokenhash']));
+            $table->addIndex(new xmldb_index('gift_issued_idx', XMLDB_INDEX_NOTUNIQUE, ['giftid', 'issuedat']));
+            $dbman->create_table($table);
+        }
+        $table = new xmldb_table('local_subs_commerce_gift_event');
+        if (!$dbman->table_exists($table)) {
+            $table->addField(new xmldb_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null));
+            $table->addField(new xmldb_field('giftid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('eventtype', XMLDB_TYPE_CHAR, '48', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('actoruserid', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('occurredat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('idempotencykey', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('detailjson', XMLDB_TYPE_TEXT, null, null, null, null, null));
+            $table->addKey(new xmldb_key('primary', XMLDB_KEY_PRIMARY, ['id']));
+            $table->addKey(new xmldb_key('gift_fk', XMLDB_KEY_FOREIGN, ['giftid'], 'local_subs_commerce_gift', ['id']));
+            $table->addIndex(new xmldb_index('event_idem_uix', XMLDB_INDEX_UNIQUE, ['idempotencykey']));
+            $table->addIndex(new xmldb_index('gift_time_idx', XMLDB_INDEX_NOTUNIQUE, ['giftid', 'occurredat']));
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026112201, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026112301) {
+        // G4B1: delivery drafts only. No emails, tokens, payment or grant writes.
+        $table = new xmldb_table('local_subs_commerce_gift_delivery');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('giftid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('message', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('locale', XMLDB_TYPE_CHAR, '5', null, XMLDB_NOTNULL, null, 'fr');
+            $table->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'draft');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('gift_fk', XMLDB_KEY_FOREIGN_UNIQUE, ['giftid'], 'local_subs_commerce_gift', ['id']);
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026112301, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026112302) {
+        // G4B2: additive status metadata only. No mail is sent by schema migration.
+        $table = new xmldb_table('local_subs_commerce_gift_delivery');
+        if (!$dbman->table_exists($table)) {
+            throw new coding_exception('G4B1 delivery table missing; cannot apply G4B2.');
+        }
+        $fields = [
+            new xmldb_field('queuedat', XMLDB_TYPE_INTEGER, '10', null, null, null, null),
+            new xmldb_field('sentat', XMLDB_TYPE_INTEGER, '10', null, null, null, null),
+            new xmldb_field('lastattemptat', XMLDB_TYPE_INTEGER, '10', null, null, null, null),
+            new xmldb_field('attempts', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0'),
+            new xmldb_field('failurecode', XMLDB_TYPE_CHAR, '40', null, null, null, null),
+        ];
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026112302, 'local', 'subscriptions');
+    }
+
+
+    if ($oldversion < 2026112303) {
+        // G5B2 DEV: prepared gift metadata before checkout; no payments or rights.
+        $table = new xmldb_table('local_subs_commerce_gift_precheckout');
+        if (!$dbman->table_exists($table)) {
+            $table->addField(new xmldb_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null));
+            $table->addField(new xmldb_field('draftuuid', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('lineuuid', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('buyeruserid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('buyeremail', XMLDB_TYPE_CHAR, '254', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('recipientname', XMLDB_TYPE_CHAR, '80', null, null, null, null));
+            $table->addField(new xmldb_field('recipientemail', XMLDB_TYPE_CHAR, '254', null, null, null, null));
+            $table->addField(new xmldb_field('deliverymode', XMLDB_TYPE_CHAR, '16', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('message', XMLDB_TYPE_TEXT, null, null, null, null, null));
+            $table->addField(new xmldb_field('locale', XMLDB_TYPE_CHAR, '5', null, XMLDB_NOTNULL, null, 'fr'));
+            $table->addField(new xmldb_field('currency', XMLDB_TYPE_CHAR, '3', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('priceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('scheduledat', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('expiresat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('status', XMLDB_TYPE_CHAR, '24', null, XMLDB_NOTNULL, null, 'checkout_started'));
+            $table->addField(new xmldb_field('giftid', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addKey(new xmldb_key('primary', XMLDB_KEY_PRIMARY, ['id']));
+            $table->addIndex(new xmldb_index('draftuuid_uix', XMLDB_INDEX_UNIQUE, ['draftuuid']));
+            $table->addIndex(new xmldb_index('lineuuid_uix', XMLDB_INDEX_UNIQUE, ['lineuuid']));
+            $table->addIndex(new xmldb_index('buyer_status_idx', XMLDB_INDEX_NOTUNIQUE, ['buyeruserid', 'status']));
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026112303, 'local', 'subscriptions');
+    }
+
+    if ($oldversion < 2026112304) {
+        // G5B3B: verified e-mail challenge for gift recipients, strictly additive.
+        // A foreign-unique key is used to avoid the Moodle 5 key/index collision.
+        $table = new xmldb_table('local_subs_commerce_gift_signup');
+        if (!$dbman->table_exists($table)) {
+            $table->addField(new xmldb_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null));
+            $table->addField(new xmldb_field('giftid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('sessionhash', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('codehash', XMLDB_TYPE_CHAR, '255', null, null, null, null));
+            $table->addField(new xmldb_field('status', XMLDB_TYPE_CHAR, '16', null, XMLDB_NOTNULL, null, 'sending'));
+            $table->addField(new xmldb_field('sentat', XMLDB_TYPE_INTEGER, '10', null, null, null, null));
+            $table->addField(new xmldb_field('expiresat', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('attempts', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0'));
+            $table->addField(new xmldb_field('windowstart', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('sendcount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0'));
+            $table->addField(new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addField(new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null));
+            $table->addKey(new xmldb_key('primary', XMLDB_KEY_PRIMARY, ['id']));
+            $table->addKey(new xmldb_key('gift_fk', XMLDB_KEY_FOREIGN_UNIQUE, ['giftid'],
+                'local_subs_commerce_gift', ['id']));
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026112304, 'local', 'subscriptions');
+    }
+
     return true;
 }
